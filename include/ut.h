@@ -56,7 +56,7 @@ typedef int (UT_InitialiseFunction_t)(void);
  * @brief UT Test Clean up function
  * 
  */
-typedef void (UT_CleanupFunction_t)(void);
+typedef int (UT_CleanupFunction_t)(void);
 
 /* *********************/
 /* Function Prototypes */
@@ -118,19 +118,20 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 #include <TestRun.h>
 #include <CUnit.h>
 
-#define UT_TEST_PASS(msg) CU_PASS(msg)
+#define UT_PASS(msg) CU_PASS(msg)
 
 /* Fatal test macros */
-#define UT_TEST_FAIL(msg) CU_FAIL_FATAL(msg)
-#define UT_TEST_ASSERT(value) CU_ASSERT_FATAL(msg)
-#define UT_TEST_ASSERT_PTR_NULL(value) CU_ASSERT_PTR_NULL_FATAL(value)
-#define UT_TEST_ASSERT_PTR_NOT_NULL(value) CU_ASSERT_PTR_NOT_NULL_FATAL(value)
+#define UT_FAIL(msg) CU_FAIL_FATAL(msg)
+#define UT_ASSERT(value) CU_ASSERT_FATAL(msg)
+#define UT_ASSERT_PTR_NULL(value) CU_ASSERT_PTR_NULL_FATAL(value)
+#define UT_ASSERT_PTR_NOT_NULL(value) CU_ASSERT_PTR_NOT_NULL_FATAL(value)
 
-#define UT_TEST_ASSERT_TRUE(value) CU_ASSERT_TRUE_FATAL(value)
-#define UT_TEST_ASSERT_FALSE(value) CU_ASSERT_FALSE_FATAL(value)
+#define UT_ASSERT_TRUE(value) CU_ASSERT_TRUE_FATAL(value)
+#define UT_ASSERT_FALSE(value) CU_ASSERT_FALSE_FATAL(value)
+#define UT_ASSERT_EQUAL(actual,expected) CU_ASSERT_EQUAL(actual,expected)
 
-#define UT_TEST_ASSERT_STRING_EQUAL(expected, actual) CU_ASSERT_STRING_EQUAL_FATAL(actual,expected)
-#define UT_TEST_ASSERT_STRING_NOT_EQUAL(expected, actual) CU_ASSERT_STRING_NOT_EQUAL_FATAL(actual,expected)
+#define UT_ASSERT_STRING_EQUAL(expected, actual) CU_ASSERT_STRING_EQUAL_FATAL(actual,expected)
+#define UT_ASSERT_STRING_NOT_EQUAL(expected, actual) CU_ASSERT_STRING_NOT_EQUAL_FATAL(actual,expected)
 
 #endif  /* UT -> CUNIT - Wrapper */
 

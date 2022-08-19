@@ -35,9 +35,9 @@
 
 typedef enum
 {
-    TEST_MODE_BASIC=0,
-    TEST_MODE_AUTOMATED,
-    TEST_MODE_CONSOLE
+    UT_MODE_BASIC=0,
+    UT_MODE_AUTOMATED,
+    UT_MODE_CONSOLE
 }TestMode_t;
 
 typedef struct
@@ -56,7 +56,7 @@ static int gRegisterFailed;     /*!< Global Registration failed counter */
 /* Function prototypes */
 static UT_status_t startup_system( void );
 static int internalInit( void );
-static void internalClean( void );
+static int internalClean( void );
 
 static void usage( void )
 {
@@ -74,7 +74,7 @@ static bool decodeOptions( int argc, char **argv )
 
     memset(&gOptions,0,sizeof(gOptions));
 
-    gOptions.testMode = TEST_MODE_CONSOLE;
+    gOptions.testMode = UT_MODE_CONSOLE;
     strcpy( gOptions.filenameRoot, DEFAULT_FILENAME );
     while((opt = getopt(argc, argv, "cabhf:l")) != -1)
     {
@@ -82,15 +82,15 @@ static bool decodeOptions( int argc, char **argv )
         {
             case 'c':
                 TEST_INFO(("Console Mode\n"));
-                gOptions.testMode = TEST_MODE_CONSOLE;
+                gOptions.testMode = UT_MODE_CONSOLE;
                 break;
             case 'b':
                 TEST_INFO(("Basic Mode\n"));
-                gOptions.testMode = TEST_MODE_BASIC;
+                gOptions.testMode = UT_MODE_BASIC;
                 break;
             case 'a':
                 TEST_INFO(("Automated Mode\n"));
-                gOptions.testMode = TEST_MODE_AUTOMATED;
+                gOptions.testMode = UT_MODE_AUTOMATED;
                 break;
             case 'l':
                 TEST_INFO(("Automated Mode: List Tests to File\n"));
@@ -98,7 +98,7 @@ static bool decodeOptions( int argc, char **argv )
                 break;
             case 'f':
                 TEST_INFO(("Automated Mode: Set Output File Prefix\n"));
-                gOptions.testMode = TEST_MODE_AUTOMATED;
+                gOptions.testMode = UT_MODE_AUTOMATED;
                 strncpy(gOptions.filenameRoot,optarg,MAX_STRING_SIZE);
                 break;
             case 'h':
@@ -150,7 +150,6 @@ UT_status_t UT_init(int argc, char** argv)
     return UT_STATUS_OK;
 }
 
-
 #ifdef UT_CUNIT
 
 /**
@@ -181,7 +180,7 @@ static UT_status_t startup_system( void )
  * result format, this will move to xUnit format as required
  * or an UT internal format
  */
-UT_status_t ut_run_tests( void )
+UT_status_t UT_run_tests( void )
 {
     CU_ErrorCode error;
     
@@ -195,7 +194,7 @@ UT_status_t ut_run_tests( void )
     CU_set_output_filename(gOptions.filenameRoot);
     switch( gOptions.testMode )
     {
-        case TEST_MODE_BASIC:
+        case UT_MODE_BASIC:
         {
             /* Run all tests using the CUnit Basic interface */
             CU_basic_set_mode(CU_BRM_VERBOSE);
@@ -205,13 +204,13 @@ UT_status_t ut_run_tests( void )
             TEST_INFO(("\n\n"));        }
         break;
 
-        case TEST_MODE_CONSOLE:
+        case UT_MODE_CONSOLE:
         {
             CU_console_run_tests();
         }
         break;
 
-        case TEST_MODE_AUTOMATED:
+        case UT_MODE_AUTOMATED:
         {
             //CU_automated_enable_junit_xml( CU_TRUE );
             CU_automated_run_tests();
@@ -314,9 +313,9 @@ static int internalInit( void )
     return 0;
 }
 
-static void internalClean( void )
+static int internalClean( void )
 {
-    return;
+    return 0;
 }
 
 
