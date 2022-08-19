@@ -54,7 +54,7 @@
 #include <math.h>
 
 /** CUnit version number. */
-#define CU_VERSION "2.1-3"
+#define CS_VERSION "2.1-3"
 
 /*  Max string lengths for names (includes terminating NULL. */
 /** Maximum length of a test name string. */

@@ -17,15 +17,39 @@
 #include <stdlib.h>
 #include <getopt.h>
 
+#include "hts.h"
+
 #define TEST_INFO(x) printf x;
 #define TRUE  (true)
 #define FALSE (false)
 #define MAX_STRING_SIZE (32)
-#define DEFAULT_FILENAME "hts"
+#define DEFAULT_FILENAME "wifi_hal"
 
+typedef enum
+{
+    TEST_MODE_BASIC=0,
+    TEST_MODE_AUTOMATED,
+    TEST_MODE_CONSOLE
+}TestMode_t;
+
+typedef struct
+{
+    /* option switches */
+    TestMode_t  testMode;
+    bool        listTest;
+    char        filenameRoot[MAX_STRING_SIZE];
+    bool        help;
+}optionFlags_t;
+
+static optionFlags_t gOptions;
 
 static void usage( void )
 {
+    TEST_INFO(( "-c - Console Mode (Default)\n" ));
+    TEST_INFO(( "-a - Automated Mode\n" ));
+    TEST_INFO(( "-b - Basic Mode\n" ));
+    TEST_INFO(( "-f - <filename> - set the output filename for automated mode\n" ));
+    TEST_INFO(( "-l - List all tests run to a file\n" ));
     TEST_INFO(( "-h - Help\n" ));
 }
 
@@ -43,6 +67,26 @@ static bool decodeOptions( int argc, char **argv )
         switch(opt)
         {
             case 'c':
+                TEST_INFO(("Console Mode\n"));
+                gOptions.testMode = TEST_MODE_CONSOLE;
+                break;
+            case 'b':
+                TEST_INFO(("Basic Mode\n"));
+                gOptions.testMode = TEST_MODE_BASIC;
+                break;
+            case 'a':
+                TEST_INFO(("Automated Mode\n"));
+                gOptions.testMode = TEST_MODE_AUTOMATED;
+                break;
+            case 'l':
+                TEST_INFO(("Automated Mode: List Tests to File\n"));
+                gOptions.listTest = TRUE;
+                break;
+            case 'f':
+                TEST_INFO(("Automated Mode: Set Output File Prefix\n"));
+                gOptions.testMode = TEST_MODE_AUTOMATED;
+                strncpy(gOptions.filenameRoot,optarg,MAX_STRING_SIZE);
+                break;
             case 'h':
                 TEST_INFO(("Help\n"));
                 usage();
