@@ -98,7 +98,7 @@ Each time you wish to use the SDK in a new shell session, you need to source the
 . /opt/rdk/2.0/environment-setup-cortexa9t2-vfp-rdk-linux-gnueabi
 ```
 
-4. Once to use cross developement toolchain in the current shell, you need to source the environment setup script.
+4. Once to use cross development toolchain in the current shell, you need to source the environment setup script.
 
 ```bash
 chmod +x  /opt/rdk/2.0/environment-setup-cortexa9t2-vfp-rdk-linux-gnueabi`
@@ -196,10 +196,10 @@ The main launch point test application, will configure the test system install t
 ├── src
 │   ├── app/main.c
 ```
-The main test app will regsiter all the tests via the following function
+The main test app will register all the tests via the following function
 
 ```c
-staitc int register_hal_tests( void );
+static int register_hal_tests( void );
 ```
 
 The wifi test cases are defined in the following directory
@@ -212,18 +212,18 @@ The wifi test cases are defined in the following directory
 Example of registering test functions with the framework is
 
 ```c
- pSuite   =   CU_add_suite("[L1 test_wifi_hal_generic]", &test_generic_init, &test_generic_clean);
+ pSuite   =   HTS_add_suite("[L1 test_wifi_hal_generic]", &test_generic_init, &test_generic_clean);
 ```
 
 Each module has a `init` and `clean` function, and it should be putting all the requirements to run this module and clean itself up in these functions.
 
-# Testing 
+## Testing
 
 The current file by file, and function by function, may not be the ideal way to support all L1 testing, since calling all functions without the wifi_init being called, is likely a requirement.
 
 Other files maybe required, that's no issue, and maybe subdirectories would also be required in reality to make it more clear which level of testing is going on.
 
-Repeating functionality should be miniised, it's ok for tests to call each other e.g.
+Repeating functionality should be minimised, it's ok for tests to call each other e.g.
 
 No hal init, test all functions without calling init.
 
@@ -254,38 +254,31 @@ All about function testing, does each function operate as expected.
 
 Requirements for test
 
-- Independant test application that will run without thte RDK
+- Independent test application that will run without the RDK
 - Start the HAL interface if required, pull it down if already up, so the test can control it.
 - Application to start up the HAL and perform Black Box Testing
 
 - Negative testing
-    - Make each interface fail as per the documentation
+        - Make each interface fail as per the documentation
 - Postive testing
-    - Make each interface pass as per the documentation
-
-**Note:** Requirements for demo ( Action: Roopa / Palaksha )
-    -> Being up a few modules with L1 testing, check the current set above, and validate that it's working ok and can be tested.
+        - Make each interface pass as per the documentation
 
 ## Level 2 Testing
 
-The purpose of the test level is to test the module functionality from an operational point of view with postive testing.
+The purpose of the test level is to test the module functionality from an operational point of view with positive testing.
 
-- Independant test application that will run without thte RDK
+- Independent test application that will run without the RDK
 - Start the HAL interface if required, pull it down if already up, so the test can control it.
 - Application to start up the HAL and perform Black Box Testing
 
 Actual tests idea's are below, more can be defined as required, update of document should be perform as required.
 
-**Note:** Requirements for demo **Note:** Requirements for demo ( Action: Roopa / Palaksha )
-    -> Being up a few modules with L2 testing, check the current set above, and validate that it's working ok and can be tested.
-
-
 ### Bootup
 
-The test should be able test that the HAL interface is present, and that it's active and ready to be called. 
+The test should be able test that the HAL interface is present, and that it's active and ready to be called.
 
-- Postive test
-    - Did the system boot up correctly
+- Positive test
+        - Did the system boot up correctly
 
 ### Factory Reset
 
@@ -314,6 +307,6 @@ External Stimuli testing.. Does the interface in the case of Wifi perform extern
 Examples of which are
 	- is the SSID visible outside of the box
 	- does the wifi come up when the box is reset
-	- how much throughput is availble on the interface, peer to peer
+	- how much throughput is available on the interface, peer to peer
 		- Control of the peer to peer devices
 

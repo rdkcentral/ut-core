@@ -7,8 +7,8 @@
 #* * A PARTICULAR PURPOSE ARE DISCLAIMED
 #* ******************************************************************************
 #*
-#*   ** Project      : cunit_hal_test
-#*   ** @addtogroup  : cunit_hal_test
+#*   ** Project      : ut-core
+#*   ** @addtogroup  : ut-core
 #*   ** @file        : makefile
 #*   ** @author      : gerald.weatherup@sky.uk
 #*   ** @date        : 20/05/2022
@@ -21,13 +21,13 @@ TARGET_EXEC ?= hal_test
 
 $(info Module [$(TARGET_EXEC)])
 
-HTS_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+UT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 export PATH := $(shell pwd)/toolchain:$(PATH)
 BUILD_DIR := $(TOP_DIR)/obj
 BIN_DIR := $(TOP_DIR)/bin
 
-INC_DIRS += $(HTS_DIR)/include
-SRC_DIRS += $(HTS_DIR)/src
+INC_DIRS += $(UT_DIR)/include
+SRC_DIRS += $(UT_DIR)/src
 
 MKDIR_P ?= @mkdir -p
 
@@ -41,9 +41,9 @@ ifeq ($(TARGET),arm)
 CUNIT_VARIANT=arm-rdk-linux-gnueabi
 CC := arm-rdk-linux-gnueabi-gcc --hello -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -mabi=aapcs-linux -mno-thumb-interwork -ffixed-r8 -fomit-frame-pointer 
 CFLAGS += -Wall -ggdb
-CFLAGS += --sysroot=${HTS_DIR}/sysroot
+CFLAGS += --sysroot=${UT_DIR}/sysroot
 CFLAGS += -D__arm__
-INC_DIRS += $(HTS_DIR)/sysroot/usr/include
+INC_DIRS += $(UT_DIR)/sysroot/usr/include
 endif
 
 ifeq ($(TARGET),linux)
@@ -53,8 +53,8 @@ CUNIT_VARIANT=i686-pc-linux-gnu
 CC := gcc -ggdb -o0 -Wall
 endif
 
-CUNIT_LIB_DIR = $(HTS_DIR)/cunit/$(CUNIT_VARIANT)/lib
-INC_DIRS += $(HTS_DIR)/cunit/$(CUNIT_VARIANT)/include/CUnit
+CUNIT_LIB_DIR = $(UT_DIR)/framework/cunit/$(CUNIT_VARIANT)/lib
+INC_DIRS += $(UT_DIR)/framework/cunit/$(CUNIT_VARIANT)/include/CUnit
 
 LDFLAGS += -Wl,-rpath,$(CUNIT_LIB_DIR) -L$(CUNIT_LIB_DIR) -lcunit
 
@@ -73,7 +73,7 @@ XCFLAGS := $(CFLAGS) $(INC_FLAGS)
 #$(info SRC_DIRS: $(SRC_DIRS))
 #$(info INC_DIRS: $(INC_DIRS))
 #$(info BUILD_DIR: $(BUILD_DIR))
-VPATH += $(HTS_DIR)
+VPATH += $(UT_DIR)
 VPATH += $(TOP_DIR)
 
 test: $(OBJS)
@@ -85,7 +85,7 @@ test: $(OBJS)
 $(BUILD_DIR)/%.o: %.c
 	@$(MKDIR_P) $(dir $@)
 	@echo Building $<
-	$(CC) $(XCFLAGS) -c $< -o $@
+	@$(CC) $(XCFLAGS) -c $< -o $@
 
 .PHONY: clean list arm linux
 
@@ -108,7 +108,7 @@ list:
 	@echo 
 	@echo SRCS:$(SRCS)
 	@echo 
-	@echo HTS_DIR:$(HTS_DIR)
+	@echo UT_DIR:$(UT_DIR)
 	@echo 
 	@echo TOP_DIR:$(TOP_DIR)
 	@echo 
