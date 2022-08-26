@@ -234,7 +234,7 @@ UT_status_t UT_run_tests( void )
     return UT_STATUS_OK;
 }
 
-UT_test_suite_t *UT_add_suite(const char *pTitle, UT_InitialiseFunction_t *pInitFunction, UT_CleanupFunction_t *pCleanupFunction)
+UT_test_suite_t *UT_add_suite(const char *pTitle, UT_InitialiseFunction_t pInitFunction, UT_CleanupFunction_t pCleanupFunction)
 {
     CU_pSuite pSuite;
 
@@ -264,7 +264,7 @@ UT_test_suite_t *UT_add_suite(const char *pTitle, UT_InitialiseFunction_t *pInit
     return (UT_test_suite_t *)pSuite;
 }
 
-UT_test_t *UT_add_test(UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunction_t *pTestFunction)
+UT_test_t *UT_add_test(UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunction_t pTestFunction)
 {
     CU_pTest pTest;
     
@@ -290,7 +290,7 @@ void UT_run_tests( void )
 
 }
 
-UT_test_suite_t *UT_add_suite(const char *pTitle, UT_InitialiseFunction_t *pInitFunction, UT_CleanupFunction_t *pCleanupFunction)
+UT_test_suite_t *UT_add_suite(const char *pTitle, UT_InitialiseFunction_t pInitFunction, UT_CleanupFunction_t pCleanupFunction)
 {
     title=title;
     pInitFunction=pInitFunction;
@@ -298,7 +298,7 @@ UT_test_suite_t *UT_add_suite(const char *pTitle, UT_InitialiseFunction_t *pInit
     return NULL;
 }
 
-UT_test_t *UT_add_test(UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunction_t *pTestFunction)
+UT_test_t *UT_add_test(UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunction_t pTestFunction)
 {
     title=title;
     pSuite=pSuite;

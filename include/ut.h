@@ -44,19 +44,19 @@ typedef void (UT_test_t);         /*!< UT test object pointer */
  * @brief UT Test Function
  * 
  */
-typedef void (UT_TestFunction_t)(void);
+typedef void (*UT_TestFunction_t)(void);
 
 /**
  * @brief UT Test Init Function
  * 
  */
-typedef int (UT_InitialiseFunction_t)(void);
+typedef int (*UT_InitialiseFunction_t)(void);
 
 /**
  * @brief UT Test Clean up function
  * 
  */
-typedef int (UT_CleanupFunction_t)(void);
+typedef int (*UT_CleanupFunction_t)(void);
 
 /* *********************/
 /* Function Prototypes */
@@ -99,7 +99,7 @@ UT_status_t UT_run_tests( void );
  
  * @return UT_test_suite_t - test suite handle, NULL on error
 */
-UT_test_suite_t *UT_add_suite( const char *pTitle, UT_InitialiseFunction_t *pInitFunction, UT_CleanupFunction_t *pCleanupFunction);
+UT_test_suite_t *UT_add_suite( const char *pTitle, UT_InitialiseFunction_t pInitFunction, UT_CleanupFunction_t pCleanupFunction);
 
 /**
  * @brief Register a test suite
@@ -108,7 +108,7 @@ UT_test_suite_t *UT_add_suite( const char *pTitle, UT_InitialiseFunction_t *pIni
  * @param[in] pFunction - pointer to the test function
  * @return UT_test_t - pointer to the function handle, NULL on error
  */
-UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunction_t *pFunction);
+UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunction_t pFunction);
 
 #define UT_CUNIT
 
