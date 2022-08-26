@@ -1,23 +1,35 @@
-#  HTS - Hal Testing Suite
+# Unit Testing - Hal Testing Suite
 
 | Date   | Author       | Comment |
 |--------|--------------|---------|
-| 09/10/22 | G. Weatherup | Initial Revision|        |
+| 26/08/22 | G. Weatherup | Initial release|
+| 09/07/22 | G. Weatherup | Initial Revision|
 
-# Scope of the issue
+
+# TODO: THIS DOCUMENT IS DRAFT AND REQUIRES REWORK
+
+## Scope of the issue
 
 To develop a L1, L2 testing suite to support vendor deliverables. This combines API Documentation, Specifications and Tests, delivered without infrastructure and RDK framework requirements.
 
-# HAL Scope
+## HAL Scope
 
-Each of the HALS will use the hal HTS-Core framework, it will provide all the configuration required to support building and running a common testing environment.
+Each of the HALS will use the hal `UT-Core` framework, it will provide all the configuration required to support building and running a common testing environment.
 
-The full HAL API Headers are defined here
+Each HAL component definition, will have individual cadence, specific documentation, and tagged testing suites to support them. All code is shared in the `comcast-sky` git hub, currently for internal consumption.
 
-[HAL Test Framework URL](#https://github.com/orgs/comcast-sky/repositories?q=rdk%2Fcomponents%2Fhal%2F&type=all&language=&sort=name)
+- [HAL Test Framework URL - Comcast-Sky GitHub](#https://github.com/orgs/comcast-sky/repositories?q=rdk%2Fcomponents%2Fhal%2F&type=all&language=&sort=name)
 
+The naming convention chosen will allow for future convergence of the RDK-B/RDK-V/RDK-X stack into a single component based definition.
 
-# POC Build Environment Requirements
+Naming convention as follows:-
+
+```
+- rdk-components-hal-<componentName>
+- rdk-components-haltest-<componentName>
+```
+
+## Build Environment Requirements
 
 Cloning the test code is available from here:
 
@@ -61,11 +73,11 @@ In order to build the `vendor`, or the `developer` will need to provide the foll
 `ln -s <source> <desintation>` can be used to setup these directories
 
 
-## Toolchain
+### Toolchain
 
-Toolchain is provided from the following link and information
+Toolchain is provided by the vendor, or via an SDK build in the Yocto build system for the given platform.
 
-Recommand to install the toolchain into `./tools/2.0` directory, because the `sysroot` link will work correctly from that location
+Recommand to install the toolchain into `./tools/2.0` directory, so that `sysroot` link will work correctly from that location
 
 The SDK installer script copied into shared location [http://hydra.bskyb.com/shared/Projects/Internal/Yocto-RDK-SDK/](http://hydra.bskyb.com/shared/Projects/Internal/Yocto-RDK-SDK/)
 
@@ -110,7 +122,7 @@ echo $CC
 arm-rdk-linux-gnueabi-gcc -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -mabi=aapcs-linux -mno-thumb-interwork -ffixed-r8 -fomit-frame-pointer --sysroot=/opt/rdk/2.0/sysroots/cortexa9t2-vfp-rdk-linux-gnueabi
 ```
 
-# Testing Environment
+## Testing Environment
 
 Cunit testing framework is used to deploy the HAL tests : [http://cunit.sourceforge.net/doc/index.html](http://cunit.sourceforge.net/doc/index.html)
 
@@ -163,7 +175,7 @@ or use the `run.sh`, which is in the same directory
 Now the hal test can be executed, `-h` for help is supported.
 
 ```bash
-./wifi_hal_test  -h
+./hal_test  -h
 Help
 -c - Console Mode (Default)
 -a - Automated Mode
@@ -196,6 +208,7 @@ The main launch point test application, will configure the test system install t
 ├── src
 │   ├── app/main.c
 ```
+
 The main test app will register all the tests via the following function
 
 ```c
@@ -212,10 +225,10 @@ The wifi test cases are defined in the following directory
 Example of registering test functions with the framework is
 
 ```c
- pSuite   =   HTS_add_suite("[L1 test_wifi_hal_generic]", &test_generic_init, &test_generic_clean);
+ pSuite   =   UT_add_suite("[L1 test_wifi_hal_generic]", &test_generic_init, &test_generic_clean);
 ```
 
-Each module has a `init` and `clean` function, and it should be putting all the requirements to run this module and clean itself up in these functions.
+Each module has a optional `init` and `clean` function, and it should be putting all the requirements to run this module and clean itself up in these functions.
 
 ## Testing
 
@@ -236,17 +249,6 @@ test_all_functions_without_init( void )
     ...
 }
 ```
-
-## Status
-
-Current Status: All functions have stubs, and their registered with the cuinit framework
-
-
-| File                    | Status                                                                                  |
-|-------------------------|-----------------------------------------------------------------------------------------|
-| test_wifi_hal_generic.c | L1 functions implemented, but will require more detailed testing to prove functionality |
-| test_wifi_hal.c         | L2 functions implemented, but will require testing.                                     |
-| test_wifi_xxx.c         |                                                                                         |
 
 ## Level 1 Testing
 
@@ -273,40 +275,13 @@ The purpose of the test level is to test the module functionality from an operat
 
 Actual tests idea's are below, more can be defined as required, update of document should be perform as required.
 
-### Bootup
-
-The test should be able test that the HAL interface is present, and that it's active and ready to be called.
-
-- Positive test
-        - Did the system boot up correctly
-
-### Factory Reset
-
-The test should be able to trigger a factory reset from the command line, and check that the reset has occurred
-
-- Trigger the factory reset
-- Check that the factory reset has been achieved? How is this possible
-
-### Set / Get Params
-
-- Set params via the HAL interface and check that those params via the command line.
-- More details to be provided
-
-### Upgrade / Downgrade Wifi
-
-- TBC on gary on this one, there's no actual downgrade that I know off, just a complete image replacement.
-
-### Steering
-
-- Don't know what this one was, there was mention of steering controls? Further discussion required
-
 ## Level 3 Testing
 
 External Stimuli testing.. Does the interface in the case of Wifi perform externally correctly..
 
-Examples of which are
-	- is the SSID visible outside of the box
-	- does the wifi come up when the box is reset
-	- how much throughput is available on the interface, peer to peer
-		- Control of the peer to peer devices
+Examples of which are:-
 
+- is the SSID visible outside of the box
+- does the wifi come up when the box is reset
+- how much throughput is available on the interface, peer to peer
+  - Control of the peer to peer devices

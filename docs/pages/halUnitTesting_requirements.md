@@ -10,22 +10,6 @@
 - [Acronyms](#acronyms)
 - [Definitions](#definitions)
 - [References](#references)
-- [Overview of Requirements and Process](#overview-of-requirements-and-process)
-- [Requirements for the HAL Testing Suite](#requirements-for-the-hal-testing-suite)
-- [Testing Requirements](#testing-requirements)
-	- [Level 1 Testing - Functional Testing](#level-1-testing-functional-testing)
-	- [Level 2 Testing - Module Testing](#level-2-testing-module-testing)
-	- [Level 3 Testing - External testing](#level-3-testing-external-testing)
-	- [Level 4 Testing - Full Stack testing](#level-4-testing-full-stack-testing)
-- [Requirements for Documentation](#requirements-for-documentation)
-- [Delivery Requirements](#delivery-requirements)
-    - [Constraints](#constraints)
-- [Feedback loop](#feedback-loop)
-- [Deployment of the codebase](#deployment-of-the-codebase)
-	- [HAL Directory structure](#hal-directory-structure)
-- [Requirements for versioning](#requirements-for-versioning)
-    - [Revision Control](#revision-control)
-    - [Proposed Version Numbering scheme](#proposed-version-numbering-scheme)
 
 ## Overview
 
@@ -45,20 +29,21 @@ This document defines the unit testing requirements the principles defined here 
 
 ## Definitions
 
-- `Broadcom` \- `SoC` manufacturer https://www.broadcom.com/
-- `Amlogic` \- `SoC` manufacturer https://en.wikipedia.org/wiki/Amlogic
+- `Broadcom` \- `SoC` manufacturer [https://www.broadcom.com/]
+- `Amlogic` \- `SoC` manufacturer [https://en.wikipedia.org/wiki/Amlogic]
 - `Soc Vendor` \- Definition to encompass multiple vendors
 - `Unit Tests` \- C Function tests that run on the target hardware
 - `Common Testing Framework` \- Off the shelf 3rd Party Testing Framework, or framework that does not require infrastructure to control it. That's not to say it cannot be controlled via infrastructure if required. Examples of which are.
-    - GTest - https://google.github.io/googletest \- Google Test Suit
-    - CUnit - http://cunit.sourceforge.net/) \- C Testing Suit
-    - Unity - http://www.throwtheswitch.org/unity -C Embedded Testing Suit
+  - GTest - [https://google.github.io/googletest] \- Google Test Suit
+  - CUnit - [http://cunit.sourceforge.net/] \- C Testing Suit
+  - Unity - [http://www.throwtheswitch.org/unity] -C Embedded Testing Suit
+- `ut-core` - Common Testing Framework [https://github.com/comcast-sky/rdk-components-ut-core]
 
 ## References
 
-- `Feedback Loops` \- https://www.softwaretestingnews.co.uk/4-methods-to-improve-your-feedback-loops-and-supercharge-your-testing-process/
-- `Doxygen` \- SourceCode documentation tool - https://www.doxygen.nl/index.html
-- `Black Box Testing` \- https://en.wikipedia.org/wiki/Black-box_testing
+- `Feedback Loops` \- [https://www.softwaretestingnews.co.uk/4-methods-to-improve-your-feedback-loops-and-supercharge-your-testing-process/]
+- `Doxygen` \- SourceCode documentation tool - [https://www.doxygen.nl/index.html]
+- `Black Box Testing` \- [https://en.wikipedia.org/wiki/Black-box_testing]
 
 ## Overview of Requirements and Process
 
@@ -119,11 +104,11 @@ The Level 1 testing suit will be classed as functional tests. The main goal of t
 
 - Max / Min param testing should be performed for every function
 - Passing invalid params ( negative testing )
-    - Passing invalid params, every function should fail as per the documentation
-    - Every param should be tested for an invalid valid
+  - Passing invalid params, every function should fail as per the documentation
+  - Every param should be tested for an invalid valid
 - Passing Correct params ( Positive testing )
-    - Passing correct parameters
-    - Checking from the box if possible if the actions have been performed correctly via other means, e.g. command line.
+  - Passing correct parameters
+  - Checking from the box if possible if the actions have been performed correctly via other means, e.g. command line.
 
 ### Level 2 Testing - Module Testing
 
@@ -150,10 +135,9 @@ External device functionality testing, in the case where the device has to perfo
 
 ## Requirements for Documentation
 
-Universal standard for documentation is doxygen, examples of which can be found below, it is a requirement for the unit tests to comply with the doxygen standards for code commenting. All tests need to be commented, and the tests should be
+There are a number of documents required in order to support ideal doxymentation for any interface.
 
-- [Eigen Doxygen Example](http://eigen.tuxfamily.org/dox/index.html)
-- [CGal Org Doxygen](https://doc.cgal.org/latest/Manual/index.html)
+Each of the API's is required to be documented via doxyg
 
 ## Delivery Requirements
 
@@ -198,25 +182,25 @@ Once committed to the final infrastructure it's optional but likely recommended 
 
 - Example layers of the HAL / Testing infrastructure, in order to support component `HAL` this is the new requirement for organisation of the `HAL` going forward.
 
-```
+```bash
 .
-├── xxx_hal		-> git repo
-│   ├── xxx_hal.h
+├── xxx_hal  -> git repo
+│   ├── include/xxx_hal.h
 │   ├── configure.ac
 │   ├── CONTRIBUTING.md
-│   ├── doc
+│   ├── docs  - (follows the standard doxygen template)
 │   ├── LICENSE
 │   └── Makefile.am
 ...
-└── yyy_hal		-> git repo
+└── yyy_hal  -> git repo
     ├── configure.ac
     ├── CONTRIBUTING.md
     ├── COPYING
-    ├── doc
+    ├── docs    - (follows the standard doxygen template)
     ├── LICENSE
     ├── Makefile.am
     ├── NOTICE
-    └── yyy_hal.h
+    └── include/yyy_hal.h
 ```
 
 ## Requirements for Versioning
