@@ -77,6 +77,7 @@ test: $(OBJS)
 	@cp $(CUNIT_LIB_DIR)/*.so* $(BIN_DIR)
 	@cp $(CUNIT_LIB_DIR)/*.a $(BIN_DIR)
 	@cp $(CUNIT_LIB_DIR)/*.la $(BIN_DIR)
+	@cp $(HAL_LIB_DIR)/*.so* $(BIN_DIR)
 
 # c source
 $(BUILD_DIR)/%.o: %.c

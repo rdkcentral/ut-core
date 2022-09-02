@@ -39,23 +39,25 @@ Testing relationship is as follows:-
 
 ```mermaid
 erDiagram
-        HAL }|..|{ Unit Test: rdk-components-haltest-componentName
-        XFW_Image_Verifier }|--o{ XFW_io: uses
+        HAL }|..|{ hal_ut: triggers
+        hal_ut }|--o{ ut_core: uses
 ```
 
 ```bash
 ├── template
-│   ├── hal_template -> example files for the top level hal directories
-│   └── ut_template -> example files for the ut directories
+│   ├── hal_template -> example trigger files for the top level hal directories
+│   └── ut_template -> example component specific files for the ut directories
 ```
 
 ### SDK Toolchain
 
 Am example toolchain is provided for RDK-B, and this is located in github at the below address.
 
-### Core - UT - `ut-core`
+### Core UT Framework
 
 Unit testing core subsystem is available from the following location
+
+[https://github.com/comcast-sky/rdk-components-ut-core]
 
 Cloning the core ut-code is available from here:
 
@@ -63,9 +65,10 @@ Cloning the core ut-code is available from here:
 git clone git@github.com:comcast-sky/rdk-components-ut-core.git
 ```
 
-URL is also available:-
+It is recommended that you read the documentation :-
 
-[https://github.com/comcast-sky/rdk-components-ut-core]
+- [https://github.com/comcast-sky/rdk-components-ut-core/blob/master/README.md]
+- [https://github.com/comcast-sky/rdk-components-ut-core/blob/master/docs/pages/halUnitTesting_requirements.md]
 
 ```bash
 .
