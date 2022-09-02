@@ -6,9 +6,9 @@
 |-------|-----|-----|
 |1.0.0| 22/07/21 |Joe Bloggs|
 
-## Document Scope
+## Overview
 
-This document will define the requirements for testing for this HAL.
+This document will define the requirements for Level 1 testing for this HAL.
 
 ## Table of Contents
 
@@ -48,7 +48,7 @@ This document will define the requirements for testing for this HAL.
 - `Doxygen` \- SourceCode documentation tool - [https://www.doxygen.nl/index.html]
 - `Black Box Testing` \- [https://en.wikipedia.org/wiki/Black-box_testing]
 
-## Testing Requirements
+## L1 Testing Requirements
 
 - TBC
 

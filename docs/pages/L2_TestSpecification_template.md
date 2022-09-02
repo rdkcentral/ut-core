@@ -2,9 +2,9 @@
 
 ## History
 
-|Version|Date (YY-MM-DD)|Author|
-|-------|-----|-----|
-|1.0.0| 22/07/21 |Joe Bloggs|
+|Version|Date (YY-MM-DD)|Author|Comments|
+|-------|-----|-----|-----|
+|1.0.0| 22/07/21 |Joe Bloggs|Draft|
 
 ## Document Scope
 
@@ -16,7 +16,8 @@ This document will define the requirements for testing for this HAL.
 - [Acronyms](#acronyms)
 - [Definitions](#definitions)
 - [References](#references)
-- [L1 Testing Requirements](#l1-testing-requirements)
+- [Testing Requirements](#testing-requirements)
+- [Top Level Testing Requirements](#top-level-testing-requirements)
 
 ## Acronyms
 
@@ -40,7 +41,7 @@ This document will define the requirements for testing for this HAL.
   - GTest - [https://google.github.io/googletest] \- Google Test Suit
   - CUnit - [http://cunit.sourceforge.net/] \- C Testing Suit
   - Unity - [http://www.throwtheswitch.org/unity] -C Embedded Testing Suit
-- `ut-core` - Common Testing Framework [https://github.com/comcast-sky/rdk-components-ut-core]
+  - `ut-core` - Common Testing Framework [https://github.com/comcast-sky/rdk-components-ut-core], which wraps a open-source framework that can be expanded to the requirements for future comcast-sky framework.
 
 ## References
 
@@ -50,5 +51,5 @@ This document will define the requirements for testing for this HAL.
 
 ## Testing Requirements
 
-- TBC
+The following level 2 tests are to be expected at this state.
 

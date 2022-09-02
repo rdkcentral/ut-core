@@ -39,24 +39,21 @@ $(info TARGET [$(TARGET)])
 
 ifeq ($(TARGET),arm)
 CUNIT_VARIANT=arm-rdk-linux-gnueabi
-CC := arm-rdk-linux-gnueabi-gcc --hello -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -mabi=aapcs-linux -mno-thumb-interwork -ffixed-r8 -fomit-frame-pointer 
-CFLAGS += -Wall -ggdb
-CFLAGS += --sysroot=${UT_DIR}/sysroot
-CFLAGS += -D__arm__
+#CC := arm-rdk-linux-gnueabi-gcc -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -mabi=aapcs-linux -mno-thumb-interwork -ffixed-r8 -fomit-frame-pointer 
+# CFLAGS will be overriden by Caller as required
 INC_DIRS += $(UT_DIR)/sysroot/usr/include
+XCFLAGS := $(KCFLAGS)
 endif
 
 ifeq ($(TARGET),linux)
 CUNIT_VARIANT=i686-pc-linux-gnu
-#XCFLAGS += -fsanitize=address -fbounds-check
-#LDFLAGS += -lasan
 CC := gcc -ggdb -o0 -Wall
 endif
 
 CUNIT_LIB_DIR = $(UT_DIR)/framework/cunit/$(CUNIT_VARIANT)/lib
 INC_DIRS += $(UT_DIR)/framework/cunit/$(CUNIT_VARIANT)/include/CUnit
 
-LDFLAGS += -Wl,-rpath,$(CUNIT_LIB_DIR) -L$(CUNIT_LIB_DIR) -lcunit
+XLDFLAGS += -Wl,-rpath,$(CUNIT_LIB_DIR) -L$(CUNIT_LIB_DIR) -lcunit $(YLDFLAGS) $(LDFLAGS) 
 
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 OBJS := $(subst $(TOP_DIR),$(BUILD_DIR), $(SRCS:.c=.o))
@@ -68,18 +65,18 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 # Final conversions
 DEPS += $(OBJS:.o=.d)
-XCFLAGS := $(CFLAGS) $(INC_FLAGS) 
+XCFLAGS += $(CFLAGS) $(INC_FLAGS) 
 
-#$(info SRC_DIRS: $(SRC_DIRS))
-#$(info INC_DIRS: $(INC_DIRS))
-#$(info BUILD_DIR: $(BUILD_DIR))
 VPATH += $(UT_DIR)
 VPATH += $(TOP_DIR)
 
 test: $(OBJS)
 	@echo Linking $@ $(BUILD_DIR)/$(TARGET_EXEC)
-	@$(CC) $(OBJS) -o $(BUILD_DIR)/$(TARGET_EXEC) $(LDFLAGS)
+	@$(CC) $(OBJS) -o $(BUILD_DIR)/$(TARGET_EXEC) $(XLDFLAGS) $(KCFLAGS)
 	@cp $(BUILD_DIR)/$(TARGET_EXEC) $(BIN_DIR)
+	@cp $(CUNIT_LIB_DIR)/*.so* $(BIN_DIR)
+	@cp $(CUNIT_LIB_DIR)/*.a $(BIN_DIR)
+	@cp $(CUNIT_LIB_DIR)/*.la $(BIN_DIR)
 
 # c source
 $(BUILD_DIR)/%.o: %.c
@@ -121,14 +118,21 @@ list:
 	@echo
 	@echo LDFLAGS:$(LDFLAGS)
 	@echo 
+	@echo YLDFLAGS:$(YLDFLAGS)
+	@echo 
+	@echo XLDFLAGS:$(XLDFLAGS)
+	@echo 
 	@echo SRC_DIRS:$(SRC_DIRS)
 	@echo 
 	@echo INC_DIRS:$(INC_DIRS)
 	@echo 
 	@echo INC_FLAGS:$(INC_FLAGS)
-	@echo 
-	@echo TEST_OBJS:$(TEST_OBJS)
-	@echo 
+	@echo
 	@echo DEPS:$(DEPS)
+	@echo
+	@echo CONFIGURE_FLAGS:$(CONFIGURE_FLAGS)
+	@echo
+	@echo PKG_CONFIG_PATH:$(PKG_CONFIG_PATH)
+	@echo
 
 -include $(DEPS)

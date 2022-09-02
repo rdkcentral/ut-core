@@ -2,6 +2,7 @@
 
 | Date | Author | Comment | Version |
 | --- | --- | --- | --- |
+| 30/08/22 | G. Weatherup | Renamed `HTS` to `UT` | 1.1.0 |
 | 21/07/22 | G. Weatherup | First Release | 1.0.0 |
 
 ## Table of Contents
@@ -23,7 +24,7 @@ This document defines the unit testing requirements the principles defined here 
 - `RDK` \- Reference Design Kit for All Devices
 - `RDK-B` \- Reference Design Kit for Broadband Devices
 - `RDK-V` \- Reference Design Kit for Video Devices
-- `HTS` \- HAL Testing Suit
+- `UT` \- HAL Unit Testing Suit
 - `OEM` \- Original Equipment Manufacture (Sky is also an OEM)
 - `SoC` \- System on a Chip
 
@@ -68,7 +69,7 @@ On other hand the **Lower Layers** are platform specific, either built by the OE
 
 ## Requirements for the HAL Testing Suite
 
-The core requirements for `HTS` Testing suite is as follows.
+The core requirements for `UT` Testing suite is as follows.
 
 | Requirement | Comment |
 | --- | --- |
@@ -77,7 +78,7 @@ The core requirements for `HTS` Testing suite is as follows.
 | `Common Framework` | A common framework will be used to control tests |
 | Run on the target | Unit Tests will be created using the `Common Framework`, these will run on the target hardware |
 | Tests will be broken down into Levels | 4 levels expected |
-| Documentation | on `HTS` and `HAL` is either accessible from a single resource, ( website etc. ), or possible to build to be rebuilt, or can be deployed with the package. Documenting the tests will also be via doxygen |
+| Documentation | on `UT` and `HAL` is either accessible from a single resource, ( website etc. ), or possible to build to be rebuilt, or can be deployed with the package. Documenting the tests will also be via doxygen |
 | Re-usable | layered testing approach, both for delivery and usability |
 | Platform independent | Tests will be platform independent, and use the `HAL` definitions / documentation to implement. No test shall have platform specific features, but features may or may not be enabled per platform. |
 | Convergence | over time has to be considered between `RDK-B` & `RDK-V` |
@@ -141,7 +142,7 @@ Each of the API's is required to be documented via doxyg
 
 ## Delivery Requirements
 
-The HAL Testing Suit (`HTS`), needs to contain the following components
+The HAL Unit Testing Suit (`UT`), needs to contain the following components
 
 | Module | Requirement |
 | --- | --- |
@@ -154,7 +155,7 @@ The HAL Testing Suit (`HTS`), needs to contain the following components
 ### Constraints
 
 - HAL Testing framework must be independent of RDK upper layers and operate without any dependency.
-- It is expected that the `HTS`, will build with minium effort using the compiler for the platform.
+- It is expected that the `UT`, will build with minium effort using the compiler for the platform.
 
 ## Feedback loop
 
@@ -205,9 +206,9 @@ Once committed to the final infrastructure it's optional but likely recommended 
 
 ## Requirements for Versioning
 
-An important aspect of delivery is that both the `HAL` and the `HTS` are fundamentally linked together. To support this, we also require a code tagging and delivery model, that is scalable.
+An important aspect of delivery is that both the `HAL` and the `UT` are fundamentally linked together. To support this, we also require a code tagging and delivery model, that is scalable.
 
-e.g. a change to the `HAL` requires a change to the `HTS`, although vice versa is not true. The `HTS` should improve on a regular basis based on feedback.
+e.g. a change to the `HAL` requires a change to the `UT`, although vice versa is not true. The `UT` should improve on a regular basis based on feedback.
 
 The testing suite will `git tag` actual versions together in the source code repository.
 

@@ -1,4 +1,4 @@
-# Level 3 HAL Testing Specification (Template)
+# Level 1 HAL Testing Specification (TBC)
 
 ## History
 
@@ -8,7 +8,7 @@
 
 ## Document Scope
 
-This document describes the option for Level 3 testing, ( out of the box ), which is deliverable to the vendor as a set of python scripts, that support simple configuration triggered from the command line.
+This document will define the requirements for Level 1 testing for this HAL.
 
 ## Table of Contents
 
@@ -16,7 +16,7 @@ This document describes the option for Level 3 testing, ( out of the box ), whic
 - [Acronyms](#acronyms)
 - [Definitions](#definitions)
 - [References](#references)
-- [Testing Support Package](#testing-support-package)
+- [L1 Testing Requirements](#l1-testing-requirements)
 
 ## Acronyms
 
@@ -48,7 +48,7 @@ This document describes the option for Level 3 testing, ( out of the box ), whic
 - `Doxygen` \- SourceCode documentation tool - [https://www.doxygen.nl/index.html]
 - `Black Box Testing` \- [https://en.wikipedia.org/wiki/Black-box_testing]
 
-## Testing Support Package
+## Testing Requirements
 
 - TBC
 
