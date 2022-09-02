@@ -1,6 +1,3 @@
-# git-flow-template
-Git flow basic repo template
-=======
 # Unit Testing - Hal Testing Suite
 
 | Date   | Author       | Comment | Version |
