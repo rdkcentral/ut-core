@@ -35,17 +35,18 @@ $(info TARGET [$(TARGET)])
 
 ifeq ($(TARGET),arm)
 HAL_LIB_DIR := $(ROOT_DIR)/libs
-LDFLAGS = -Wl,-rpath,$(HAL_LIB_DIR) -L$(HAL_LIB_DIR) -lhal_xxx
+YLDFLAGS = -Wl,-rpath,$(HAL_LIB_DIR) -L$(HAL_LIB_DIR) -lhal_xxx
 endif
 
 .PHONY: clean list all
 
-export LDFLAGS
+export YLDFLAGS
 export BIN_DIR
 export SRC_DIRS
 export INC_DIRS
 export TARGET
 export TOP_DIR
+export HAL_LIB_DIR
 
 .PHONY: clean list build
 
