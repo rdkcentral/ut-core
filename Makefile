@@ -26,8 +26,21 @@ export PATH := $(shell pwd)/toolchain:$(PATH)
 BUILD_DIR := $(TOP_DIR)/obj
 BIN_DIR := $(TOP_DIR)/bin
 
+CUNIT_DIR +=  $(UT_DIR)/framework/CUnit-2.1-3/CUnit/
+CUNIT_SRC_DIRS += $(CUNIT_DIR)/Sources
+
 INC_DIRS += $(UT_DIR)/include
+INC_DIRS += $(CUNIT_DIR)/Headers
+
 SRC_DIRS += $(UT_DIR)/src
+SRC_DIRS += $(CUNIT_SRC_DIRS)/Automated
+SRC_DIRS += $(CUNIT_SRC_DIRS)/Basic
+SRC_DIRS += $(CUNIT_SRC_DIRS)/Console
+SRC_DIRS += $(CUNIT_SRC_DIRS)/Framework
+#SRC_DIRS += $(CUNIT_SRC_DIRS)/Curses
+#SRC_DIRS += $(CUNIT_SRC_DIRS)/wxWidget
+#SRC_DIRS += $(CUNIT_SRC_DIRS)/Win
+#SRC_DIRS += $(CUNIT_SRC_DIRS)/Test
 
 MKDIR_P ?= @mkdir -p
 
@@ -47,13 +60,11 @@ endif
 
 ifeq ($(TARGET),linux)
 CUNIT_VARIANT=i686-pc-linux-gnu
-CC := gcc -ggdb -o0 -Wall
+CC := gcc -ggdb -o0 -Wall -Wno-format
 endif
 
-CUNIT_LIB_DIR = $(UT_DIR)/framework/cunit/$(CUNIT_VARIANT)/lib
-INC_DIRS += $(UT_DIR)/framework/cunit/$(CUNIT_VARIANT)/include/CUnit
 
-XLDFLAGS += -Wl,-rpath,$(CUNIT_LIB_DIR) -L$(CUNIT_LIB_DIR) -lcunit $(YLDFLAGS) $(LDFLAGS) 
+XLDFLAGS += -Wl,-rpath, $(YLDFLAGS) $(LDFLAGS)
 
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 OBJS := $(subst $(TOP_DIR),$(BUILD_DIR), $(SRCS:.c=.o))
@@ -72,13 +83,11 @@ VPATH += $(TOP_DIR)
 
 test: $(OBJS)
 	@echo Linking $@ $(BUILD_DIR)/$(TARGET_EXEC)
-	@$(CC) $(OBJS) -o $(BUILD_DIR)/$(TARGET_EXEC) $(XLDFLAGS) $(KCFLAGS)
+	@$(CC) $(OBJS) -o $(BUILD_DIR)/$(TARGET_EXEC) $(XLDFLAGS) $(KCFLAGS) $(XCFLAGS)
 	@cp $(BUILD_DIR)/$(TARGET_EXEC) $(BIN_DIR)
-	@cp $(CUNIT_LIB_DIR)/*.so* $(BIN_DIR)
-	@cp $(CUNIT_LIB_DIR)/*.a $(BIN_DIR)
-	@cp $(CUNIT_LIB_DIR)/*.la $(BIN_DIR)
-	@touch $(HAL_LIB_DIR)/hal.so.touch
-	@cp $(HAL_LIB_DIR)/*.so* $(BIN_DIR)
+ifneq ("$(wildcard $(HAL_LIB_DIR)/*.so)","")
+	cp $(HAL_LIB_DIR)/*.so* $(BIN_DIR)
+endif
 
 # c source
 $(BUILD_DIR)/%.o: %.c
@@ -92,7 +101,7 @@ arm:
 	make TARGET=arm
 
 linux:
-	make TARGET=arm
+	make TARGET=linux
 
 clean:
 	@echo Performing Clean
