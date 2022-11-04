@@ -18,7 +18,6 @@
 #include <getopt.h>
 
 #include "ut.h"
-#include "PreReqUtility.h"
 
 #ifdef UT_CUNIT
 /* CUnit functions */
@@ -150,28 +149,6 @@ UT_status_t UT_init(int argc, char** argv)
  
     return UT_STATUS_OK;
 }
-
-/**
- * @brief main UT init for WiFi
- *
- * @return UT_status_t
- * @retval UT_STATUS_OK - Success
- * @retval UT_STATUS_FAILURE - failure in initializing WiFi
- */
-UT_status_t UT_WiFi_init( void) 
-{
-    int ret = 0;
-    ret = WiFiPreReq();
-
-    /* Check if WiFi Pre-requisites are done */
-    if (ret != UT_STATUS_OK)
-    {
-        return UT_STATUS_FAILURE;
-    }
- 
-    return UT_STATUS_OK;
-}
-
 
 #ifdef UT_CUNIT
 

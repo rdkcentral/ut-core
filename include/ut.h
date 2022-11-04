@@ -79,15 +79,6 @@ typedef int (*UT_CleanupFunction_t)(void);
 UT_status_t UT_init(int argc, char** argv);
 
 /**
- * @brief main UT init for WiFi
- *
- * @return UT_status_t
- * @retval UT_STATUS_OK - Success
- * @retval UT_STATUS_FAILURE - failure in initializing WiFi
- */
-UT_status_t UT_WiFi_init(void);
-
-/**
  * @brief run the registered tests as required
  * In order for tests to be registered and ran the client will use
  * - UT_add_suite
