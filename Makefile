@@ -30,9 +30,11 @@ CUNIT_DIR +=  $(UT_DIR)/framework/CUnit-2.1-3/CUnit/
 CUNIT_SRC_DIRS += $(CUNIT_DIR)/Sources
 
 INC_DIRS += $(UT_DIR)/include
+INC_DIRS += $(UT_DIR)/Logger/include
 INC_DIRS += $(CUNIT_DIR)/Headers
 
 SRC_DIRS += $(UT_DIR)/src
+SRC_DIRS += $(UT_DIR)/Logger/src
 SRC_DIRS += $(CUNIT_SRC_DIRS)/Automated
 SRC_DIRS += $(CUNIT_SRC_DIRS)/Basic
 SRC_DIRS += $(CUNIT_SRC_DIRS)/Console
