@@ -25,26 +25,38 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
 #include <time.h>
 
 #define UT_MAX_PATH (260)
+#define UT_MAX_TIME_STRING (20)
 
 /* #FIXME: By default all filenames MUST assume current running directory and linux, not target, for all development the target is LINUX */
-static char logFileName[UT_MAX_PATH] = "./log_baseline.log";    /*!< Path + Filename of the currently active log file*/
+static char gLogFileName[UT_MAX_PATH] = "/tmp/ut-log_base.log";    /*!< Path + Filename of the currently active log file*/
+static bool gLogInit = false;
 
 void UT_log_setLogFilePath(char *inputFilePath)
 {
-    char        time_now[20] = {'\0'};
+    char        time_now[UT_MAX_TIME_STRING] = {'\0'};
     time_t      now;
-    struct tm   *tmp ;
+    struct tm   *tmp;
+    int         length;
 
+    length = strlen(inputFilePath);
     time(&now);
     tmp = localtime(&now);
-    strftime(time_now, sizeof(time_now), "%Y-%m-%d-%X", tmp);
-    strcpy(logFileName, inputFilePath);
-    strcat(logFileName, "/log_");
-    strcat(logFileName, time_now);
-    strcat(logFileName, ".log");
+    strftime(time_now, sizeof(time_now), "%F_%H%M%S", tmp);
+    if ( inputFilePath[length-1] == '/' )
+    {
+        /* Dont append / because path has one */
+        snprintf(gLogFileName, UT_MAX_PATH, "%sut-log_%s.log", inputFilePath, time_now);
+    }
+    else
+    {
+        /* Append / because path doesn't have one */
+        snprintf(gLogFileName, UT_MAX_PATH, "%s/ut-log_%s.log", inputFilePath, time_now);
+    }
+    gLogInit = true;
 }
 
 void UT_log(const char *function, int line, const char * format, ...)
@@ -57,8 +69,14 @@ void UT_log(const char *function, int line, const char * format, ...)
 
     time(&now);
 
+    if ( gLogInit == false )
+    {
+        /* If ut-core has never called to set the log to a fixed location then let's set it */
+        UT_log_setLogFilePath("/tmp");
+    }
+
     /* #FIXME : This will all need rework, we shouldn't be opening logs constantly */
-    fp = fopen(logFileName, "a");
+    fp = fopen(gLogFileName, "a");
     if (fp == NULL)
     { 
         printf("\nUnable to open file for logging...");
@@ -67,7 +85,8 @@ void UT_log(const char *function, int line, const char * format, ...)
 
     tmp = localtime(&now);
     strftime(time_now, sizeof(time_now), "%Y-%m-%d-%X", tmp);
-    fprintf(fp,"\n3PE [%s] [%s] [%d] : ", time_now, function, line);
+    /* Use C Standard formatting for */
+    fprintf(fp,"\n%s, %s,%6d : ", time_now, function, line);
     va_start(list, format);
     vfprintf(fp, format, list);
     va_end(list);
