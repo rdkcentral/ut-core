@@ -22,3 +22,10 @@ Note: This requirement needs further specification and is only defined here so a
 
   - Add support for ut-core KeyValuePair value checking into the core framework, for STRINGS, UINTS, ARRAYS etc.
   - Add platform specific definitions configuration files, ideally .yml to support the platform, and each platform will require definition of this.
+
+
+## Consistent logging
+
+- Modules must have consistent logging, and a global system for ut-core to support module logging as required.
+- All configuration should be driven by either switches to the command line, or incoming configuration files.
+
