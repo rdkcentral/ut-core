@@ -18,6 +18,7 @@
 #include <getopt.h>
 
 #include "ut.h"
+#include "ut_log.h"
 
 #ifdef UT_CUNIT
 /* CUnit functions */
@@ -65,6 +66,7 @@ static void usage( void )
     TEST_INFO(( "-b - Basic Mode\n" ));
     TEST_INFO(( "-f - <filename> - set the output filename for automated mode\n" ));
     TEST_INFO(( "-l - List all tests run to a file\n" ));
+    TEST_INFO(( "-p - Set the log Path\n" ));
     TEST_INFO(( "-h - Help\n" ));
 }
 
@@ -76,7 +78,7 @@ static bool decodeOptions( int argc, char **argv )
 
     gOptions.testMode = UT_MODE_CONSOLE;
     strcpy( gOptions.filenameRoot, DEFAULT_FILENAME );
-    while((opt = getopt(argc, argv, "cabhf:l")) != -1)
+    while((opt = getopt(argc, argv, "cabhf:lp:")) != -1)
     {
         switch(opt)
         {
@@ -100,6 +102,10 @@ static bool decodeOptions( int argc, char **argv )
                 TEST_INFO(("Automated Mode: Set Output File Prefix\n"));
                 gOptions.testMode = UT_MODE_AUTOMATED;
                 strncpy(gOptions.filenameRoot,optarg,MAX_STRING_SIZE);
+                break;
+            case 'p':
+                TEST_INFO(("Setting Log Path [%s]\n", optarg));
+                UT_log_setLogFilePath(optarg);
                 break;
             case 'h':
                 TEST_INFO(("Help\n"));
@@ -199,7 +205,7 @@ UT_status_t UT_run_tests( void )
             /* Run all tests using the CUnit Basic interface */
             CU_basic_set_mode(CU_BRM_VERBOSE);
             CU_basic_run_tests();
-            TEST_INFO(("\r\nFailures:-\n"));
+            TEST_INFO(("\nFailures:-\n"));
             CU_basic_show_failures(CU_get_failure_list());
             TEST_INFO(("\n\n"));        }
         break;
