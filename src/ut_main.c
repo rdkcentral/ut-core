@@ -205,7 +205,7 @@ UT_status_t UT_run_tests( void )
             /* Run all tests using the CUnit Basic interface */
             CU_basic_set_mode(CU_BRM_VERBOSE);
             CU_basic_run_tests();
-            TEST_INFO(("\r\nFailures:-\n"));
+            TEST_INFO(("\nFailures:-\n"));
             CU_basic_show_failures(CU_get_failure_list());
             TEST_INFO(("\n\n"));        }
         break;
