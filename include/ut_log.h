@@ -19,38 +19,34 @@
 ##########################################################################
 */
 
-#ifndef LOGGER_H
-#define LOGGER_H
+#ifndef UT_LOG_H
+#define UT_LOG_H
 
 /* System Includes */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 #include <stdarg.h> 
 
-#define UT_LOG(format, ...)\
-        UT_Log(__func__, __LINE__, format, ## __VA_ARGS__)
-
-/* Log Fileto which execution logs are to be redirected */
-char logFileName[40];
+#define UT_LOG(format, ...) UT_log(__func__, __LINE__, format, ## __VA_ARGS__)
 
 /**
- * @brief Create a Log File 
- * IN/OUT : logFileName after appending the timestamp 
- * This function will create a new log file with
- * timestamp as suffix for every new execution
+ * @brief Set the path of the active logfile
+ * 
+ * This function set the path for the active logfile
+ * 
+ * @param inputFilePath - output logfile
+ *
  */
-void UT_CreateLogfile(char * logFileName);
+void UT_log_setLogFilePath(char * inputFilePath);
 
 /**
  * @brief Appending to log file 
- * IN : function - name of the function from which Logger is called
- *      line - line number from which Logger is called
- *      format - string formatting to be applied
- * This function will append the log lines with
- * timestamp, function name and line number
+ * 
+ * This function will append the log lines with timestamp, function name and line number
+ * 
+ * @param function      - name of the calling function
+ * @param line          - line number
+ * @param format        - string formatting to be applied
+ * @param ...           - variable args
  */
-void UT_Log (const char *function, int line, const char * format, ...);
+void UT_log(const char *function, int line, const char * format, ...);
 
-#endif /* LOGGER_H */
+#endif /* UT_LOG_H */

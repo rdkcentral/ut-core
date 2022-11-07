@@ -20,59 +20,56 @@
 */
 
 /* Application Includes */
-#include "Logger.h"
+#include "ut_log.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+#include <time.h>
 
+#define UT_MAX_PATH (260)
 
-/**
- * @brief Create a Log File 
- * IN/OUT : logFileName after appending the timestamp
- * This function will create a new log file with
- * timestamp as suffix for every new execution
- */
-void UT_CreateLogfile(char * logFileName)
+/* #FIXME: By default all filenames MUST assume current running directory and linux, not target, for all development the target is LINUX */
+static char logFileName[UT_MAX_PATH] = "./log_baseline.log";    /*!< Path + Filename of the currently active log file*/
+
+void UT_log_setLogFilePath(char *inputFilePath)
 {
-    char time_now[20] = {'\0'};
-    time_t now;
+    char        time_now[20] = {'\0'};
+    time_t      now;
+    struct tm   *tmp ;
+
     time(&now);
-    struct tm *tmp ;
     tmp = localtime(&now);
     strftime(time_now, sizeof(time_now), "%Y-%m-%d-%X", tmp);
-    strcat(logFileName, "/tmp/3PE_Log_");
+    strcpy(logFileName, inputFilePath);
+    strcat(logFileName, "/log_");
     strcat(logFileName, time_now);
-    return;
+    strcat(logFileName, ".log");
 }
 
-/**
- * @brief Appending to log file 
- * IN : function - name of the function from which Logger is called
- *      line - line number from which Logger is called
- *      format - string formatting to be applied
- * This function will append to the log file with
- * timestamp, function name, line number and log message
- */
-void UT_Log (const char *function, int line, const char * format, ...)
+void UT_log(const char *function, int line, const char * format, ...)
 {
-    char time_now[20] = { '\0' };
-    FILE * fp = NULL;
-    va_list list;
-    time_t now ;
-    time(&now);
-    struct tm *tmp ;
-    tmp = localtime(&now);
-    strftime(time_now, sizeof(time_now), "%Y-%m-%d-%X", tmp);
+    char        time_now[20] = { '\0' };
+    FILE        *fp = NULL;
+    va_list     list;
+    time_t      now;
+    struct tm   *tmp;
 
+    time(&now);
+
+    /* #FIXME : This will all need rework, we shouldn't be opening logs constantly */
     fp = fopen(logFileName, "a");
     if (fp == NULL)
     { 
         printf("\nUnable to open file for logging...");
         return;
     }
-   
+
+    tmp = localtime(&now);
+    strftime(time_now, sizeof(time_now), "%Y-%m-%d-%X", tmp);
     fprintf(fp,"\n3PE [%s] [%s] [%d] : ", time_now, function, line);
     va_start(list, format);
     vfprintf(fp, format, list);
     va_end(list);
     fclose(fp);
-
-    return;
 }
