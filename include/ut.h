@@ -119,9 +119,10 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 #include <CUnit.h>
 
 #define UT_PASS(msg) CU_PASS(msg)
+#define UT_FAIL(msg) CU_FAIL(msg)
 
 /* Fatal test macros */
-#define UT_FAIL(msg) CU_FAIL_FATAL(msg)
+#define UT_FAIL_FATAL(msg) CU_FAIL_FATAL(msg)
 #define UT_ASSERT(value) CU_ASSERT_FATAL(msg)
 #define UT_ASSERT_PTR_NULL(value) CU_ASSERT_PTR_NULL_FATAL(value)
 #define UT_ASSERT_PTR_NOT_NULL(value) CU_ASSERT_PTR_NOT_NULL_FATAL(value)
