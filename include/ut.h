@@ -27,6 +27,7 @@
 /**
  * @brief Status codes to support the UT system
  * 
+ * @note in the future these error codes will be expanded
  */
 
 typedef enum
