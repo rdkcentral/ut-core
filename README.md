@@ -263,7 +263,13 @@ The main launch point test application, will configure the test system install t
 The main test app will register all the tests and kick off the framework.
 
 ```c
-    UT_init( argc, argv );
+    UT_status_t status;
+    status = UT_init( argc, argv );
+    if ( status != UT_STATUS_OK )
+    {
+      /* UT Initialise failed */
+      return -1;
+    }
 
     register_hal_l1_tests();
     register_hal_l2_tests();

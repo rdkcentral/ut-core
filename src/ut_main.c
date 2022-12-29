@@ -194,7 +194,12 @@ UT_status_t UT_run_tests( void )
     if ( gRegisterFailed != 0 )
     {
         CU_cleanup_registry();
-        return CU_get_error();
+        error = CU_get_error();
+        if ( error != CUE_SUCCESS )
+        {
+            return UT_STATUS_FAILURE;
+        }
+        return UT_STATUS_OK;
     }
 
     CU_set_output_filename(gOptions.filenameRoot);
