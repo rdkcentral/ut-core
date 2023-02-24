@@ -119,6 +119,8 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 #include <TestRun.h>
 #include <CUnit.h>
 
+#define UT_VERSION "1.0.0"
+
 #define UT_PASS(msg) CU_PASS(msg)
 #define UT_FAIL(msg) CU_FAIL(msg)
 

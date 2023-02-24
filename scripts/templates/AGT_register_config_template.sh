@@ -1,0 +1,5 @@
+AGT_REGISTER_FUNCTION=register_function
+AGT_TEST_LEVEL=L1
+AGT_SUITE_NAME=suite_name
+AGT_FUNCTION_NAME=function_name
+AGT_FILE_NAME=file_name
