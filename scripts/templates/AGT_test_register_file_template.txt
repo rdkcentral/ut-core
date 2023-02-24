@@ -1,0 +1,30 @@
+/**
+ * @brief Register test functionality
+ * 
+ */
+
+/* L1 Testing Functions */
+`echo "${AGT_EXTERN_TEST_REGISTER_L1}"| tr ":" "\n"`
+
+
+/* L2 Testing Functions */
+`echo "${AGT_EXTERN_TEST_REGISTER_L2}"| tr ":" "\n"`
+
+int UT_register_APIDEF_l1_tests( void )
+{
+	int registerFailed=0;
+
+	`echo "${AGT_TEST_REGISTER_L1}"| tr ":" "\n"`
+
+	return registerFailed;
+}
+
+/* Register UT Functions */
+int UT_register_APIDEF_l2_tests( void )
+{
+	int registerFailed=0;
+
+	`echo "${AGT_TEST_REGISTER_L2}"| tr ":" "\n"`
+
+	return registerFailed;
+}

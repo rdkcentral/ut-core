@@ -1,0 +1,1 @@
+../../../../docs/pages/l2_module_test_specification_template.md

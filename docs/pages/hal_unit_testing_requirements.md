@@ -1,4 +1,5 @@
-# HAL Unit Testing
+# HAL Unit Testing Requirements
+# HISTORY
 
 | Date | Author | Comment | Version |
 | --- | --- | --- | --- |
@@ -16,7 +17,7 @@
 
 This document defines the unit testing requirements the principles defined here apply to all `HAL`s.
 
-## Acronyms
+## Acronyms, Terms and Abbreviations
 
 - `HAL` \- Hardware Abstraction Layer, may include some common components
 - `HAL.h` \- Abstracted defined API to control the hardware
@@ -171,7 +172,7 @@ Improvements in the quality of the documentation, the layered tests, both in low
 
 A feedback loop for bugs feeding back into the testing is required in order to improve the testing.
 
-It is expected therefore that the `oem` will automatically test all releases, and submit testing reports for every release..
+It is expected therefore that the `oem` will automatically test all releases, and submit testing reports for every release.
 
 Once committed to the final infrastructure it's optional but likely recommended for another test to be ran.
 
@@ -245,7 +246,7 @@ flowchart
     xx_V2.0.0 --> HAL-V2.0.0
 ```
 
-### Proposed Version Numbering scheme
+### Version Numbering scheme
 
 `<prefix>-<major>.<minor>.<bugfix / patch / doc>`
 

@@ -1,5 +1,7 @@
 # User defined
 framework/**
+workspace
+.vscode/*.log
 
 # Prerequisites
 *.d

@@ -2,6 +2,7 @@
 
 | Date   | Author       | Comment | Version |
 |--------|--------------|---------|---------|
+| 23/02/22 | G. Weatherup | Reviewed & Updated| 1.1.0|
 | 30/09/22 | G. Weatherup | Initial release| 1.0.0|
 
 ## Scope
@@ -45,7 +46,7 @@ erDiagram
 
 ```bash
 ├── template
-│   ├── hal_template -> example trigger files for the top level hal directories
+│   ├── api_definition_template -> example trigger files for the top level `API` directories
 │   └── ut_template -> example component specific files for the ut directories
 ```
 
@@ -330,38 +331,28 @@ The current file by file, and function by function, may not be the ideal way to 
 
 Other files maybe required, users should use their own description and best practices to perform and implement tests.
 
-## Level 1 Testing
 
-All about function testing, does each function operate as expected.
+## Level 1 Testing - Functional Testing
 
-Requirements for test
+The Level 1 testing suit will be classed as functional tests. The main goal of the tests are:
 
-- Independent test application that will run without the RDK
-- Start the HAL interface if required, pull it down if already up, so the test can control it.
-- Application to start up the HAL and perform Black Box Testing
+- Max / Min parameter testing should be performed for every function
+- Passing invalid parameters (negative testing)
+  - Passing invalid parameters, every function should fail as per the documentation
+  - Every parameter should be tested for an invalid valid
+- Passing Correct parameters (Positive testing)
+  - Passing correct parameters
+  - Checking from the box if possible is the actions have been performed correctly via other means, e.g. command line.
 
-- Negative testing
-        - Make each interface fail as per the documentation
-- Positive testing
-        - Make each interface pass as per the documentation
+## Level 2 Testing - Module Testing
 
-## Level 2 Testing
+The purpose of the test level is to test the module functionality as much as possible from an operational point of view.
 
-The purpose of the test level is to test the module functionality from an operational point of view with positive testing.
+- independent test application that will run and build without the RDK on platform
+- The application can be copied after building to a running box.
+- Application will perform the startup requirements for the section of the HAL required to test, in order to perform Black Box Testing
+- Features to be defined on whether it can be functionally tested or not.
 
-- Independent test application that will run without the RDK
-- Start the HAL interface if required, pull it down if already up, so the test can control it.
-- Application to start up the HAL and perform Black Box Testing
+## Autogen scripts
 
-A specification document should be created to define the testing requirements for the interfaces.
-
-## Level 3 Testing
-
-External Stimuli testing.. Does the interface e.g. in the case of Wifi perform externally correctly..
-
-Examples of which are:-
-
-- is the SSID visible outside of the box
-- does the wifi come up when the box is reset
-- how much throughput is available on the interface, peer to peer
-  - Control of the peer to peer devices
+Please refer to [docs/pages/autogenTemplate.md](autogenTemplate.md)
