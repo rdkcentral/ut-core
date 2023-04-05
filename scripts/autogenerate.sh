@@ -33,7 +33,7 @@ function AGT_create_workspace()
 
 	# Create workspace if it doesnt exist already
 	if [ ${AGT_WORKSPACE_EXISTS} = false ]; then
-		mkdir -p ${AGT_UT_WORKSPACE}
+		${AGT_MKDIR_IF_EXISTS} ${AGT_UT_WORKSPACE}
 		AGT_INFO "Workspace directory [../workspace/] is now created"
 		AGT_WORKSPACE_EXISTS=true
 	else
@@ -78,6 +78,21 @@ function AGT_clone_apidef()
 	AGT_INFO_CYAN "Cloning API Definition repo .. COMPLETE "
 }
 
+# Function to checkout API Definition branch if -b option is specified
+function AGT_checkout_branch()
+{
+	# Exit with error if remote branch does not exist
+	if [ ! `git ls-remote --heads "${AGT_APIDEF_URL}" "${AGT_APIDEF_BRANCH}" | awk '{print $2}' ` ]; then
+		AGT_ERROR "Branch [${AGT_APIDEF_BRANCH}] does not exist!"
+		${AGT_EXIT_ERROR}
+	fi
+
+	cd ${AGT_APIDEF_HOME}
+	git checkout ${AGT_APIDEF_BRANCH}
+	AGT_INFO_GREEN "Branch [${AGT_APIDEF_BRANCH}] is now checked out"
+	cd -
+}
+
 # Function to clone the ut-core and doxygen repos to copy their templates
 function AGT_clone_doxygen_repo()
 {
@@ -107,74 +122,45 @@ function AGT_copy_and_display_uncopied_files()
 			${AGT_DIR_APIDEF})
 				if [[ "$template" == "$AGT_TEMPLATE_APIDEF" ]]; then
 				    # Copy all files as source and not symbolic links
-					cp -Lurv ${AGT_BASEDIR}/${AGT_APIDEF_TEMPLATE_PATH}/* . > ${AGT_TEMP_FILE1}
+					cp -Lurv ${AGT_BASEDIR}/${AGT_APIDEF_TEMPLATE_PATH}/* .
 				else
-					cp -urv ${AGT_UT_WORKSPACE}/${AGT_DOXYGEN_DIR}/${AGT_DOXYGEN_GENERATE_FILE} ./${AGT_DOCS_DIR}  > ${AGT_TEMP_FILE1}
-					cp -urv ${AGT_UT_WORKSPACE}/${AGT_DOXYGEN_DIR}/${AGT_DOXYGEN_TEMPLATE_FILES} ./${AGT_DOCS_PAGES_DIR}  > ${AGT_TEMP_FILE1}
+				    # If docs or docs/pages or docs/images don't exist, create them
+				    ${AGT_MKDIR_IF_EXISTS} ${AGT_DOCS_PAGES_DIR}
+				    ${AGT_MKDIR_IF_EXISTS} ${AGT_DOCS_PAGES_DIR}/images
+					cp -urv ${AGT_UT_WORKSPACE}/${AGT_DOXYGEN_DIR}/${AGT_DOXYGEN_GENERATE_FILE} ./${AGT_DOCS_DIR}
+					cp -urv ${AGT_UT_WORKSPACE}/${AGT_DOXYGEN_DIR}/${AGT_DOXYGEN_TEMPLATE_FILES} ./${AGT_DOCS_PAGES_DIR}
 				fi
 			;;
 			${AGT_DIR_UT})
 				if [[ "$template" = "$AGT_TEMPLATE_UT" ]]; then
-				    # Copy all files excluding the docs/ folder
-				    rsync -ur ${AGT_BASEDIR}/${AGT_UT_TEMPLATE_PATH}/* . --exclude ${AGT_DOCS_DIR}
-				    # Create docs/pages/images dir if they don't exit
-					mkdir -p ${AGT_UT_HOME}/${AGT_DOCS_IMAGES_DIR}
+				    # Copy all files from ut template
+					cp -urv ${AGT_BASEDIR}/${AGT_UT_TEMPLATE_PATH}/* .
 					cd ${AGT_BASEDIR}/${AGT_UT_TEMPLATE_PATH}
 					# Get the files (with .md extenstion) common to ${AGT_UT_HOME} and UT's docs/pages folder
 					# CONTRIBUTING, README, NOTICE, LICENSE
-				    `comm -12 <(ls | sed -e 's/\.md$//' ) <(ls ./docs/pages | sed -e 's/\.md$//' ) > ${AGT_TEMP_FILE2}`
+				    `comm -12 <(ls | sed -e 's/\.md$//' ) <(ls ./docs/pages | sed -e 's/\.md$//' ) > ${AGT_TEMP_FILE1}`
 					# Get list of files in UT's docs/pages folder
-					`ls ./${AGT_DOCS_PAGES_DIR} | sed -e 's/\.md$//' > ${AGT_TEMP_FILE3}`
-					for file in `cat ${AGT_TEMP_FILE3}`
+					`ls ./${AGT_DOCS_PAGES_DIR} | sed -e 's/\.md$//' > ${AGT_TEMP_FILE2}`
+					for file in `cat ${AGT_TEMP_FILE2}`
 					do
 					    # If the file in UT's docs/pages folder is not CONTRIBUTING, README, NOTICE, LICENSE
 						# then copy source file and not symbolic link
-						if [ -z `grep $file ${AGT_TEMP_FILE2}` ]; then
-							cp -Lurv ./${AGT_DOCS_PAGES_DIR}/$file* ${AGT_UT_HOME}/${AGT_DOCS_PAGES_DIR}/ > ${AGT_UT_HOME}/${AGT_TEMP_FILE1}
+						if [ -z `grep $file ${AGT_TEMP_FILE1}` ]; then
+							cp -Lurv ./${AGT_DOCS_PAGES_DIR}/$file* ${AGT_UT_HOME}/${AGT_DOCS_PAGES_DIR}/
 						else
-							cp -urv ./${AGT_DOCS_PAGES_DIR}/$file* ${AGT_UT_HOME}/${AGT_DOCS_PAGES_DIR}/ > ${AGT_UT_HOME}/${AGT_TEMP_FILE1}
+							cp -urv ./${AGT_DOCS_PAGES_DIR}/$file* ${AGT_UT_HOME}/${AGT_DOCS_PAGES_DIR}/
 						fi
 					done
-					${AGT_RM} ${AGT_TEMP_FILE2} ${AGT_TEMP_FILE3}
+					${AGT_RM} ${AGT_TEMP_FILE1} ${AGT_TEMP_FILE2}
 					cd -
 				else
-					cp -urv ${AGT_UT_WORKSPACE}/${AGT_DOXYGEN_DIR}/${AGT_DOXYGEN_GENERATE_FILE} ./${AGT_DOCS_DIR}  > ${AGT_TEMP_FILE1}
+				        # If docs or docs/pages or docs/images don't exist, create them
+				        ${AGT_MKDIR_IF_EXISTS} ${AGT_DOCS_PAGES_DIR}
+				        ${AGT_MKDIR_IF_EXISTS} ${AGT_DOCS_PAGES_DIR}/images
+					cp -urv ${AGT_UT_WORKSPACE}/${AGT_DOXYGEN_DIR}/${AGT_DOXYGEN_GENERATE_FILE} ./${AGT_DOCS_DIR}
 				fi
 			;;
 		esac
-
-		# If there were files copied
-		if [ -s ${AGT_TEMP_FILE1} ]; then
-		    # Get the file names with relative path removing unrequired lines and sections created by `cp -uv`
-		    # Get the file names with relative path removing unrequired lines and sections created by `cp -uv`
-			cat ${AGT_TEMP_FILE1} | grep -vE "removed|.gitignore" | cut -d\  -f2- | cut -d\' -f2 | sort -nr > ${AGT_TEMP_FILE2}
-			# If copying from the doxygen template
-			if [[ "$template" = "$AGT_TEMPLATE_DOXYGEN" ]]; then
-				# If docs directory already exists
-				if [ -d "./docs" ]; then
-				    # Remove all hidden files and directories and ignore temp files
-					find ./docs -not -path '*/.*' | grep -vE "${AGT_TEMP_FILE1}|${AGT_TEMP_FILE2}|${AGT_TEMP_FILE3}" | sort -nr > ${AGT_TEMP_FILE3}
-				# If docs directory does not exist, then there will be no files; so create empty file to compare
-				else
-					touch ${AGT_TEMP_FILE3}
-				fi
-			# If copying from ut_template
-			else
-				 # Remove all hidden files and directories. Also ignore temp files and current directory entry
-				find . -not -path '*/.*' | grep -vE "^.$|${AGT_TEMP_FILE1}|${AGT_TEMP_FILE2}|${AGT_TEMP_FILE3}" | sort -nr > ${AGT_TEMP_FILE3}
-			fi
-			# Get the diff of copied files and list of all files to get the list of files not copied/updated
-			diff ${AGT_TEMP_FILE2}  ${AGT_TEMP_FILE3} | sort -nr | grep -E "<|>" | cut -d">" -f2 | cut -d"<" -f2  > ${AGT_TEMP_FILE4}
-			AGT_INFO_YELLOW "FILES/DIRS NOT COPIED/UPDATED ARE:"
-			cat ${AGT_TEMP_FILE4}
-			# Delete temp files
-			${AGT_RM} ${AGT_TEMP_FILE2} ${AGT_TEMP_FILE3} ${AGT_TEMP_FILE4}
-		# No files were copied ; ${AGT_TEMP_FILE1} will empty
-		else
-			AGT_INFO_YELLOW "NO FILES/DIRS WERE COPIED/UPDATED"
-		fi
-		# Delete common temp file
-		${AGT_RM} ${AGT_TEMP_FILE1}
 }
 
 # Function to copy the templates to the respective folders
@@ -260,6 +246,9 @@ AGT_generate_all()
 {
 	AGT_create_workspace
 	AGT_clone_apidef
+	if [ ! -z "${AGT_APIDEF_BRANCH}" ]; then
+		AGT_checkout_branch
+	fi
 	AGT_clone_doxygen_repo
 	AGT_copy_templates ${AGT_DIR_APIDEF}
 	AGT_clone_ut
@@ -289,10 +278,11 @@ AGT_clean_workspace()
 function AGT_show_usage()
 {
 	AGT_INFO "Autogen Script : Please run this script from inside the scripts dir"
-	AGT_INFO_YELLOW "./autogenerate.sh <api-def-repo-url> <clean/help>"
+	AGT_INFO_YELLOW "./autogenerate.sh <api-def-repo-url> <clean/help/branch>"
 	AGT_INFO_GREEN "	api-def-repo-url - The API Definition url"
-	AGT_INFO_GREEN "	clean - Cleans the workspace directory"
-	AGT_INFO_GREEN "	h/help - Shows the usage"
+	AGT_INFO_GREEN "	clean/-c - Cleans the workspace directory"
+	AGT_INFO_GREEN "	branch/-b - Use this switch along with API definition branch to be checked out"
+	AGT_INFO_GREEN "	help/-h - Shows the usage"
 	echo
 }
 
@@ -302,17 +292,25 @@ function AGT_decode_switches()
 	for switch in "$2";
 	do
 		case "$switch" in
-			"clean")
+			"clean"|"-c")
 				AGT_clean_workspace
+				${AGT_EXIT_SUCCESS};
 			;;
 
-			"help"|"h")
+			"help"|"-h")
 				AGT_show_usage
 				${AGT_EXIT_SUCCESS};
 			;;
 
-			"")
-			    AGT_generate_all
+			"branch"|"-b")
+				if [ ! -z "$3" ]; then
+					AGT_APIDEF_BRANCH=$3
+				else
+					AGT_ERROR "Branch name is empty"
+					AGT_show_usage
+					${AGT_EXIT_ERROR}
+				fi
+
 			;;
 
 			[a-zA-Z0-9]|[^a-zA-Z0-9]|*)
@@ -323,6 +321,7 @@ function AGT_decode_switches()
 
 		esac
 	done
+	AGT_generate_all
 }
 
 # Init function for autogen
@@ -345,6 +344,7 @@ function AGT_init()
 	AGT_UT="UT_url"
 	AGT_APIDEF="API_definition_url"
 	AGT_DOXY_REPO="rdk-components-hal-doxygen.git"
+	AGT_APIDEF_BRANCH=""
 	AGT_DOXYGEN_DIR=`echo "$(basename "$AGT_DOXY_REPO" .git)"`
 	# Dir path for API Defintion template in ut-core
 	AGT_APIDEF_TEMPLATE_PATH="template/api_definition_template"
@@ -363,8 +363,6 @@ function AGT_init()
 	AGT_TEMPLATE_DOXYGEN="Doxygen_template"
 	AGT_TEMP_FILE1="AGT_TEMP_FILE1.sh"
 	AGT_TEMP_FILE2="AGT_TEMP_FILE2.sh"
-	AGT_TEMP_FILE3="AGT_TEMP_FILE3.sh"
-	AGT_TEMP_FILE4="AGT_TEMP_FILE4.sh"
 	AGT_validate_url ${AGT_APIDEF_URL} ${AGT_APIDEF}
 
 	# Call the shared function to update the respective variables
@@ -372,7 +370,6 @@ function AGT_init()
 	AGT_update_variables ${AGT_APIDEF_HOME}
 	AGT_update_variables ${AGT_UT_HOME}
 }
-
 
 AGT_init $1
 AGT_decode_switches $@

@@ -116,7 +116,7 @@ function AGT_check_skeleton_status()
 {
         # If skeleton dir does not exist, create it along with its src child dir
         if [ ! -d ${AGT_SKELETONS_DIR} ]; then
-                mkdir -p ${AGT_SKELETONS_SRC}
+                ${AGT_MKDIR_IF_EXISTS} ${AGT_SKELETONS_SRC}
                 AGT_INFO "The skeletons' directory is now created"
         else
                 # If skeleton's child src dir exist
@@ -134,7 +134,7 @@ function AGT_check_skeleton_status()
                         fi
                 # If skeleton's child src dir does not exist, create it
                 else
-                        mkdir -p ${AGT_SKELETONS_SRC}
+                        ${AGT_MKDIR_IF_EXISTS} ${AGT_SKELETONS_SRC}
                         AGT_INFO "The skeletons' src directory  is now created"
                 fi
         fi

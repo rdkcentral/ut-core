@@ -144,10 +144,6 @@ The following doxygen template should be placed at the top of any .c file and po
 * @page module_name TODO: Required field, name of the main module
 * @subpage sub_page_name TODO: Add a function group if relevant
 *
-* **Component Owner:** TODO: Required field, Lead Engineer of the component ( Component Expert ) who must review; for OpenSource can be obfuscated email or ideally real name@n
-* **Component Architect:** TODO: Required field, Single Architect of the component who must review; for OpenSource can be obfuscated email or ideally real name@n
-* **Review Team:** TODO: Review Team required to sign off the component changes; for OpenSource can be obfuscated email or ideally real name (Min 2 reviewers)@n
-*
 * ## Module's Role
 * TODO: Explain the module's role in the system in general
 * This is to ensure that the API meets the operational requirements of the module across all vendors.
@@ -166,9 +162,6 @@ The following examples a filled out example a header file
 /**
 * @file test_L1_hdmi_cec_driver.c
 * @page HDMI_CEC_L1_Tests HDMI CEC Level 1 Tests
-* **Component Owner:** Amit Patel@n
-* **Component Architect:** Amit Patel@n
-* **Review Team:** Amit Patel, Gerald Weatherup, Anjali Thampi@n
 *
 * ## Module's Role
 * This module includes Level 1 functional tests (success and failure scenarios).

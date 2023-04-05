@@ -29,13 +29,13 @@ function AGT_tests_init()
         AGT_TEMP_FUNC_DEF_FILE="funcs_list.txt"
         AGT_TEMP_FUNC_NAMES_FILE="func_names.txt"
         AGT_SCRIPTS_TEMPLATES="${AGT_SCRIPTS_HOME}/templates/"
-        AGT_COPYRIGHT_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/ATG_copywrite_template.txt"
+        AGT_COPYRIGHT_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/AGT_copywrite_template.txt"
         AGT_L1_FUNCTION_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/AGT_L1_function_template.txt"
         AGT_L2_FUNCTION_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/AGT_L2_function_template.txt"
         AGT_REGISTER_FUNCTION_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/AGT_register_function_template.txt"
         AGT_CONFIG_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/AGT_register_config_template.sh"
         AGT_FILE_BANNER_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/AGT_file_banner.txt"
-        AGT_MAIN_FILE_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/ATG_main_file_template.txt"
+        AGT_MAIN_FILE_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/AGT_main_file_template.txt"
         AGT_TEST_REGISTER_FILE_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/AGT_test_register_file_template.txt"
         AGT_WORKSPACE_CONFIG_FILE="${AGT_UT_WORKSPACE}/UT_register_config.sh"
         AGT_UT_MAIN_FILE="${AGT_UT_SRC}/main.c"
@@ -95,6 +95,7 @@ function AGT_add_file_banner_to_files()
 {
         banner_file_name=`echo ${1##*/}`
         AGT_update_config ${AGT_FILE_NAME_KEY} ${banner_file_name}
+
         # Add the register function to the file using the template and config key values
         source ${AGT_WORKSPACE_CONFIG_FILE}
         tempfile=`cat ${AGT_FILE_BANNER_TEMPLATE}`
@@ -126,7 +127,7 @@ function AGT_update_config()
                 value=${line#*=}
 
                 case $key in
-                       ${AGT_REGISTER_FUNCTION_KEY} | ${AGT_TEST_LEVEL_KEY} | ${AGT_SUITE_NAME_KEY} | ${AGT_FUNCTION_NAME_KEY} | ${AGT_FILE_NAME_KEY})
+                       ${AGT_REGISTER_FUNCTION_KEY} | ${AGT_TEST_LEVEL_KEY} | ${AGT_SUITE_NAME_KEY} | ${AGT_FUNCTION_NAME_KEY} | ${AGT_FILE_NAME_KEY} )
                                 if [ $1 = $key ]; then
                                         sed -i "s/\($key=*\).*/\1$2/" ${input}
                                 fi
@@ -267,7 +268,7 @@ function AGT_create_ut_src()
         # If UT's src dir does not exist, create it
         if [ ! -d ${AGT_UT_SRC} ]; then
                 AGT_WARNING "The UT's src directory [../workspace/${AGT_APIDEF_NAME}/ut/src] DOES NOT EXIST."
-                mkdir -p ${AGT_UT_SRC}
+                ${AGT_MKDIR_IF_EXISTS} ${AGT_UT_SRC}
                 AGT_INFO_BLUE "The UT's src directory [../workspace/${AGT_APIDEF_NAME}/ut/src] is now CREATED."
         else
                 # If UT's src is not empty, then get user input to rewrite or not

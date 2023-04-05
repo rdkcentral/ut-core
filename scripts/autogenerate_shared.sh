@@ -69,6 +69,7 @@ function AGT_commons_init()
         AGT_DELETE_MOCKS="DELETE"
         AGT_RM="rm -f"
         AGT_RMRF="rm -rf"
+        AGT_MKDIR_IF_EXISTS="mkdir -p"
         AGT_EXIT_SUCCESS="exit 0"
         AGT_EXIT_ERROR="exit 1"
 }
