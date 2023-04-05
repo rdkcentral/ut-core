@@ -61,7 +61,6 @@ The following functions are expecting to test the module operates correctly.
 |Description|TODO: Add the description of what is tested and why in this test|
 |Test Group|TODO: Basic (for L1): 01 / Module (L2): 02 / Stress (L2): 03)|
 |Test Case ID|TODO: Add the ID of the test case so that it can be logically tracked in the logs|
-|Priority|TODO: (Low/Med/High) Add the priority for the level of test, how important is the test to overall functionality|
 
 **Pre-Conditions :**
 TODO: Add pre-conditions, if any
@@ -86,7 +85,6 @@ TODO: Add the steps to run this test and add a line in the below table for each 
 |Description|TODO: Add the description of what is tested and why in this test|
 |Test Group|TODO: Basic (for L1): 01 / Module (L2): 02 / Stress (L2): 03)|
 |Test Case ID|TODO: Add the ID of the test case so that it can be logically tracked in the logs|
-|Priority|TODO: (Low/Med/High) Add the priority for the level of test, how important is the test to overall functionality|
 
 **Pre-Conditions :**
 TODO: Add pre-conditions, if any

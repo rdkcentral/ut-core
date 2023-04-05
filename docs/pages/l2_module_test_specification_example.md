@@ -60,7 +60,6 @@ The following functions are expecting to test the module operates correctly.
 |Description|This module test will check if the logicalAddress added is what is received for the devType specified|
 |Test Group|02 (Module)|
 |Test Case ID|001|
-|Priority|Low|
 
 **Pre-Conditions :**
 -  There should be a HDMICEC enabled device connected via HDMI
