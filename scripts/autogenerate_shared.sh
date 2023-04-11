@@ -63,15 +63,8 @@ function AGT_commons_init()
         AGT_SKELETONS_SRC=${AGT_SKELETONS_DIR}/src
 
         # Variables for basic actions
-        AGT_YES="YES"
-        AGT_NO="NO"
-        AGT_REWRITE="REWRITE"
-        AGT_DELETE_MOCKS="DELETE"
-        AGT_RM="rm -f"
-        AGT_RMRF="rm -rf"
-        AGT_MKDIR_IF_EXISTS="mkdir -p"
-        AGT_EXIT_SUCCESS="exit 0"
-        AGT_EXIT_ERROR="exit 1"
+        AGT_TASK_START="START"
+        AGT_TASK_END="END"
 }
 
 # Function to update the variables based on their particular directory's existence
@@ -106,40 +99,18 @@ function AGT_update_variables()
 	esac
 }
 
-# Function to get user input to continue
-function AGT_get_user_response()
+function AGT_task_message()
 {
-        if [ $1 = ${AGT_REWRITE} ]; then
-                while true; do
-                        read -p "$(AGT_INFO_YELLOW Do you wish to rewrite\?) " yn
-                        case $yn in
-                                [Yy]* ) AUTO_RESPONSE=${AGT_YES}
-                                        break
-                                ;;
-                                [Nn]* ) AUTO_RESPONSE=${AGT_NO}
-                                        break
-                                ;;
-                                * ) AGT_INFO_YELLOW "Please answer yes or no.";;
-                        esac
-                done
-                return 0;
-
-        elif [ $1 = ${AGT_DELETE_MOCKS} ]; then
-                AGT_INFO_CYAN "It is highly recommended to delete the deprecated mocks directory!"
-                while true; do
-                        read -p "$(AGT_INFO_YELLOW Do you wish to delete this mocks directory\?) " yn
-                        case $yn in
-                                [Yy]* ) AUTO_RESPONSE=${AGT_YES}
-                                        break
-                                ;;
-                                [Nn]* ) AUTO_RESPONSE=${AGT_NO}
-                                        break
-                                ;;
-                                * ) AGT_INFO_YELLOW "Please answer yes or no.";;
-                        esac
-                done
-
-        fi
+        local message
+        message=$2
+        case $1 in
+                ${AGT_TASK_START}) AGT_INFO_GREEN "\nSTARTED: ${message}"
+                echo -e ""
+                ;;
+                ${AGT_TASK_END}) AGT_INFO_GREEN "\nCOMPLETED: ${message}"
+                echo -e ""
+                ;;
+        esac
 }
 
 # Colour Codes methods
@@ -165,7 +136,7 @@ function AGT_INFO_YELLOW()
 
 function AGT_INFO_CYAN()
 {
-	echo -e ${CYAN}$1 ${CYAN}$2 ${CYAN}$3 ${CYAN}$4
+	echo -e ${CYAN}$1 ${CYAN}$2 ${CYAN}$3 ${CYAN}$4 ${CYAN}$5 ${CYAN}$6 ${CYAN}$7
 }
 
 function AGT_WARNING()

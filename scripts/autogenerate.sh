@@ -7,6 +7,7 @@
 #*   ** @file        : shell
 #*   ** @author      : anjali.thampi@sky.uk
 #*   ** @date        : 12/01/2023
+#*   ** @version     : Version 1.1.0
 #*   **
 #*   ** @brief : Shell script to initiate autogeneration of skeletons and L1 and L2 tests' framework
 #*   **
@@ -15,38 +16,51 @@
 
 set -e
 
-# Validates if the url is correct and exits script if it isn't
+# Validate if the url is correct and exit script if it isn't
 AGT_validate_url()
 {
-	result=$(git clone $1  --depth 1 -q AGT_clone_check; echo $?)
+	local URL
+	local AGT_clone_check
+	URL=$1
+	result=$(git clone ${URL}  --depth 1 -q AGT_clone_check; echo $?)
 	if [ ${result} != 0 ]; then
-		AGT_ERROR "Unknown url : '$1'"
-		${AGT_EXIT_ERROR}
+		AGT_ERROR "Unknown url : '${URL}'"
+		exit 1
 	fi
-	${AGT_RMRF} AGT_clone_check
+	rm -rf AGT_clone_check
 }
 
-# Function to create workspace dir
+# Validate if the branch is correct and exit script if it isn't
+AGT_validate_branch()
+{
+	# Exit with error if remote branch does not exist
+	if [ ! `git ls-remote --heads "${AGT_APIDEF_URL}" "${AGT_APIDEF_BRANCH}" | awk '{print $2}' ` ]; then
+		AGT_ERROR "Branch [${AGT_APIDEF_BRANCH}] does not exist!"
+		exit 1
+	fi
+}
+
+# Create workspace dir
 function AGT_create_workspace()
 {
-	AGT_INFO_GREEN "Creating Workspace .."
+	AGT_task_message ${AGT_TASK_START} "Creating Workspace"
 
 	# Create workspace if it doesnt exist already
 	if [ ${AGT_WORKSPACE_EXISTS} = false ]; then
-		${AGT_MKDIR_IF_EXISTS} ${AGT_UT_WORKSPACE}
-		AGT_INFO "Workspace directory [../workspace/] is now created"
+		mkdir -p ${AGT_UT_WORKSPACE}
+		AGT_INFO_CYAN "Workspace directory [../workspace/] is now created"
 		AGT_WORKSPACE_EXISTS=true
 	else
 		AGT_INFO_YELLOW "Workspace directory already exists"
 	fi
 
-	AGT_INFO_CYAN "Creating Workspace .. COMPLETE"
+	AGT_task_message ${AGT_TASK_END} "Creating Workspace"
 }
 
-# Function to clone the API definition repo
+# Clone the API definition repo
 function AGT_clone_apidef()
 {
-	AGT_INFO_GREEN "Cloning API Definition repo .."
+	AGT_task_message ${AGT_TASK_START} "Cloning API Definition repo"
 
 	# Getting the base url and org unit from the url
 	echo ${AGT_APIDEF_URL} | sed 's|\(.*\)/.*|\1|' 1>& /dev/null
@@ -59,61 +73,60 @@ function AGT_clone_apidef()
 		git clone ${AGT_APIDEF_URL}
 		cd ${AGT_SCRIPTS_HOME}
 
-		AGT_INFO "API Definition repo is now cloned"
+		AGT_INFO_CYAN "API Definition repo is now cloned"
 	else
 		# Exit if include dir is empty
 		if [ -d "${AGT_APIDEF_HOME}" ]; then
 			if [ -z "$(ls ${AGT_INCLUDE_DIR}/*.h)" ]; then
 				AGT_ERROR "${AGT_APIDEF_NAME}'s API Definition include dir exists, but HAS NO HEADER FILES"
-				${AGT_EXIT_ERROR}
+				exit 1
 			fi
 		else
 			# Exit if include dir does not exist
 			AGT_ERROR "${AGT_APIDEF_NAME}'s API Definition include dir DOES NOT EXIST"
-			${AGT_EXIT_ERROR}
+			exit 1
 		fi
 	fi
 	AGT_APIDEF_EXISTS=true
 
-	AGT_INFO_CYAN "Cloning API Definition repo .. COMPLETE "
+	AGT_task_message ${AGT_TASK_END} "Cloning API Definition repo"
 }
 
-# Function to checkout API Definition branch if -b option is specified
+# Checkout API Definition branch if -b option is specified
 function AGT_checkout_branch()
 {
-	# Exit with error if remote branch does not exist
-	if [ ! `git ls-remote --heads "${AGT_APIDEF_URL}" "${AGT_APIDEF_BRANCH}" | awk '{print $2}' ` ]; then
-		AGT_ERROR "Branch [${AGT_APIDEF_BRANCH}] does not exist!"
-		${AGT_EXIT_ERROR}
-	fi
-
 	cd ${AGT_APIDEF_HOME}
 	git checkout ${AGT_APIDEF_BRANCH}
 	AGT_INFO_GREEN "Branch [${AGT_APIDEF_BRANCH}] is now checked out"
 	cd -
 }
 
-# Function to clone the ut-core and doxygen repos to copy their templates
+# Clone the ut-core and doxygen repos to copy their templates
 function AGT_clone_doxygen_repo()
 {
-	AGT_INFO_GREEN "Cloning doxygen repo .."
+	AGT_task_message ${AGT_TASK_START} "Cloning doxygen repo"
 
-	if [ ! -d "${AGT_UT_WORKSPACE}/${AGT_DOXYGEN_DIR}"  ]; then
+	if [ ! -d "${AGT_DOXYGEN_DIR}"  ]; then
 		# Clone doxygen template into doxy dir in workspace/api-def dir
-		git clone ${AGT_BASE_URL}/${AGT_DOXY_REPO} ${AGT_UT_WORKSPACE}/${AGT_DOXYGEN_DIR}
-		AGT_INFO_BLUE "Doxygen repo has been cloned in [../workspace/${AGT_DOXYGEN_DIR}]"
+		git clone ${AGT_BASE_URL}/${AGT_DOXY_REPO} ${AGT_DOXYGEN_DIR}
+		AGT_INFO_CYAN "Doxygen repo has been cloned in [../workspace/${AGT_DOXYGEN_REPO_NAME}]"
 	fi
 
 	cd ${AGT_SCRIPTS_HOME}
 
-	AGT_INFO_CYAN "Cloning doxygen repo .. COMPLETE"
+	AGT_task_message ${AGT_TASK_END} "Cloning doxygen repo"
 }
 
-# Function to copy from templates both for ut-core(API Definition/ut template) and doxygen (docs template)
+# Copy from templates both for ut-core(API Definition/ut template) and doxygen (docs template)
 # input - First param is the path for the template
 # input - Second param is location to be copied to
 function AGT_copy_and_display_uncopied_files()
 {
+		local AGT_TEMP_FILE1
+		local AGT_TEMP_FILE2
+		AGT_TEMP_FILE1="AGT_TEMP_FILE1.sh"
+		AGT_TEMP_FILE2="AGT_TEMP_FILE2.sh"
+
 		directory=$1
 		template=$2
 
@@ -122,20 +135,20 @@ function AGT_copy_and_display_uncopied_files()
 			${AGT_DIR_APIDEF})
 				if [[ "$template" == "$AGT_TEMPLATE_APIDEF" ]]; then
 				    # Copy all files as source and not symbolic links
-					cp -Lurv ${AGT_BASEDIR}/${AGT_APIDEF_TEMPLATE_PATH}/* .
+					cp -Lrv ${AGT_BASEDIR}/${AGT_APIDEF_TEMPLATE_PATH}/* .
 				else
 				    # If docs or docs/pages or docs/images don't exist, create them
-				    ${AGT_MKDIR_IF_EXISTS} ${AGT_DOCS_PAGES_DIR}
-				    ${AGT_MKDIR_IF_EXISTS} ${AGT_DOCS_PAGES_DIR}/images
-					cp -urv ${AGT_UT_WORKSPACE}/${AGT_DOXYGEN_DIR}/${AGT_DOXYGEN_GENERATE_FILE} ./${AGT_DOCS_DIR}
-					cp -urv ${AGT_UT_WORKSPACE}/${AGT_DOXYGEN_DIR}/${AGT_DOXYGEN_TEMPLATE_FILES} ./${AGT_DOCS_PAGES_DIR}
+				    mkdir -p ${AGT_DOCS_PAGES_DIR}
+				    mkdir -p ${AGT_DOCS_PAGES_DIR}/images
+					cp -rv ${AGT_DOXYGEN_DIR}/${AGT_DOXYGEN_GENERATE_FILE} ./${AGT_DOCS_DIR}
+					cp -rv ${AGT_DOXYGEN_DIR}/${AGT_DOXYGEN_TEMPLATE_FILES} ./${AGT_DOCS_PAGES_DIR}
 				fi
 			;;
 			${AGT_DIR_UT})
 				if [[ "$template" = "$AGT_TEMPLATE_UT" ]]; then
 				    # Copy all files from ut template
-					cp -urv ${AGT_BASEDIR}/${AGT_UT_TEMPLATE_PATH}/* .
-					cd ${AGT_BASEDIR}/${AGT_UT_TEMPLATE_PATH}
+					cp -rv ${AGT_UT_TEMPLATE_PATH}/* .
+					cd ${AGT_UT_TEMPLATE_PATH}
 					# Get the files (with .md extenstion) common to ${AGT_UT_HOME} and UT's docs/pages folder
 					# CONTRIBUTING, README, NOTICE, LICENSE
 				    `comm -12 <(ls | sed -e 's/\.md$//' ) <(ls ./docs/pages | sed -e 's/\.md$//' ) > ${AGT_TEMP_FILE1}`
@@ -146,72 +159,72 @@ function AGT_copy_and_display_uncopied_files()
 					    # If the file in UT's docs/pages folder is not CONTRIBUTING, README, NOTICE, LICENSE
 						# then copy source file and not symbolic link
 						if [ -z `grep $file ${AGT_TEMP_FILE1}` ]; then
-							cp -Lurv ./${AGT_DOCS_PAGES_DIR}/$file* ${AGT_UT_HOME}/${AGT_DOCS_PAGES_DIR}/
+							cp -Lrv ./${AGT_DOCS_PAGES_DIR}/$file* ${AGT_UT_HOME}/${AGT_DOCS_PAGES_DIR}/
 						else
-							cp -urv ./${AGT_DOCS_PAGES_DIR}/$file* ${AGT_UT_HOME}/${AGT_DOCS_PAGES_DIR}/
+							cp -rv ./${AGT_DOCS_PAGES_DIR}/$file* ${AGT_UT_HOME}/${AGT_DOCS_PAGES_DIR}/
 						fi
 					done
-					${AGT_RM} ${AGT_TEMP_FILE1} ${AGT_TEMP_FILE2}
+					rm -f ${AGT_TEMP_FILE1} ${AGT_TEMP_FILE2}
 					cd -
 				else
 				        # If docs or docs/pages or docs/images don't exist, create them
-				        ${AGT_MKDIR_IF_EXISTS} ${AGT_DOCS_PAGES_DIR}
-				        ${AGT_MKDIR_IF_EXISTS} ${AGT_DOCS_PAGES_DIR}/images
-					cp -urv ${AGT_UT_WORKSPACE}/${AGT_DOXYGEN_DIR}/${AGT_DOXYGEN_GENERATE_FILE} ./${AGT_DOCS_DIR}
+				        mkdir -p ${AGT_DOCS_PAGES_DIR}
+				        mkdir -p ${AGT_DOCS_PAGES_DIR}/images
+					cp -rv ${AGT_DOXYGEN_DIR}/${AGT_DOXYGEN_GENERATE_FILE} ./${AGT_DOCS_DIR}
 				fi
 			;;
 		esac
 }
 
-# Function to copy the templates to the respective folders
+# Copy the templates to the respective folders
 function AGT_copy_templates()
 {
-	AGT_INFO_GREEN "Copying template for '${1}' (if missing any).."
+	AGT_task_message ${AGT_TASK_START} "Copying template for '${1}'"
 
 	case "$1" in
 		${AGT_DIR_APIDEF})
-			AGT_INFO_BLUE "Copying from ut-core template .."
+			AGT_task_message ${AGT_TASK_START} "Copying from ut-core template"
 			cd ${AGT_APIDEF_HOME}
 			# Copy the missing files and dirs from ut-core template
 			AGT_copy_and_display_uncopied_files ${AGT_DIR_APIDEF} ${AGT_TEMPLATE_APIDEF}
-			AGT_INFO_GREEN "Copying from ut-core template .. COMPLETE"
+			AGT_task_message ${AGT_TASK_END} "Copying from ut-core template"
 
-			AGT_INFO_BLUE "Copying from doxygen template .."
+			AGT_task_message ${AGT_TASK_START} "Copying from doxygen template"
 			# Copy the missing files and dirs from doxygen template
 			AGT_copy_and_display_uncopied_files ${AGT_DIR_APIDEF} ${AGT_TEMPLATE_DOXYGEN}
 			cd ${AGT_SCRIPTS_HOME} &> /dev/null
 
-			AGT_INFO_GREEN "Copying from doxygen template .. COMPLETE"
+			AGT_task_message ${AGT_TASK_END} "Copying from doxygen template"
 		;;
 		${AGT_DIR_UT})
-			AGT_INFO_BLUE "Copying from ut-core template .."
+			AGT_task_message ${AGT_TASK_START} "Copying from ut-core template"
 			cd ${AGT_UT_HOME}
 			# Copy the missing files and dirs from ut-core template
 			AGT_copy_and_display_uncopied_files  ${AGT_DIR_UT} ${AGT_TEMPLATE_UT}
-			AGT_INFO_GREEN "Copying from ut-core template .. COMPLETE"
-			AGT_INFO_BLUE "Copying from doxygen template .."
+			AGT_task_message ${AGT_TASK_END} "Copying from ut-core template"
+			AGT_task_message ${AGT_TASK_START} "Copying from doxygen template"
 			# Copy the missing files and dirs from doxygen template
 			AGT_copy_and_display_uncopied_files ${AGT_DIR_UT} ${AGT_TEMPLATE_DOXYGEN}
 			cd ${AGT_SCRIPTS_HOME} &> /dev/null
-			AGT_INFO_GREEN "Copying from doxygen template .. COMPLETE"
+			AGT_task_message ${AGT_TASK_END} "Copying from doxygen template"
 		;;
 		*) AGT_ERROR "Invalid input"
-			${AGT_EXIT_ERROR}
+			exit 1
 		;;
 
 	esac
 
-	AGT_INFO_CYAN "Copying template for '${1}'.. COMPLETE"
+	AGT_task_message ${AGT_TASK_END} "Copying template for '${1}'"
 }
 
-# Function to clone the ut dir
+# Clone the ut dir
 function AGT_clone_ut()
 {
-	AGT_INFO_GREEN "Building UT .."
+	AGT_task_message ${AGT_TASK_START} "Building UT"
 
 	# If ut dir exists, then exit this function
 	if [ "${AGT_UT_EXISTS}" = true ]; then
-		AGT_WARNING "UT dir already EXISTS"
+		AGT_INFO_YELLOW "UT dir already EXISTS"
 		return 0
 	fi
 
@@ -230,18 +243,19 @@ function AGT_clone_ut()
 	esac
 
 
-	AGT_INFO "UT url is '${UT_URL}'"
+	AGT_INFO_CYAN "UT url is '${UT_URL}'"
 	# Validate if UT url is correct
-	AGT_validate_url ${UT_URL} ${AGT_UT}
+	AGT_validate_url ${UT_URL}
 	# Clone the UT repo
+	echo -e "${NOCOLOR}"
 	git clone ${UT_URL} ${AGT_APIDEF_HOME}/ut
-	AGT_INFO "UT repo is now cloned"
+	AGT_INFO_CYAN "UT repo is now cloned"
 	AGT_UT_EXISTS=true
 
-	AGT_INFO_CYAN "Building UT .. COMPLETE"
+	AGT_task_message ${AGT_TASK_END} "Building UT"
 }
 
-# Function to autogenerate the tests framework
+# Autogenerate the tests framework
 AGT_generate_all()
 {
 	AGT_create_workspace
@@ -255,76 +269,94 @@ AGT_generate_all()
 	AGT_copy_templates ${AGT_DIR_UT}
 	./autogenerate_skeletons.sh ${AGT_APIDEF_URL}
 	./autogenerate_tests.sh ${AGT_APIDEF_URL}
-	AGT_INFO_YELLOW "GENERATED TESTS AVAILABLE IN [../workspace/${AGT_APIDEF_NAME}/ut/src]"
+	echo -e ""
+	AGT_INFO_YELLOW "PLEASE REVIEW, SELECT, EDIT AND COMMIT AS REQUIRED"
+	AGT_INFO_BLUE "GENERATED TESTS AVAILABLE IN ${PURPLE}[../workspace/${AGT_APIDEF_NAME}/ut/src]"
 }
 
-# Function to clear workspace dir
+# Clear workspace dir
 AGT_clean_workspace()
 {
-	AGT_INFO_GREEN "Deleting workspace .."
+	AGT_task_message ${AGT_TASK_START} "Deleting workspace"
 
 	# Delete workspace dir if it exists
 	if [ "${AGT_WORKSPACE_EXISTS}" = true ]; then
-		${AGT_RMRF} ${AGT_UT_WORKSPACE}
-		AGT_INFO "The workspace directory is now DELETED"
+		rm -rf ${AGT_UT_WORKSPACE}
+		AGT_INFO_WARNING "The workspace directory is now DELETED"
 	else
-		AGT_INFO_YELLOW "The workspace directory does not exist"
+		AGT_INFO_WARNING "The workspace directory does not exist"
 	fi
 
-	AGT_INFO_CYAN "Deleting workspace .. COMPLETE"
+	AGT_task_message ${AGT_TASK_END} "Deleting workspace"
 }
 
 # Command Usage
 function AGT_show_usage()
 {
+	echo -e ""
 	AGT_INFO "Autogen Script : Please run this script from inside the scripts dir"
-	AGT_INFO_YELLOW "./autogenerate.sh <api-def-repo-url> <clean/help/branch>"
-	AGT_INFO_GREEN "	api-def-repo-url - The API Definition url"
-	AGT_INFO_GREEN "	clean/-c - Cleans the workspace directory"
-	AGT_INFO_GREEN "	branch/-b - Use this switch along with API definition branch to be checked out"
-	AGT_INFO_GREEN "	help/-h - Shows the usage"
+	echo -e ""
+	AGT_INFO_YELLOW "./autogenerate.sh <api-def-repo-url/-c/-clean/-b/-branch/q-h/-help>"
+	echo -e ""
+	AGT_INFO_GREEN "	api-def-repo-url\t\t - The API Definition url to be used as first argument separately"
+	AGT_INFO_GREEN "	branch-name\t\t\t - API definition branch to be checked out and used along with branch switch"
+	echo -e ""
+	AGT_INFO_GREEN "	-clean / -c\t\t\t - Cleans the workspace directory"
+	AGT_INFO_GREEN "	-branch / -b <branch-name>\t - Use this switch along with branch-name"
+	AGT_INFO_GREEN "	-help / -h\t\t\t - Shows the usage"
 	echo
 }
 
-# Function for the switch cases for second command line argument
+# Switch cases for first command line argument
 function AGT_decode_switches()
 {
-	for switch in "$2";
+	for switch in "$1";
 	do
 		case "$switch" in
-			"clean"|"-c")
+			"-clean"|"-c")
 				AGT_clean_workspace
-				${AGT_EXIT_SUCCESS};
+				exit 0;
 			;;
 
-			"help"|"-h")
+			"-help"|"-h")
 				AGT_show_usage
-				${AGT_EXIT_SUCCESS};
+				exit 0;
 			;;
 
-			"branch"|"-b")
-				if [ ! -z "$3" ]; then
-					AGT_APIDEF_BRANCH=$3
-				else
-					AGT_ERROR "Branch name is empty"
-					AGT_show_usage
-					${AGT_EXIT_ERROR}
-				fi
+			# Should start with the following valid url starters:
+			# - git@github.com
+			# - github.com
+			# - git://git
+			# - ssh://git
+			# - http://git
+			# - http://git
 
+			git@github.com*|github.com*|git://git*|ssh://git*|http://git*|https://git*)
 			;;
 
-			[a-zA-Z0-9]|[^a-zA-Z0-9]|*)
+			* )
 				AGT_ERROR "[$switch] unknown switch"
 				AGT_show_usage
-				${AGT_EXIT_ERROR}
+				exit 1
 			;;
-
 		esac
 	done
+
+	if [[ "$2" == "-branch" || "$2" == "-b" ]]; then
+		if [[ -z "$3" ]]; then
+			AGT_ERROR "Git branch name cannot be empty!"
+			AGT_show_usage
+			exit 1
+		fi
+		AGT_APIDEF_BRANCH=$3
+		AGT_validate_branch
+	fi
+	AGT_validate_url ${AGT_APIDEF_URL}
+
 	AGT_generate_all
 }
 
-# Init function for autogen
+# Init for autogen
 function AGT_init()
 {
 	# URL of API definition repo to be cloned as first command line argument
@@ -337,7 +369,7 @@ function AGT_init()
 	if [ $# -eq 0 ]; then
 		>&2 AGT_ERROR "No arguments provided"
 		AGT_show_usage
-		${AGT_EXIT_ERROR}
+		exit 1
 	fi
 
 	# Variables
@@ -345,11 +377,12 @@ function AGT_init()
 	AGT_APIDEF="API_definition_url"
 	AGT_DOXY_REPO="rdk-components-hal-doxygen.git"
 	AGT_APIDEF_BRANCH=""
-	AGT_DOXYGEN_DIR=`echo "$(basename "$AGT_DOXY_REPO" .git)"`
+	AGT_DOXYGEN_REPO_NAME=`echo "$(basename "$AGT_DOXY_REPO" .git)"`
+	AGT_DOXYGEN_DIR=${AGT_UT_WORKSPACE}/${AGT_DOXYGEN_REPO_NAME}
 	# Dir path for API Defintion template in ut-core
 	AGT_APIDEF_TEMPLATE_PATH="template/api_definition_template"
 	 # Dir path for UT template in ut-core
-	AGT_UT_TEMPLATE_PATH="template/ut_template"
+	AGT_UT_TEMPLATE_PATH="${AGT_BASEDIR}/template/ut_template"
 	AGT_DOCS_DIR="docs"
 	AGT_DOCS_PAGES_DIR="${AGT_DOCS_DIR}/pages"
 	AGT_DOCS_IMAGES_DIR="${AGT_DOCS_PAGES_DIR}/images"
@@ -361,9 +394,6 @@ function AGT_init()
 	AGT_TEMPLATE_APIDEF="API_Definition_template"
 	AGT_TEMPLATE_UT="UT_template"
 	AGT_TEMPLATE_DOXYGEN="Doxygen_template"
-	AGT_TEMP_FILE1="AGT_TEMP_FILE1.sh"
-	AGT_TEMP_FILE2="AGT_TEMP_FILE2.sh"
-	AGT_validate_url ${AGT_APIDEF_URL} ${AGT_APIDEF}
 
 	# Call the shared function to update the respective variables
 	AGT_update_variables ${AGT_UT_WORKSPACE}
