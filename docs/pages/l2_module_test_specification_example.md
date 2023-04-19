@@ -1,9 +1,9 @@
 # HDMI CEC Level 2 - Module Testing
 ## History
 
-| Version | Date(YY-MM-DD) | Author |Comments |
-| -------| ----- | ----- | ----- |
-| 1.0.0 | 22/02/23 | Anjali Thampi| Inital Document |
+| Version | Date(YY-MM-DD) | Comments |
+| -------| ----- |  ----- |
+| 1.0.0 | 22/02/23 | Inital Document |
 
 ## Table of Contents
 

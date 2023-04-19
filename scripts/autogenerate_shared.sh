@@ -5,7 +5,6 @@
 #*   ** Project      : Unit Test Script
 #*   ** @addtogroup  : ut
 #*   ** @file        : shell
-#*   ** @author      : anjali.thampi@sky.uk
 #*   ** @date        : 12/01/2023
 #*   **
 #*   ** @brief : Shell script for common functions and variable for all autogeneration scripts
@@ -62,9 +61,6 @@ function AGT_commons_init()
         # Skeleton dir's child dir, src inside worksapce dir
         AGT_SKELETONS_SRC=${AGT_SKELETONS_DIR}/src
 
-        # Variables for basic actions
-        AGT_TASK_START="START"
-        AGT_TASK_END="END"
 }
 
 # Function to update the variables based on their particular directory's existence
@@ -99,49 +95,47 @@ function AGT_update_variables()
 	esac
 }
 
-function AGT_task_message()
+function AGT_DEBUG_START()
 {
-        local message
-        message=$2
-        case $1 in
-                ${AGT_TASK_START}) AGT_INFO_GREEN "\nSTARTED: ${message}"
-                echo -e ""
-                ;;
-                ${AGT_TASK_END}) AGT_INFO_GREEN "\nCOMPLETED: ${message}"
-                echo -e ""
-                ;;
-        esac
+        if [ ! -z "${AGT_DEBUG}" ]; then
+                local message
+                message=$1
+                AGT_INFO "\nSTARTED: ${message}\n"
+                #echo -e ""
+        fi
+}
+
+function AGT_DEBUG_END()
+{
+        if [ ! -z "${AGT_DEBUG}" ]; then
+                local message
+                message=$1
+                AGT_INFO "\nCOMPLETED: ${message}\n"
+                #echo -e ""
+        fi
 }
 
 # Colour Codes methods
+
 function AGT_INFO()
 {
-	echo -e ${BLUE}$1 ${BLUE}$2 ${BLUE}$3 ${BLUE}$4
+	echo -e ${GREEN}$1${GREEN}$2${GREEN}$3${NOCOLOR}$4
 }
 
-function AGT_INFO_BLUE()
+function AGT_ALERT()
 {
-	echo -e ${BLUE}$1 ${BLUE}$2 ${BLUE}$3 ${BLUE}$4
+	echo -e ${YELLOW}$1 ${YELLOW}$2 ${YELLOW}$3 ${YELLOW}$4${YELLOW}$5${YELLOW}$6${YELLOW}$7${YELLOW}$8${NOCOLOR}$9
+
 }
 
-function AGT_INFO_GREEN()
+function AGT_SUCCESS()
 {
-	echo -e ${GREEN}$1${NOCOLOR}$2${GREEN}$3${NOCOLOR}$4
-}
-
-function AGT_INFO_YELLOW()
-{
-	echo -e ${YELLOW}$1 ${YELLOW}$2 ${YELLOW}$3 ${YELLOW}$4 ${YELLOW}$5 ${YELLOW}$6 ${YELLOW}$7 ${YELLOW}$8 ${PURPLE}$9
-}
-
-function AGT_INFO_CYAN()
-{
-	echo -e ${CYAN}$1 ${CYAN}$2 ${CYAN}$3 ${CYAN}$4 ${CYAN}$5 ${CYAN}$6 ${CYAN}$7
+	echo -e ${CYAN}$1${CYAN}$2${CYAN}$3${CYAN}$4${CYAN}$5${CYAN}$6${CYAN}$7${NOCOLOR}$8
 }
 
 function AGT_WARNING()
 {
-	echo -e ${PURPLE}$1${PURPLE}$2${PURPLE}$3${PURPLE}$4
+	echo -e ${PURPLE}$1${PURPLE}$2${PURPLE}$3${PURPLE}$4${NOCOLOR}$5
 }
 
 function AGT_ERROR()

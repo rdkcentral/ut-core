@@ -2,9 +2,9 @@
 
 # History
 
-| Date | Author | Comment | Version |
-| --- | --- | --- | --- |
-| 17/02/23 | G. Weatherup & Anjali thampi | Initial Version | 1.1.0 |
+| Date | Comment | Version |
+| --- | --- | --- |
+| 17/02/23 | Initial Version | 1.1.0 |
 
 # Contents
 

@@ -1,9 +1,9 @@
 # L2 Test Specification template
 ## History
 
-| Version | Date(YY-MM-DD) | Author |Comments |
+| Version | Date(YY-MM-DD) | Comments |
 | -------| ----- | ----- | ----- |
-| 1.0.0 | 22/02/23 | Anjali Thampi| Inital Document |
+| 1.0.0 | 22/02/23 | Inital Document |
 
 ## Table of Contents
 

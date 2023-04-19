@@ -1,9 +1,10 @@
 # How to run autogen script
 ## History
 
-| Date   | Author       | Comment | Doc Version |
-|--------|--------------|---------|---------|
-| 12/01/23 | Anjali Thampi | Initial release| 1.0.0|
+| Date   | Comment | Doc Version |
+|--------|---------|---------|
+| 12/01/23 | Initial release| 1.0.0 |
+| 19/03/23 | Added debug | 1.1.0 |
 
 ## Contents
 + [Overview](#overview)
@@ -15,19 +16,26 @@
 ## Overview
 This document defines the guidelines and requirements for engineering teams on how to auto generate Level 1 and Level 2 testing suite frameworks.
 
-## Autogen command:
+## Autogen Command
 
 ```console
-./autogenerate.sh <api-def-repo-url> <clean/help>
+./autogenerate.sh <api-def-repo-url/-c/-clean/-b/-branch/-h/-help>
 ```
 
 ## Autogen options explained
 
 | Argument  | Optional?|What is this?|Values/Examples |
 |--------|--------------|--------------|------------------|
-|api-def-repo-url|N|Provide the API definitions repo url to be cloned |[git@github.com:comcast-sky/rdk-components-hal-deepsleepmanager.git](git@github.com:comcast-sky/rdk-components-hal-deepsleepmanager.git)|
-|clean|Y|Delete the workspace dir (including all API definitions repos)|clean|
-|help|Y|Show the usage of this command|help / h|
+|api-def-repo-url|Y|Provide the API definitions repo url to be cloned |[git@github.com:comcast-sky/rdk-components-hal-deepsleepmanager.git](git@github.com:comcast-sky/rdk-components-hal-deepsleepmanager.git)|
+|-clean / -c|Y|Delete the workspace dir (including all API definitions repos)|-clean / -c|
+|-branch / -b |Y|This switch needs to be used along with the API definition branch to be checked out |-branch / -b [branchname]|
+|-help / -h|Y|Show the usage of this command|-help / -h|
+
+__Please Note :__ To include debug statements, please export the following env variable before running the script.
+
+```console
+    export AGT_DEBUG=1
+```
 
 
 ## Examples
@@ -37,10 +45,20 @@ This document defines the guidelines and requirements for engineering teams on h
 ```console
     ./autogenerate.sh git@github.com:comcast-sky/rdk-components-hal-deepsleepmanager.git
 ```
-2.  The below command will delete the workspace directory (if it exists)
+2. The below command will generate L1 and L2 test framework for 'deepsleepmanager' (along with adding template directories and files in the API definition directory and ut directory and also, generating skeletons in the ut directory, if any of them don't exist) HAL on a 'hal-review' branch on the API definition repo:
 
 ```console
-    ./autogenerate.sh git@github.com:comcast-sky/rdk-components-hal-powermanager.git clean
+    ./autogenerate.sh git@github.com:comcast-sky/rdk-components-hal-deepsleepmanager.git -b hal-review
+```
+3.  The below command will delete the workspace directory (if it exists)
+
+```console
+    ./autogenerate.sh git@github.com:comcast-sky/rdk-components-hal-powermanager.git -c
+```
+4. The below command will show the usage for the autogen script
+
+```console
+    ./autogenerate.sh -h
 ```
 
 ## Index
