@@ -2,9 +2,9 @@
 
 # History
 
-| Date | Author | Comment | Version |
-| --- | --- | --- | --- |
-| 17/02/23 | G. Weatherup & Anjali thampi | Initial Version | 1.1.0 |
+| Date | Comment | Version |
+| --- | --- | --- |
+| 17/02/23 | Initial Version | 1.1.0 |
 
 # Contents
 
@@ -32,7 +32,7 @@
 
 This document defines the guidelines and requirements for the engineering teams on how to write Level 1 and Level 2 testing suites.
 
-For more information on the Levels of Tests refer to [halUnitTesting_requirements.md](halUnitTesting_requirements.md)
+For more information on the Levels of Tests refer to [hal_unit_testing_requirements.md](hal_unit_testing_requirements.md)
 
 ## Acronyms, Terms and Abbreviations
 
@@ -58,7 +58,7 @@ The following is the list of reference materials whioch may be helpful in unders
 | `Coding Guidelines` | [Link to RDK Central Coding Guidelines](https://developer.rdkcentral.com/source/source-code/source-code/coding_guideline/) |
 | `UT Core` (Unit Testing Core) | [Link to UT Core Repo](https://github.com/comcast-sky/rdk-components-ut-core)
 | `hal_unit_testing_requirements.md` | [Github Reference Documentation](https://github.com/comcast-sky/rdk-components-ut-core/tree/master/docs/pages)|
-| `l2_test_specification_template.md` | [Github Reference Documentation](https://github.com/comcast-sky/rdk-components-ut-core/tree/master/docs/pages) |
+| `l2_modue_test_specification_template.md` | [Github Reference Documentation](https://github.com/comcast-sky/rdk-components-ut-core/tree/master/docs/pages) |
 | `example_l2_module_test_specification.md` | [Github Reference Documentation](https://github.com/comcast-sky/rdk-components-ut-core/tree/master/docs/pages) |
 | `git_branching_strategy.md` | [Github Reference Documentation](https://github.com/comcast-sky/rdk-components-ut-core/tree/master/docs/pages) |
 | `how_to_run_autogen_script.md` | [Github Reference Documentation](https://github.com/comcast-sky/rdk-components-ut-core/tree/master/docs/pages) |
@@ -82,7 +82,7 @@ The expectation is that the `Component Owner` and `Component Architect` will cre
 
 Modification of the source files will be required to aid the implementation.
 
-A template document for the requirements for Level 2 testing can be found in [L2 Testing Specification Template](l2_test_specification_template.md). This can form the basis of the expectations.
+A template document for the requirements for Level 2 testing can be found in [L2 Testing Specification Template](l2_modue_test_specification_template.md). This can form the basis of the expectations.
 
 ## Implementation Guidelines
 
@@ -144,10 +144,6 @@ The following doxygen template should be placed at the top of any .c file and po
 * @page module_name TODO: Required field, name of the main module
 * @subpage sub_page_name TODO: Add a function group if relevant
 *
-* **Component Owner:** TODO: Required field, Lead Engineer of the component ( Component Expert ) who must review; for OpenSource can be obfuscated email or ideally real name@n
-* **Component Architect:** TODO: Required field, Single Architect of the component who must review; for OpenSource can be obfuscated email or ideally real name@n
-* **Review Team:** TODO: Review Team required to sign off the component changes; for OpenSource can be obfuscated email or ideally real name (Min 2 reviewers)@n
-*
 * ## Module's Role
 * TODO: Explain the module's role in the system in general
 * This is to ensure that the API meets the operational requirements of the module across all vendors.
@@ -166,9 +162,6 @@ The following examples a filled out example a header file
 /**
 * @file test_L1_hdmi_cec_driver.c
 * @page HDMI_CEC_L1_Tests HDMI CEC Level 1 Tests
-* **Component Owner:** Amit Patel@n
-* **Component Architect:** Amit Patel@n
-* **Review Team:** Amit Patel, Gerald Weatherup, Anjali Thampi@n
 *
 * ## Module's Role
 * This module includes Level 1 functional tests (success and failure scenarios).
@@ -195,7 +188,6 @@ The following doxygen template should be placed at the top of all .c functions t
 *
 * **Test Group ID:** TODO: Basic (for L1): 01 / Module (L2): 02 / Stress (L2): 03)@n
 * **Test Case ID:** TODO: Add the ID of the test case so that it can be logically tracked in the logs@n
-* **Priority:** (Low/Med/High) TODO: Add the priority for the level of test, how important is the test to overall functionality@n
 * @n
 * **Pre-Conditions:** TODO: Add pre-conditions, if any@n
 * **Dependencies:** TODO: Add dependencies for this test, if any@n
@@ -220,7 +212,6 @@ void test_l1_<filename>_<testName>( void );
 *
 * **Test Group ID:** Basic: 01@n
 * **Test Case ID:** 001@n
-* **Priority:** Medium@n
 *
 * **Pre-Conditions:**@n
 * - Config: "testcase:01" - logicalAddresses[] - (valid param driven by configuration - CONFIG)
@@ -250,7 +241,6 @@ void test_l1_hdmi_cec_driver_positive_HdmiCecSetLogicalAddress( void )
 *
 * **Test Group ID:** Basic: 01@n
 * **Test Case ID:** 002@n
-* **Priority:** Medium@n
 *
 * **Pre-Conditions:**@n
 * - Config: "testcase:01002"   - logicalAddresses[] - (valid params driven by configuration - CONFIG)
@@ -286,7 +276,6 @@ void test_l1_hdmi_cec_driver_negative_HdmiCecSetLogicalAddress( void )
 *
 * **Test Group ID:** TODO: Add the group this test belongs to - Basic (for L1): 01 / Module (L2): 02 / Stress (L2): 03)@n
 * **Test Case ID:** TODO: Add the ID of the test case so that it can be logically tracked in the logs@n
-* **Priority:** (Low/Med/High) TODO: Add the priority for the level of test, how important is the test to overall functionality@n
 *
 * **Test Procedure:**
 * Refer to UT specification documentation [l2_module_test_specification.md](l2_module_test_specification.md)
@@ -302,7 +291,6 @@ void test_l2_<filename>_<testName>( void );
 *
 * **Test Group ID:** 02@n
 * **Test Case ID:** 001@n
-* **Priority:** Low@n
 *
 * **Test Procedure:**
 * Refer to UT specification documentation [l2_module_test_specification.md](l2_module_test_specification.md)
@@ -314,6 +302,6 @@ void test_l2_hdmi_cec_driver_checkLogicalAddress( void )
 
 Level 2 requires a more detailed informational document to understand the nuances and interactions of the module. The document should include diagrams and detailed information. It is recommended that markdown be used, along side diagrams via mermaid, which `SCM`'s like github support in their markdown renderers. https://mermaid.js.org/#/
 
-There is a basic template provided [l2_test_specification_template.md](https://github.com/comcast-sky/rdk-components-ut-core/tree/master/docs/pages)
+There is a basic template provided [l2_modue_test_specification_template.md](https://github.com/comcast-sky/rdk-components-ut-core/tree/master/docs/pages)
 
 There is a simple example of how to fill out the document [example_l2_module_test_specification.md](https://github.com/comcast-sky/rdk-components-ut-core/tree/master/docs/pages) |

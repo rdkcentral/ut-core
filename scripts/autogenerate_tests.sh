@@ -5,7 +5,6 @@
 #*   ** Project      : Unit Test Script
 #*   ** @addtogroup  : ut
 #*   ** @file        : shell
-#*   ** @author      : anjali.thampi@sky.uk
 #*   ** @date        : 12/01/2023
 #*   **
 #*   ** @brief : Shell script to autogenerate L1 and L2 tests' framework
@@ -20,22 +19,20 @@ function AGT_tests_init()
         AGT_APIDEF_NAME=$1
 
         # Call file which has the common variables and function
-        source autogenerate_shared.sh ${AGT_APIDEF_NAME}
+        . autogenerate_shared.sh ${AGT_APIDEF_NAME}
 
         # UT's src dir inside worksapce dir
         AGT_UT_SRC=${AGT_UT_HOME}/src
 
         # Variables
-        AGT_TEMP_FUNC_DEF_FILE="funcs_list.txt"
-        AGT_TEMP_FUNC_NAMES_FILE="func_names.txt"
         AGT_SCRIPTS_TEMPLATES="${AGT_SCRIPTS_HOME}/templates/"
-        AGT_COPYRIGHT_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/ATG_copywrite_template.txt"
+        AGT_COPYRIGHT_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/AGT_copywrite_template.txt"
         AGT_L1_FUNCTION_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/AGT_L1_function_template.txt"
         AGT_L2_FUNCTION_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/AGT_L2_function_template.txt"
         AGT_REGISTER_FUNCTION_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/AGT_register_function_template.txt"
         AGT_CONFIG_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/AGT_register_config_template.sh"
         AGT_FILE_BANNER_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/AGT_file_banner.txt"
-        AGT_MAIN_FILE_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/ATG_main_file_template.txt"
+        AGT_MAIN_FILE_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/AGT_main_file_template.txt"
         AGT_TEST_REGISTER_FILE_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/AGT_test_register_file_template.txt"
         AGT_WORKSPACE_CONFIG_FILE="${AGT_UT_WORKSPACE}/UT_register_config.sh"
         AGT_UT_MAIN_FILE="${AGT_UT_SRC}/main.c"
@@ -47,12 +44,8 @@ function AGT_tests_init()
         AGT_FILE_NAME_KEY="AGT_FILE_NAME"
         AGT_L1_TEST="L1"
         AGT_L2_TEST="L2"
-        AGT_L1_FILE_PREFIX="test_l1"
-        AGT_L2_FILE_PREFIX="test_l2"
         AGT_POSITIVE_TEST_CASES="positive"
         AGT_NEGATIVE_TEST_CASES="negative"
-        AGT_UNDERSCORE="_"
-        AGT_EMPTY_VARIABLE=''
         AGT_ADD_L1_TEST_TO_SUITE=""
         AGT_ADD_L2_TEST_TO_SUITE=""
         AGT_EXTERN_TEST_REGISTER_L1=""
@@ -76,7 +69,7 @@ function AGT_add_headers_to_files()
         if [ $2 = true ]; then
                 echo -e '#include <ut_log.h>\n' >> ${1}
         else
-                echo -e ${AGT_EMPTY_VARIABLE}  >> ${1}
+                echo -e ''  >> ${1}
         fi
 }
 
@@ -85,8 +78,7 @@ function AGT_add_headers_to_files()
 function AGT_add_copyright_to_files()
 {
         temp=`cat ${AGT_COPYRIGHT_TEMPLATE}`
-        eval "echo \"${temp}\"" > $1
-        echo -e ${AGT_EMPTY_VARIABLE}  >> $1
+        eval "echo -e \"${temp}\\n\"" > $1
 }
 
 # Function to add file banner with file details like author, reviewer, etc
@@ -95,11 +87,11 @@ function AGT_add_file_banner_to_files()
 {
         banner_file_name=`echo ${1##*/}`
         AGT_update_config ${AGT_FILE_NAME_KEY} ${banner_file_name}
+
         # Add the register function to the file using the template and config key values
-        source ${AGT_WORKSPACE_CONFIG_FILE}
+        . ${AGT_WORKSPACE_CONFIG_FILE}
         tempfile=`cat ${AGT_FILE_BANNER_TEMPLATE}`
-        eval "echo \"${tempfile}\"" >> $1
-        echo -e ${AGT_EMPTY_VARIABLE}  >> $1
+        eval "echo -e \"${tempfile}\\n\"" >> $1
 }
 
 # Function to add headers and generic comments to the start of the tests
@@ -126,7 +118,7 @@ function AGT_update_config()
                 value=${line#*=}
 
                 case $key in
-                       ${AGT_REGISTER_FUNCTION_KEY} | ${AGT_TEST_LEVEL_KEY} | ${AGT_SUITE_NAME_KEY} | ${AGT_FUNCTION_NAME_KEY} | ${AGT_FILE_NAME_KEY})
+                       ${AGT_REGISTER_FUNCTION_KEY} | ${AGT_TEST_LEVEL_KEY} | ${AGT_SUITE_NAME_KEY} | ${AGT_FUNCTION_NAME_KEY} | ${AGT_FILE_NAME_KEY} )
                                 if [ $1 = $key ]; then
                                         sed -i "s/\($key=*\).*/\1$2/" ${input}
                                 fi
@@ -152,7 +144,7 @@ function AGT_add_register_function()
         AGT_update_config ${AGT_SUITE_NAME_KEY} ${suite}
 
         # Add the register function to the file using the template and config key values
-        source ${AGT_WORKSPACE_CONFIG_FILE}
+        . ${AGT_WORKSPACE_CONFIG_FILE}
         template="$(cat ${AGT_REGISTER_FUNCTION_TEMPLATE})"
         eval "echo \"${template}\"" >> ${file}".c"
 }
@@ -190,7 +182,7 @@ function AGT_add_test_register_file()
 # @param [in] The name of the test file
 # @param [in] AGT_POSITIVE_TEST_CASES [or] AGT_NEGATIVE_TEST_CASES [or] empty string (for L2)
 # @param [in] The name of the header function
-# @param [in] AGT_L2_TEST [or] AGT_L2_TEST and AGT_UNDERSCORE
+# @param [in] AGT_L2_TEST [or] AGT_L2_TEST and "_"
 function AGT_add_functions_to_test()
 {
         # Local variables
@@ -225,12 +217,12 @@ function AGT_add_functions_to_test()
                 # Test function name for respective L1 (positive / negative) tests
                 # L1 positive testname : filename_positive_headerfunction
                 # L1 negative testname : filename_negative_headerfunction
-                test_function_name="${file_name}${AGT_UNDERSCORE}${test_type}${AGT_UNDERSCORE}${header_function}"
+                test_function_name="${file_name}_${test_type}_${header_function}"
 
                 # Test name for respective L1 (positive / negative) functions
                 # L1 positive testname : headerfunction_positive_L1
                 # L1 negative testname : headerfunction_negative_L1
-                test_name=${header_function}${AGT_UNDERSCORE}${4}${test_type}
+                test_name=${header_function}_${4}${test_type}
 
                 if [ "${l1_line_indent}" = true ]; then
                         AGT_ADD_L1_TEST_TO_SUITE+=`echo -e '\t'`
@@ -244,7 +236,7 @@ function AGT_add_functions_to_test()
 
         # Update the value of AGT_FUNCTION_NAME key in the config file
         AGT_update_config ${AGT_FUNCTION_NAME_KEY} ${test_function_name}
-        source ${AGT_WORKSPACE_CONFIG_FILE}
+        . ${AGT_WORKSPACE_CONFIG_FILE}
 
         if [ ${test_level} = ${AGT_L2_TEST} ]; then
                 # Copy the L2 function template for each header function with AGT_FUNCTION_NAME in the config file
@@ -254,39 +246,16 @@ function AGT_add_functions_to_test()
                 template="$(cat ${AGT_L1_FUNCTION_TEMPLATE})"
         fi
 
-        eval "echo \"${template}\"" >> ${file_name}".c"
-        echo -e ${AGT_EMPTY_VARIABLE}  >> ${file_name}".c"
-
+        eval "echo -e \"${template}\\n\"" >> ${file_name}".c"
 }
 
 # Function to create the UT's src directory if it does not exist
-function AGT_create_ut_src()
+function AGT_delete_and_create_ut_src()
 {
-        AGT_INFO_GREEN "Creating UT's src dir .."
-
-        # If UT's src dir does not exist, create it
-        if [ ! -d ${AGT_UT_SRC} ]; then
-                AGT_WARNING "The UT's src directory [../workspace/${AGT_APIDEF_NAME}/ut/src] DOES NOT EXIST."
-                mkdir -p ${AGT_UT_SRC}
-                AGT_INFO_BLUE "The UT's src directory [../workspace/${AGT_APIDEF_NAME}/ut/src] is now CREATED."
-        else
-                # If UT's src is not empty, then get user input to rewrite or not
-                if [ ! -z "$(ls -A ${AGT_UT_HOME}/src/*)" ]; then
-                        AGT_WARNING "The UT's src (test cases) directory [../workspace/${AGT_APIDEF_NAME}/ut/src] is NOT EMPTY."
-                        AGT_get_user_response ${AGT_REWRITE}
-                        # If user response is "YES", delete mocks dir
-                        if [ "${AUTO_RESPONSE}" = ${AGT_YES} ]; then
-                                cd ${AGT_UT_SRC}
-                                ls  | grep -xv "main.c" | xargs rm
-                                cd -
-                                AGT_INFO_YELLOW "The UT's src directory [../workspace/${AGT_APIDEF_NAME}/ut/src] is now EMPTY."
-                        else
-                                AGT_INFO_CYAN "Creating UT's src dir .. COMPLETE"
-                                ${AGT_EXIT_SUCCESS}
-                        fi
-                fi
-        fi
-        AGT_INFO_CYAN "Creating UT's src dir .. COMPLETE"
+        AGT_DEBUG_START "Deleting and creating UT's src dir"
+        rm -rf ${AGT_UT_SRC}
+        mkdir -p ${AGT_UT_SRC}
+        AGT_DEBUG_END "Deleting and creating UT's src dir"
 }
 
 # Function to add data to the following variables : AGT_EXTERN_TEST_REGISTER_L1 and AGT_TEST_REGISTER_L1
@@ -329,7 +298,9 @@ function AGT_add_to_L2_test_register_variables()
 # Function to isolate the functions and generate the L1 and ${AGT_L2_TEST} tests
 function AGT_generate_l1_l2_tests()
 {
-        AGT_INFO_GREEN "Creating UT's L1 and L2 tests .."
+        local AGT_TEMP_FUNC_DEF_FILE="funcs_list.txt"
+        local AGT_TEMP_FUNC_NAMES_FILE="func_names.txt"
+        AGT_DEBUG_START "Creating UT's ${AGT_L1_TEST} and L2 tests"
 
         cd ${AGT_SKELETONS_SRC}
 
@@ -362,14 +333,14 @@ function AGT_generate_l1_l2_tests()
                 cat ${AGT_TEMP_FUNC_DEF_FILE} | cut -d"(" -f1 | cut -d" " -f2  > ${AGT_TEMP_FUNC_NAMES_FILE}
 
                 # Set up the L1 filename
-                new_L1_filename="${AGT_L1_FILE_PREFIX}${AGT_UNDERSCORE}`echo $filename| cut -d"." -f1`"
+                new_L1_filename="test_l1_`echo $filename| cut -d"." -f1`"
                 # Call function to add common lines to L1 file
                 AGT_add_common_to_tests_file ${new_L1_filename}
                 # Call function to update the test register L1 variables
                 AGT_add_to_L1_test_register_variables ${new_L1_filename}
 
                  # Set up the L2 filename
-                new_L2_filename="${AGT_L2_FILE_PREFIX}${AGT_UNDERSCORE}`echo $filename| cut -d"." -f1`"
+                new_L2_filename="test_l2_`echo $filename| cut -d"." -f1`"
                  # Call function to add common lines to L2 file
                 AGT_add_common_to_tests_file ${new_L2_filename}
                 # Call function to update the test register L2 variables
@@ -383,12 +354,12 @@ function AGT_generate_l1_l2_tests()
                 while read -r header_function
                 do
                         # Add the positive function to the L1 file
-                        AGT_add_functions_to_test ${new_L1_filename} ${AGT_POSITIVE_TEST_CASES} ${header_function} "${AGT_L1_TEST}${AGT_UNDERSCORE}"
+                        AGT_add_functions_to_test ${new_L1_filename} ${AGT_POSITIVE_TEST_CASES} ${header_function} "${AGT_L1_TEST}_"
                         if [ "${l1_line_indent}" = false ]; then
                                 l1_line_indent=true
                         fi
                         # Add the negative function to the L1 file
-                        AGT_add_functions_to_test ${new_L1_filename} ${AGT_NEGATIVE_TEST_CASES} ${header_function} "${AGT_L1_TEST}${AGT_UNDERSCORE}"
+                        AGT_add_functions_to_test ${new_L1_filename} ${AGT_NEGATIVE_TEST_CASES} ${header_function} "${AGT_L1_TEST}_"
 
                 done < "$input"
 
@@ -410,21 +381,21 @@ function AGT_generate_l1_l2_tests()
                 # Move the files to UT's src directory
                 mv "${AGT_SKELETONS_SRC}/${new_L1_filename}.c" "${AGT_UT_SRC}/${new_L1_filename}.c" ;
                 mv "${AGT_SKELETONS_SRC}/${new_L2_filename}.c" "${AGT_UT_SRC}/${new_L2_filename}.c" ;
-                AGT_INFO_BLUE "${AGT_L1_TEST} and L2 tests for '`echo $filename| cut -d"." -f1`.h' is created "
+                AGT_SUCCESS "${AGT_L1_TEST} and L2 tests for '`echo $filename| cut -d"." -f1`.h' is created "
                 echo -e ""
         done
 
         # Remove all temp files created
-        ${AGT_RM} ${AGT_SKELETONS_SRC}/${AGT_TEMP_FUNC_DEF_FILE} ${AGT_SKELETONS_SRC}/${AGT_TEMP_FUNC_NAMES_FILE}
+        rm -f ${AGT_TEMP_FUNC_DEF_FILE} ${AGT_TEMP_FUNC_NAMES_FILE}
         cd ${AGT_SCRIPTS_HOME}
 
-        AGT_INFO_CYAN "Creating UT's ${AGT_L1_TEST} and L2 tests .. COMPLETE"
+        AGT_DEBUG_END "Creating UT's ${AGT_L1_TEST} and L2 tests"
 }
 
 
 
 AGT_tests_init $1
-AGT_create_ut_src
+AGT_delete_and_create_ut_src
 AGT_add_main_file
 AGT_generate_l1_l2_tests
 AGT_add_test_register_file
