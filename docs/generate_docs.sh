@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 # In the future this should moved to a fixed verison
-HAL_GENERATOR_VERSION=develop
+HAL_GENERATOR_VERSION=master
 
 # This will look up the last tag in the git repo, depending on the project this may require modification
-PROJECT_VERSION=$(git describe --tags | head -n1)
+PROJECT_VERSION=$(git describe --tags | sort | head -n1)
 
 # Check if the common document configuration is present, if not clone it
 if [ -d "./build" ]; then

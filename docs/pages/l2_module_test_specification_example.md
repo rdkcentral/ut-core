@@ -1,9 +1,9 @@
 # HDMI CEC Level 2 - Module Testing
 ## History
 
-| Version | Date(YY-MM-DD) | Author |Comments |
-| -------| ----- | ----- | ----- |
-| 1.0.0 | 22/02/23 | Anjali Thampi| Inital Document |
+| Version | Date(YY-MM-DD) | Comments |
+| -------| ----- |  ----- |
+| 1.0.0 | 22/02/23 | Inital Document |
 
 ## Table of Contents
 
@@ -60,7 +60,6 @@ The following functions are expecting to test the module operates correctly.
 |Description|This module test will check if the logicalAddress added is what is received for the devType specified|
 |Test Group|02 (Module)|
 |Test Case ID|001|
-|Priority|Low|
 
 **Pre-Conditions :**
 -  There should be a HDMICEC enabled device connected via HDMI

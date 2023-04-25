@@ -5,7 +5,6 @@
 #*   ** Project      : Unit Test Script
 #*   ** @addtogroup  : ut
 #*   ** @file        : shell
-#*   ** @author      : anjali.thampi@sky.uk
 #*   ** @date        : 12/01/2023
 #*   **
 #*   ** @brief : Shell script to autogenerate skeletons
@@ -18,78 +17,48 @@ set -e
 # Function to install cmock dir
 function AGT_install_cmock()
 {
-	AGT_INFO_GREEN "Installing cmock tool required for skeletons' generation .."
+	AGT_DEBUG_START "Installing cmock tool required for skeletons' generation"
 
         # Install latest cmock tool if it does not already exists in the dir
-	if [ "${AGT_CMOCK_EXISTS}" = false ]; then
-		git clone --recursive https://github.com/throwtheswitch/cmock.git ${AGT_CMOCK_DIR}
-		cd ${AGT_CMOCK_DIR}
-		bundle install
-		AGT_INFO "CMock is now installed"
-		AGT_CMOCK_EXISTS=true
-		cd -
-	else
-		AGT_INFO_YELLOW "Cmock dir in UT already EXIST."
-	fi
+        git clone --recursive https://github.com/throwtheswitch/cmock.git ${AGT_CMOCK_DIR} &> /dev/null
+        cd ${AGT_CMOCK_DIR}
+        bundle install &> /dev/null
+        AGT_SUCCESS "CMock is now installed"
+        cd - &> /dev/null
 
-        AGT_INFO_CYAN "Installing cmock tool required for skeletons' generation .. .. COMPLETED"
-}
-
-# Function to delete cmock dir
-AGT_delete_cmock()
-{
-	AGT_INFO_GREEN "Deleting cmock tool required for skeletons' generation .."
-
-        # If cmock directory exists, delete it
-        if [ "${AGT_CMOCK_EXISTS}" = true ]; then
-                ${AGT_RMRF} ${AGT_CMOCK_DIR}
-                AGT_INFO "The cmock directory  is now DELETED"
-                AGT_CMOCK_EXISTS=false
-        else
-                AGT_INFO "The cmock directory does NOT EXIST"
-        fi
-
-        AGT_INFO_CYAN "Deleting cmock tool required for skeletons' generation .. COMPLETE"
+        AGT_DEBUG_END "Installing cmock tool required for skeletons' generation"
 }
 
 # Function to delete mocks dir
 AGT_delete_mocks()
 {
-	AGT_INFO_GREEN "Deleting deprecated mocks .."
+	AGT_DEBUG_START "Deleting deprecated mocks"
 
-        # If mocks dir exist , prompt user to allow deletion of the same
+        # If deprecated mocks dir exists, delete it
         if [ "${AGT_MOCKS_EXISTS}" = true ]; then
-                # Check with user if the deprecated mocks dir can be deleted
-                AGT_get_user_response ${AGT_DELETE_MOCKS}
-                # If user response is "YES", delete mocks dir
-                if [ "${AUTO_RESPONSE}" = ${AGT_YES} ]; then
-                        ${AGT_RMRF} ${AGT_MOCKS_DIR}
-                        AGT_INFO "The mocks directory is now DELETED"
-                        AGT_CMOCK_EXISTS=false
-                # If user response is "YES", keep the mocks dir and warn user again
-                else
-                        AGT_WARNING "NOT DELETED mocks directory"
-                        AGT_WARNING "Again, it is highly recommended to delete the deprecated mocks directory!"
-                fi
+                rm -rf ${AGT_MOCKS_DIR}
+                AGT_WARNING "The mocks directory is now DELETED"
+                AGT_MOCKS_EXISTS=false
         # Display to user that mocks dir didn't exist
         else
-                AGT_INFO "The mocks directory does NOT EXIST"
+                AGT_ALERT "The mocks directory does NOT EXIST"
         fi
 
-	AGT_INFO_CYAN "Deleting deprecated mocks .. COMPLETE"
+	AGT_DEBUG_END "Deleting deprecated mocks"
 }
 
 # Function to generate skeletons
 function AGT_generate_skeletons()
 {
-        AGT_INFO_GREEN "Generating skeletons .."
+        local COUNT_SRC
+        AGT_DEBUG_START "Generating skeletons"
 
         # Install cmock tool required to generate skeletons
         AGT_install_cmock
 
         # Run the skeleton generate command
         cd ${AGT_UT_HOME}
-        ruby ${AGT_CMOCK_DIR}/lib/cmock.rb --skeleton --mock_path=${AGT_SKELETONS_DIR} ${AGT_INCLUDE_DIR}/*.h
+        ruby ${AGT_CMOCK_DIR}/lib/cmock.rb --skeleton --mock_path=${AGT_SKELETONS_DIR} ${AGT_INCLUDE_DIR}/*.h &> /dev/null
 
         cd ${AGT_SKELETONS_DIR}
 
@@ -102,45 +71,29 @@ function AGT_generate_skeletons()
                 mv *.c src/
         fi
 
-        AGT_INFO "Skeletons are created successfully"
-        cd - 2>/dev/null
+        AGT_SUCCESS "Skeletons are generated successfully"
+        cd - &> /dev/null
 
         # Delete cmock tool which was required to generate skeletons
-        AGT_delete_cmock
+        AGT_DEBUG_START "Deleting cmock tool required for skeletons' generation"
+        rm -rf ${AGT_CMOCK_DIR}
+        AGT_DEBUG_END "Deleting cmock tool required for skeletons' generation"
 
-        AGT_INFO_CYAN "Generating skeletons .. COMPLETE"
+        AGT_DEBUG_END "Generating skeletons"
 }
 
 # Check the status of skeletons created for the API Defintion's header files
-function AGT_check_skeleton_status()
+function AGT_set_up_skeletons()
 {
-        # If skeleton dir does not exist, create it along with its src child dir
-        if [ ! -d ${AGT_SKELETONS_DIR} ]; then
-                mkdir -p ${AGT_SKELETONS_SRC}
-                AGT_INFO "The skeletons' directory is now created"
-        else
-                # If skeleton's child src dir exist
-                if [ -d ${AGT_SKELETONS_SRC} ]; then
-                        # If src dir is not empty, check with user if the skeletons need to be rewritten
-                        if [ ! -z "$(ls -A ${AGT_SKELETONS_SRC})" ]; then
-                                AGT_WARNING "The skeletons' src directory IS NOT EMPTY"
-                                AGT_get_user_response ${AGT_REWRITE}
-                                # If user response is NO, then exit this function
-                                if [ "${AUTO_RESPONSE}" = ${AGT_NO} ]; then
-                                        return 0
-                                fi
-                        else
-                                AGT_INFO "The skeletons' src directory IS EMPTY"
-                        fi
-                # If skeleton's child src dir does not exist, create it
-                else
-                        mkdir -p ${AGT_SKELETONS_SRC}
-                        AGT_INFO "The skeletons' src directory  is now created"
-                fi
+        AGT_DEBUG_START "Creating skeletons and its src directory (if they don't exist)"
+        mkdir -p ${AGT_SKELETONS_SRC}
+        AGT_DEBUG_END "Creating skeletons and its src directory (if they don't exist)"
+        if [ ! -z "$(ls -A ${AGT_SKELETONS_SRC})" ]; then
+                AGT_WARNING "The skeletons' src directory IS NOT EMPTY"
+                AGT_DEBUG_START "Deleting skeletons' src files"
+                rm ${AGT_SKELETONS_SRC}/*
+                AGT_DEBUG_END "Deleting skeletons' src files"
         fi
-
-        # Generate skeletons
-        AGT_generate_skeletons
 }
 
 # Init function for skeletons' generation
@@ -150,15 +103,16 @@ function AGT_skeletons_init()
         API_DEF_URL=$1
 
         # Source the script with the shared variables and functions
-        source autogenerate_shared.sh ${API_DEF_URL}
+        . autogenerate_shared.sh ${API_DEF_URL}
 
         # Call the shared function to update the respective variables
         AGT_update_variables ${AGT_CMOCK_DIR}
         AGT_update_variables ${AGT_MOCKS_DIR}
-
-        # Delete Mocks dir (if it exists)
-        AGT_delete_mocks
 }
 
 AGT_skeletons_init $1
-AGT_check_skeleton_status
+# Delete Mocks dir (if it exists)
+AGT_delete_mocks
+AGT_set_up_skeletons
+# Generate skeletons
+AGT_generate_skeletons
