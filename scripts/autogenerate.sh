@@ -40,7 +40,7 @@ function AGT_clone_apidef()
 	    AGT_INFO "API Definition url is '${url}'"
 
 		cd ${AGT_UT_WORKSPACE}
-		git clone ${url}
+		git clone ${url} &> /dev/null
 		cd ${AGT_SCRIPTS_HOME}
 
 		AGT_SUCCESS "API Definition repo is now cloned"
@@ -69,7 +69,7 @@ function AGT_clone_doxygen_repo()
 
 	if [ ! -d "${AGT_DOXYGEN_DIR}"  ]; then
 		# Clone doxygen template into doxy dir in workspace/api-def dir
-		git clone ${AGT_BASE_URL}/${AGT_DOXY_REPO} ${AGT_DOXYGEN_DIR}
+		git clone ${AGT_BASE_URL}/${AGT_DOXY_REPO} ${AGT_DOXYGEN_DIR} &> /dev/null
 		AGT_SUCCESS "Doxygen repo has been cloned in [../workspace/${AGT_DOXYGEN_REPO_NAME}]"
 	fi
 
@@ -98,20 +98,20 @@ function AGT_copy_and_display_uncopied_files()
 			${AGT_DIR_APIDEF})
 				if [[ "$template" == "$AGT_TEMPLATE_APIDEF" ]]; then
 				    # Copy all files as source and not symbolic links
-					cp -Lrv ${AGT_BASEDIR}/${AGT_APIDEF_TEMPLATE_PATH}/* .
+					cp -Lrv ${AGT_BASEDIR}/${AGT_APIDEF_TEMPLATE_PATH}/* . &> /dev/null
 				else
 				    # If docs or docs/pages or docs/images don't exist, create them
 				    mkdir -p ${AGT_DOCS_PAGES_DIR}
 				    mkdir -p ${AGT_DOCS_PAGES_DIR}/images
-					cp -rv ${AGT_DOXYGEN_GENERATE_FILE} ./${AGT_DOCS_DIR}
-					cp -rv ${AGT_DOXYGEN_TEMPLATE_FILES} ./${AGT_DOCS_PAGES_DIR}
+					cp -rv ${AGT_DOXYGEN_GENERATE_FILE} ./${AGT_DOCS_DIR} &> /dev/null
+					cp -rv ${AGT_DOXYGEN_TEMPLATE_FILES} ./${AGT_DOCS_PAGES_DIR} &> /dev/null
 				fi
 			;;
 			${AGT_DIR_UT})
 				if [[ "$template" = "$AGT_TEMPLATE_UT" ]]; then
 				    # Copy all files from ut template
-					cp -rv ${AGT_UT_TEMPLATE_PATH}/* .
-					cd ${AGT_UT_TEMPLATE_PATH}
+					cp -rv ${AGT_UT_TEMPLATE_PATH}/* . &> /dev/null
+					cd ${AGT_UT_TEMPLATE_PATH} &> /dev/null
 					# Get the files (with .md extenstion) common to ${AGT_UT_HOME} and UT's docs/pages folder
 					# CONTRIBUTING, README, NOTICE, LICENSE
 				    `comm -12 <(ls | sed -e 's/\.md$//' ) <(ls ./docs/pages | sed -e 's/\.md$//' ) > ${AGT_TEMP_FILE1}`
@@ -122,18 +122,18 @@ function AGT_copy_and_display_uncopied_files()
 					    # If the file in UT's docs/pages folder is not CONTRIBUTING, README, NOTICE, LICENSE
 						# then copy source file and not symbolic link
 						if [ -z `grep $file ${AGT_TEMP_FILE1}` ]; then
-							cp -Lrv ./${AGT_DOCS_PAGES_DIR}/$file* ${AGT_UT_HOME}/${AGT_DOCS_PAGES_DIR}/
+							cp -Lrv ./${AGT_DOCS_PAGES_DIR}/$file* ${AGT_UT_HOME}/${AGT_DOCS_PAGES_DIR}/ &> /dev/null
 						else
-							cp -rv ./${AGT_DOCS_PAGES_DIR}/$file* ${AGT_UT_HOME}/${AGT_DOCS_PAGES_DIR}/
+							cp -rv ./${AGT_DOCS_PAGES_DIR}/$file* ${AGT_UT_HOME}/${AGT_DOCS_PAGES_DIR}/ &> /dev/null
 						fi
 					done
 					rm -f ${AGT_TEMP_FILE1} ${AGT_TEMP_FILE2}
-					cd -
+					cd - &> /dev/null
 				else
 				        # If docs or docs/pages or docs/images don't exist, create them
 				        mkdir -p ${AGT_DOCS_PAGES_DIR}
 				        mkdir -p ${AGT_DOCS_PAGES_DIR}/images
-					cp -rv ${AGT_DOXYGEN_GENERATE_FILE} ./${AGT_DOCS_DIR}
+					cp -rv ${AGT_DOXYGEN_GENERATE_FILE} ./${AGT_DOCS_DIR} &> /dev/null
 				fi
 			;;
 		esac
@@ -147,7 +147,7 @@ function AGT_copy_templates()
 	case "$1" in
 		${AGT_DIR_APIDEF})
 			AGT_DEBUG_START "Copying from ut-core template"
-			cd ${AGT_APIDEF_HOME}
+			cd ${AGT_APIDEF_HOME} &> /dev/null
 			# Copy the missing files and dirs from ut-core template
 			AGT_copy_and_display_uncopied_files ${AGT_DIR_APIDEF} ${AGT_TEMPLATE_APIDEF}
 			AGT_DEBUG_END "Copying from ut-core template"
@@ -161,7 +161,7 @@ function AGT_copy_templates()
 		;;
 		${AGT_DIR_UT})
 			AGT_DEBUG_START "Copying from ut-core template"
-			cd ${AGT_UT_HOME}
+			cd ${AGT_UT_HOME} &> /dev/null
 			# Copy the missing files and dirs from ut-core template
 			AGT_copy_and_display_uncopied_files  ${AGT_DIR_UT} ${AGT_TEMPLATE_UT}
 			AGT_DEBUG_END "Copying from ut-core template"
@@ -210,8 +210,7 @@ function AGT_clone_ut()
 	AGT_SUCCESS "UT url is '${UT_URL}'"
 	# Validate if UT url is correct
 	# Clone the UT repo
-	echo -e "${NOCOLOR}"
-	git clone ${UT_URL} ${AGT_APIDEF_HOME}/ut
+	git clone ${UT_URL} ${AGT_APIDEF_HOME}/ut &> /dev/null
 	AGT_SUCCESS "UT repo is now cloned"
 	AGT_UT_EXISTS=true
 
@@ -230,11 +229,11 @@ AGT_generate_all()
 	AGT_SUCCESS "Workspace directory available at [../workspace/]"
 
 	AGT_DEBUG_END "Creating Workspace"
-	AGT_clone_apidef $url
+	AGT_clone_apidef $url &> /dev/null
 	if [ ! -z "${branch}" ]; then
 		cd ${AGT_APIDEF_HOME}
-		git checkout ${branch}
-		AGT_SUCCESS "\nBranch [${branch}] is now checked out"
+		git checkout ${branch} &> /dev/null
+		AGT_SUCCESS "Branch [${branch}] is now checked out"
 		cd - 1>/dev/null
 	fi
 	AGT_clone_doxygen_repo

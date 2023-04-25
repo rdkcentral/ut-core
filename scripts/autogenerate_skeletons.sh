@@ -20,11 +20,11 @@ function AGT_install_cmock()
 	AGT_DEBUG_START "Installing cmock tool required for skeletons' generation"
 
         # Install latest cmock tool if it does not already exists in the dir
-        git clone --recursive https://github.com/throwtheswitch/cmock.git ${AGT_CMOCK_DIR}
+        git clone --recursive https://github.com/throwtheswitch/cmock.git ${AGT_CMOCK_DIR} &> /dev/null
         cd ${AGT_CMOCK_DIR}
-        bundle install
+        bundle install &> /dev/null
         AGT_SUCCESS "CMock is now installed"
-        cd -
+        cd - &> /dev/null
 
         AGT_DEBUG_END "Installing cmock tool required for skeletons' generation"
 }
@@ -58,7 +58,7 @@ function AGT_generate_skeletons()
 
         # Run the skeleton generate command
         cd ${AGT_UT_HOME}
-        ruby ${AGT_CMOCK_DIR}/lib/cmock.rb --skeleton --mock_path=${AGT_SKELETONS_DIR} ${AGT_INCLUDE_DIR}/*.h
+        ruby ${AGT_CMOCK_DIR}/lib/cmock.rb --skeleton --mock_path=${AGT_SKELETONS_DIR} ${AGT_INCLUDE_DIR}/*.h &> /dev/null
 
         cd ${AGT_SKELETONS_DIR}
 
@@ -72,7 +72,7 @@ function AGT_generate_skeletons()
         fi
 
         AGT_SUCCESS "Skeletons are generated successfully"
-        cd - 2>/dev/null
+        cd - &> /dev/null
 
         # Delete cmock tool which was required to generate skeletons
         AGT_DEBUG_START "Deleting cmock tool required for skeletons' generation"
