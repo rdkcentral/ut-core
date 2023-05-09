@@ -18,18 +18,17 @@
 
 ## Building Skeleton Library
  
-Change the makefile, to that SKELETON_SRC is build into a library in `UT-CORE` makefiles, so no other dependancies area required.
+Change the makefile, to that SKELETON_SRC is build into a library in `UT-CORE` makefiles, so no other dependencies area required.
  
 It should detect if the image is already there, and not build it again, so to rebuild the library you could have to perform a clean.
  
-It's upto the caller, to replace the library with the target one in question as required, this can be done by copuying the library in the lib directory, or by not copying it to the final target ,and using the one from rootfs or `LD_LIBRARY_PATH`
+It's up-to the caller, to replace the library with the target one in question as required, this can be done by copying the library in the lib directory, or by not copying it to the final target ,and using the one from rootfs or `LD_LIBRARY_PATH`
 
 ## Testing Requirements
  
-We need to define a specification for requirements for testing, the do's and don't define what documenation / doxygen comments are required, and what are the expectations for test.
+We need to define a specification for requirements for testing, the do's and don't define what documentation / doxygen comments are required, and what are the expectations for test.
  
-- Remove the L3 spec, from UT-Core
-- Ensure we copy the specifications from and define the layers from [Source of truth ETWIKI](https://etwiki.sys.comcast.net/display/RDK/RDK+Vendor+Delivery+Testing) Put this into the new Test Specification document.
+- Ensure we copy the specifications from and define the layers
 
 ## Key Value Pair
  

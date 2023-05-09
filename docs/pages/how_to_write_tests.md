@@ -8,25 +8,29 @@
 
 # Contents
 
-+ [Overview](#overview)
-+ [Acronyms, Terms and Abbreviations](#acronyms-terms-and-abbreviations)
-+ [Related Documents](#related-documents)
-+ [Testing Specification Level 1 (L1)](#testing-specification-level-1-l1)
-+ [Testing Specification Level 2 (L2)](#testing-specification-level-2-l2)
-+ [Implementation Guidelines](#implementation-guidelines)
-	- [Linux Environment](#linux-environment)
-	- [Test Naming Convention](#test-naming-convention)
-	- [Git Branching Stategy](#git-branching-stategy)
-+ [File header for .c files](#file-header-for-c-files)
-	- [Template](#template)
-	- [Example of the .c file template](#example-of-the-c-file-template)
-+ [Function brief template L1 functions](#function-brief-template-l1-functions)
-	- [Template](#template-1)
-	- [Example - Positive Test](#example---positive-test)
-	- [Example - Negative Test](#example---negative-test)
-+ [Function brief template L2 module functions](#function-brief-template-l2-module-functions)
-	- [Template](#template-2)
-	- [Example](#example)
+- [Guidelines to Authoring Tests](#guidelines-to-authoring-tests)
+- [History](#history)
+- [Contents](#contents)
+	- [Overview](#overview)
+	- [Acronyms, Terms and Abbreviations](#acronyms-terms-and-abbreviations)
+	- [Related Documents](#related-documents)
+	- [Testing Specification Level 1 (L1)](#testing-specification-level-1-l1)
+	- [Testing Specification Level 2 (L2)](#testing-specification-level-2-l2)
+	- [Implementation Guidelines](#implementation-guidelines)
+		- [Linux Environment :](#linux-environment-)
+		- [Test Naming Convention :](#test-naming-convention-)
+		- [Git Branching Stategy :](#git-branching-stategy-)
+	- [File header for .c files](#file-header-for-c-files)
+		- [Template :](#template-)
+		- [Example of the .c file template :](#example-of-the-c-file-template-)
+	- [Function brief template L1 functions](#function-brief-template-l1-functions)
+		- [Template :](#template--1)
+		- [Example - Positive Test :](#example---positive-test-)
+		- [Example - Negative Test :](#example---negative-test-)
+	- [Function brief template L2 module functions](#function-brief-template-l2-module-functions)
+		- [Template :](#template--2)
+		- [Example](#example)
+		- [Level 2 Markdown Documentation](#level-2-markdown-documentation)
 
 ## Overview
 
@@ -56,12 +60,12 @@ The following is the list of reference materials whioch may be helpful in unders
 | `Doxygen` | [Link to SourceCode documentation tool](https://www.doxygen.nl/index.html) |
 | `Black Box Testing` | [Link to Wikipedia page on Black Box Testing](https://en.wikipedia.org/wiki/Black-box_testing) |
 | `Coding Guidelines` | [Link to RDK Central Coding Guidelines](https://developer.rdkcentral.com/source/source-code/source-code/coding_guideline/) |
-| `UT Core` (Unit Testing Core) | [Link to UT Core Repo](https://github.com/comcast-sky/rdk-components-ut-core)
-| `hal_unit_testing_requirements.md` | [Github Reference Documentation](https://github.com/comcast-sky/rdk-components-ut-core/tree/master/docs/pages)|
-| `l2_modue_test_specification_template.md` | [Github Reference Documentation](https://github.com/comcast-sky/rdk-components-ut-core/tree/master/docs/pages) |
-| `example_l2_module_test_specification.md` | [Github Reference Documentation](https://github.com/comcast-sky/rdk-components-ut-core/tree/master/docs/pages) |
-| `git_branching_strategy.md` | [Github Reference Documentation](https://github.com/comcast-sky/rdk-components-ut-core/tree/master/docs/pages) |
-| `how_to_run_autogen_script.md` | [Github Reference Documentation](https://github.com/comcast-sky/rdk-components-ut-core/tree/master/docs/pages) |
+| `UT Core` (Unit Testing Core) | [Link to UT Core Repo](https://github.com/rdkcentral/ut-core)
+| `hal_unit_testing_requirements.md` | [Github Reference Documentation](https://github.com/rdkcentral/ut-core/tree/master/docs/pages)|
+| `l2_modue_test_specification_template.md` | [Github Reference Documentation](https://github.com/rdkcentral/ut-core/tree/master/docs/pages) |
+| `example_l2_module_test_specification.md` | [Github Reference Documentation](https://github.com/rdkcentral/ut-core/tree/master/docs/pages) |
+| `git_branching_strategy.md` | [Github Reference Documentation](https://github.com/rdkcentral/ut-core/tree/master/docs/pages) |
+| `how_to_run_autogen_script.md` | [Github Reference Documentation](https://github.com/rdkcentral/ut-core/tree/master/docs/pages) |
 | `Mermaid Graphics in Markdown` | [Link to Mermaid](https://mermaid.js.org/#/)
 
 ## Testing Specification Level 1 (L1)
@@ -302,6 +306,6 @@ void test_l2_hdmi_cec_driver_checkLogicalAddress( void )
 
 Level 2 requires a more detailed informational document to understand the nuances and interactions of the module. The document should include diagrams and detailed information. It is recommended that markdown be used, along side diagrams via mermaid, which `SCM`'s like github support in their markdown renderers. https://mermaid.js.org/#/
 
-There is a basic template provided [l2_modue_test_specification_template.md](https://github.com/comcast-sky/rdk-components-ut-core/tree/master/docs/pages)
+There is a basic template provided [l2_modue_test_specification_template.md](https://github.com/rdkcentral/ut-core/tree/master/docs/pages)
 
-There is a simple example of how to fill out the document [example_l2_module_test_specification.md](https://github.com/comcast-sky/rdk-components-ut-core/tree/master/docs/pages) |
+There is a simple example of how to fill out the document [example_l2_module_test_specification.md](https://github.com/rdkcentral/ut-core/tree/master/docs/pages) |

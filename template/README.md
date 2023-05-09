@@ -1,8 +1,8 @@
 # Template Configuration
 
-|Date|Author|Comment|
-|------|----|--|
-|G.Weatherup|0.1.0|Draft Revisions|
+|Version|Comment|
+|-----|------|
+|0.1.0|Draft Revisions|
 
 ## Overview
 
@@ -12,7 +12,7 @@ This document is to describe the template framework that can be used to populate
 
 | Reference | Description |
 | --- | --- |
-| [Comcast-Sky](https://github.com/comcast-sky) | Comcast Sky Git Hub Enterprise |
+| [rdkcentral](https://github.com/rdkcentral) | Opensource codebase in github |
 | [CMOCK](https://github.com/ThrowTheSwitch/CMock) | Auto generation tool for interface mocks|
 
 ## Acronyms
@@ -30,8 +30,8 @@ Repositories required
 
 |Link|Description|
 |----|-----------|
-|[https://github.com/comcast-sky/rdk-components-ut-core]| Unit testing Code |
-|[https://github.com/comcast-sky/rdk-components-haltest-wifi-rdkb.git]|Example HAL Test suite using `ut-core`|
+|[https://github.com/rdkcentral/ut-core]| Unit testing Code |
+|[https://github.com/rdkcentral/haltest-wifi-rdkb.git]|Example HAL Test suite using `ut-core`|
 
 The basic `UT` Unit Test framework, has a `ut-core`.
 

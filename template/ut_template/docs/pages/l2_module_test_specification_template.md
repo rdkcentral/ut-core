@@ -1,19 +1,24 @@
 # L2 Test Specification template
 ## History
 
-| Version | Date(YY-MM-DD) | Author |Comments |
-| -------| ----- | ----- | ----- |
-| 1.0.0 | 22/02/23 | Anjali Thampi| Inital Document |
+| Version | Date(YY-MM-DD) | Comments |
+| --------| -------------- |  ----- |
+| 1.0.0 | 22/02/23 | Inital Document |
 
 ## Table of Contents
 
-- [Overview](#overview)
-  - [Acronyms](#acronyms)
-  - [Definitions](#definitions)
-  - [References](#references)
-- [Level 2 Test Suite](#level-2-test-suite)
-  - [Test 1](#test-1)
-  - [Test 2](#test-2)
+- [L2 Test Specification template](#l2-test-specification-template)
+  - [History](#history)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+    - [Acronyms, Terms and Abbreviations](#acronyms-terms-and-abbreviations)
+    - [Definitions](#definitions)
+    - [References](#references)
+  - [Level 2 Test Suite](#level-2-test-suite)
+    - [Test 1](#test-1)
+      - [Test Procedure :](#test-procedure-)
+    - [Test 2](#test-2)
+      - [Test Procedure :](#test-procedure--1)
 
 ## Overview
 
@@ -28,7 +33,7 @@ This document describes the level 2 testing suite for the <component> module.
 - `RDK-B`  \- Reference Design Kit for Broadband Devices
 - `RDK-V`  \- Reference Design Kit for Video Devices
 - `UT`  \- Unit Test(s)
-- `OEM`  \- Original Equipment Manufacture (Sky is also an OEM)
+- `OEM`  \- Original Equipment Manufacture
 - `SoC`  \- System on a Chip
 
 ### Definitions
@@ -41,7 +46,7 @@ This document describes the level 2 testing suite for the <component> module.
   - `GTest` \- Google Test Suit <https://google.github.io/googletest>
   - `CUnit` \- C Testing Suit <http://cunit.sourceforge.net/>
   - `Unity` \- C Embedded Testing Suit <http://www.throwtheswitch.org/unity>
-  - `ut-core` \- Common Testing Framework <https://github.com/comcast-sky/rdk-components-ut-core>, which wraps a open-source framework that can be expanded to the requirements for future comcast-sky framework.
+  - `ut-core` \- Common Testing Framework <https://github.com/rdkcentral/ut-core>, which wraps a open-source framework that can be expanded to the requirements for future framework.
 
 ### References
 

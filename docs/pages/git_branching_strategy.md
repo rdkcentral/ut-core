@@ -2,21 +2,26 @@
 
 ## History
  
-|Version|Date|Author|Notes|
-|-----------|------|-----|---|
-|1.2|23rd Feb 2023|G.Weatherup|Updated for release, with reworked template|
-|1.1|23th Nov 2022|G.Weatherup|Added useful information|
-|1.0|23th Nov 2022|G.Weatherup|Initial release|
+|Version|Date|Notes|
+|-------|----|-----|
+|1.2|23rd Feb 2023|Updated for release, with reworked template|
+|1.1|23th Nov 2022|Added useful information|
+|1.0|23th Nov 2022|Initial release|
 
 ## Table of Contents
 
-- [Overview](#overview)
+- [Git Branching Strategy](#git-branching-strategy)
+  - [History](#history)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
     - [Acronyms, Terms and Abbreviations](#acronyms-terms-and-abbreviations)
     - [References](#references)
-- [Gitflow vs trunk-based development](#gitflow-vs-trunk-based-development)
-- [Process on creating code changes](#process-on-creating-code-changes)
+  - [Git-flow vs trunk-based development](#git-flow-vs-trunk-based-development)
+  - [Process on creating code changes](#process-on-creating-code-changes)
     - [Release Process](#release-process)
-- [Useful Information](#useful-information)
+  - [Useful Information](#useful-information)
+      - [Configuration to auto uplink](#configuration-to-auto-uplink)
+      - [Change your PS1 so you can see what branch you are on](#change-your-ps1-so-you-can-see-what-branch-you-are-on)
  
 ## Overview
  
@@ -28,7 +33,7 @@ The purpose of this document is to describe the standard method of working for d
 - `tig`  \- Tig is an ncurses-based text-mode interface for git.
 - `git-flow`  \- Strategy for managing Git branches.
 - `git-hub flow`  \- GitHub flow is a lightweight, branch-based workflow.
-- `OEM`  \- Original Equipment Manufacture (Sky is an OEM)
+- `OEM`  \- Original Equipment Manufacture
 - `vendor`  \- 3rd Party `Soc` or `Software provider` who will be required to pass all the tests
 - `patching`  \- File applied independantly ontop of a software delivery.
 - `pull request`  \- Github review, let's you tell others about changes you've pushed to a branch in a repository on GitHub

@@ -1,6 +1,5 @@
 /**
  * @file main.c
- * @author Gerald Weatherup (gerald.weatherup@sky.uk)
  * @brief Main control application for wifi unit testing
  * @version 0.1
  * @date 2022-05-20

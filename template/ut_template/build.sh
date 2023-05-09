@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Clone the Unit Test Requirements
-TEST_REPO=git@github.com:comcast-sky/rdk-components-ut-core.git
+TEST_REPO=git@github.com:rdkcentral/ut-core.git
 
 # Set default UT_PROJECT_VERSION to master
 if [ -z "${UT_PROJECT_VERSION}" ]; then

@@ -1,10 +1,10 @@
 # HAL Unit Testing Requirements
 # HISTORY
 
-| Date | Author | Comment | Version |
-| --- | --- | --- | --- |
-| 30/08/22 | G. Weatherup | Renamed `HTS` to `UT` | 1.1.0 |
-| 21/07/22 | G. Weatherup | First Release | 1.0.0 |
+| Date | Comment | Version |
+| --- | --- | --- |
+| 30/08/22 | Renamed `HTS` to `UT` | 1.1.0 |
+| 21/07/22 | First Release | 1.0.0 |
 
 ## Table of Contents
 
@@ -26,7 +26,7 @@ This document defines the unit testing requirements the principles defined here 
 - `RDK-B` \- Reference Design Kit for Broadband Devices
 - `RDK-V` \- Reference Design Kit for Video Devices
 - `UT` \- HAL Unit Testing Suit
-- `OEM` \- Original Equipment Manufacture (Sky is also an OEM)
+- `OEM` \- Original Equipment Manufacture
 - `SoC` \- System on a Chip
 
 ## Definitions
@@ -39,7 +39,7 @@ This document defines the unit testing requirements the principles defined here 
   - GTest - [https://google.github.io/googletest] \- Google Test Suit
   - CUnit - [http://cunit.sourceforge.net/] \- C Testing Suit
   - Unity - [http://www.throwtheswitch.org/unity] -C Embedded Testing Suit
-- `ut-core` - Common Testing Framework [https://github.com/comcast-sky/rdk-components-ut-core]
+- `ut-core` - Common Testing Framework [https://github.com/rdkcentral/ut-core]
 
 ## References
 
@@ -213,7 +213,7 @@ e.g. a change to the `HAL` requires a change to the `UT`, although vice versa is
 
 The testing suite will `git tag` actual versions together in the source code repository.
 
-This is standard practice for using git with tags, and repo, in comcast terminology this is called the `federated` model.
+This is standard practice for using git with tags, and repo with branching.
 
 ### Revision Control
 

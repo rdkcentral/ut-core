@@ -1,9 +1,9 @@
 # Unit Testing - Hal Testing Suite
 
-| Date   | Author       | Comment | Version |
-|--------|--------------|---------|---------|
-| 23/02/22 | G. Weatherup | Reviewed & Updated| 1.1.0|
-| 30/09/22 | G. Weatherup | Initial release| 1.0.0|
+| Date   | Comment | Version |
+|--------|---------|---------|
+| 23/02/22 | Reviewed & Updated| 1.1.0|
+| 30/09/22 | Initial release| 1.0.0|
 
 ## Scope
 
@@ -13,17 +13,17 @@ To develop a L1, L2 testing suite to support vendor deliverables. This combines 
 
 Each of the HALS will use the hal `UT-Core` framework, it will provide all the configuration required to support building and running a common testing environment.
 
-Each HAL component definition, will have individual cadence, specific documentation, and tagged testing suites to support them. All code is shared in the `comcast-sky` git hub, currently for internal consumption.
+Each HAL component definition, will have individual cadence, specific documentation, and tagged testing suites to support them. All code is shared in the `rdkcentral` git hub.
 
-- [HAL Test Framework URL - Comcast-Sky GitHub](https://github.com/orgs/comcast-sky/repositories?q=rdk%2Fcomponents%2Fhal%2F&type=all&language=&sort=name)
+- [Test Framework URL - GitHub](https://github.com/search?q=org%3Ardkcentral+hal&type=repositories)
 
 The naming convention chosen will allow for future convergence of the RDK-B/RDK-V/RDK-X stack into a single component based definition.
 
-Naming convention as follows:-
+Ideal Naming convention as follows:-
 
 ```bash
-- rdk-components-hal-<componentName>
-- rdk-components-haltest-<componentName>
+- hal-<componentName>
+- haltest-<componentName>
 ```
 
 ## Build Environment Requirements
@@ -58,18 +58,18 @@ Am example toolchain is provided for RDK-B, and this is located in github at the
 
 Unit testing core subsystem is available from the following location
 
-[https://github.com/comcast-sky/rdk-components-ut-core]
+[https://github.com/rdkcentral/ut-core]
 
 Cloning the core ut-code is available from here:
 
 ```bash
-git clone git@github.com:comcast-sky/rdk-components-ut-core.git
+git clone git@github.com:rdkcentral/ut-core
 ```
 
 It is recommended that you read the documentation :-
 
-- [https://github.com/comcast-sky/rdk-components-ut-core/blob/master/README.md]
-- [https://github.com/comcast-sky/rdk-components-ut-core/blob/master/docs/pages/halUnitTesting_requirements.md]
+- [https://github.com/rdkcentral/ut-core/blob/master/README.md]
+- [https://github.com/rdkcentral/ut-core/blob/master/docs/pages/hal_unit_testing_requirements.md]
 
 ```bash
 .
@@ -112,14 +112,11 @@ Toolchain is provided by the vendor, or via an SDK build in the Yocto build syst
 
 Recommand to install the toolchain into `./tools/2.0` directory
 
-A sample SDK installer script for RDK-B, using an ARM compiler is shared location [https://github.com/comcast-sky/rdk-component-yocto-rdk-sdk](https://github.com/comcast-sky/rdk-component-yocto-rdk-sdk)
+Follow the standard build instructions for generating an SDK for your platform, and installing and triggering the toolchain.
 
 #### How to use SDK Toolchain
 
 ```bash
-cd ./tools
-git clone git@github.com:comcast-sky/rdk-component-yocto-rdk-sdk.git
-cd rdk-component-yocto-rdk-sdk
 ./rdk-glibc-x86_64-arm-toolchain-2.0.sh
 ```
 
@@ -227,7 +224,7 @@ Help
 ## Source Tree `UT` Unit Test Directory
 
 The tests are defined into the following structure, as per the template from `template/ut_template/`
-, which can be copied to the root directory if your specific `rdk-component-haltest-xxx` directory for a baseline.
+, which can be copied to the root directory if your specific `haltest-xxx` directory for a baseline.
 
  ```bash
 ├── bin
@@ -238,12 +235,8 @@ The tests are defined into the following structure, as per the template from `te
 │   └── pages
 │       ├── L1_TestSpecification.md
 │       ├── L2_TestSpecification.md
-│       ├── L3_TestSpecification.md
 │       └── README.md -> ../../README.md
 ├── Makefile
-├── mocks
-│   ├── include
-│   └── src
 ├── README.md
 ├── skeletons
 │   └── src
