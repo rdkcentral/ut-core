@@ -32,7 +32,6 @@ else
     echo "Cloning Common documentation generation"
     git clone git@github.com:rdkcentral/hal-doxygen.git build
     cd ./build
-    git flow init -d
     git checkout ${HAL_GENERATOR_VERSION}
     cd ..
     ./${0}
