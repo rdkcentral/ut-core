@@ -45,7 +45,7 @@ function AGT_tests_init()
 
         # Variables
         AGT_SCRIPTS_TEMPLATES="${AGT_SCRIPTS_HOME}/templates/"
-        AGT_COPYRIGHT_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/AGT_copywrite_template.txt"
+        AGT_COPYRGT_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/AGT_copywrite_template.txt"
         AGT_L1_FUNCTION_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/AGT_L1_function_template.txt"
         AGT_L2_FUNCTION_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/AGT_L2_function_template.txt"
         AGT_REGISTER_FUNCTION_TEMPLATE="${AGT_SCRIPTS_TEMPLATES}/AGT_register_function_template.txt"
@@ -92,11 +92,11 @@ function AGT_add_headers_to_files()
         fi
 }
 
-# Function to add copyright lines from template to file
+# Function to add copyrt lines from template to file
 # @param [in] Filename to copied into
-function AGT_add_copyright_to_files()
+function AGT_add_copyrt_to_files()
 {
-        temp=`cat ${AGT_COPYRIGHT_TEMPLATE}`
+        temp=`cat ${AGT_COPYRGT_TEMPLATE}`
         eval "echo -e \"${temp}\\n\"" > $1
 }
 
@@ -117,7 +117,7 @@ function AGT_add_file_banner_to_files()
 # @param [in] Filename to copied into
 function AGT_add_common_to_tests_file()
 {
-        AGT_add_copyright_to_files "${1}.c"
+        AGT_add_copyrt_to_files "${1}.c"
         AGT_add_file_banner_to_files "${1}.c"
         AGT_add_headers_to_files "${1}.c" true
 }
@@ -171,7 +171,7 @@ function AGT_add_register_function()
 # Function to add main file in UT src from templates
 function AGT_add_main_file()
 {
-        AGT_add_copyright_to_files ${AGT_UT_MAIN_FILE}
+        AGT_add_copyrt_to_files ${AGT_UT_MAIN_FILE}
 
         AGT_add_file_banner_to_files ${AGT_UT_MAIN_FILE}
 
@@ -184,7 +184,7 @@ function AGT_add_main_file()
 # Function to add test register file from the templates
 function AGT_add_test_register_file()
 {
-        AGT_add_copyright_to_files ${AGT_UT_TEST_REGISTER_FILE}
+        AGT_add_copyrt_to_files ${AGT_UT_TEST_REGISTER_FILE}
 
         AGT_add_headers_to_files ${AGT_UT_TEST_REGISTER_FILE} false
 
