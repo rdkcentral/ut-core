@@ -1,0 +1,14 @@
+/**
+* @file TODO: ${AGT_FILE_NAME}
+* @page module_name TODO: Required field, name of the main module
+* @subpage sub_page_name TODO: Add a function group if relevant
+*
+* ## Module's Role
+* TODO: Explain the module's role in the system in general
+* This is to ensure that the API meets the operational requirements of the module across all vendors.
+*
+* **Pre-Conditions:**  TODO: Add pre-conditions if any@n
+* **Dependencies:** TODO: Add dependencies if any@n
+*
+* Ref to API Definition specification documentation : [halSpec.md](../../../docs/halSpec.md)
+*/

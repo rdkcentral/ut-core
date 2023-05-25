@@ -1,0 +1,11 @@
+This component contains software that is Copyright (c) 2023 RDK Management.
+The component is licensed to you under the Apache License, Version 2.0 (the "License").
+You may not use the component except in compliance with the License.
+
+The component may include material which is licensed under other licenses / copyrights as
+listed below.  Your use of this material within the component is also subject to the terms and
+conditions of these licenses.  The LICENSE file contains the text of all the licenses which apply
+within this component.
+
+cJSON: "Copyright (c) 2009-2017 Dave Gamble and cJSON contributors/Licensed under the MIT License"
+

@@ -1,0 +1,21 @@
+static UT_test_suite_t * pSuite = NULL;
+
+/**
+ * @brief Register the main test(s) for this module
+ *
+ * @return int - 0 on success, otherwise failure
+ */
+int ${AGT_REGISTER_FUNCTION}_register ( void )
+{
+	/* add a suite to the registry */
+	pSuite = UT_add_suite( "\"[${AGT_TEST_LEVEL} ${AGT_SUITE_NAME}]\"", NULL, NULL );
+	if ( NULL == pSuite )
+	{
+		return -1;
+	}	
+
+	`echo "${AGT_ADD_L1_TEST_TO_SUITE}"| tr ":" "\n"`
+	`echo "${AGT_ADD_L2_TEST_TO_SUITE}"| tr ":" "\n"`
+
+	return 0;
+} 

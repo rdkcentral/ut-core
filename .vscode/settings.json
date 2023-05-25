@@ -1,0 +1,17 @@
+{
+    "makefile.extensionOutputFolder": "./.vscode",
+    "cSpell.words": [
+        "cabhf",
+        "CUNIT",
+        "memset",
+        "optarg",
+        "optind",
+        "stdbool",
+        "stdint",
+        "stdlib",
+        "strcpy",
+        "strncpy",
+        "struct"
+    ],
+    "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools"
+}
