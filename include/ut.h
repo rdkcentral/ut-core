@@ -151,7 +151,7 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 
 #define UT_ASSERT_TRUE(value) CU_ASSERT_TRUE_FATAL(value)
 #define UT_ASSERT_FALSE(value) CU_ASSERT_FALSE_FATAL(value)
-#define UT_ASSERT_EQUAL(actual,expected) CU_ASSERT_EQUAL(actual,expected)
+#define UT_ASSERT_EQUAL(actual,expected) CU_ASSERT_EQUAL_FATAL(actual,expected)
 
 #define UT_ASSERT_STRING_EQUAL(expected, actual) CU_ASSERT_STRING_EQUAL_FATAL(actual,expected)
 #define UT_ASSERT_STRING_NOT_EQUAL(expected, actual) CU_ASSERT_STRING_NOT_EQUAL_FATAL(actual,expected)
