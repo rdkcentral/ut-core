@@ -40,9 +40,6 @@
 
 #include <string.h>
 
-// the configured options and settings
-#define UT_CORE_VERSION "1.0.0"
-
 /**
  * @brief Status codes to support the UT system
  * 
@@ -138,23 +135,44 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 #include <TestRun.h>
 #include <CUnit.h>
 
-#define UT_VERSION "1.0.0"
-
+/* UT test macros */
 #define UT_PASS(msg) CU_PASS(msg)
-#define UT_FAIL(msg) CU_FAIL(msg)
 
-/* Fatal test macros */
-#define UT_FAIL_FATAL(msg) CU_FAIL_FATAL(msg)
-#define UT_ASSERT(value) CU_ASSERT_FATAL(msg)
+#define UT_FAIL(msg) CU_FAIL_FATAL(msg)
+/* NON-FATAL equivalent of UT_FAIL test macro */
+#define UT_FAIL_NOT_FATAL(msg) CU_FAIL(msg)
+
+#define UT_ASSERT(value) CU_ASSERT_FATAL(value)
+/* NON-FATAL equivalent of UT_ASSERT test macro */
+#define UT_ASSERT_NOT_FATAL(value) CU_ASSERT(value)
+
 #define UT_ASSERT_PTR_NULL(value) CU_ASSERT_PTR_NULL_FATAL(value)
+/* NON-FATAL equivalent of UT_ASSERT_PTR_NULL test macro */
+#define UT_ASSERT_PTR_NULL_NOT_FATAL(value) CU_ASSERT_PTR_NULL(value)
+
 #define UT_ASSERT_PTR_NOT_NULL(value) CU_ASSERT_PTR_NOT_NULL_FATAL(value)
+/* NON-FATAL equivalent of UT_ASSERT_PTR_NOT_NULL test macro */
+#define UT_ASSERT_PTR_NOT_NULL_NOT_FATAL(value) CU_ASSERT_PTR_NOT_NULL(value)
 
 #define UT_ASSERT_TRUE(value) CU_ASSERT_TRUE_FATAL(value)
+/* NON-FATAL equivalent of UT_ASSERT_TRUE test macro */
+#define UT_ASSERT_TRUE_NOT_FATAL(value) CU_ASSERT_TRUE(value)
+
 #define UT_ASSERT_FALSE(value) CU_ASSERT_FALSE_FATAL(value)
+/* NON-FATAL equivalent of UT_ASSERT_FALSE test macro */
+#define UT_ASSERT_FALSE_NOT_FATAL(value) CU_ASSERT_FALSE(value)
+
 #define UT_ASSERT_EQUAL(actual,expected) CU_ASSERT_EQUAL_FATAL(actual,expected)
+/* NON-FATAL equivalent of UT_ASSERT_EQUAL test macro */
+#define UT_ASSERT_EQUAL_NOT_FATAL(actual,expected) CU_ASSERT_EQUAL(actual,expected)
 
 #define UT_ASSERT_STRING_EQUAL(expected, actual) CU_ASSERT_STRING_EQUAL_FATAL(actual,expected)
+/* NON-FATAL equivalent of UT_ASSERT_STRING_EQUAL test macro */
+#define UT_ASSERT_STRING_EQUAL_NOT_FATAL(expected, actual) CU_ASSERT_STRING_EQUAL(actual,expected)
+
 #define UT_ASSERT_STRING_NOT_EQUAL(expected, actual) CU_ASSERT_STRING_NOT_EQUAL_FATAL(actual,expected)
+/* NON-FATAL equivalent of UT_ASSERT_STRING_NOT_EQUAL test macro */
+#define UT_ASSERT_STRING_NOT_EQUAL_NOT_FATAL(expected, actual) CU_ASSERT_STRING_NOT_EQUAL(actual,expected)
 
 #endif  /* UT -> CUNIT - Wrapper */
 
