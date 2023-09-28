@@ -142,9 +142,9 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 /* NON-FATAL equivalent of UT_FAIL test macro */
 #define UT_FAIL_NOT_FATAL(msg) CU_FAIL(msg)
 
-#define UT_ASSERT(value) CU_ASSERT_FATAL(msg)
+#define UT_ASSERT(value) CU_ASSERT_FATAL(value)
 /* NON-FATAL equivalent of UT_ASSERT test macro */
-#define UT_ASSERT_NOT_FATAL(value) CU_ASSERT(msg)
+#define UT_ASSERT_NOT_FATAL(value) CU_ASSERT(value)
 
 #define UT_ASSERT_PTR_NULL(value) CU_ASSERT_PTR_NULL_FATAL(value)
 /* NON-FATAL equivalent of UT_ASSERT_PTR_NULL test macro */
