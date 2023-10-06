@@ -220,7 +220,8 @@ UT_status_t UT_run_tests( void )
             CU_basic_run_tests();
             TEST_INFO(("\nFailures:-\n"));
             CU_basic_show_failures(CU_get_failure_list());
-            TEST_INFO(("\n\n"));        }
+            TEST_INFO(("\n\n"));
+        }
         break;
 
         case UT_MODE_CONSOLE:
@@ -245,11 +246,16 @@ UT_status_t UT_run_tests( void )
     CU_cleanup_registry();
     error = CU_get_error();
 
+    /* #BUG: There's a bug here to be investigated, the suites are not counting as failed when tests fail.*/
+    /* #TODO: Should display message PASS / FAIL depending on the flag state */
     if ( error != CUE_SUCCESS )
     {
         // #TODO: Latest date to upgrade to add a translate error function
+                UT_LOG("\n ---- end of test run ---- \n"); 
         return UT_STATUS_FAILURE;
     }
+
+    UT_LOG("\n ---- end of test run ---- \n");
     return UT_STATUS_OK;
 }
 

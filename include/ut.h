@@ -39,6 +39,7 @@
 #define __UT_H
 
 #include <string.h>
+#include <ut_log.h>
 
 // the configured options and settings
 #define UT_CORE_VERSION "1.0.0"
@@ -138,14 +139,12 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 #include <TestRun.h>
 #include <CUnit.h>
 
-#define UT_VERSION "1.0.0"
-
 #define UT_PASS(msg) CU_PASS(msg)
 #define UT_FAIL(msg) CU_FAIL(msg)
 
 /* Fatal test macros */
 #define UT_FAIL_FATAL(msg) CU_FAIL_FATAL(msg)
-#define UT_ASSERT(value) CU_ASSERT_FATAL(msg)
+#define UT_ASSERT(value) CU_ASSERT_FATAL(value)
 #define UT_ASSERT_PTR_NULL(value) CU_ASSERT_PTR_NULL_FATAL(value)
 #define UT_ASSERT_PTR_NOT_NULL(value) CU_ASSERT_PTR_NOT_NULL_FATAL(value)
 
@@ -157,6 +156,31 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 #define UT_ASSERT_STRING_NOT_EQUAL(expected, actual) CU_ASSERT_STRING_NOT_EQUAL_FATAL(actual,expected)
 
 #endif  /* UT -> CUNIT - Wrapper */
+
+/**
+ * @brief UT Assert with Message on failure
+ * 
+ * @param[in] value - the value to check 
+ * @param[in] message - message to log, if the assert fails
+ * 
+ */
+#define UT_ASSERT_MSG(value, message, ...) \
+    if ( !(value) ) \
+    { \
+        UT_LOG("UT_ASSERT_MSG: "message" ", ##__VA_ARGS__); \
+    } \
+    UT_ASSERT(value);
+
+/**
+ * @brief UT Assert with Log always
+ * 
+ * @param[in] value - the value to check 
+ * @param[in] message - message to log, will always log
+ * 
+ */
+#define UT_ASSERT_LOG(value, message, ...) \
+    UT_LOG("UT_ASSERT_LOG: "message" ", ##__VA_ARGS__); \
+    UT_ASSERT(value);
 
 #endif  /*  __UT_H  */
 

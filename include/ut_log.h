@@ -23,6 +23,8 @@
 /* System Includes */
 #include <stdarg.h> 
 
+#define UT_LOG_MAX_LINE_SIZE (255)
+
 #define UT_LOG(format, ...) UT_log(__func__, __LINE__, format, ## __VA_ARGS__)
 
 /**
@@ -39,6 +41,7 @@ void UT_log_setLogFilePath(char * inputFilePath);
  * @brief Appending to log file 
  * 
  * This function will append the log lines with timestamp, function name and line number
+ * @note: LF will be added to the start of each line by this function
  * 
  * @param function      - name of the calling function
  * @param line          - line number

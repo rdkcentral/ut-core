@@ -55,6 +55,11 @@ void UT_log_setLogFilePath(char *inputFilePath)
         snprintf(gLogFileName, UT_MAX_PATH, "%s/ut-log_%s.log", inputFilePath, time_now);
     }
     gLogInit = true;
+
+    /* Just dump the log location for the moment, when we upgrade to abtract logging we can handle this differently */
+    printf( "\n\tLog Location: [%s]\n", gLogFileName );
+    
+    /* #BUG: Doesn't set the error outputs from testing framework, thus we only get our logs not the framework ones */
 }
 
 void UT_log(const char *function, int line, const char * format, ...)
@@ -64,6 +69,8 @@ void UT_log(const char *function, int line, const char * format, ...)
     va_list     list;
     time_t      now;
     struct tm   *tmp;
+    char        singleLineBuffer[UT_LOG_MAX_LINE_SIZE+1]={0};
+    size_t      lineSize;
 
     time(&now);
 
@@ -83,10 +90,17 @@ void UT_log(const char *function, int line, const char * format, ...)
 
     tmp = localtime(&now);
     strftime(time_now, sizeof(time_now), "%Y-%m-%d-%X", tmp);
-    /* Use C Standard formatting for */
-    fprintf(fp,"\n%s, %s,%6d : ", time_now, function, line);
+    snprintf( singleLineBuffer, UT_LOG_MAX_LINE_SIZE, "\n%s, %s,%6d : ", time_now, function, line );
+    lineSize = strlen( singleLineBuffer );
+
     va_start(list, format);
-    vfprintf(fp, format, list);
+    vsnprintf(&singleLineBuffer[lineSize], UT_LOG_MAX_LINE_SIZE-lineSize-1, format, list);
     va_end(list);
+
+    /* Print the line to stdout */
+    printf( singleLineBuffer );
+
+    /* Print the data to the stream */
+    fprintf( fp, singleLineBuffer );
     fclose(fp);
 }

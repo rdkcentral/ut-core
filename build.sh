@@ -19,8 +19,17 @@
 # * limitations under the License.
 # *
 
+SCRIPT_EXEC="$(realpath $0)"                                                                                                                                                                                            
+MY_DIR="$(dirname $SCRIPT_EXEC)"    
+
+pushd ${MY_DIR} > /dev/null
 # Clone CUnit
-echo "Clone CUnit"
-wget https://sourceforge.net/projects/cunit/files/CUnit/2.1-3/CUnit-2.1-3.tar.bz2 --no-check-certificate -P framework/
-tar xvfj framework/CUnit-2.1-3.tar.bz2 -C ./framework/
-cp framework/CUnit-2.1-3/CUnit/Headers/CUnit.h.in framework/CUnit-2.1-3/CUnit/Headers/CUnit.h
+if [ -d "./framework/" ]; then
+    echo "Framework already exists"
+else
+    echo "Clone Framework"
+    wget https://sourceforge.net/projects/cunit/files/CUnit/2.1-3/CUnit-2.1-3.tar.bz2 --no-check-certificate -P framework/
+    tar xvfj framework/CUnit-2.1-3.tar.bz2 -C ./framework/
+    cp framework/CUnit-2.1-3/CUnit/Headers/CUnit.h.in framework/CUnit-2.1-3/CUnit/Headers/CUnit.h
+fi
+popd > /dev/null
