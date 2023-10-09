@@ -368,3 +368,15 @@ The purpose of the test level is to test the module functionality as much as pos
 ## Autogen scripts
 
 Please refer to [docs/pages/autogenTemplate.md](autogenTemplate.md)
+
+## UT-Core testing suite
+
+The testing suite to check the ut-core functionality is housed under the `tests` directory and will run in linux.
+
+To build and run the testing suite and output in basic mode do the following
+
+```bash
+cd ./tests
+make
+./bin/ut-tests -b
+``````

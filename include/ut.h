@@ -41,9 +41,6 @@
 #include <string.h>
 #include <ut_log.h>
 
-// the configured options and settings
-#define UT_CORE_VERSION "1.0.0"
-
 /**
  * @brief Status codes to support the UT system
  * 
@@ -146,7 +143,7 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
  * 
  */
 #define UT_PASS(msg) \
-    UT_LOG( "UT_PASS(" #msg ")" ); \
+    UT_LOG( UT_LOG_GREEN"UT_PASS"UT_LOG_NC"(" #msg ")" ); \
     CU_PASS(msg);
 
 /**
@@ -155,7 +152,7 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
  * @note Test will continue to process
  */
 #define UT_FAIL(msg) \
-    UT_LOG( ("UT_FAIL(" #msg")") ); \
+    UT_LOG( (UT_LOG_RED"UT_FAIL"UT_LOG_NC"(" #msg")") ); \
     CU_FAIL(msg);
 
 /**
@@ -165,7 +162,7 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
  * 
  */
 #define UT_FAIL_FATAL(msg) \
-    UT_LOG( ("UT_FAIL_FATAL(" #msg")") ); \
+    UT_LOG( (UT_LOG_RED"UT_FAIL_FATAL("UT_LOG_NC #msg")") ); \
     CU_FAIL_FATAL(msg);
 
 /**
@@ -176,7 +173,7 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 #define UT_ASSERT(value) \
     if ( !(value) ) \
     { \
-        UT_LOG( ("UT_ASSERT(" #value")") ); \
+        UT_LOG( (UT_LOG_RED"UT_ASSERT"UT_LOG_NC"(" #value")") ); \
     } \
     CU_ASSERT_FATAL(value);
 
@@ -189,7 +186,7 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 #define UT_ASSERT_PTR_EQUAL(actual, expected) \
     if ( ((const void*)(actual) != (const void*)(expected)) ) \
     { \
-        UT_LOG( ("UT_ASSERT_PTR_EQUAL(" #actual ","  #expected ")") ); \
+        UT_LOG( (UT_LOG_RED"UT_ASSERT_PTR_EQUAL"UT_LOG_NC"(" #actual ","  #expected ")") ); \
     } \
     CU_ASSERT_PTR_EQUAL_FATAL(actual, expected);
 
@@ -202,7 +199,7 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 #define UT_ASSERT_PTR_NOT_EQUAL(actual, expected) \
     if ( ((const void*)(actual) == (const void*)(expected)) ) \
     { \
-        UT_LOG( ("UT_ASSERT_PTR_NOT_EQUAL(" #actual ","  #expected ")") ); \
+        UT_LOG( (UT_LOG_RED"UT_ASSERT_PTR_NOT_EQUAL"UT_LOG_NC"(" #actual ","  #expected ")") ); \
     } \
     CU_ASSERT_PTR_NOT_EQUAL_FATAL(actual, expected);
 
@@ -214,7 +211,7 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 #define UT_ASSERT_PTR_NULL(value)  \
     if ( (NULL != (const void*)(value)) ) \
     { \
-        UT_LOG( ("UT_ASSERT_PTR_NULL(" #value")") ); \
+        UT_LOG( (UT_LOG_RED"UT_ASSERT_PTR_NULL"UT_LOG_NC"(" #value")") ); \
     } \
     CU_ASSERT_PTR_NULL_FATAL(value);
 
@@ -226,7 +223,7 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 #define UT_ASSERT_PTR_NOT_NULL(value) \
     if ( (NULL == (const void*)(value)) ) \
     { \
-        UT_LOG(("UT_ASSERT_PTR_NOT_NULL(" #value")")); \
+        UT_LOG((UT_LOG_RED"UT_ASSERT_PTR_NOT_NULL"UT_LOG_NC"(" #value")")); \
     } \
     CU_ASSERT_PTR_NOT_NULL_FATAL(value);
 
@@ -238,7 +235,7 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 #define UT_ASSERT_TRUE(value)  \
     if ( !(value) ) \
     { \
-        UT_LOG( ("UT_ASSERT_TRUE(" #value")") ); \
+        UT_LOG( (UT_LOG_RED"UT_ASSERT_TRUE"UT_LOG_NC"(" #value")") ); \
     } \
     CU_ASSERT_TRUE_FATAL(value);
 
@@ -250,7 +247,7 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 #define UT_ASSERT_FALSE(value) \
     if ( (value) ) \
     { \
-        UT_LOG( ("UT_ASSERT_FALSE(" #value")") ); \
+        UT_LOG( (UT_LOG_RED"UT_ASSERT_FALSE"UT_LOG_NC"(" #value")") ); \
     } \
     CU_ASSERT_FALSE_FATAL(value);
 
@@ -263,7 +260,7 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 #define UT_ASSERT_EQUAL(actual,expected) \
     if ( ((actual) != (expected)) ) \
     { \
-        UT_LOG( ("UT_ASSERT_EQUAL(" #actual ","  #expected ")") ); \
+        UT_LOG( (UT_LOG_RED"UT_ASSERT_EQUAL"UT_LOG_NC"(" #actual ","  #expected ")") ); \
     } \
     CU_ASSERT_EQUAL_FATAL(actual,expected);
 
@@ -276,7 +273,7 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 #define UT_ASSERT_NOT_EQUAL(actual,expected) \
     if ( ((actual) == (expected)) ) \
     { \
-        UT_LOG(("UT_ASSERT_NOT_EQUAL(" #actual ","  #expected ")")); \
+        UT_LOG((UT_LOG_RED"UT_ASSERT_NOT_EQUAL"UT_LOG_NC"(" #actual ","  #expected ")")); \
     } \
     CU_ASSERT_NOT_EQUAL_FATAL(actual,expected);
 
@@ -289,7 +286,7 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 #define UT_ASSERT_STRING_EQUAL(expected, actual) \
     if ( (strcmp((const char*)(actual), (const char*)(expected))) ) \
     { \
-        UT_LOG(("UT_ASSERT_STRING_EQUAL(" #actual ","  #expected ")") ); \
+        UT_LOG((UT_LOG_RED"UT_ASSERT_STRING_EQUAL"UT_LOG_NC"(" #actual ","  #expected ")") ); \
     } \
     CU_ASSERT_STRING_EQUAL_FATAL(actual,expected);
 
@@ -302,7 +299,7 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 #define UT_ASSERT_STRING_NOT_EQUAL(expected, actual) \
     if ( !(strcmp((const char*)(actual), (const char*)(expected))) ) \
     { \
-        UT_LOG(("UT_ASSERT_STRING_NOT_EQUAL(" #actual ","  #expected ")") ); \
+        UT_LOG((UT_LOG_RED"UT_ASSERT_STRING_NOT_EQUAL"UT_LOG_NC"(" #actual ","  #expected ")") ); \
     } \
     CU_ASSERT_STRING_NOT_EQUAL_FATAL(actual,expected);
 
@@ -316,7 +313,7 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 #define UT_ASSERT_MSG(value, message) \
     if ( !(value) ) \
     { \
-        UT_LOG( ("UT_ASSERT_MSG( [" #value "],[" #message "])")  ); \
+        UT_LOG( (UT_LOG_RED"UT_ASSERT_MSG"UT_LOG_NC"( [" #value "],[" #message "])")  ); \
     } \
     CU_ASSERT_FATAL(value);
 
@@ -330,7 +327,7 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 #define UT_ASSERT_TRUE_MSG(value, message) \
     if ( !(value) ) \
     { \
-        UT_LOG( ("UT_ASSERT_TRUE_MSG( ["#value"],[" #message"])") ); \
+        UT_LOG( (UT_LOG_RED"UT_ASSERT_TRUE_MSG"UT_LOG_NC"( ["#value"],[" #message"])") ); \
     } \
     CU_ASSERT_TRUE_FATAL(value);
 
@@ -344,7 +341,7 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 #define UT_ASSERT_FALSE_MSG(value, message) \
     if ( (value) ) \
     { \
-        UT_LOG( ("UT_ASSERT_FALSE_MSG( ["#value"],[" #message"])")  ); \
+        UT_LOG( (UT_LOG_RED"UT_ASSERT_FALSE_MSG"UT_LOG_NC"( ["#value"],[" #message"])")  ); \
     } \
     CU_ASSERT_FALSE_FATAL(value);
 
@@ -360,7 +357,12 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
  * 
  */
 #define UT_ASSERT_LOG(value, message) \
-    UT_LOG( ("UT_ASSERT_LOG( ["#value"],[" #message"])") ); \
+    if ( !(value) ) \
+    { \
+        UT_LOG( (UT_LOG_RED"UT_ASSERT_LOG"UT_LOG_NC"( ["#value"],[" #message"])") ); \
+    } else { \
+        UT_LOG( (UT_LOG_GREEN"UT_ASSERT_LOG"UT_LOG_NC"( ["#value"],[" #message"])") ); \
+    } \
     UT_ASSERT(value);
 
 #endif  /* UT -> CUNIT - Wrapper */

@@ -53,6 +53,10 @@ build: framework
 	@make -C ../ test TARGET=linux
 	@echo -e ${GREEN}Build Complete${NC}
 
+run: build
+	@echo ${GREEN}Running [$@]${NC}
+	./bin/ut-test -bp ./logs
+
 framework:
 	make -C ../ framework TARGET=linux
 

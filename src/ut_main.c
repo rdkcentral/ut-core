@@ -211,6 +211,7 @@ UT_status_t UT_run_tests( void )
     }
 
     CU_set_output_filename(gOptions.filenameRoot);
+    UT_LOG( UT_LOG_GREEN"---- start of test run ----\n"UT_LOG_NC );
     switch( gOptions.testMode )
     {
         case UT_MODE_BASIC:
@@ -248,14 +249,16 @@ UT_status_t UT_run_tests( void )
 
     /* #BUG: There's a bug here to be investigated, the suites are not counting as failed when tests fail.*/
     /* #TODO: Should display message PASS / FAIL depending on the flag state */
+    UT_LOG( UT_LOG_GREEN"Logfile"UT_LOG_NC":["UT_LOG_YELLOW"%s"UT_LOG_NC"]",UT_log_getLogFilename() );
     if ( error != CUE_SUCCESS )
     {
         // #TODO: Latest date to upgrade to add a translate error function
-                UT_LOG("\n ---- end of test run ---- \n"); 
+        UT_LOG( UT_LOG_GREEN"---- end of test run ----\n"UT_LOG_NC ); 
         return UT_STATUS_FAILURE;
     }
 
-    UT_LOG("\n ---- end of test run ---- \n");
+    UT_LOG( UT_LOG_GREEN"---- end of test run ----\n"UT_LOG_NC );
+
     return UT_STATUS_OK;
 }
 

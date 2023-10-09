@@ -26,13 +26,13 @@ static UT_test_suite_t * gpAssertSuite = NULL;
 
 int ut_init_function( void )
 {
-    UT_LOG( "--- Start of Suite ---" );
+    UT_LOG( UT_LOG_YELLOW"--- Start of Suite ---"UT_LOG_NC );
     return 0;
 }
 
 int ut_clean_function( void )
 {
-    UT_LOG( "--- End of Suite ---\n" );
+    UT_LOG( UT_LOG_YELLOW"--- End of Suite ---\n"UT_LOG_NC );
     return 0;
 }
 
@@ -41,6 +41,41 @@ void test_ut_logging( void )
     const char string[]="I'm a string";
 
     UT_LOG( "This message should print out with an [I'm a string, in the next box] -> [%s]\n", string );
+}
+
+void test_ut_logging_too_long_string( void )
+{
+    const char string[]="The widespread usage of computer-based assessments and individualized learning platforms has resulted "\
+                        "in an increased demand for the rapid production of high-quality items. Automated item generation (AIG),"\
+                        "the process of using item models to generate new items with the help of computer technology, was proposed"\
+                        " to reduce reliance on human subject experts at each step of the process. AIG has been used in test development"\
+                        " for some time. Still, the use of machine learning algorithms has introduced the potential to improve the efficiency"\
+                        " and effectiveness of the process greatly. The approach presented in this paper utilizes OpenAI's latest transformer-based"\
+                        " language model, GPT-3, to generate reading passages. Existing reading passages were used in carefully engineered prompts to"\
+                        " ensure the AI-generated text has similar content and structure to a fourth-grade reading passage. For each prompt, we generated"\
+                        " multiple passages, the final passage was selected according to the Lexile score agreement with the original passage. In the final"\
+                        " round, the selected passage went through a simple revision by a human editor to ensure the text was free of any grammatical and factual"\
+                        " errors. All AI-generated passages, along with original passages were evaluated by human judges according to their coherence, "\
+                        "appropriateness to fourth graders, and readability.";
+
+    UT_LOG( "This passage must be truncated to [%d] from it's current size of [%d]", UT_LOG_MAX_LINE_SIZE, strlen(string) );
+    UT_LOG( "%s", string );
+
+    UT_LOG( "This test should also have the same affect" );
+
+    UT_LOG( string );
+}
+
+void test_ut_logging_colour_test( void )
+{
+    UT_LOG( "This is black:   "UT_LOG_BLACK"[black]"UT_LOG_NC );
+    UT_LOG( "This is red:     "UT_LOG_RED"[red]"UT_LOG_NC );
+    UT_LOG( "This is green:   "UT_LOG_GREEN"[green]"UT_LOG_NC );
+    UT_LOG( "This is yellow:  "UT_LOG_YELLOW"[yellow]"UT_LOG_NC );
+    UT_LOG( "This is blue:    "UT_LOG_BLUE"[blue]"UT_LOG_NC );
+    UT_LOG( "This is magenta: "UT_LOG_MAGENTA"[magenta]"UT_LOG_NC );
+    UT_LOG( "This is cyan:    "UT_LOG_CYAN"[cyan]"UT_LOG_NC );
+    UT_LOG( "This is white:   "UT_LOG_WHITE"[white]"UT_LOG_NC );
 }
 
 void test_ut_assert( void )
@@ -257,6 +292,8 @@ int main(int argc, char** argv)
     }
 
     UT_add_test( gpLogSuite, "UT_LOG Tests", test_ut_logging);
+    UT_add_test( gpLogSuite, "UT_LOG Tests - Too Long String", test_ut_logging_too_long_string);
+    UT_add_test( gpLogSuite, "UT_LOG Tests - Colour Test", test_ut_logging_colour_test);
 
     gpAssertSuite = UT_add_suite("ut-core-assert-tests", ut_init_function, ut_clean_function);
     if (NULL == gpAssertSuite)

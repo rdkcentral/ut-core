@@ -55,9 +55,11 @@ void UT_log_setLogFilePath(char *inputFilePath)
         snprintf(gLogFileName, UT_MAX_PATH, "%s/ut-log_%s.log", inputFilePath, time_now);
     }
     gLogInit = true;
+}
 
-    /* Just dump the log location for the moment, when we upgrade to abtract logging we can handle this differently */
-    printf( "\n\tLog Location: [%s]\n", gLogFileName );
+const char *UT_log_getLogFilename( void )
+{
+    return (const char *)&gLogFileName[0];
 }
 
 void UT_log(const char *function, int line, const char * format, ...)
