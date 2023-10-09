@@ -133,29 +133,178 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
 
 #define UT_CUNIT
 
-/* CSUnit -> CUnit Wrapper */
 #ifdef UT_CUNIT 
 
 #include <TestRun.h>
 #include <CUnit.h>
 
-#define UT_PASS(msg) CU_PASS(msg)
-#define UT_FAIL(msg) CU_FAIL(msg)
+/**
+ * @brief Cause to pass always
+ * 
+ * @param msg - message to display
+ * @note Test will continue to process
+ * 
+ */
+#define UT_PASS(msg) \
+    UT_LOG( "UT_PASS(" #msg ")" ); \
+    CU_PASS(msg);
 
-/* Fatal test macros */
-#define UT_FAIL_FATAL(msg) CU_FAIL_FATAL(msg)
-#define UT_ASSERT(value) CU_ASSERT_FATAL(value)
-#define UT_ASSERT_PTR_NULL(value) CU_ASSERT_PTR_NULL_FATAL(value)
-#define UT_ASSERT_PTR_NOT_NULL(value) CU_ASSERT_PTR_NOT_NULL_FATAL(value)
+/**
+ * @brief Cause a test to failure always & continue processing
+ * @param msg - mesage to display
+ * @note Test will continue to process
+ */
+#define UT_FAIL(msg) \
+    UT_LOG( ("UT_FAIL(" #msg")") ); \
+    CU_FAIL(msg);
 
-#define UT_ASSERT_TRUE(value) CU_ASSERT_TRUE_FATAL(value)
-#define UT_ASSERT_FALSE(value) CU_ASSERT_FALSE_FATAL(value)
-#define UT_ASSERT_EQUAL(actual,expected) CU_ASSERT_EQUAL_FATAL(actual,expected)
+/**
+ * @brief Cause a test to fail
+ * @param msg - mesage to display
+ * @note Test will exit
+ * 
+ */
+#define UT_FAIL_FATAL(msg) \
+    UT_LOG( ("UT_FAIL_FATAL(" #msg")") ); \
+    CU_FAIL_FATAL(msg);
 
-#define UT_ASSERT_STRING_EQUAL(expected, actual) CU_ASSERT_STRING_EQUAL_FATAL(actual,expected)
-#define UT_ASSERT_STRING_NOT_EQUAL(expected, actual) CU_ASSERT_STRING_NOT_EQUAL_FATAL(actual,expected)
+/**
+ * @brief Asset if the expression is true
+ * 
+ * @param value - expression to evaluate
+ */
+#define UT_ASSERT(value) \
+    if ( !(value) ) \
+    { \
+        UT_LOG( ("UT_ASSERT(" #value")") ); \
+    } \
+    CU_ASSERT_FATAL(value);
 
-#endif  /* UT -> CUNIT - Wrapper */
+/**
+ * @brief Asset if the pointers passed are equal
+ * 
+ * @param value - pointer value actual
+ * @param expected - pointer value expected
+ */
+#define UT_ASSERT_PTR_EQUAL(actual, expected) \
+    if ( ((const void*)(actual) != (const void*)(expected)) ) \
+    { \
+        UT_LOG( ("UT_ASSERT_PTR_EQUAL(" #actual ","  #expected ")") ); \
+    } \
+    CU_ASSERT_PTR_EQUAL_FATAL(actual, expected);
+
+/**
+ * @brief Asset if the pointers passed NOT equal
+ * 
+ * @param value - pointer value actual
+ * @param expected - pointer value expected
+ */
+#define UT_ASSERT_PTR_NOT_EQUAL(actual, expected) \
+    if ( ((const void*)(actual) == (const void*)(expected)) ) \
+    { \
+        UT_LOG( ("UT_ASSERT_PTR_NOT_EQUAL(" #actual ","  #expected ")") ); \
+    } \
+    CU_ASSERT_PTR_NOT_EQUAL_FATAL(actual, expected);
+
+/**
+ * @brief Asset if the pointer value is NULL
+ * 
+ * @param value - pointer value
+ */
+#define UT_ASSERT_PTR_NULL(value)  \
+    if ( (NULL != (const void*)(value)) ) \
+    { \
+        UT_LOG( ("UT_ASSERT_PTR_NULL(" #value")") ); \
+    } \
+    CU_ASSERT_PTR_NULL_FATAL(value);
+
+/**
+ * @brief Asset if the pointer value is NOT NULL
+ * 
+ * @param value - pointer value
+ */
+#define UT_ASSERT_PTR_NOT_NULL(value) \
+    if ( (NULL == (const void*)(value)) ) \
+    { \
+        UT_LOG(("UT_ASSERT_PTR_NOT_NULL(" #value")")); \
+    } \
+    CU_ASSERT_PTR_NOT_NULL_FATAL(value);
+
+/**
+ * @brief Asset if the expression is true
+ * 
+ * @param value -  expression to evaluate
+ */
+#define UT_ASSERT_TRUE(value)  \
+    if ( !(value) ) \
+    { \
+        UT_LOG( ("UT_ASSERT_TRUE(" #value")") ); \
+    } \
+    CU_ASSERT_TRUE_FATAL(value);
+
+/**
+ * @brief Asset if the expression is false
+ * 
+ * @param value -  expression to evaluate
+ */
+#define UT_ASSERT_FALSE(value) \
+    if ( (value) ) \
+    { \
+        UT_LOG( ("UT_ASSERT_FALSE(" #value")") ); \
+    } \
+    CU_ASSERT_FALSE_FATAL(value);
+
+/**
+ * @brief Asset if the two expressions are equal
+ * 
+ * @param actual -  actual expression
+ * @param expected -  expected expression
+ */
+#define UT_ASSERT_EQUAL(actual,expected) \
+    if ( ((actual) != (expected)) ) \
+    { \
+        UT_LOG( ("UT_ASSERT_EQUAL(" #actual ","  #expected ")") ); \
+    } \
+    CU_ASSERT_EQUAL_FATAL(actual,expected);
+
+/**
+ * @brief Asset if the two expressions are NOT equal
+ * 
+ * @param actual -  actual expression
+ * @param expected -  expected expression
+ */
+#define UT_ASSERT_NOT_EQUAL(actual,expected) \
+    if ( ((actual) == (expected)) ) \
+    { \
+        UT_LOG(("UT_ASSERT_NOT_EQUAL(" #actual ","  #expected ")")); \
+    } \
+    CU_ASSERT_NOT_EQUAL_FATAL(actual,expected);
+
+/**
+ * @brief Asset if the strings are equal
+ * 
+ * @param actual -  actual string
+ * @param expected -  expected string
+ */
+#define UT_ASSERT_STRING_EQUAL(expected, actual) \
+    if ( (strcmp((const char*)(actual), (const char*)(expected))) ) \
+    { \
+        UT_LOG(("UT_ASSERT_STRING_EQUAL(" #actual ","  #expected ")") ); \
+    } \
+    CU_ASSERT_STRING_EQUAL_FATAL(actual,expected);
+
+/**
+ * @brief Asset if the strings are NOT equal
+ * 
+ * @param actual -  actual string
+ * @param expected -  expected string
+ */
+#define UT_ASSERT_STRING_NOT_EQUAL(expected, actual) \
+    if ( !(strcmp((const char*)(actual), (const char*)(expected))) ) \
+    { \
+        UT_LOG(("UT_ASSERT_STRING_NOT_EQUAL(" #actual ","  #expected ")") ); \
+    } \
+    CU_ASSERT_STRING_NOT_EQUAL_FATAL(actual,expected);
 
 /**
  * @brief UT Assert with Message on failure
@@ -164,13 +313,45 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
  * @param[in] message - message to log, if the assert fails
  * 
  */
-#define UT_ASSERT_MSG(value, message, ...) \
+#define UT_ASSERT_MSG(value, message) \
     if ( !(value) ) \
     { \
-        UT_LOG("UT_ASSERT_MSG: "message" ", ##__VA_ARGS__); \
+        UT_LOG( ("UT_ASSERT_MSG( [" #value "],[" #message "])")  ); \
     } \
-    UT_ASSERT(value);
+    CU_ASSERT_FATAL(value);
 
+/**
+ * @brief UT Assert True with Message on failure
+ * 
+ * @param[in] value - expression value to check 
+ * @param[in] message - message to log, if the expression is true
+ * 
+ */
+#define UT_ASSERT_TRUE_MSG(value, message) \
+    if ( !(value) ) \
+    { \
+        UT_LOG( ("UT_ASSERT_TRUE_MSG( ["#value"],[" #message"])") ); \
+    } \
+    CU_ASSERT_TRUE_FATAL(value);
+
+/**
+ * @brief UT Assert True with Message on failure
+ * 
+ * @param[in] value - the value to check 
+ * @param[in] message - message to log, if the expression is false
+ * 
+ */
+#define UT_ASSERT_FALSE_MSG(value, message) \
+    if ( (value) ) \
+    { \
+        UT_LOG( ("UT_ASSERT_FALSE_MSG( ["#value"],[" #message"])")  ); \
+    } \
+    CU_ASSERT_FALSE_FATAL(value);
+
+/**
+ * @brief 
+ * 
+ */
 /**
  * @brief UT Assert with Log always
  * 
@@ -178,9 +359,11 @@ UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunc
  * @param[in] message - message to log, will always log
  * 
  */
-#define UT_ASSERT_LOG(value, message, ...) \
-    UT_LOG("UT_ASSERT_LOG: "message" ", ##__VA_ARGS__); \
+#define UT_ASSERT_LOG(value, message) \
+    UT_LOG( ("UT_ASSERT_LOG( ["#value"],[" #message"])") ); \
     UT_ASSERT(value);
+
+#endif  /* UT -> CUNIT - Wrapper */
 
 #endif  /*  __UT_H  */
 

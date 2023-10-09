@@ -1,36 +1,36 @@
 # Guidelines to Authoring Tests
 
-# History
+## History
 
 | Date | Comment | Version |
 | --- | --- | --- |
 | 17/02/23 | Initial Version | 1.1.0 |
 
-# Contents
+## Contents
 
 - [Guidelines to Authoring Tests](#guidelines-to-authoring-tests)
 - [History](#history)
 - [Contents](#contents)
-	- [Overview](#overview)
-	- [Acronyms, Terms and Abbreviations](#acronyms-terms-and-abbreviations)
-	- [Related Documents](#related-documents)
-	- [Testing Specification Level 1 (L1)](#testing-specification-level-1-l1)
-	- [Testing Specification Level 2 (L2)](#testing-specification-level-2-l2)
-	- [Implementation Guidelines](#implementation-guidelines)
-		- [Linux Environment :](#linux-environment-)
-		- [Test Naming Convention :](#test-naming-convention-)
-		- [Git Branching Stategy :](#git-branching-stategy-)
-	- [File header for .c files](#file-header-for-c-files)
-		- [Template :](#template-)
-		- [Example of the .c file template :](#example-of-the-c-file-template-)
-	- [Function brief template L1 functions](#function-brief-template-l1-functions)
-		- [Template :](#template--1)
-		- [Example - Positive Test :](#example---positive-test-)
-		- [Example - Negative Test :](#example---negative-test-)
-	- [Function brief template L2 module functions](#function-brief-template-l2-module-functions)
-		- [Template :](#template--2)
-		- [Example](#example)
-		- [Level 2 Markdown Documentation](#level-2-markdown-documentation)
+  - [Overview](#overview)
+  - [Acronyms, Terms and Abbreviations](#acronyms-terms-and-abbreviations)
+  - [Related Documents](#related-documents)
+  - [Testing Specification Level 1 (L1)](#testing-specification-level-1-l1)
+  - [Testing Specification Level 2 (L2)](#testing-specification-level-2-l2)
+  - [Implementation Guidelines](#implementation-guidelines)
+    - [Linux Environment](#linux-environment)
+    - [Test Naming Convention](#test-naming-convention)
+    - [Git Branching Stategy](#git-branching-stategy)
+  - [File header for .c files](#file-header-for-c-files)
+    - [Function Brief Template](#function-brief-template)
+    - [Example of the .c file template](#example-of-the-c-file-template)
+  - [Function brief template L1 functions](#function-brief-template-l1-functions)
+    - [Function Template](#function-template)
+    - [Example - Positive Test](#example---positive-test)
+    - [Example - Negative Test](#example---negative-test)
+  - [Function brief template L2 module functions](#function-brief-template-l2-module-functions)
+    - [Template](#template)
+    - [Example](#example)
+    - [Level 2 Markdown Documentation](#level-2-markdown-documentation)
 
 ## Overview
 
@@ -93,20 +93,20 @@ A template document for the requirements for Level 2 testing can be found in [L2
 In order to support consistent interface design, and cross platform support the following guidelines are considered :
 
 - Any gaps either not yet completed or require further work will be marked in the code with:
-	- TODO: Some expansion of the coding / documentation.
-	- BUG: There's a bug to fix.
-	- FIXME: Something is broken, and will require further investigate.
+  - TODO: Some expansion of the coding / documentation.
+  - BUG: There's a bug to fix.
+  - FIXME: Something is broken, and will require further investigate.
 - All suites are `Platform independent` and should follow these rules:-
-	- **All tests** are **independent of platform**, and all are driven only by configurations.
-	- **All tests** should be **enabled**, the **code flow** should be **dynamically controlled by configurations**.
-	- **#ifdef should not** be used to enable / disable parts of the testing suites.
-	- **No hardcoding values** should exist in the code, to reduce the number of cross platform issues.
+  - **All tests** are **independent of platform**, and all are driven only by configurations.
+  - **All tests** should be **enabled**, the **code flow** should be **dynamically controlled by configurations**.
+  - **#ifdef should not** be used to enable / disable parts of the testing suites.
+  - **No hardcoding values** should exist in the code, to reduce the number of cross platform issues.
 - All field values, where applicable should be checkd by configurations.
 - Each test should log it's "Test Group ID", "Test Case ID" and "Variation Step".
 - Each test should log each of the variation steps.
 - Common logging should be used from ut-core.
 
-### Linux Environment :
+### Linux Environment
 
 There is a linux environment to aid rapid development, to generate the skeleton files and the framework and is expected to be run in an IDE. This will greatly aid debugging the testing environnement, before running on the target platform.
 
@@ -114,7 +114,7 @@ It's optional for the test developer to make the skeletons pass, if this is usef
 
 Engineers should be using the linux environment for building, and walking through their test code to ensure it's functionally correct. It's expected this can be setup and run in an IDE e.g. Visual Studio Code.
 
-### Test Naming Convention :
+### Test Naming Convention
 
 Tests in the framework are named with a three field number convention as follows:-
 
@@ -132,7 +132,7 @@ Tests in the framework are named with a three field number convention as follows
 
 *For example*: Test *`0300105`* means, Stress Test [`03`], Test ID test [`001`], Test Variation [`05`]
 
-### Git Branching Stategy :
+### Git Branching Stategy
 
 For information on the suggested branching strategy refer to the following document :- [gitBranchingStrategy.md](gitBranchingStrategy.md)
 
@@ -140,7 +140,7 @@ For information on the suggested branching strategy refer to the following docum
 
 The following doxygen template should be placed at the top of any .c file and populated as required.
 
-### Template :
+### Template
 
 ```c
 /**
@@ -158,9 +158,10 @@ The following doxygen template should be placed at the top of any .c file and po
 * Ref to API Definition specification documentation : [halSpec.md](../../../docs/halSpec.md)
 */
 ```
-### Example of the .c file template :
 
-The following examples a filled out example a header file 
+### Example of the .c file template
+
+The following examples a filled out example a header file
 
 ```c
 /**
@@ -182,7 +183,7 @@ The following examples a filled out example a header file
 
 The following doxygen template should be placed at the top of all .c functions that are used for L1 testing and populated as required.
 
-### Template :
+### Function Template
 
 ```c
 /**
@@ -206,7 +207,7 @@ The following doxygen template should be placed at the top of all .c functions t
 void test_l1_<filename>_<testName>( void );
 ```
 
-### Example - Positive Test :
+### Example - Positive Test
 
 ```c
 /**
@@ -235,7 +236,7 @@ void test_l1_<filename>_<testName>( void );
 void test_l1_hdmi_cec_driver_positive_HdmiCecSetLogicalAddress( void )
 ```
 
-### Example - Negative Test :
+### Example - Negative Test
 
 ```c
 /**
@@ -270,7 +271,7 @@ void test_l1_hdmi_cec_driver_negative_HdmiCecSetLogicalAddress( void )
 
 ## Function brief template L2 module functions
 
-### Template :
+### Function Brief Template
 
 ```c
 /**
@@ -287,7 +288,7 @@ void test_l1_hdmi_cec_driver_negative_HdmiCecSetLogicalAddress( void )
 void test_l2_<filename>_<testName>( void );
  ```
 
- ### Example
+### Example
 
 ```c
 /**
@@ -304,8 +305,8 @@ void test_l2_hdmi_cec_driver_checkLogicalAddress( void )
 
 ### Level 2 Markdown Documentation
 
-Level 2 requires a more detailed informational document to understand the nuances and interactions of the module. The document should include diagrams and detailed information. It is recommended that markdown be used, along side diagrams via mermaid, which `SCM`'s like github support in their markdown renderers. https://mermaid.js.org/#/
+Level 2 requires a more detailed informational document to understand the nuances and interactions of the module. The document should include diagrams and detailed information. It is recommended that markdown be used, along side diagrams via mermaid, which `SCM`'s like github support in their markdown renderers. [(https://mermaid.js.org/#/](https://mermaid.js.org/#/)
 
 There is a basic template provided [l2_modue_test_specification_template.md](https://github.com/rdkcentral/ut-core/tree/master/docs/pages)
 
-There is a simple example of how to fill out the document [example_l2_module_test_specification.md](https://github.com/rdkcentral/ut-core/tree/master/docs/pages) |
+There is a simple example of how to fill out the document [example_l2_module_test_specification.md](https://github.com/rdkcentral/ut-core/tree/master/docs/pages)

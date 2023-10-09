@@ -19,8 +19,8 @@
 # * limitations under the License.
 # *
 
-SCRIPT_EXEC="$(realpath $0)"                                                                                                                                                                                            
-MY_DIR="$(dirname $SCRIPT_EXEC)"    
+SCRIPT_EXEC="$(realpath $0)"
+MY_DIR="$(dirname $SCRIPT_EXEC)"
 
 pushd ${MY_DIR} > /dev/null
 # Clone CUnit

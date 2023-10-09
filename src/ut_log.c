@@ -58,8 +58,6 @@ void UT_log_setLogFilePath(char *inputFilePath)
 
     /* Just dump the log location for the moment, when we upgrade to abtract logging we can handle this differently */
     printf( "\n\tLog Location: [%s]\n", gLogFileName );
-    
-    /* #BUG: Doesn't set the error outputs from testing framework, thus we only get our logs not the framework ones */
 }
 
 void UT_log(const char *function, int line, const char * format, ...)
@@ -80,7 +78,7 @@ void UT_log(const char *function, int line, const char * format, ...)
         UT_log_setLogFilePath("/tmp");
     }
 
-    /* #FIXME : This will all need rework, we shouldn't be opening logs constantly */
+    /* #FIXME : This will need rework, we shouldn't be opening logs constantly */
     fp = fopen(gLogFileName, "a");
     if (fp == NULL)
     { 

@@ -19,20 +19,41 @@
 # * limitations under the License.
 # *
 
+RED="\e[0;31m"
+YELLOW="\e[1;33m"
+GREEN="\e[0;32m"
+NC="\e[39m"
+
+UT_PROJECT_MAJOR_VERSION="1."    # Change this to upgrade your UT-Core Major versions. Non ABI Changes 1.x.x are supported
+
 # Clone the Unit Test Requirements
 TEST_REPO=git@github.com:rdkcentral/ut-core.git
 
-# Set default UT_PROJECT_VERSION to master
-if [ -z "${UT_PROJECT_VERSION}" ]; then
-    UT_PROJECT_VERSION=master
-fi
+# This function checks if we're not sitting on the latest revision.
+function check_next_revision()
+{
+    pushd ./ut-core 2&>/dev/null
+    # Set default UT_PROJECT_VERSION to next revision
+    if [ -v ${UT_PROJECT_VERSION} ]; then
+        UT_PROJECT_VERSION=$(git tag | grep ${UT_PROJECT_MAJOR_VERSION} | sort -r | head -n1)
+        UT_NEXT_VERSION=$(git tag | sort -r | head -n1)
+        echo -e ${YELLOW}ut-core version selected:[${UT_PROJECT_VERSION}]${NC}
+        if [ "${UT_NEXT_VERSION}" != "${UT_PROJECT_VERSION}" ]; then
+            echo -e ${RED}--- New Version of ut-core released [${UT_NEXT_VERSION}] consider upgrading ---${NC}
+        fi
+    fi
+    popd 2&>/dev/null
+}
 
 # Check if the common document configuration is present, if not clone it
 if [ -d "./ut-core" ]; then
+    # ut-core exists so run the makefile from ut
+    check_next_revision
     make -C . -f Makefile $@
 else
     echo "Cloning Unit Test Core System"
     git clone ${TEST_REPO} ut-core
+    check_next_revision
     cd ./ut-core
     git checkout ${UT_PROJECT_VERSION}
     ./build.sh
