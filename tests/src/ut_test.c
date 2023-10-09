@@ -267,12 +267,6 @@ void test_ut_assert_log( void )
 }
 
 /**
- * @brief Register the main tests for this module
- *
- * @return int - 0 on success, otherwise failure
- */
-
-/**
  * @brief Main launch function for the test app
  * 
  * @param argc - param count from the command line
