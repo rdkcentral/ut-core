@@ -24,48 +24,22 @@
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <assert.h>
 
-#include "ut.h"
-#include "ut_log.h"
+#include <ut.h>
+#include <ut_log.h>
+#include "ut_internal.h"
 
-#ifdef UT_CUNIT
-/* CUnit functions */
-#include <CUnit.h>
-#include <Basic.h>
-#include <Console.h>
-#include <Automated.h>
-#endif
+#define DEFAULT_FILENAME "ut_test"
 
-#define TEST_INFO(x) printf x;
-#define TRUE  (true)
-#define FALSE (false)
-#define MAX_STRING_SIZE (32)
-#define DEFAULT_FILENAME "wifi_hal"
 
-typedef enum
-{
-    UT_MODE_BASIC=0,
-    UT_MODE_AUTOMATED,
-    UT_MODE_CONSOLE
-}TestMode_t;
-
-typedef struct
-{
-    /* option switches */
-    TestMode_t  testMode;
-    bool        listTest;
-    char        filenameRoot[MAX_STRING_SIZE];
-    bool        help;
-}optionFlags_t;
+/* Global External Functions */
+extern UT_status_t startup_system( void );
 
 /* Global variables */
-static optionFlags_t gOptions;  /*!< Control flags */
-static int gRegisterFailed;     /*!< Global Registration failed counter */
+optionFlags_t gOptions;  /*!< Control flags */
 
 /* Function prototypes */
-static UT_status_t startup_system( void );
-static int internalInit( void );
-static int internalClean( void );
 
 static void usage( void )
 {
@@ -81,11 +55,23 @@ static void usage( void )
 static bool decodeOptions( int argc, char **argv )
 {
     int opt;
+    const char *logFilename;
+    size_t length;
 
     memset(&gOptions,0,sizeof(gOptions));
 
     gOptions.testMode = UT_MODE_CONSOLE;
-    strcpy( gOptions.filenameRoot, DEFAULT_FILENAME );
+
+    /* Set the default path to ./ and then take the filename back and use that for automated mode */
+    UT_log_setLogFilePath( "./" );
+
+    logFilename = UT_log_getLogFilename();
+    assert( logFilename != NULL );
+
+    length = strlen(logFilename);
+    length -= strlen(".log");
+    strncpy( gOptions.filenameRoot, logFilename, length );
+
     while((opt = getopt(argc, argv, "cabhf:lp:")) != -1)
     {
         switch(opt)
@@ -104,12 +90,13 @@ static bool decodeOptions( int argc, char **argv )
                 break;
             case 'l':
                 TEST_INFO(("Automated Mode: List Tests to File\n"));
-                gOptions.listTest = TRUE;
+                gOptions.testMode = UT_MODE_AUTOMATED;
+                gOptions.listTest = true;
                 break;
             case 'f':
                 TEST_INFO(("Automated Mode: Set Output File Prefix\n"));
                 gOptions.testMode = UT_MODE_AUTOMATED;
-                strncpy(gOptions.filenameRoot,optarg,MAX_STRING_SIZE);
+                strncpy(gOptions.filenameRoot,optarg,UT_MAX_FILENAME_STRING_SIZE);
                 break;
             case 'p':
                 TEST_INFO(("Setting Log Path [%s]\n", optarg));
@@ -134,7 +121,7 @@ static bool decodeOptions( int argc, char **argv )
         TEST_INFO(("unknown arguments: %s\n", argv[optind]));
     }
 
-    return TRUE;
+    return true;
 }
 
 /**
@@ -151,7 +138,7 @@ static bool decodeOptions( int argc, char **argv )
 UT_status_t UT_init(int argc, char** argv) 
 {
     /* Decode the options */
-    if ( decodeOptions( argc, argv ) == FALSE )
+    if ( decodeOptions( argc, argv ) == false )
     {
         return UT_STATUS_FAILURE;
     }
@@ -160,190 +147,7 @@ UT_status_t UT_init(int argc, char** argv)
     {
         return UT_STATUS_FAILURE;
     }
- 
-    return UT_STATUS_OK;
-}
-
-#ifdef UT_CUNIT
-
-/**
- * @brief Startup the system
- * 
- * This function will startup the system based on the CUNIT requirements
- * 
- */
-static UT_status_t startup_system( void )
-{
-    /* initialize the CUnit test registry */
-    if (CUE_SUCCESS != CU_initialize_registry())
-    {
-        int result;
-        result = CU_get_error();
-
-        // @FIXME: Check the return status and return a corrected error code
-        result = result;
-        return UT_STATUS_FAILURE;
-    }
-    return UT_STATUS_OK;
-}
-
-/**
- * @brief run the registered tests as required
- * 
- * For the moment this function will currently output the cunit
- * result format, this will move to xUnit format as required
- * or an UT internal format
- */
-UT_status_t UT_run_tests( void )
-{
-    CU_ErrorCode error;
-    
-    /* If any registration failed then stop here */
-    if ( gRegisterFailed != 0 )
-    {
-        CU_cleanup_registry();
-        error = CU_get_error();
-        if ( error != CUE_SUCCESS )
-        {
-            return UT_STATUS_FAILURE;
-        }
-        return UT_STATUS_OK;
-    }
-
-    CU_set_output_filename(gOptions.filenameRoot);
-    UT_LOG( UT_LOG_GREEN"---- start of test run ----\n"UT_LOG_NC );
-    switch( gOptions.testMode )
-    {
-        case UT_MODE_BASIC:
-        {
-            /* Run all tests using the CUnit Basic interface */
-            CU_basic_set_mode(CU_BRM_VERBOSE);
-            CU_basic_run_tests();
-            TEST_INFO(("\nFailures:-\n"));
-            CU_basic_show_failures(CU_get_failure_list());
-            TEST_INFO(("\n\n"));
-        }
-        break;
-
-        case UT_MODE_CONSOLE:
-        {
-            CU_console_run_tests();
-        }
-        break;
-
-        case UT_MODE_AUTOMATED:
-        {
-            //CU_automated_enable_junit_xml( CU_TRUE );
-            CU_automated_run_tests();
-        }
-        break;
-    }
-
-    if ( gOptions.listTest == true )
-    {
-        CU_list_tests_to_file();
-    }
-
-    CU_cleanup_registry();
-    error = CU_get_error();
-
-    /* #BUG: There's a bug here to be investigated, the suites are not counting as failed when tests fail.*/
-    /* #TODO: Should display message PASS / FAIL depending on the flag state */
-    UT_LOG( UT_LOG_GREEN"Logfile"UT_LOG_NC":["UT_LOG_YELLOW"%s"UT_LOG_NC"]",UT_log_getLogFilename() );
-    if ( error != CUE_SUCCESS )
-    {
-        // #TODO: Latest date to upgrade to add a translate error function
-        UT_LOG( UT_LOG_GREEN"---- end of test run ----\n"UT_LOG_NC ); 
-        return UT_STATUS_FAILURE;
-    }
-
-    UT_LOG( UT_LOG_GREEN"---- end of test run ----\n"UT_LOG_NC );
 
     return UT_STATUS_OK;
 }
-
-UT_test_suite_t *UT_add_suite(const char *pTitle, UT_InitialiseFunction_t pInitFunction, UT_CleanupFunction_t pCleanupFunction)
-{
-    CU_pSuite pSuite;
-
-    if ( pInitFunction == NULL )
-    {
-        pInitFunction = &internalInit;
-    }
-
-    if ( pCleanupFunction == NULL )
-    {
-        pCleanupFunction = &internalClean;
-    }
-
-    if ( pTitle == NULL )
-    {
-        gRegisterFailed++;
-        return NULL;
-    }
-
-    pSuite = CU_add_suite(pTitle, (CU_InitializeFunc)pInitFunction, (CU_CleanupFunc)pCleanupFunction);
-
-    if ( pSuite == NULL )
-    {
-        gRegisterFailed++;
-    }
-
-    return (UT_test_suite_t *)pSuite;
-}
-
-UT_test_t *UT_add_test(UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunction_t pTestFunction)
-{
-    CU_pTest pTest;
-    
-    pTest = CU_add_test((CU_pSuite)pSuite, pTitle, (CU_TestFunc)pTestFunction);
-
-    if ( pTest == NULL )
-    {
-        gRegisterFailed++;
-    }
-
-    return (UT_test_t *)pTest;
-}
-
-#else // UT_CUNIT
-
-static UT_status_t system_startup( void )
-{
-    return UT_STATUS_FAILURE; 
-}
-
-void UT_run_tests( void )
-{
-
-}
-
-UT_test_suite_t *UT_add_suite(const char *pTitle, UT_InitialiseFunction_t pInitFunction, UT_CleanupFunction_t pCleanupFunction)
-{
-    title=title;
-    pInitFunction=pInitFunction;
-    pCleanupFunction=pCleanupFunction;
-    return NULL;
-}
-
-UT_test_t *UT_add_test(UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunction_t pTestFunction)
-{
-    title=title;
-    pSuite=pSuite;
-    pTestFunction=pTestFunction;
-    return NULL;
-}
-
-#endif
-
-static int internalInit( void )
-{
-    return 0;
-}
-
-static int internalClean( void )
-{
-    return 0;
-}
-
 

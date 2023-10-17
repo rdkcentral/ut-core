@@ -24,16 +24,17 @@
 #include <stdarg.h> 
 
 #define UT_LOG_MAX_LINE_SIZE (255)  /*!< Max String size that UT_LOG will display */
+#define UT_LOG_MAX_PATH      (260)  /*!< Default max path length */
 
-#define UT_LOG_BLACK    "\033[0;30m"    /*!< BLACK Ascii Code */
-#define UT_LOG_RED      "\033[0;31m"    /*!< RED Ascii Code */
-#define UT_LOG_GREEN    "\033[0;32m"    /*!< Green Ascii Code */
-#define UT_LOG_YELLOW   "\033[0;33m"    /*!< Yellow Ascii Code */
-#define UT_LOG_BLUE     "\033[0;34m"    /*!< Blue Ascii Code */
-#define UT_LOG_MAGENTA  "\033[0;35m"    /*!< Magenta Ascii Code */
-#define UT_LOG_CYAN     "\033[0;36m"    /*!< Cyan Ascii Code */
-#define UT_LOG_WHITE    "\033[0;37m"    /*!< White Ascii Code */
-#define UT_LOG_NC       "\033[0m"       /*!< Reset Colour Ascii Code */
+#define UT_LOG_ASCII_BLACK    "\033[0;30m"    /*!< BLACK Ascii Code */
+#define UT_LOG_ASCII_RED      "\033[0;31m"    /*!< RED Ascii Code */
+#define UT_LOG_ASCII_GREEN    "\033[0;32m"    /*!< Green Ascii Code */
+#define UT_LOG_ASCII_YELLOW   "\033[0;33m"    /*!< Yellow Ascii Code */
+#define UT_LOG_ASCII_BLUE     "\033[0;34m"    /*!< Blue Ascii Code */
+#define UT_LOG_ASCII_MAGENTA  "\033[0;35m"    /*!< Magenta Ascii Code */
+#define UT_LOG_ASCII_CYAN     "\033[0;36m"    /*!< Cyan Ascii Code */
+#define UT_LOG_ASCII_WHITE    "\033[0;37m"    /*!< White Ascii Code */
+#define UT_LOG_ASCII_NC       "\033[0m"       /*!< Reset Colour Ascii Code */
 
 /**
  * @brief macro with va_args to display a string
@@ -41,7 +42,14 @@
  * @param format        - string formatting to be applied
  * @param ...           - variable args
  */
-#define UT_LOG(format, ...) UT_log(__func__, __LINE__, format, ## __VA_ARGS__)
+#define UT_LOG(format, ...)                 UT_logPrefix(__FILE__, __LINE__, UT_LOG_ASCII_MAGENTA"LOG   "UT_LOG_ASCII_NC, format, ## __VA_ARGS__)
+#define UT_LOG_PREFIX(prefix, format, ...)  UT_logPrefix(__FILE__, __LINE__, prefix, format, ## __VA_ARGS__)
+#define UT_LOG_STEP(format, ...)            UT_logPrefix(__FILE__, __LINE__, UT_LOG_ASCII_BLUE"STEP  "UT_LOG_ASCII_NC, format, ## __VA_ARGS__)
+#define UT_LOG_INFO(format, ...)            UT_logPrefix(__FILE__, __LINE__, UT_LOG_ASCII_CYAN"INFO  "UT_LOG_ASCII_NC, format, ## __VA_ARGS__)
+#define UT_LOG_DEBUG(format, ...)           UT_logPrefix(__FILE__, __LINE__, UT_LOG_ASCII_MAGENTA"DEBUG "UT_LOG_ASCII_NC, format, ## __VA_ARGS__)
+#define UT_LOG_WARNING(format, ...)         UT_logPrefix(__FILE__, __LINE__, UT_LOG_ASCII_YELLOW"WARN  "UT_LOG_ASCII_NC, format, ## __VA_ARGS__)
+#define UT_LOG_ERROR(format, ...)           UT_logPrefix(__FILE__, __LINE__, UT_LOG_ASCII_RED"ERROR "UT_LOG_ASCII_NC, format, ## __VA_ARGS__)
+#define UT_LOG_ASSERT(prefix, format, ...)  UT_logPrefix(__FILE__, __LINE__, UT_LOG_ASCII_RED"ASSERT"UT_LOG_ASCII_NC, UT_LOG_ASCII_RED#prefix":"UT_LOG_ASCII_NC #format, ## __VA_ARGS__)
 
 /**
  * @brief Set the path of the active logfile
@@ -72,5 +80,20 @@ const char *UT_log_getLogFilename( void );
  * @param ...           - variable args
  */
 void UT_log(const char *function, int line, const char * format, ...);
+
+/**
+ * @brief Appending to log file 
+ * 
+ * This function will append the log lines with timestamp, function name and line number
+ * It will also add a prefix message before the message output
+ * @note: LF will be added to the start of each line by this function
+ * 
+ * @param function      - name of the calling function
+ * @param line          - line number
+ * @param prefix        - Prefix Column string
+ * @param format        - string formatting to be applied
+ * @param ...           - variable args
+ */
+void UT_logPrefix(const char *function, int line, const char *prefix, const char * format, ...);
 
 #endif /* UT_LOG_H */

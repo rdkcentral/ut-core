@@ -26,11 +26,10 @@
 #include <stdbool.h>
 #include <time.h>
 
-#define UT_MAX_PATH (260)
 #define UT_MAX_TIME_STRING (20)
 
 /* #FIXME: By default all filenames MUST assume current running directory and linux, not target, for all development the target is LINUX */
-static char gLogFileName[UT_MAX_PATH] = "/tmp/ut-log_base.log";    /*!< Path + Filename of the currently active log file*/
+static char gLogFileName[UT_LOG_MAX_PATH] = "/tmp/ut-log_base.log";    /*!< Path + Filename of the currently active log file*/
 static bool gLogInit = false;
 
 void UT_log_setLogFilePath(char *inputFilePath)
@@ -47,12 +46,12 @@ void UT_log_setLogFilePath(char *inputFilePath)
     if ( inputFilePath[length-1] == '/' )
     {
         /* Dont append / because path has one */
-        snprintf(gLogFileName, UT_MAX_PATH, "%sut-log_%s.log", inputFilePath, time_now);
+        snprintf(gLogFileName, UT_LOG_MAX_PATH, "%sut-log_%s.log", inputFilePath, time_now);
     }
     else
     {
         /* Append / because path doesn't have one */
-        snprintf(gLogFileName, UT_MAX_PATH, "%s/ut-log_%s.log", inputFilePath, time_now);
+        snprintf(gLogFileName, UT_LOG_MAX_PATH, "%s/ut-log_%s.log", inputFilePath, time_now);
     }
     gLogInit = true;
 }
@@ -77,7 +76,7 @@ void UT_log(const char *function, int line, const char * format, ...)
     if ( gLogInit == false )
     {
         /* If ut-core has never called to set the log to a fixed location then let's set it */
-        UT_log_setLogFilePath("/tmp");
+        UT_log_setLogFilePath("./");
     }
 
     /* #FIXME : This will need rework, we shouldn't be opening logs constantly */
@@ -90,7 +89,59 @@ void UT_log(const char *function, int line, const char * format, ...)
 
     tmp = localtime(&now);
     strftime(time_now, sizeof(time_now), "%Y-%m-%d-%X", tmp);
+#if 0
     snprintf( singleLineBuffer, UT_LOG_MAX_LINE_SIZE, "\n%s, %s,%6d : ", time_now, function, line );
+#else
+    snprintf( singleLineBuffer, UT_LOG_MAX_LINE_SIZE, "\n%s, %s, %6d : ", time_now, UT_LOG_ASCII_MAGENTA"LOG   "UT_LOG_ASCII_NC, line );
+#endif
+    lineSize = strlen( singleLineBuffer );
+
+    va_start(list, format);
+    vsnprintf(&singleLineBuffer[lineSize], UT_LOG_MAX_LINE_SIZE-lineSize-1, format, list);
+    va_end(list);
+
+    /* Print the line to stdout */
+    printf( singleLineBuffer );
+
+    /* Print the data to the stream */
+    fprintf( fp, singleLineBuffer );
+    fclose(fp);
+}
+
+void UT_logPrefix(const char *file, int line, const char *prefix, const char * format, ...)
+{
+    char        time_now[20] = { '\0' };
+    FILE        *fp = NULL;
+    va_list     list;
+    time_t      now;
+    struct tm   *tmp;
+    char        singleLineBuffer[UT_LOG_MAX_LINE_SIZE+1]={0};
+    size_t      lineSize;
+
+    time(&now);
+
+    if ( gLogInit == false )
+    {
+        /* If ut-core has never called to set the log to a fixed location then let's set it */
+        UT_log_setLogFilePath("./");
+    }
+
+    /* #FIXME : This will need rework, we shouldn't be opening logs constantly */
+    fp = fopen(gLogFileName, "a");
+    if (fp == NULL)
+    { 
+        printf("\nUnable to open file for logging...");
+        return;
+    }
+
+    tmp = localtime(&now);
+    strftime(time_now, sizeof(time_now), "%Y-%m-%d-%X", tmp);
+#if 1
+    snprintf( singleLineBuffer, UT_LOG_MAX_LINE_SIZE, "\n%s, %*s, %s,%6d : ", time_now, 16, prefix, file, line );
+#else
+    file=file;  /* unused */
+    snprintf( singleLineBuffer, UT_LOG_MAX_LINE_SIZE, "\n%s, %s, %6d : ", time_now, prefix, line );
+#endif
     lineSize = strlen( singleLineBuffer );
 
     va_start(list, format);

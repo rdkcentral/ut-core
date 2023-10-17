@@ -24,12 +24,12 @@ YELLOW="\e[1;33m"
 GREEN="\e[0;32m"
 NC="\e[39m"
 
-UT_PROJECT_MAJOR_VERSION="1."    # Change this to upgrade your UT-Core Major versions. Non ABI Changes 1.x.x are supported
+UT_PROJECT_MAJOR_VERSION="1."    # Change this to upgrade your UT-Core Major versions. Non ABI Changes 1.x.x are supported, between major revisions
 
 # Clone the Unit Test Requirements
 TEST_REPO=git@github.com:rdkcentral/ut-core.git
 
-# This function checks if we're not sitting on the latest revision.
+# This function checks the latest version of UT core and recommends an upgrade if reuqired
 function check_next_revision()
 {
     pushd ./ut-core 2&>/dev/null

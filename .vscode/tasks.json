@@ -28,5 +28,17 @@
 				"isDefault": true
 			},
 		},
+		{
+			"type": "make",
+			"targetName": "clean",
+			"makeFileRelativePath": "tests/Makefile",
+			"problemMatcher": [],
+			"label": "make: clean",
+			"detail": "./tests/Makefile",
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			},
+		},
 	]
 }

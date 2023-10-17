@@ -31,22 +31,27 @@ export PATH := $(shell pwd)/toolchain:$(PATH)
 TOP_DIR ?= $(UT_DIR)
 BUILD_DIR ?= $(TOP_DIR)/obj
 BIN_DIR ?= $(TOP_DIR)/bin
+XCFLAGS := $(KCFLAGS)
 
+# Enable CUnit Requirements
+XCFLAGS += -DUT_CUNIT
 CUNIT_DIR +=  $(UT_DIR)/framework/CUnit-2.1-3/CUnit
+#CUNIT_SRC_DIRS +=  $(UT_DIR)/src/cunit
 CUNIT_SRC_DIRS += $(CUNIT_DIR)/Sources
-
-INC_DIRS += $(UT_DIR)/include
 INC_DIRS += $(CUNIT_DIR)/Headers
-
-SRC_DIRS += $(UT_DIR)/src
-SRC_DIRS += $(CUNIT_SRC_DIRS)/Automated
-SRC_DIRS += $(CUNIT_SRC_DIRS)/Basic
-SRC_DIRS += $(CUNIT_SRC_DIRS)/Console
+#SRC_DIRS += $(CUNIT_SRC_DIRS)/Automated
+#SRC_DIRS += $(CUNIT_SRC_DIRS)/Basic
+#SRC_DIRS += $(CUNIT_SRC_DIRS)/Console
 SRC_DIRS += $(CUNIT_SRC_DIRS)/Framework
 #SRC_DIRS += $(CUNIT_SRC_DIRS)/Curses
 #SRC_DIRS += $(CUNIT_SRC_DIRS)/wxWidget
 #SRC_DIRS += $(CUNIT_SRC_DIRS)/Win
 #SRC_DIRS += $(CUNIT_SRC_DIRS)/Test
+
+INC_DIRS += $(UT_DIR)/include
+INC_DIRS += $(UT_DIR)/src
+
+SRC_DIRS += $(UT_DIR)/src
 
 MKDIR_P ?= @mkdir -p
 
@@ -58,7 +63,6 @@ CUNIT_VARIANT=arm-rdk-linux-gnueabi
 #CC := arm-rdk-linux-gnueabi-gcc -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -mabi=aapcs-linux -mno-thumb-interwork -ffixed-r8 -fomit-frame-pointer 
 # CFLAGS will be overriden by Caller as required
 INC_DIRS += $(UT_DIR)/sysroot/usr/include
-XCFLAGS := $(KCFLAGS)
 endif
 
 # Defaults for target linux
@@ -76,9 +80,13 @@ OBJS := $(subst $(TOP_DIR),$(BUILD_DIR),$(SRCS:.c=.o))
 INC_DIRS += $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
+VERSION=$(shell git describe --tags | head -n1)
+
+$(info VERSION [$(VERSION)])
+
 # Final conversions
 DEPS += $(OBJS:.o=.d)
-XCFLAGS += $(CFLAGS) $(INC_FLAGS)
+XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\"
 
 # Library Path
 VPATH += $(UT_DIR)

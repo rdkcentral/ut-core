@@ -57,6 +57,8 @@ run: build
 	@echo ${GREEN}Running [$@]${NC}
 	./bin/ut-test -bp ./logs
 
+rebuild: clean build
+
 framework:
 	make -C ../ framework TARGET=linux
 
