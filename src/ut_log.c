@@ -29,7 +29,8 @@
 #define UT_MAX_TIME_STRING (20)
 
 /* #FIXME: By default all filenames MUST assume current running directory and linux, not target, for all development the target is LINUX */
-static char gLogFileName[UT_LOG_MAX_PATH] = "/tmp/ut-log_base.log";    /*!< Path + Filename of the currently active log file*/
+#define UT_LOG_DEFAULT_PATH "/tmp/"  // Move to "./" in the future, when 
+static char gLogFileName[UT_LOG_MAX_PATH] = {0};    /*!< Path + Filename of the currently active log file*/
 static bool gLogInit = false;
 
 void UT_log_setLogFilePath(char *inputFilePath)
@@ -76,7 +77,7 @@ void UT_log(const char *function, int line, const char * format, ...)
     if ( gLogInit == false )
     {
         /* If ut-core has never called to set the log to a fixed location then let's set it */
-        UT_log_setLogFilePath("./");
+        UT_log_setLogFilePath(UT_LOG_DEFAULT_PATH);
     }
 
     /* #FIXME : This will need rework, we shouldn't be opening logs constantly */
@@ -123,7 +124,7 @@ void UT_logPrefix(const char *file, int line, const char *prefix, const char * f
     if ( gLogInit == false )
     {
         /* If ut-core has never called to set the log to a fixed location then let's set it */
-        UT_log_setLogFilePath("./");
+        UT_log_setLogFilePath(UT_LOG_DEFAULT_PATH);
     }
 
     /* #FIXME : This will need rework, we shouldn't be opening logs constantly */

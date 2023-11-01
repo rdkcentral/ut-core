@@ -63,7 +63,7 @@ static bool decodeOptions( int argc, char **argv )
     gOptions.testMode = UT_MODE_CONSOLE;
 
     /* Set the default path to ./ and then take the filename back and use that for automated mode */
-    UT_log_setLogFilePath( "./" );
+    UT_log_setLogFilePath( "/tmp/" );
 
     logFilename = UT_log_getLogFilename();
     assert( logFilename != NULL );

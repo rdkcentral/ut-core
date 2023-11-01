@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/tests/bin/ut-test",
-            "args": [ "-a"],
+            "args": [ "-b"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/tests",
             "environment": [],
