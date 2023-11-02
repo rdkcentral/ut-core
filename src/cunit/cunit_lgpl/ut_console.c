@@ -21,7 +21,7 @@
 /*
  *  Implementation of the Console Test Interface.
  *
- *  October 2023... Modifyed to satisfy ut_core requirements
+ *  October 2023... Modifyed to satisfy ut_core requirements (Ulrond)
  *
  *  Aug 2001      Initial implementation (AK)
  *

@@ -14,3 +14,8 @@ Licensed under the MIT License
 templates directory
 The license files in the "template" directory or directories are intended as templates, and that the actual repository is licensed according to the licensing information at top level.
 *.md symbolic linked files, are included specifically by the doxygen configuration and required to ensure the doxygen HTML output contains all the required (c) notices, and license files.
+
+src/cunit/cunit_lgpl
+Copyright (C) 2001       Anil Kumar
+Copyright (C) 2004-2006  Anil Kumar, Jerry St.Clair
+Licensed under LGPLv2.0, the GNU Library General Public License v2.0
