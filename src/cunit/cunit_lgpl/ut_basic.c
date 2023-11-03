@@ -1,6 +1,7 @@
 /*
  *  CUnit - A Unit testing framework library for C.
  *  Copyright (C) 2004-2006  Jerry St.Clair, Anil Kumar
+ *  Copyright (C) 2023 RDK Management
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Library General Public
