@@ -24,7 +24,9 @@
 # This is a general configuration for ease, you can hard code it if that's the requirement
 
 # This will look up the last tag in the git repo, depending on the project this may require modification
-TEST_REPO=$(git remote -vv | head -n1 | awk -F ' ' '{print $2}' | sed 's/halif/halif-test/g')
+# We need to check for the old format, and also support either old or new depending on the repo.
+# Transition was from hal -> hal-test, new format is from halif -> halif-test
+TEST_REPO=$(git remote -vv | head -n1 | awk -F ' ' '{print $2}' | sed 's/halif/halif-test/g' | sed 's/hal-/haltest-/g' )
 DIR="."
 
 # Set default UT_PROJECT_VERSION to master

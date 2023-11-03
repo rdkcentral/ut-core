@@ -104,28 +104,29 @@ endif
 
 # Make any c source
 $(BUILD_DIR)/%.o: %.c
-	@echo ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
+	@echo -e ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
 	@$(MKDIR_P) $(dir $@)
 	@$(CC) $(XCFLAGS) -c $< -o $@
 
 .PHONY: clean list arm linux framework
+all: framework linux
 
 # Ensure the framework is built
-framework:
-	@echo ${GREEN}"Ensure framework is present"${NC}
-	@$(shell ${UT_DIR}build.sh)
+framework: $(eval SHELL:=/usr/bin/env bash)
+	@echo -e ${GREEN}"Ensure framework is present"${NC}
+	${SHELL} -c ${UT_DIR}/build.sh
 	@echo -e ${GREEN}Completed${NC}
 
 arm:
 	make TARGET=arm
 
-linux:
+linux: framework
 	make TARGET=linux
 
 clean:
-	@echo ${GREEN}Performing Clean$${NC}
+	@echo -e ${GREEN}Performing Clean${NC}
 	@$(RM) -rf $(BUILD_DIR)
-	@echo Clean Completed
+	@echo -e ${GREEN}Clean Completed${NC}
 
 list:
 	@echo 
