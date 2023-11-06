@@ -31,7 +31,7 @@ DIR="."
 
 # Set default UT_PROJECT_VERSION to master
 if [ -z "${UT_PROJECT_VERSION}" ]; then
-    UT_PROJECT_VERSION=master
+    UT_PROJECT_VERSION=main
 fi
 
 # Simple help
