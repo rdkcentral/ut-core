@@ -282,13 +282,14 @@ The versioning format for the testing suites is therefore `<major.minor.bugfix/p
 
 In the file `ut_template/build.sh` you can see the template version of the script.
 
-This is selected via `UT_PROJECT_VERSION` variable as an input in the default build script for the tests suite e.g. `ut/build.sh UT_PROJECT_VERSION=2.0.0` or by changing the fixed version set in your unit testing `build.sh` trigger script.
+This is selected via `UT_CORE_PROJECT_VERSION` variable as an input in the default build script for the tests suite e.g. `ut/build.sh UT_CORE_PROJECT_VERSION=2.0.0` or by changing the fixed version set in your unit testing `build.sh` trigger script.
 
 For best practice and receive bug fixes define `UT_PROJECT_MAJOR_VERSION` in `ut/build.sh` to choose the major revision that the testing suite should compile against.
 `ut-core` will assure backwards compatibility in major versions. This means that the bugfixes and minor changes you will automatically acquire on the next test run.
 
 ```bash
-UT_PROJECT_MAJOR_VERSION="1."    # Change this to upgrade your UT-Core Major versions. Non ABI Changes e.g. 1.x.x are supported in this example
+# Change this to upgrade your UT-Core Major versions. Non ABI Changes 1.x.x are supported, between major revisions
+UT_PROJECT_MAJOR_VERSION="1."
 ```
 
 ### Example of registering test functions with the framework is
