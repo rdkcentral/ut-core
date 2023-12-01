@@ -2,6 +2,8 @@
 framework/**
 workspace
 .vscode/*.log
+*.log
+*.xml
 
 # Prerequisites
 *.d

@@ -40,6 +40,10 @@
 
 #include <string.h>
 
+#ifdef UT_CUNIT
+#include <ut_cunit.h>
+#endif
+
 /**
  * @brief Status codes to support the UT system
  * 
@@ -48,13 +52,13 @@
 
 typedef enum
 {
-    UT_STATUS_OK=0,    /*!< Success / OK Results */
-    UT_STATUS_FAILURE  /*!< General failure */
+    UT_STATUS_OK=0,     /*!< Success / OK Results */
+    UT_STATUS_FAILURE,  /*!< General failure */
 }UT_status_t;
 
 /* Typedefs */
 
-typedef void (UT_test_suite_t);   /*!< hts_test_suite object pointer */
+typedef void (UT_test_suite_t);   /*!< UT Test Suite Object Pointer */
 typedef void (UT_test_t);         /*!< UT test object pointer */
 
 /**
@@ -64,13 +68,19 @@ typedef void (UT_test_t);         /*!< UT test object pointer */
 typedef void (*UT_TestFunction_t)(void);
 
 /**
- * @brief UT Test Init Function
+ * @brief UT Test Clean up function
+ * 
+ */
+typedef int (*UT_TestCleanupFunction_t)(void);
+
+/**
+ * @brief UT Test Suite Init Function
  * 
  */
 typedef int (*UT_InitialiseFunction_t)(void);
 
 /**
- * @brief UT Test Clean up function
+ * @brief UT Test Suite Clean up function
  * 
  */
 typedef int (*UT_CleanupFunction_t)(void);
@@ -111,8 +121,8 @@ UT_status_t UT_run_tests( void );
  * @brief Register a test suite with the system
  * 
  * @param[in] pTitle - name for the suite
- * @param[in] pInitFunction - init function if required, or NULL otherwise
- * @param[in] pCleanupFunction - clean function if required or NULL otherwise
+ * @param[in] pInitFunction - suite init function if required, or NULL otherwise
+ * @param[in] pCleanupFunction - suite clean function if required or NULL otherwise
  
  * @return UT_test_suite_t - test suite handle, NULL on error
 */
@@ -127,55 +137,21 @@ UT_test_suite_t *UT_add_suite( const char *pTitle, UT_InitialiseFunction_t pInit
  */
 UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunction_t pFunction);
 
-#define UT_CUNIT
+/**
+ * @brief Get the test suite title from the suite name
+ * 
+ * @param pSuite - pointer to the suite to get the title from
+ * @return const char* - string data, or null if unknown
+ */
+const char *UT_getTestSuiteTitle( UT_test_suite_t *pSuite );
 
-/* CSUnit -> CUnit Wrapper */
-#ifdef UT_CUNIT 
-
-#include <TestRun.h>
-#include <CUnit.h>
-
-/* UT test macros */
-#define UT_PASS(msg) CU_PASS(msg)
-
-#define UT_FAIL(msg) CU_FAIL_FATAL(msg)
-/* NON-FATAL equivalent of UT_FAIL test macro */
-#define UT_FAIL_NOT_FATAL(msg) CU_FAIL(msg)
-
-#define UT_ASSERT(value) CU_ASSERT_FATAL(value)
-/* NON-FATAL equivalent of UT_ASSERT test macro */
-#define UT_ASSERT_NOT_FATAL(value) CU_ASSERT(value)
-
-#define UT_ASSERT_PTR_NULL(value) CU_ASSERT_PTR_NULL_FATAL(value)
-/* NON-FATAL equivalent of UT_ASSERT_PTR_NULL test macro */
-#define UT_ASSERT_PTR_NULL_NOT_FATAL(value) CU_ASSERT_PTR_NULL(value)
-
-#define UT_ASSERT_PTR_NOT_NULL(value) CU_ASSERT_PTR_NOT_NULL_FATAL(value)
-/* NON-FATAL equivalent of UT_ASSERT_PTR_NOT_NULL test macro */
-#define UT_ASSERT_PTR_NOT_NULL_NOT_FATAL(value) CU_ASSERT_PTR_NOT_NULL(value)
-
-#define UT_ASSERT_TRUE(value) CU_ASSERT_TRUE_FATAL(value)
-/* NON-FATAL equivalent of UT_ASSERT_TRUE test macro */
-#define UT_ASSERT_TRUE_NOT_FATAL(value) CU_ASSERT_TRUE(value)
-
-#define UT_ASSERT_FALSE(value) CU_ASSERT_FALSE_FATAL(value)
-/* NON-FATAL equivalent of UT_ASSERT_FALSE test macro */
-#define UT_ASSERT_FALSE_NOT_FATAL(value) CU_ASSERT_FALSE(value)
-
-#define UT_ASSERT_EQUAL(actual,expected) CU_ASSERT_EQUAL_FATAL(actual,expected)
-/* NON-FATAL equivalent of UT_ASSERT_EQUAL test macro */
-#define UT_ASSERT_EQUAL_NOT_FATAL(actual,expected) CU_ASSERT_EQUAL(actual,expected)
-
-#define UT_ASSERT_STRING_EQUAL(expected, actual) CU_ASSERT_STRING_EQUAL_FATAL(actual,expected)
-/* NON-FATAL equivalent of UT_ASSERT_STRING_EQUAL test macro */
-#define UT_ASSERT_STRING_EQUAL_NOT_FATAL(expected, actual) CU_ASSERT_STRING_EQUAL(actual,expected)
-
-#define UT_ASSERT_STRING_NOT_EQUAL(expected, actual) CU_ASSERT_STRING_NOT_EQUAL_FATAL(actual,expected)
-/* NON-FATAL equivalent of UT_ASSERT_STRING_NOT_EQUAL test macro */
-#define UT_ASSERT_STRING_NOT_EQUAL_NOT_FATAL(expected, actual) CU_ASSERT_STRING_NOT_EQUAL(actual,expected)
-
-#endif  /* UT -> CUNIT - Wrapper */
+/**
+ * @brief Register a test suite cleanup function
+ * 
+ * @param[in] pFunction - pointer to the test function
+ * @return UT_test_t - pointer to the function handle, NULL on error
+ */
+void UT_regsiter_test_cleanup_function( UT_test_suite_t *pSuite,  UT_TestCleanupFunction_t pFunction);
 
 #endif  /*  __UT_H  */
-
 /** @} */

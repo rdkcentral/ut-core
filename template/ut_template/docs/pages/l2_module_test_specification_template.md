@@ -1,4 +1,5 @@
 # L2 Test Specification template
+
 ## History
 
 | Version | Date(YY-MM-DD) | Comments |
@@ -16,13 +17,13 @@
     - [References](#references)
   - [Level 2 Test Suite](#level-2-test-suite)
     - [Test 1](#test-1)
-      - [Test Procedure :](#test-procedure-)
+      - [Test Procedure 1](#test-procedure-1)
     - [Test 2](#test-2)
-      - [Test Procedure :](#test-procedure--1)
+      - [Test Procedure 2](#test-procedure-2)
 
 ## Overview
 
-This document describes the level 2 testing suite for the <component> module.
+This document describes the level 2 testing suite for the `<component>` module.
 
 ### Acronyms, Terms and Abbreviations
 
@@ -75,7 +76,7 @@ TODO: Add pre-conditions, if any
 
 **User Interaction :** TODO: Add any user interactions required during this test, if any
 
-#### Test Procedure :
+#### Test Procedure 1
 
 TODO: Add the steps to run this test and add a line in the below table for each input variation tried in this function.
 
@@ -100,7 +101,7 @@ TODO: Add pre-conditions, if any
 
 **User Interaction :** TODO: Add any user interactions required during this test, if any
 
-#### Test Procedure :
+#### Test Procedure 2
 
 TODO: Add the steps to run this test and add a line in the below table for each input variation tried in this function.
 
