@@ -630,14 +630,12 @@ static void console_test_start_message_handler(const CU_pTest pTest, const CU_pS
   assert(NULL != pSuite->pName);
 
   /* Comparing the Addresses rather than the Group Names. */
-  if ((NULL == f_pRunningSuite) || (f_pRunningSuite != pSuite)) {
-    UT_LOG( UT_LOG_ASCII_CYAN"Running Suite : %s"UT_LOG_ASCII_NC, pSuite->pName);
-    UT_LOG( UT_LOG_ASCII_CYAN"     Running Test : %s"UT_LOG_ASCII_NC, pTest->pName);
+  if ((NULL == f_pRunningSuite) || (f_pRunningSuite != pSuite)) 
+  {
+    UT_LOG( UT_LOG_ASCII_BLUE"Running Suite : "UT_LOG_ASCII_CYAN"%s"UT_LOG_ASCII_NC, pSuite->pName);
     f_pRunningSuite = pSuite;
   }
-  else {
-    UT_LOG( UT_LOG_ASCII_CYAN"     Running Test : %s"UT_LOG_ASCII_NC, pTest->pName);
-  }
+  UT_LOG( UT_LOG_ASCII_GREEN"     Running Test : "UT_LOG_ASCII_CYAN"\'%s\'"UT_LOG_ASCII_NC, pTest->pName);
 }
 
 /*------------------------------------------------------------------------*/
@@ -657,6 +655,9 @@ static void console_test_complete_message_handler(const CU_pTest pTest,
   CU_UNREFERENCED_PARAMETER(pTest);
   CU_UNREFERENCED_PARAMETER(pSuite);
   CU_UNREFERENCED_PARAMETER(pFailure);
+
+  /* Comparing the Addresses rather than the Group Names. */
+  UT_LOG( UT_LOG_ASCII_GREEN"     Test Complete : "UT_LOG_ASCII_CYAN"\'%s\'"UT_LOG_ASCII_NC, pTest->pName);
 }
 
 /*------------------------------------------------------------------------*/
@@ -666,7 +667,7 @@ static void console_test_complete_message_handler(const CU_pTest pTest,
 static void console_all_tests_complete_message_handler(const CU_pFailureRecord pFailure)
 {
   CU_UNREFERENCED_PARAMETER(pFailure); /* not used in console interface */
-  printf("\n\n");
+    printf("\n\n");
   CU_print_run_results(stdout);
   printf("\n");
 }

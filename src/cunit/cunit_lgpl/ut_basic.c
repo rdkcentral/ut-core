@@ -242,18 +242,14 @@ static void basic_test_start_message_handler(const CU_pTest pTest, const CU_pSui
   assert(NULL != pSuite);
   assert(NULL != pTest);
 
-  if (CU_BRM_VERBOSE == f_run_mode) {
-    assert(NULL != pTest->pName);
-    if ((NULL == f_pRunningSuite) || (f_pRunningSuite != pSuite)) {
-      assert(NULL != pSuite->pName);
-      UT_LOG( "\n%s: %s", _("Suite"), pSuite->pName);
-      UT_LOG( "\n  %s: %s ...", _("Test"), pTest->pName);
-      f_pRunningSuite = pSuite;
-    }
-    else {
-      UT_LOG( "\n  %s: %s ...", _("Test"), pTest->pName);
-    }
+  assert(NULL != pTest->pName);
+  if ((NULL == f_pRunningSuite) || (f_pRunningSuite != pSuite)) 
+  {
+    assert(NULL != pSuite->pName);
+    UT_LOG( UT_LOG_ASCII_BLUE"Running Suite : "UT_LOG_ASCII_CYAN"%s"UT_LOG_ASCII_NC, pSuite->pName);
+    f_pRunningSuite = pSuite;
   }
+  UT_LOG( UT_LOG_ASCII_GREEN"     Running Test : "UT_LOG_ASCII_CYAN"\'%s\'"UT_LOG_ASCII_NC, pTest->pName);
 }
 
 /*------------------------------------------------------------------------*/
@@ -299,6 +295,10 @@ static void basic_test_complete_message_handler(const CU_pTest pTest,
       }
     }
   }
+
+  /* Comparing the Addresses rather than the Group Names. */
+  UT_LOG( UT_LOG_ASCII_GREEN"     Test Complete : "UT_LOG_ASCII_CYAN"\'%s\'"UT_LOG_ASCII_NC, pTest->pName);
+
 }
 
 /*------------------------------------------------------------------------*/

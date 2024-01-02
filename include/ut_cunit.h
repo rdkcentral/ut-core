@@ -34,7 +34,7 @@
 #include <ut_log.h>
 
 /**
- * @brief Cause to pass always
+ * @brief Cause to test to pass always & continue processing
  * 
  * @param msg - message to display
  * @note Test will continue to process
@@ -45,7 +45,7 @@
     CU_PASS(msg);
 
 /**
- * @brief Cause a test to failure always & continue processing
+ * @brief Cause the test to failure always & continue processing
  * @param msg - message to display
  * @note Test will continue to process
  */
@@ -54,7 +54,7 @@
     CU_FAIL(msg);
 
 /**
- * @brief Cause a test to fail
+ * @brief Cause a test to fail and exit
  * @param msg - message to display
  * @note Test will exit
  * 
@@ -64,7 +64,7 @@
     CU_FAIL_FATAL(msg);
 
 /**
- * @brief Asset if the expression is true
+ * @brief Asset(make sure) the expression evaluates to true, otherwise fail
  * 
  * @param value - expression to evaluate
  */
@@ -76,7 +76,7 @@
     CU_ASSERT(value);
 
 /**
- * @brief Asset if the expression is true
+ * @brief Asset (make sure) the expression evaluates to true and fail otherwise and exit the test
  *  This function is fatal
  * @param value - expression to evaluate
  */
@@ -88,7 +88,7 @@
     CU_ASSERT_FATAL(value);
 
 /**
- * @brief Asset if the pointers passed are equal
+ * @brief Asset (make sure) the pointers passed are equal, otherwise fail
  * 
  * @param value - pointer value actual
  * @param expected - pointer value expected
@@ -101,7 +101,7 @@
     CU_ASSERT_PTR_EQUAL(actual, expected);
 
 /**
- * @brief Asset if the pointers passed are equal
+ * @brief Assert(make sure) the pointers passed are equal, otherwise fail and exit the test
  * 
  * @param value - pointer value actual
  * @param expected - pointer value expected
@@ -114,7 +114,7 @@
     CU_ASSERT_PTR_EQUAL_FATAL(actual, expected);
 
 /**
- * @brief Asset if the pointers passed NOT equal
+ * @brief Assert(make sure) the pointers passed NOT equal
  * 
  * @param value - pointer value actual
  * @param expected - pointer value expected
@@ -127,7 +127,7 @@
     CU_ASSERT_PTR_NOT_EQUAL(actual, expected);
 
 /**
- * @brief Asset if the pointers passed NOT equal
+ * @brief Assert(make sure) the pointers passed NOT equal, otherwise fail and exit the test
  * 
  * @param value - pointer value actual
  * @param expected - pointer value expected
@@ -140,7 +140,7 @@
     CU_ASSERT_PTR_NOT_EQUAL_FATAL(actual, expected);
 
 /**
- * @brief Asset if the pointer value is NULL
+ * @brief Assert(make sure) the pointer value is NULL
  * 
  * 
  * @param value - pointer value
@@ -153,7 +153,7 @@
     CU_ASSERT_PTR_NULL(value);
 
 /**
- * @brief Asset if the pointer value is NULL
+ * @brief Assert(make sure) the pointer value is NULL, otherwise fail and exit the test
  * 
  * 
  * @param value - pointer value
@@ -166,7 +166,7 @@
     CU_ASSERT_PTR_NULL_FATAL(value);
 
 /**
- * @brief Asset if the pointer value is NOT NULL
+ * @brief Assert(make sure) the pointer value is NOT NULL, otherwise fail
  * 
  * @param value - pointer value
  */
@@ -178,7 +178,7 @@
     CU_ASSERT_PTR_NOT_NULL(value);
 
 /**
- * @brief Asset if the pointer value is NOT NULL
+ * @brief Assert(make sure) the pointer value is NOT NULL, otherwise fail and exit the test
  * 
  * @param value - pointer value
  */
@@ -190,9 +190,10 @@
     CU_ASSERT_PTR_NOT_NULL_FATAL(value);
 
 /**
- * @brief Asset if the expression is true
+ * @brief Assert(make sure) the expression is true, otherwise fail
  * 
  * @param value -  expression to evaluate
+ * @see UT_ASSERT - Same condition as UT_ASSERT
  */
 #define UT_ASSERT_TRUE(value)  \
     if ( !(value) ) \
@@ -202,9 +203,10 @@
     CU_ASSERT_TRUE(value);
 
 /**
- * @brief Asset if the expression is true
+ * @brief Assert(make sure) the expression is true, otherwise fail and exit the test
  * 
  * @param value -  expression to evaluate
+ * @see UT_ASSERT - Same condition as UT_ASSERT_FATAL
  */
 #define UT_ASSERT_TRUE_FATAL(value)  \
     if ( !(value) ) \
@@ -214,7 +216,7 @@
     CU_ASSERT_TRUE_FATAL(value);
 
 /**
- * @brief Asset if the expression is false
+ * @brief Assert(make sure) the expression is false, otherwise
  * 
  * @param value -  expression to evaluate
  */
@@ -226,7 +228,7 @@
     CU_ASSERT_FALSE(value);
 
 /**
- * @brief Asset if the expression is false
+ * @brief Assert(make sure) the expression is false, otherwise fail and exit the test
  * 
  * @param value -  expression to evaluate
  */
@@ -238,7 +240,7 @@
     CU_ASSERT_FALSE_FATAL(value);
 
 /**
- * @brief Asset if the two expressions are equal
+ * @brief Assert(make sure) the two expressions are equal, otherwise fail
  * 
  * @param actual -  actual expression
  * @param expected -  expected expression
@@ -251,7 +253,7 @@
     CU_ASSERT_EQUAL(actual,expected);
 
 /**
- * @brief Asset if the two expressions are equal
+ * @brief Assert(make sure) the two expressions are equal, otherwise fail and exit the test
  * 
  * @param actual -  actual expression
  * @param expected -  expected expression
@@ -264,7 +266,7 @@
     CU_ASSERT_EQUAL_FATAL(actual,expected);
 
 /**
- * @brief Asset if the two expressions are NOT equal
+ * @brief Assert(make sure) the two expressions are NOT equal, otherwise fail
  * 
  * @param actual -  actual expression
  * @param expected -  expected expression
@@ -277,7 +279,7 @@
     CU_ASSERT_NOT_EQUAL(actual,expected);
 
 /**
- * @brief Asset if the two expressions are NOT equal
+ * @brief Assert(make sure) the two expressions are NOT equal, otherwise fail and exit the test
  * 
  * @param actual -  actual expression
  * @param expected -  expected expression
@@ -290,7 +292,7 @@
     CU_ASSERT_NOT_EQUAL_FATAL(actual,expected);
 
 /**
- * @brief Asset if the strings are equal
+ * @brief Assert(make sure) the strings are equal, otherwise fail
  * 
  * @param actual -  actual string
  * @param expected -  expected string
@@ -303,7 +305,7 @@
     CU_ASSERT_STRING_EQUAL(actual,expected);
 
 /**
- * @brief Asset if the strings are equal
+ * @brief Assert(make sure) the strings are equal, otherwise fail and exit the test
  * 
  * @param actual -  actual string
  * @param expected -  expected string
@@ -316,7 +318,7 @@
     CU_ASSERT_STRING_EQUAL_FATAL(actual,expected);
 
 /**
- * @brief Asset if the strings are NOT equal
+ * @brief Assert(make sure) the strings are NOT equal, otherwise fail
  * 
  * @param actual -  actual string
  * @param expected -  expected string
@@ -329,7 +331,7 @@
     CU_ASSERT_STRING_NOT_EQUAL(actual,expected);
 
 /**
- * @brief Asset if the strings are NOT equal
+ * @brief Assert(make sure) the strings are NOT equal, otherwise fail and exit the test
  * 
  * @param actual -  actual string
  * @param expected -  expected string
@@ -342,7 +344,7 @@
     CU_ASSERT_STRING_NOT_EQUAL_FATAL(actual,expected);
 
 /**
- * @brief UT Assert with Message on failure
+ * @brief Assert(make sure) the expression is true, otherwise fail with the log message
  * 
  * @param[in] value - the value to check 
  * @param[in] message - message to log, if the assert fails
@@ -356,7 +358,7 @@
     CU_ASSERT(value);
 
 /**
- * @brief UT Assert with Message on failure
+ * @brief Assert(make sure) the expression is true, otherwise fail with the log message and exit the test
  * 
  * @param[in] value - the value to check 
  * @param[in] message - message to log, if the assert fails
@@ -370,7 +372,7 @@
     CU_ASSERT_FATAL(value);
 
 /**
- * @brief UT Assert True with Message on failure
+ * @brief Assert(make sure) the expression is true, otherwise fail with the log message
  * 
  * @param[in] value - expression value to check 
  * @param[in] message - message to log, if the expression is true
@@ -384,7 +386,7 @@
     CU_ASSERT_TRUE(value);
 
 /**
- * @brief UT Assert True with Message on failure
+ * @brief Assert(make sure) the expression is true, otherwise fail with the log message and exit the test
  * 
  * @param[in] value - expression value to check 
  * @param[in] message - message to log, if the expression is true
@@ -398,7 +400,7 @@
     CU_ASSERT_TRUE_FATAL(value);
 
 /**
- * @brief UT Assert True with Message on failure
+ * @brief Assert(make sure) the expression is false, otherwise fail with the log message
  * 
  * @param[in] value - the value to check 
  * @param[in] message - message to log, if the expression is false
@@ -412,7 +414,7 @@
     CU_ASSERT_FALSE(value);
 
 /**
- * @brief UT Assert True with Message on failure
+ * @brief Assert(make sure) the expression is false, otherwise fail with the log message and exit the test
  * 
  * @param[in] value - the value to check 
  * @param[in] message - message to log, if the expression is false
@@ -426,7 +428,7 @@
     CU_ASSERT_FALSE_FATAL(value);
 
 /**
- * @brief UT Assert with Log always
+ * @brief Assert(make sure) the expression is true, otherwise fail but always log the message
  * 
  * @param[in] value - the value to check 
  * @param[in] message - message to log, will always log
@@ -442,7 +444,7 @@
     CU_ASSERT(value);
 
 /**
- * @brief UT Assert with Log always
+ * @brief Assert(make sure) the expression is true, otherwise fail and exit the test, but always log the message
  * 
  * @param[in] value - the value to check 
  * @param[in] message - message to log, will always log

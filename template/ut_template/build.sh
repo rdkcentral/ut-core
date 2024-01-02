@@ -28,7 +28,7 @@ NC="\e[39m"
 # When the major version changes in the ut-core, what that signals is that the testings will have to be upgraded to support that version
 # Therefore in that case it warns you but doesnt' chnage to that version, which could cause your tests to break.
 # Change this to upgrade your UT-Core Major versions. Non ABI Changes 1.x.x are supported, between major revisions
-UT_PROJECT_MAJOR_VERSION="1."
+UT_PROJECT_MAJOR_VERSION="2."
 
 # Clone the Unit Test Requirements
 TEST_REPO=git@github.com:rdkcentral/ut-core.git

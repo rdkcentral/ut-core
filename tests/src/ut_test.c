@@ -306,10 +306,10 @@ void test_ut_assert_msg_false( void )
 
 void test_ut_assert_log( void )
 {
-    UT_ASSERT_LOG( true==true, "Step 1: ASSERT_LOG : should log and NOT fail :")
-    UT_ASSERT_LOG( true==false, "Step 2: ASSERT_LOG : should log and fail :")   /* This line should assert */
+    UT_ASSERT_LOG( true==true, "Step 1: ASSERT_LOG : should log and NOT fail :");
+    UT_ASSERT_LOG( true==false, "Step 2: ASSERT_LOG : should log and NOT fail :");   /* This line should assert */
 
-    UT_LOG_INFO("### This line SHOULD never be seen\n");
+    UT_LOG_INFO("+++ This line SHOULD be seen\n");
 }
 
 /**
