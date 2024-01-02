@@ -20,15 +20,18 @@
 # *
 
 # Clone the Unit Testing Suit for this repo, it follows a standard convention
-# HAL Name is replaced with haltest, allowing this script to be part of the template for all
+# halif Name is by default to halif-test, allowing this script to be part of the template for all hals
+# This is a general configuration for ease, you can hard code it if that's the requirement
 
 # This will look up the last tag in the git repo, depending on the project this may require modification
-TEST_REPO=$(git remote -vv | head -n1 | awk -F ' ' '{print $2}' | sed 's/hal/haltest/g')
+# We need to check for the old format, and also support either old or new depending on the repo.
+# Transition was from hal -> hal-test, new format is from halif -> halif-test
+TEST_REPO=$(git remote -vv | head -n1 | awk -F ' ' '{print $2}' | sed 's/halif/halif-test/g' | sed 's/hal-/haltest-/g' )
 DIR="."
 
 # Set default UT_PROJECT_VERSION to master
 if [ -z "${UT_PROJECT_VERSION}" ]; then
-    UT_PROJECT_VERSION=master
+    UT_PROJECT_VERSION=main
 fi
 
 # Simple help

@@ -1,13 +1,17 @@
 # Unit Testing - Hal Testing Suite
 
-| Date   | Comment | Version |
+| Date   | Comment | Document Version |
 |--------|---------|---------|
-| 23/02/22 | Reviewed & Updated| 1.1.0|
+| 02/01/24 | Added Release Notes | 2.0.0|
+| 06/10/23 | Initial release| 1.2.0|
+| 23/02/23 | Reviewed & Updated| 1.1.0|
 | 30/09/22 | Initial release| 1.0.0|
 
 ## Scope
 
 To develop a L1, L2 testing suite to support vendor deliverables. This combines API Documentation, Specifications and Tests, delivered without infrastructure and RDK framework requirements.
+
+Please refer to the release notes here :- [RELEASE.md](./RELEASE.md), for information on latest releases.
 
 ## HAL Scope
 
@@ -271,6 +275,26 @@ The main test app will register all the tests and kick off the framework.
     UT_run_tests();
 ```
 
+### Choosing a Major Version of the UT-Core
+
+Since the ut-core interfaces will change over time, and in order to be consistant when creating tests engineers should select the major release they wish to fixed too. (Although it's recommended to periodically upgrade to a later revision )
+
+The interface will not change between minor versions, but the most recent bugfix version should be selected.
+
+The versioning format for the testing suites is therefore `<major.minor.bugfix/patch/documentation>`
+
+In the file `ut_template/build.sh` you can see the template version of the script.
+
+This is selected via `UT_CORE_PROJECT_VERSION` variable as an input in the default build script for the tests suite e.g. `ut/build.sh UT_CORE_PROJECT_VERSION=2.0.0` or by changing the fixed version set in your unit testing `build.sh` trigger script.
+
+For best practice and receive bug fixes define `UT_PROJECT_MAJOR_VERSION` in `ut/build.sh` to choose the major revision that the testing suite should compile against.
+`ut-core` will assure backwards compatibility in major versions. This means that the bugfixes and minor changes you will automatically acquire on the next test run.
+
+```bash
+# Change this to upgrade your UT-Core Major versions. Non ABI Changes 1.x.x are supported, between major revisions
+UT_PROJECT_MAJOR_VERSION="1."
+```
+
 ### Example of registering test functions with the framework is
 
 ```c
@@ -324,7 +348,6 @@ The current file by file, and function by function, may not be the ideal way to 
 
 Other files maybe required, users should use their own description and best practices to perform and implement tests.
 
-
 ## Level 1 Testing - Functional Testing
 
 The Level 1 testing suit will be classed as functional tests. The main goal of the tests are:
@@ -349,3 +372,15 @@ The purpose of the test level is to test the module functionality as much as pos
 ## Autogen scripts
 
 Please refer to [docs/pages/autogenTemplate.md](autogenTemplate.md)
+
+## UT-Core testing suite
+
+The testing suite to check the ut-core functionality is housed under the `tests` directory and will run in linux.
+
+To build and run the testing suite and output in basic mode do the following
+
+```bash
+cd ./tests
+make
+./bin/ut-tests -b
+``````
