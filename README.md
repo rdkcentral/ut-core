@@ -2,6 +2,7 @@
 
 | Date   | Comment | Document Version |
 |--------|---------|---------|
+| 02/01/24 | Added Release Notes | 2.0.0|
 | 06/10/23 | Initial release| 1.2.0|
 | 23/02/23 | Reviewed & Updated| 1.1.0|
 | 30/09/22 | Initial release| 1.0.0|
@@ -9,6 +10,8 @@
 ## Scope
 
 To develop a L1, L2 testing suite to support vendor deliverables. This combines API Documentation, Specifications and Tests, delivered without infrastructure and RDK framework requirements.
+
+Please refer to the release notes here :- [RELEASE.md](./RELEASE.md), for information on latest releases.
 
 ## HAL Scope
 

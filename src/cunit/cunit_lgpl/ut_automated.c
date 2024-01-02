@@ -68,6 +68,7 @@
 #include "CUnit_intl.h"
 
 #include "ut_cunit_internal.h"
+#include <ut_log.h>
 
 #define MAX_FILENAME_LENGTH		1025
 
@@ -266,6 +267,14 @@ static void automated_test_start_message_handler(const CU_pTest pTest, const CU_
   assert(NULL != pSuite->pName);
   assert(NULL != f_pTestResultFile);
 
+  /* Comparing the Addresses rather than the Group Names. */
+  if ((NULL == f_pRunningSuite) || (f_pRunningSuite != pSuite)) 
+  {
+    UT_LOG( UT_LOG_ASCII_BLUE"Running Suite : "UT_LOG_ASCII_CYAN"%s"UT_LOG_ASCII_NC, pSuite->pName);
+    f_pRunningSuite = pSuite;
+  }
+  UT_LOG( UT_LOG_ASCII_GREEN"     Running Test : "UT_LOG_ASCII_CYAN"\'%s\'"UT_LOG_ASCII_NC, pTest->pName);
+
   /* write suite close/open tags if this is the 1st test for this szSuite */
   if ((NULL == f_pRunningSuite) || (f_pRunningSuite != pSuite)) {
     if (CU_TRUE == f_bWriting_CUNIT_RUN_SUITE) {
@@ -331,6 +340,9 @@ static void automated_test_complete_message_handler(const CU_pTest pTest,
   assert(NULL != pSuite);
   assert(NULL != pSuite->pName);
   assert(NULL != f_pTestResultFile);
+
+  /* Comparing the Addresses rather than the Group Names. */
+  UT_LOG( UT_LOG_ASCII_GREEN"     Test Complete : "UT_LOG_ASCII_CYAN"\'%s\'"UT_LOG_ASCII_NC, pTest->pName);
 
   if (NULL != pTempFailure) {
 
