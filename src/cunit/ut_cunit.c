@@ -180,7 +180,7 @@ const char *UT_getTestSuiteTitle( UT_test_suite_t *pSuite )
 {
     CU_pTest pTest;
 
-    pTest = pSuite;
+    pTest = (CU_pTest)pSuite;
 
     return pTest->pName;
 }
