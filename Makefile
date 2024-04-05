@@ -68,7 +68,7 @@ endif
 # Defaults for target linux
 ifeq ($(TARGET),linux)
 CUNIT_VARIANT=i686-pc-linux-gnu
-CC := gcc -ggdb -o0 -Wall -Wno-format
+CC := gcc -ggdb -o0 -Wall
 endif
 
 XLDFLAGS += -Wl,-rpath, $(YLDFLAGS) $(LDFLAGS)
