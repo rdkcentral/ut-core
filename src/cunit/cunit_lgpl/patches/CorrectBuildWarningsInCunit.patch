@@ -3,9 +3,6 @@
 #		 in TestRun.c under CUnit directory. 
 #
 #Source: Uses code from the CUnit Testing Framework 
-#Notice: This software is licensed by RDK Management under the GNU General
-#	 Public License version 2.0 only, as per COPYING.LGPL and subject to any
-#	 additional licenses included in this file.
 #Signed-off-by: kanjoe24 <165808281+kanjoe24@users.noreply.github.com>
 #---
 #
