@@ -102,10 +102,10 @@ void UT_log(const char *function, int line, const char * format, ...)
     va_end(list);
 
     /* Print the line to stdout */
-    printf( singleLineBuffer );
+    printf( "%s", singleLineBuffer );
 
     /* Print the data to the stream */
-    fprintf( fp, singleLineBuffer );
+    fprintf( fp, "%s", singleLineBuffer );
     fclose(fp);
 }
 
@@ -150,9 +150,9 @@ void UT_logPrefix(const char *file, int line, const char *prefix, const char * f
     va_end(list);
 
     /* Print the line to stdout */
-    printf( singleLineBuffer );
+    printf( "%s", singleLineBuffer );
 
     /* Print the data to the stream */
-    fprintf( fp, singleLineBuffer );
+    fprintf( fp, "%s", singleLineBuffer );
     fclose(fp);
 }
