@@ -26,6 +26,11 @@ INC_DIRS := $(ROOT_DIR)/include
 
 CFLAGS = -DBUILD_LINUX
 TARGET_EXEC = ut-test
+TARGET_TMP_FYAML_EXEC = fyaml-test
+
+PKG_CONFIG_PATH = $(LIBFYAML_DIR)
+CFLAGS += $(shell pkg-config --cflags libfyaml)
+LDFLAGS += $(shell pkg-config --libs libfyaml)
 
 TARGET = linux
 
@@ -42,6 +47,7 @@ export BUILD_DIR
 export CFLAGS
 export TARGET
 export TARGET_EXEC
+export TARGET_TMP_FYAML_EXEC
 
 GREEN='\033[0;32m'
 NC='\033[0m'
@@ -51,6 +57,7 @@ NC='\033[0m'
 build: framework
 	@echo ${GREEN}Build [$@]${NC}
 	@make -C ../ test TARGET=linux
+	@make -C ../ test_tmp_fyaml TARGET=linux
 	@echo -e ${GREEN}Build Complete${NC}
 
 run: build

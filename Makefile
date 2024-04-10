@@ -48,6 +48,14 @@ SRC_DIRS += $(CUNIT_SRC_DIRS)/Framework
 #SRC_DIRS += $(CUNIT_SRC_DIRS)/Win
 #SRC_DIRS += $(CUNIT_SRC_DIRS)/Test
 
+# Enable libyaml Requirements
+LIBFYAML_DIR += $(UT_DIR)/framework/libfyaml-master
+PKG_CONFIG_PATH += $(LIBFYAML_DIR)
+CFLAGS += $(shell pkg-config --cflags libfyaml)
+LDFLAGS += $(shell pkg-config --libs libfyaml)
+SRC_DIR_FYAML += $(UT_DIR)/tests/fyaml_test_src
+
+
 INC_DIRS += $(UT_DIR)/include
 INC_DIRS += $(UT_DIR)/src
 
@@ -75,7 +83,11 @@ XLDFLAGS += -Wl,-rpath, $(YLDFLAGS) $(LDFLAGS)
 
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 
+SRCS_TEST_YAML := $(SRC_DIR_FYAML)/inprogram_yaml_generation.c
+
 OBJS := $(subst $(TOP_DIR),$(BUILD_DIR),$(SRCS:.c=.o))
+
+OBJS_TEST_YAML := $(subst $(TOP_DIR),$(BUILD_DIR),$(SRCS_TEST_YAML:.c=.o))
 
 INC_DIRS += $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
@@ -86,6 +98,8 @@ $(info VERSION [$(VERSION)])
 
 # Final conversions
 DEPS += $(OBJS:.o=.d)
+DEPS += $(OBJS_TEST_YAML:.o=.d)
+
 XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\"
 
 # Library Path
@@ -102,11 +116,20 @@ ifneq ("$(wildcard $(HAL_LIB_DIR)/*.so)","")
 	cp $(HAL_LIB_DIR)/*.so* $(BIN_DIR)
 endif
 
+test_tmp_fyaml: $(OBJS_TEST_YAML)
+	@echo -e ${GREEN}TARGET_EXEC [$(TARGET_TMP_FYAML_EXEC)]${NC}
+	@echo -e ${GREEN}Linking $@ $(BUILD_DIR)/$(TARGET_TMP_FYAML_EXEC)${NC}
+	@$(CC) $(OBJS_TEST_YAML) -o $(BUILD_DIR)/$(TARGET_TMP_FYAML_EXEC) $(XLDFLAGS) $(KCFLAGS) $(XCFLAGS)
+	@$(MKDIR_P) $(BIN_DIR)
+	@cp $(BUILD_DIR)/$(TARGET_TMP_FYAML_EXEC) $(BIN_DIR)
+
 # Make any c source
 $(BUILD_DIR)/%.o: %.c
 	@echo -e ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
 	@$(MKDIR_P) $(dir $@)
 	@$(CC) $(XCFLAGS) -c $< -o $@
+	@echo -e ${GREEN}"Building libfyaml library"
+	make -C $(LIBFYAML_DIR)
 
 .PHONY: clean list arm linux framework
 all: framework linux
@@ -126,6 +149,8 @@ linux: framework
 clean:
 	@echo -e ${GREEN}Performing Clean${NC}
 	@$(RM) -rf $(BUILD_DIR)
+	@echo -e ${GREEN}Performing Clean for libfyaml${NC}
+	make -C $(LIBFYAML_DIR) clean
 	@echo -e ${GREEN}Clean Completed${NC}
 
 list:
@@ -139,12 +164,18 @@ list:
 	@echo OBJS:$(OBJS)
 	@echo 
 	@echo SRCS:$(SRCS)
-	@echo 
+	@echo
+	@echo SRC_DIR_FYAML:$(SRC_DIR_FYAML)
+	@echo
+	@echo SRCS_TEST_YAML:$(SRCS_TEST_YAML)
+	@echo
 	@echo UT_DIR:$(UT_DIR)
 	@echo 
 	@echo TOP_DIR:$(TOP_DIR)
 	@echo 
 	@echo BUILD_DIR:$(BUILD_DIR)
+	@echo
+	@echo LIBFYAML_DIR:$(LIBFYAML_DIR)
 	@echo
 	@echo
 	@echo CFLAGS:$(CFLAGS)
