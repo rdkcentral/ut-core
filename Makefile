@@ -53,7 +53,7 @@ LIBFYAML_DIR += $(UT_DIR)/framework/libfyaml-master
 PKG_CONFIG_PATH += $(LIBFYAML_DIR)
 CFLAGS += $(shell pkg-config --cflags libfyaml)
 LDFLAGS += $(shell pkg-config --libs libfyaml)
-SRC_DIR_FYAML += $(UT_DIR)/tests/fyaml_test_src
+SRC_DIR_FYAML += $(UT_DIR)/tests/kvp
 
 
 INC_DIRS += $(UT_DIR)/include
@@ -83,10 +83,12 @@ XLDFLAGS += -Wl,-rpath, $(YLDFLAGS) $(LDFLAGS)
 
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 
-SRCS_TEST_YAML := $(SRC_DIR_FYAML)/inprogram_yaml_generation.c
+SRCS_TEST_YAML_TMP := $(SRC_DIR_FYAML)/inprogram_yaml_generation.c
+SRCS_TEST_YAML := $(SRC_DIR_FYAML)/ut_kvp_test.c $(UT_DIR)/src/ut_log.c
 
 OBJS := $(subst $(TOP_DIR),$(BUILD_DIR),$(SRCS:.c=.o))
 
+OBJS_TEST_YAML_TMP := $(subst $(TOP_DIR),$(BUILD_DIR),$(SRCS_TEST_YAML_TMP:.c=.o))
 OBJS_TEST_YAML := $(subst $(TOP_DIR),$(BUILD_DIR),$(SRCS_TEST_YAML:.c=.o))
 
 INC_DIRS += $(shell find $(SRC_DIRS) -type d)
@@ -116,20 +118,28 @@ ifneq ("$(wildcard $(HAL_LIB_DIR)/*.so)","")
 	cp $(HAL_LIB_DIR)/*.so* $(BIN_DIR)
 endif
 
-test_tmp_fyaml: $(OBJS_TEST_YAML)
+test_tmp_fyaml: $(OBJS_TEST_YAML_TMP)
 	@echo -e ${GREEN}TARGET_EXEC [$(TARGET_TMP_FYAML_EXEC)]${NC}
 	@echo -e ${GREEN}Linking $@ $(BUILD_DIR)/$(TARGET_TMP_FYAML_EXEC)${NC}
-	@$(CC) $(OBJS_TEST_YAML) -o $(BUILD_DIR)/$(TARGET_TMP_FYAML_EXEC) $(XLDFLAGS) $(KCFLAGS) $(XCFLAGS)
+	@$(CC) $(OBJS_TEST_YAML_TMP) -o $(BUILD_DIR)/$(TARGET_TMP_FYAML_EXEC) $(XLDFLAGS) $(KCFLAGS) $(XCFLAGS)
 	@$(MKDIR_P) $(BIN_DIR)
 	@cp $(BUILD_DIR)/$(TARGET_TMP_FYAML_EXEC) $(BIN_DIR)
+
+ut_test_kvp : $(OBJS_TEST_YAML)
+	@echo -e ${GREEN}TARGET_EXEC [$(TARGET_UTTEST_FYAML_EXEC)]${NC}
+	@echo -e ${GREEN}Linking $@ $(BUILD_DIR)/$(TARGET_UTTEST_FYAML_EXEC)${NC}
+	@$(CC) $(OBJS_TEST_YAML) -o $(BUILD_DIR)/$(TARGET_UTTEST_FYAML_EXEC) $(XLDFLAGS) $(KCFLAGS) $(XCFLAGS)
+	@$(MKDIR_P) $(BIN_DIR)
+	@cp $(BUILD_DIR)/$(TARGET_UTTEST_FYAML_EXEC) $(BIN_DIR)
 
 # Make any c source
 $(BUILD_DIR)/%.o: %.c
 	@echo -e ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
 	@$(MKDIR_P) $(dir $@)
 	@$(CC) $(XCFLAGS) -c $< -o $@
-	@echo -e ${GREEN}"Building libfyaml library"
+	@echo -e ${GREEN}"Building libfyaml library and fy-tool"
 	make -C $(LIBFYAML_DIR)
+	@cp $(LIBFYAML_DIR)/src/.libs/fy-tool $(BIN_DIR)
 
 .PHONY: clean list arm linux framework
 all: framework linux
@@ -168,6 +178,8 @@ list:
 	@echo SRC_DIR_FYAML:$(SRC_DIR_FYAML)
 	@echo
 	@echo SRCS_TEST_YAML:$(SRCS_TEST_YAML)
+	@echo
+	@echo SRCS_TEST_YAML_TMP:$(SRCS_TEST_YAML_TMP)
 	@echo
 	@echo UT_DIR:$(UT_DIR)
 	@echo 

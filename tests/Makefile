@@ -27,6 +27,7 @@ INC_DIRS := $(ROOT_DIR)/include
 CFLAGS = -DBUILD_LINUX
 TARGET_EXEC = ut-test
 TARGET_TMP_FYAML_EXEC = fyaml-test
+TARGET_UTTEST_FYAML_EXEC = ut-kvp-test
 
 PKG_CONFIG_PATH = $(LIBFYAML_DIR)
 CFLAGS += $(shell pkg-config --cflags libfyaml)
@@ -48,6 +49,7 @@ export CFLAGS
 export TARGET
 export TARGET_EXEC
 export TARGET_TMP_FYAML_EXEC
+export TARGET_UTTEST_FYAML_EXEC
 
 GREEN='\033[0;32m'
 NC='\033[0m'
@@ -58,6 +60,7 @@ build: framework
 	@echo ${GREEN}Build [$@]${NC}
 	@make -C ../ test TARGET=linux
 	@make -C ../ test_tmp_fyaml TARGET=linux
+	@make -C ../ ut_test_kvp TARGET=linux
 	@echo -e ${GREEN}Build Complete${NC}
 
 run: build
