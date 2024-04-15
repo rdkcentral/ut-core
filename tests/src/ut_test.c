@@ -22,6 +22,10 @@
 
 #include <ut.h>
 #include <ut_log.h>
+#include <ut_log.h>
+#include <ut_kvp.h>
+
+
 
 static UT_test_suite_t * gpLogSuite = NULL;
 static UT_test_suite_t * gpAssertSuite = NULL;
@@ -312,6 +316,55 @@ void test_ut_assert_log( void )
     UT_LOG_INFO("+++ This line SHOULD be seen\n");
 }
 
+void test_ut_kvp_log()
+{
+	struct fy_document *fyd = NULL;
+	int index1, index2;
+	char radioname1[256], radioname2[256];
+	char ace1[10], ace2[10];
+	FILE *inputfileptr = NULL;
+
+	inputfileptr = fopen("xione.de.yaml", "r");
+        if (NULL == inputfileptr) {
+                UT_LOG_STEP("Unable to open YAML file\n");
+	}
+
+	fyd = fy_document_build_from_fp(NULL, inputfileptr);
+	if (!fyd) {
+                UT_LOG_STEP("Unable to build YAML file\n");
+                fy_document_destroy(fyd);
+                fclose(inputfileptr);
+	}
+	fy_document_scanf(fyd,"/WifiRadioConfig/0/RadioIndex %d ",&index1);
+	fy_document_scanf(fyd,"/WifiRadioConfig/1/RadioIndex %d ",&index2);
+	fy_document_scanf(fyd,"/WifiRadioConfig/0/RadioName %s",radioname1);
+	fy_document_scanf(fyd,"/WifiRadioConfig/1/RadioName %s",radioname2);
+	fy_document_scanf(fyd,"/WifiRadioConfig/0/AutoChannelEnabled %s",ace1);
+	fy_document_scanf(fyd,"/WifiRadioConfig/1/AutoChannelEnabled %s",ace2);
+
+        UT_LOG_STEP("/WifiRadioConfig/0/RadioIndex = %d", index1);
+	UT_LOG_STEP("/WifiRadioConfig/1/RadioIndex = %d\n", index2);
+
+	UT_LOG_STEP("/WifiRadioConfig/0/RadioName = %s", radioname1);
+	UT_LOG_STEP("/WifiRadioConfig/1/RadioName = %s\n", radioname2);
+
+	UT_LOG_STEP("/WifiRadioConfig/0/AutoChannelEnabled = %s", ace1);
+	UT_LOG_STEP("/WifiRadioConfig/1/AutoChannelEnabled = %s\n", ace2);
+
+
+	#if 0
+        rv = fy_emit_document_to_fp(fyd, FYECF_DEFAULT | FYECF_SORT_KEYS, stdout);
+	if (rv) {
+		fprintf(stderr, "failed to emit document to stdout");
+		UT_LOG_STEP("failed to emit document");
+		fy_document_destroy(fyd);
+		return -1;
+	}
+	#endif
+
+        fy_document_destroy(fyd);
+	fclose(inputfileptr);
+}
 /**
  * @brief Main launch function for the test app
  * 
@@ -357,6 +410,7 @@ int main(int argc, char** argv)
     UT_add_test( gpAssertSuite, "UT_ASSERT_TRUE_MSG", test_ut_assert_msg_true);
     UT_add_test( gpAssertSuite, "UT_ASSERT_FALSE_MSG", test_ut_assert_msg_false);
     UT_add_test( gpAssertSuite, "UT_ASSERT Log", test_ut_assert_log);
+    UT_add_test( gpAssertSuite, "UT_ASSERT Log", test_ut_kvp_log);
 
     /* Begin test executions */
     UT_run_tests();

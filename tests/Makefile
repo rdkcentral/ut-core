@@ -26,10 +26,8 @@ INC_DIRS := $(ROOT_DIR)/include
 
 CFLAGS = -DBUILD_LINUX
 TARGET_EXEC = ut-test
-TARGET_TMP_FYAML_EXEC = fyaml-test
-TARGET_UTTEST_FYAML_EXEC = ut-kvp-test
 
-PKG_CONFIG_PATH = $(LIBFYAML_DIR)
+PKG_CONFIG_PATH = $(ROOT_DIR)/../framework/libfyaml-master
 CFLAGS += $(shell pkg-config --cflags libfyaml)
 LDFLAGS += $(shell pkg-config --libs libfyaml)
 
@@ -50,6 +48,10 @@ export TARGET
 export TARGET_EXEC
 export TARGET_TMP_FYAML_EXEC
 export TARGET_UTTEST_FYAML_EXEC
+export PKG_CONFIG_PATH
+export CFLAGS
+export LDFLAGS
+export SRC_DIR_FYAML
 
 GREEN='\033[0;32m'
 NC='\033[0m'
@@ -59,8 +61,6 @@ NC='\033[0m'
 build: framework
 	@echo ${GREEN}Build [$@]${NC}
 	@make -C ../ test TARGET=linux
-	@make -C ../ test_tmp_fyaml TARGET=linux
-	@make -C ../ ut_test_kvp TARGET=linux
 	@echo -e ${GREEN}Build Complete${NC}
 
 run: build
@@ -76,6 +76,10 @@ list:
 	@echo -e ${GREEN}List [$@]${NC}
 	@echo INC_DIRS: ${INC_DIRS}
 	@echo SRC_DIRS: ${SRC_DIRS}
+	@echo PKG_CONFIG_PATH: ${PKG_CONFIG_PATH}
+	@echo CFLAGS: ${CFLAGS}
+	@echo LDFLAGS: ${LDFLAGS}
+	@echo SRC_DIR_FYAML: ${SRC_DIR_FYAML}
 	@make -C ../ list TARGET=linux
 
 clean:
