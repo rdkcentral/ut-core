@@ -51,7 +51,6 @@ export TARGET_UTTEST_FYAML_EXEC
 export PKG_CONFIG_PATH
 export CFLAGS
 export LDFLAGS
-export SRC_DIR_FYAML
 
 GREEN='\033[0;32m'
 NC='\033[0m'
@@ -79,7 +78,6 @@ list:
 	@echo PKG_CONFIG_PATH: ${PKG_CONFIG_PATH}
 	@echo CFLAGS: ${CFLAGS}
 	@echo LDFLAGS: ${LDFLAGS}
-	@echo SRC_DIR_FYAML: ${SRC_DIR_FYAML}
 	@make -C ../ list TARGET=linux
 
 clean:

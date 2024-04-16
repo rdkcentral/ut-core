@@ -51,7 +51,6 @@ SRC_DIRS += $(CUNIT_SRC_DIRS)/Framework
 # Enable libyaml Requirements
 LIBFYAML_DIR += $(UT_DIR)/framework/libfyaml-master
 
-
 INC_DIRS += $(UT_DIR)/include
 INC_DIRS += $(UT_DIR)/src
 
@@ -90,7 +89,6 @@ $(info VERSION [$(VERSION)])
 
 # Final conversions
 DEPS += $(OBJS:.o=.d)
-DEPS += $(OBJS_TEST_YAML:.o=.d)
 
 XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\"
 
@@ -150,8 +148,6 @@ list:
 	@echo OBJS:$(OBJS)
 	@echo 
 	@echo SRCS:$(SRCS)
-	@echo
-	@echo SRC_DIR_FYAML:$(SRC_DIR_FYAML)
 	@echo
 	@echo UT_DIR:$(UT_DIR)
 	@echo 
