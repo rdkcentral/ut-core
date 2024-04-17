@@ -23,6 +23,7 @@ BUILD_DIR := $(ROOT_DIR)/obj
 
 SRC_DIRS = $(ROOT_DIR)/src
 INC_DIRS := $(ROOT_DIR)/include
+INC_DIRS += $(ROOT_DIR)/../include
 
 CFLAGS = -DBUILD_LINUX
 TARGET_EXEC = ut-test

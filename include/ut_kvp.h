@@ -21,9 +21,9 @@
 
 // ut_kvp.h, header to be expanded as required
 
-//#include <std_bool.h>
-//#include <std_int.h>
-#include <libfyaml.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
 
 typedef enum
 {
@@ -80,6 +80,11 @@ ut_kvp_value_t ut_kvp_read( ut_kvp_handle_t *pHandle, const char *pszKvpFile );
  */
 ut_kvp_value_t ut_kvp_get( ut_kvp_handle_t *pHandle, const char *pszKey );
 
+ut_kvp_handle_t *ut_kvp_createInstance_from_file_ptr(FILE *inputfileptr);
+ut_kvp_handle_t *ut_kvp_createInstance_from_file(char *file);
+ut_kvp_value_t ut_kvp_document_get_int(ut_kvp_handle_t *pHandle, const char *string);
+ut_kvp_value_t ut_kvp_document_get_string(ut_kvp_handle_t *pHandle, const char *string);
+ut_kvp_value_t ut_kvp_document_get_bool(ut_kvp_handle_t *pHandle, const char *string);
 /*Other possible examples*/
 const char * ut_kvp_getString( ut_kvp_handle_t *pHandle, const char *pszKey );
 int ut_kvp_getInt( ut_kvp_handle_t *pHandle, const char *pszKey );

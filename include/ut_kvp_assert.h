@@ -25,19 +25,23 @@
 // Macro Setup, will perform type checking
 #define UT_KVP_GET_BOOL( key ) \
 { \
-    ut_kvp_value_t kvpValue; \
-    kvpValue = ut_kvp_get( key ); \
+    ut_kvp_value_t (kvpValue); \
+    ut_kvp_handle_t *p_Handle = NULL; \
+    FILE *inputfileptr = NULL; \
+    p_Handle = ut_kvp_createInstance_from_file_ptr(inputfileptr); \
+    kvpValue = ut_kvp_document_get_bool( p_Handle, key ); \
     UT_ASSERT( kvpValue.type == UT_KVP_BOOL ); \
+    ut_kvp_pHandledestoryInstance_from_file_ptr(p_Handle); \
     kvpValue.u.bValue; \
 } \
 
-#define UT_KVP_GET_INT( key ) \
+#define UT_KVP_GET_INT(key, kvpValue, pHandle) \
 { \
-    ut_kvp_value_t kvpValue; \
-    kvpValue = ut_kvp_get( key ); \
+    kvpValue = ut_kvp_document_get_int( key, pHandle ); \
     UT_ASSERT( kvpValue.type == UT_KVP_INT ); \
-    kvpValue.u.intValue; \
+    kvpValue.u.intValue \
 } \
+
 
 //.. Expand as required
 
@@ -46,8 +50,8 @@
     UT_ASSERT( UT_KVP_GET_BOOL( key ) == checkValue ); \
 } \
 
-#define UT_ASSERT_EQUAL_KVP_INT(checkValue, key ) \
+#define UT_ASSERT_EQUAL_KVP_INT(checkValue, key, kvpValue, pHandle ) \
 { \
-    UT_ASSERT( UT_KVP_GET_INT( key ) == checkValue ); \
+    UT_ASSERT( UT_KVP_GET_INT( key, kvpValue, pHandle )) == checkValue ); \
 } \
 

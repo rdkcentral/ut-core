@@ -15,7 +15,8 @@
 			"stdint.h": "c",
 			"string": "c",
 			"ut_cunit_internal.h": "c",
-			"string_view": "c"
+			"string_view": "c",
+			"time.h": "c"
 		}
 	}
 }
