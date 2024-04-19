@@ -38,8 +38,13 @@ else
     echo "Clone libfyml"
     wget https://github.com/pantoniou/libfyaml/archive/refs/heads/master.zip --no-check-certificate
     unzip master.zip
+    if [ -d "${MY_DIR}/bin" ]; then
+         echo "bin already exists"
+    else
+         mkdir ${MY_DIR}/bin
+    fi
     cd libfyaml-master/
     ./bootstrap.sh
-    ./configure
+    ./configure --prefix=${MY_DIR}/bin
 fi
 popd > /dev/null

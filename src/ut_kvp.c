@@ -15,7 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /* Application Includes */
 #include <ut_log.h>
@@ -25,77 +25,111 @@
 #include <stdint.h>
 #include <string.h>
 #include <time.h>
+#include <assert.h>
 
 #include <libfyaml.h>
 
-ut_kvp_handle_t *pHandle = NULL;
-ut_kvp_value_t kvpValue={0};
+ut_kvp_instance_t gKVP_Instance = NULL;
 
-ut_kvp_handle_t *ut_kvp_createInstance_from_file_ptr(FILE *inputfileptr)
+typedef struct
 {
-	inputfileptr = fopen("xione.de.yaml", "r");
-	if (NULL == inputfileptr)
+	uint32_t magic;
+	FILE *inputFilePtr;
+	struct fy_document *fy_handle;
+} ut_kvp_instance_internal_t;
+
+static ut_kvp_instance_internal_t *validateInstance(ut_kvp_instance_t *pInstance);
+
+ut_kvp_instance_t *ut_kvp_createInstance(void)
+{
+	ut_kvp_instance_internal_t *pInstance = malloc(sizeof(ut_kvp_instance_internal_t));
+	memset(pInstance, 0, sizeof(ut_kvp_instance_internal_t));
+
+	pInstance->magic = 0xdeadbeef;
+}
+
+ut_kvp_instance_t ut_kvp_destoryInstance(ut_kvp_instance_t *pInstance)
+{
+	// ut_kvp_instance_t *pInstance = get_ut_kvp_instance;
+	ut_kvp_instance_internal_t *pInternal = validateInstance(pInstance);
+
+	assert(pInstance != NULL);
+	assert(pInternal->fy_handle != NULL);
+	assert(pInternal->inputFilePtr != NULL);
+
+	if (pInternal->fy_handle != NULL)
 	{
-		UT_LOG_STEP("Unable to open YAML file\n");
+		fy_document_destroy(pInternal->fy_handle);
+	}
+	if (pInternal->inputFilePtr != NULL)
+	{
+		fclose(pInternal->inputFilePtr);
+	}
+
+	memset(pInternal, sizeof(ut_kvp_instance_internal_t), 0);
+
+	free(pInstance);
+}
+
+ut_kvp_status_t ut_kvp_read(ut_kvp_instance_t *pInstance, char *fileName)
+{
+	ut_kvp_instance_internal_t *pInternal = validateInstance(pInstance);
+
+	assert(pInternal != NULL);
+	if (pInternal == NULL)
+	{
+		return UT_KVP_VALID_PARAM;
+	}
+
+	if (pInternal->inputFilePtr != NULL)
+	{
+		fclose(pInternal->inputFilePtr);
+		pInternal->inputFilePtr = NULL;
+	}
+
+	pInternal->inputFilePtr = fopen(fileName, "r");
+	if (NULL == pInternal->inputFilePtr)
+	{
+		UT_LOG_ERROR("Unable to open file\n");
+		return UT_KVP_FILE_OPEN_ERROR;
+	}
+	pInternal->fy_handle = fy_document_build_from_fp(NULL, pInternal->inputFilePtr);
+	if (NULL == pInternal->fy_handle)
+	{
+		UT_LOG_ERROR("Unable to build file\n");
+		return UT_KVP_FILE_READ_ERROR;
+	}
+
+	return UT_KVP_STATUS_OK;
+}
+
+const char *ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *string)
+{
+	const char *result;
+	// ut_kvp_instance_t *pInstance = get_ut_kvp_instance();
+	ut_kvp_instance_internal_t *pInternal = validateInstance(pInstance);
+
+	assert(pInternal != NULL);
+	if (pInternal == NULL)
+	{
 		return NULL;
 	}
-	pHandle = fy_document_build_from_fp(NULL, inputfileptr);
-	if (!pHandle)
+	fy_document_scanf(pInternal->fy_handle, string, result);
+
+	return result;
+}
+
+static ut_kvp_instance_internal_t *validateInstance(ut_kvp_instance_t *pInstance)
+{
+	ut_kvp_instance_internal_t *pInternal = (ut_kvp_instance_internal_t *)pInstance;
+
+	assert(pInternal != NULL);
+	assert(pInternal->magic == 0xdeadbeef);
+
+	if (pInternal->magic != 0xdeadbeef)
 	{
-		UT_LOG_STEP("Unable to build YAML file\n");
-		ut_kvp_pHandledestoryInstance_from_file_ptr(pHandle, inputfileptr);
 		return NULL;
 	}
-	fclose(inputfileptr);
 
-	return pHandle;
-}
-
-ut_kvp_handle_t *ut_kvp_createInstance_from_file(char *file)
-{
-	ut_kvp_handle_t *pHandle = NULL;
-	pHandle = fy_document_build_from_file(NULL, file);
-	return pHandle;
-}
-
-ut_kvp_instance_t ut_kvp_pHandledestoryInstance_from_file_ptr( ut_kvp_handle_t *pHandle)
-{
-	fy_document_destroy(pHandle);
-}
-
-ut_kvp_instance_t ut_kvp_pHandleestoryInstance_from_file( ut_kvp_handle_t *pHandle)
-{
-	fy_document_destroy(pHandle);
-}
-
-ut_kvp_value_t ut_kvp_document_get_int(ut_kvp_handle_t *pHandle, const char *string)
-{
-	fy_document_scanf(pHandle, string, &kvpValue.u.intValue);
-	kvpValue.type = UT_KVP_INT;
-	UT_LOG_STEP("%s = %d", string, kvpValue.u.intValue);
-	return kvpValue;
-}
-
-ut_kvp_value_t ut_kvp_document_get_string(ut_kvp_handle_t *pHandle, const char *string)
-{
-	fy_document_scanf(pHandle, string, kvpValue.u.szValue);
-	kvpValue.type = UT_KVP_zSTRING;
-	UT_LOG_STEP("%s = %s", string, kvpValue.u.szValue);
-	return kvpValue;
-}
-
-ut_kvp_value_t ut_kvp_document_get_bool(ut_kvp_handle_t *pHandle, const char *string)
-{
-	char bool_string[10];
-	fy_document_scanf(pHandle, string, bool_string);
-	if (!strcmp("true", bool_string))
-	{
-		kvpValue.u.bValue = true;
-	}
-	else
-	{
-		kvpValue.u.bValue = false;
-	}
-	UT_LOG_STEP("%s = %d", string, kvpValue.u.bValue);
-	return kvpValue;
+	return pInternal;
 }

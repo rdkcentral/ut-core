@@ -23,35 +23,44 @@
 #include <ut_kvp.h>
 
 // Macro Setup, will perform type checking
+
 #define UT_KVP_GET_BOOL( key ) \
 { \
-    ut_kvp_value_t (kvpValue); \
-    ut_kvp_handle_t *p_Handle = NULL; \
-    FILE *inputfileptr = NULL; \
-    p_Handle = ut_kvp_createInstance_from_file_ptr(inputfileptr); \
-    kvpValue = ut_kvp_document_get_bool( p_Handle, key ); \
-    UT_ASSERT( kvpValue.type == UT_KVP_BOOL ); \
-    ut_kvp_pHandledestoryInstance_from_file_ptr(p_Handle); \
-    kvpValue.u.bValue; \
+    bool kvpValue; \
+    kvpValue = ut_kvp_getField( gKVP_Instance, key ); \
+    kvpValue; \
 } \
 
-#define UT_KVP_GET_INT(key, kvpValue, pHandle) \
+#define UT_KVP_GET_INT(key) \
 { \
-    kvpValue = ut_kvp_document_get_int( key, pHandle ); \
-    UT_ASSERT( kvpValue.type == UT_KVP_INT ); \
-    kvpValue.u.intValue \
+    int kvpValue; \
+    kvpValue = ut_kvp_getField( gKVP_Instance, key ); \
+    kvpValue; \
 } \
 
+#if 0
+#define UT_KVP_GET_STRING(key) \
+{ \
+    const char *kvpValue; \
+    kvpValue = ut_kvp_getField( key ); \
+    kvpValue; \
+} \
+
+#endif
 
 //.. Expand as required
 
 #define UT_ASSERT_EQUAL_KVP_BOOL( checkValue, key ) \
 { \
-    UT_ASSERT( UT_KVP_GET_BOOL( key ) == checkValue ); \
+    UT_ASSERT_EQUAL( UT_KVP_GET_BOOL( #key ), #checkValue ); \
 } \
 
-#define UT_ASSERT_EQUAL_KVP_INT(checkValue, key, kvpValue, pHandle ) \
+#define UT_ASSERT_EQUAL_KVP_INT( checkValue, key ) \
 { \
-    UT_ASSERT( UT_KVP_GET_INT( key, kvpValue, pHandle )) == checkValue ); \
+    UT_ASSERT_EQUAL( UT_KVP_GET_INT( #key ), #checkValue ); \
 } \
 
+#define UT_ASSERT_EQUAL_KVP_STRING( checkValue, key ) \
+{ \
+    UT_ASSERT_EQUAL_STRING( UT_KVP_GET_STRING( #key ), #checkValue ); \
+}

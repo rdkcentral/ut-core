@@ -28,10 +28,6 @@ INC_DIRS += $(ROOT_DIR)/../include
 CFLAGS = -DBUILD_LINUX
 TARGET_EXEC = ut-test
 
-PKG_CONFIG_PATH = $(ROOT_DIR)/../framework/libfyaml-master
-CFLAGS += $(shell pkg-config --cflags libfyaml)
-LDFLAGS += $(shell pkg-config --libs libfyaml)
-
 TARGET = linux
 
 $(info TARGET [$(TARGET)])

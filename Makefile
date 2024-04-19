@@ -50,6 +50,9 @@ SRC_DIRS += $(CUNIT_SRC_DIRS)/Framework
 
 # Enable libyaml Requirements
 LIBFYAML_DIR += $(UT_DIR)/framework/libfyaml-master
+PKG_CONFIG_PATH = $(LIBFYAML_DIR)
+CFLAGS += $(shell pkg-config --cflags libfyaml)
+LDFLAGS += $(shell pkg-config --libs libfyaml)
 
 INC_DIRS += $(UT_DIR)/include
 INC_DIRS += $(UT_DIR)/src
@@ -113,7 +116,7 @@ $(BUILD_DIR)/%.o: %.c
 	@$(CC) $(XCFLAGS) -c $< -o $@
 	@echo -e ${GREEN}"Building libfyaml library and fy-tool"
 	make -C $(LIBFYAML_DIR)
-	@cp $(LIBFYAML_DIR)/src/.libs/fy-tool $(BIN_DIR)
+	make -C $(LIBFYAML_DIR) install
 
 .PHONY: clean list arm linux framework
 all: framework linux
