@@ -136,8 +136,8 @@ clean:
 	@echo -e ${GREEN}Clean Completed${NC}
 
 cleanall: clean 
-	@echo -e ${GREEN}Performing Clean on frameworks [${$(UT_DIR)/framework}]${NC}
-	@$(RM) -rf $($(UT_DIR)/framework)
+	@echo -e ${GREEN}Performing Clean on frameworks [$(UT_DIR)/framework]${NC}
+	@${RM} -rf $(UT_DIR)/framework
 
 list:
 	@echo 
