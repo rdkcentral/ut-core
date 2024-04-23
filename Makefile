@@ -50,8 +50,10 @@ SRC_DIRS += $(CUNIT_SRC_DIRS)/Framework
 
 # Enable libyaml Requirements
 LIBFYAML_DIR = ${UT_DIR}/framework/libyml/libfyaml-master
-LIBFYAML = ${LIBFYAML_DIR}/src/.libs/libfyaml.a
 INC_DIRS += $(LIBFYAML_DIR)/include
+LDFLAGS= -L ${LIBFYAML_DIR}/src/.libs/
+LDLIBS= -lfyaml
+YLDFLAGS= ${LDFLAGS} ${LDLIBS}
 
 INC_DIRS += $(UT_DIR)/include
 INC_DIRS += $(UT_DIR)/src
