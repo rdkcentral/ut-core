@@ -49,11 +49,12 @@ SRC_DIRS += $(CUNIT_SRC_DIRS)/Framework
 #SRC_DIRS += $(CUNIT_SRC_DIRS)/Test
 
 # Enable libyaml Requirements
-LIBFYAML_DIR = ${UT_DIR}/framework/libyml/libfyaml-master
+LIBFYAML_DIR = ${UT_DIR}/framework/libyaml/libfyaml-master
+SRC_DIRS += $(LIBFYAML_DIR)/src/lib
+SRC_DIRS += $(LIBFYAML_DIR)/src/thread
+SRC_DIRS += $(LIBFYAML_DIR)/src/util
+SRC_DIRS += $(LIBFYAML_DIR)/src/xxhash
 INC_DIRS += $(LIBFYAML_DIR)/include
-LDFLAGS= -L ${LIBFYAML_DIR}/src/.libs/
-LDLIBS= -lfyaml
-YLDFLAGS= ${LDFLAGS} ${LDLIBS}
 
 INC_DIRS += $(UT_DIR)/include
 INC_DIRS += $(UT_DIR)/src

@@ -41,6 +41,7 @@
 		"[shellscript]": {
 			"files.eol": "\n",
 			"files.trimTrailingWhitespace": false
-		}
+		},
+		"search.useIgnoreFiles": false
 	}
 }

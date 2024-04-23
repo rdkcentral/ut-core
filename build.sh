@@ -24,7 +24,8 @@ MY_DIR="$(dirname $SCRIPT_EXEC)"
 
 pushd ${MY_DIR} > /dev/null
 
-LIBYAML_DIR=${MY_DIR}/framework/libyml
+FRAMEWORK_DIR=${MY_DIR}/framework
+LIBYAML_DIR=${FRAMEWORK_DIR}/libfyaml-master
 
 # Clone CUnit
 if [ -d "./framework/" ]; then
@@ -36,22 +37,26 @@ else
     cp framework/CUnit-2.1-3/CUnit/Headers/CUnit.h.in framework/CUnit-2.1-3/CUnit/Headers/CUnit.h
     cp src/cunit/cunit_lgpl/patches/CorrectBuildWarningsInCunit.patch  framework/.
     cd framework/
-    patch -u -b CUnit-2.1-3/CUnit/Sources/Framework/TestRun.c -i CorrectBuildWarningsInCunit.patch
+    echo "Patching Framework"
+    patch -u CUnit-2.1-3/CUnit/Sources/Framework/TestRun.c -i ../patches/CorrectBuildWarningsInCunit.patch
+    echo "Patching Complete"
 fi
 
 if [ -d "${LIBYAML_DIR}" ]; then
     echo "Framework libyml already exists"
 else
-    mkdir -p ${LIBYAML_DIR}
-    pushd ${LIBYAML_DIR} > /dev/null
-    echo "Clone libfyml in ${LIBYAML_DIR}"
+    pushd ${FRAMEWORK_DIR} > /dev/null
+    echo "Clone libfyaml in ${LIBYAML_DIR}"
     wget https://github.com/pantoniou/libfyaml/archive/refs/heads/master.zip --no-check-certificate
     unzip master.zip
 
-    cd ./libfyaml-master/
-    ./bootstrap.sh
-    ./configure --prefix=${LIBYAML_DIR}
-    make
+    echo "Patching Framework"
+    patch -u . -i ../../patches/CorrectBuildIssuesInLibyaml.patch
+    echo "Patching Complete"
+
+#    ./bootstrap.sh
+#    ./configure --prefix=${LIBYAML_DIR}
+#    make
     popd > /dev/null
 fi
 popd > /dev/null
