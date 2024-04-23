@@ -19,6 +19,8 @@
 
 #include <ut_kvp_assert.h>
 
+static ut_kvp_instance_t gKVP_Instance = NULL;
+
 void ut_kvp_assert_load(char *fileName)
 {
     if (gKVP_Instance == NULL)
@@ -29,9 +31,17 @@ void ut_kvp_assert_load(char *fileName)
     ut_kvp_read(gKVP_Instance, fileName);
 }
 
-#if 0
-ut_kvp_instance_t* get_ut_kvp_instance()
+void ut_kvp_assert_unload(void)
 {
-	return gKVP_Instance;
+    if ( gKVP_Instance != NULL )
+    {
+        ut_kvp_destroyInstance(gKVP_Instance);
+        gKVP_Instance = NULL;
+    }
 }
-#endif
+
+ut_kvp_instance_t* ut_kvp_assert_getInstance()
+{
+    return gKVP_Instance;
+}
+

@@ -18,6 +18,7 @@
 */
 
 #include <stdlib.h>
+#include <ut.h>
 
 extern void register_assert_functions(void);
 extern void register_kvp_functions(void);

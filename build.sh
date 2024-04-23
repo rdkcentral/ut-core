@@ -23,9 +23,12 @@ SCRIPT_EXEC="$(realpath $0)"
 MY_DIR="$(dirname $SCRIPT_EXEC)"
 
 pushd ${MY_DIR} > /dev/null
+
+LIBYAML_DIR=${MY_DIR}/framework/libyml
+
 # Clone CUnit
 if [ -d "./framework/" ]; then
-    echo "Framework already exists"
+    echo "Framework CUnit already exists"
 else
     echo "Clone Framework"
     wget https://sourceforge.net/projects/cunit/files/CUnit/2.1-3/CUnit-2.1-3.tar.bz2 --no-check-certificate -P framework/
@@ -34,17 +37,21 @@ else
     cp src/cunit/cunit_lgpl/patches/CorrectBuildWarningsInCunit.patch  framework/.
     cd framework/
     patch -u -b CUnit-2.1-3/CUnit/Sources/Framework/TestRun.c -i CorrectBuildWarningsInCunit.patch
+fi
 
-    echo "Clone libfyml"
+if [ -d "${LIBYAML_DIR}" ]; then
+    echo "Framework libyml already exists"
+else
+    mkdir -p ${LIBYAML_DIR}
+    pushd ${LIBYAML_DIR} > /dev/null
+    echo "Clone libfyml in ${LIBYAML_DIR}"
     wget https://github.com/pantoniou/libfyaml/archive/refs/heads/master.zip --no-check-certificate
     unzip master.zip
-    if [ -d "${MY_DIR}/bin" ]; then
-         echo "bin already exists"
-    else
-         mkdir ${MY_DIR}/bin
-    fi
-    cd libfyaml-master/
+
+    cd ./libfyaml-master/
     ./bootstrap.sh
-    ./configure --prefix=${MY_DIR}/bin
+    ./configure --prefix=${LIBYAML_DIR}
+    make
+    popd > /dev/null
 fi
 popd > /dev/null

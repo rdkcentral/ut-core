@@ -19,6 +19,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <assert.h>
 
 #include <ut.h>
 #include <ut_log.h>
@@ -319,20 +320,14 @@ void register_assert_functions(void)
 {
     /* add a suite to the registry */
     gpLogSuite = UT_add_suite("ut-core-log-tests", ut_init_function, ut_clean_function);
-    if (NULL == gpLogSuite)
-    {
-        return -1;
-    }
+    assert(gpLogSuite != NULL);
 
     UT_add_test( gpLogSuite, "UT_LOG Tests", test_ut_logging);
     UT_add_test( gpLogSuite, "UT_LOG Tests - Too Long String", test_ut_logging_too_long_string);
     UT_add_test( gpLogSuite, "UT_LOG Tests - Colour Test", test_ut_logging_colour_test);
 
     gpAssertSuite = UT_add_suite("ut-core-assert-tests", ut_init_function, ut_clean_function);
-    if (NULL == gpAssertSuite)
-    {
-        return -1;
-    }
+    assert(gpAssertSuite != NULL);
 
     UT_add_test( gpAssertSuite, "UT_PASS Pass", test_ut_assert_pass);
     UT_add_test( gpAssertSuite, "UT_FAIL Fail", test_ut_assert_fail);

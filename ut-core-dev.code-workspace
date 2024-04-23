@@ -16,7 +16,31 @@
 			"string": "c",
 			"ut_cunit_internal.h": "c",
 			"string_view": "c",
-			"time.h": "c"
+			"time.h": "c",
+			"*.conf": "bitbake",
+			"*.inc": "bitbake",
+			"stdlib.h": "c"
+		},
+		"python.autoComplete.extraPaths": [
+			"${workspaceFolder}/sources/poky/bitbake/lib",
+			"${workspaceFolder}/sources/poky/meta/lib"
+		],
+		"python.analysis.extraPaths": [
+			"${workspaceFolder}/sources/poky/bitbake/lib",
+			"${workspaceFolder}/sources/poky/meta/lib"
+		],
+		"[python]": {
+			"diffEditor.ignoreTrimWhitespace": false,
+			"gitlens.codeLens.symbolScopes": [
+				"!Module"
+			],
+			"editor.formatOnType": true,
+			"editor.wordBasedSuggestions": "off",
+			"files.trimTrailingWhitespace": false
+		},
+		"[shellscript]": {
+			"files.eol": "\n",
+			"files.trimTrailingWhitespace": false
 		}
 	}
 }

@@ -49,10 +49,9 @@ SRC_DIRS += $(CUNIT_SRC_DIRS)/Framework
 #SRC_DIRS += $(CUNIT_SRC_DIRS)/Test
 
 # Enable libyaml Requirements
-LIBFYAML_DIR += $(UT_DIR)/framework/libfyaml-master
-PKG_CONFIG_PATH = $(LIBFYAML_DIR)
-CFLAGS += $(shell pkg-config --cflags libfyaml)
-LDFLAGS += $(shell pkg-config --libs libfyaml)
+LIBFYAML_DIR = ${UT_DIR}/framework/libyml/libfyaml-master
+LIBFYAML = ${LIBFYAML_DIR}/src/.libs/libfyaml.a
+INC_DIRS += $(LIBFYAML_DIR)/include
 
 INC_DIRS += $(UT_DIR)/include
 INC_DIRS += $(UT_DIR)/src
@@ -94,6 +93,7 @@ $(info VERSION [$(VERSION)])
 DEPS += $(OBJS:.o=.d)
 
 XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\"
+XCLFAGS += -l ${LIBFYAML}
 
 # Library Path
 VPATH += $(UT_DIR)
@@ -114,9 +114,6 @@ $(BUILD_DIR)/%.o: %.c
 	@echo -e ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
 	@$(MKDIR_P) $(dir $@)
 	@$(CC) $(XCFLAGS) -c $< -o $@
-	@echo -e ${GREEN}"Building libfyaml library and fy-tool"
-	make -C $(LIBFYAML_DIR)
-	make -C $(LIBFYAML_DIR) install
 
 .PHONY: clean list arm linux framework
 all: framework linux
@@ -136,9 +133,11 @@ linux: framework
 clean:
 	@echo -e ${GREEN}Performing Clean${NC}
 	@$(RM) -rf $(BUILD_DIR)
-	@echo -e ${GREEN}Performing Clean for libfyaml${NC}
-	make -C $(LIBFYAML_DIR) clean
 	@echo -e ${GREEN}Clean Completed${NC}
+
+cleanall: clean 
+	@echo -e ${GREEN}Performing Clean on frameworks [${$(UT_DIR)/framework}]${NC}
+	@$(RM) -rf $($(UT_DIR)/framework)
 
 list:
 	@echo 

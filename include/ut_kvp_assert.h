@@ -21,46 +21,28 @@
 
 #include <ut.h>
 #include <ut_kvp.h>
+#include <stdbool.h>
 
-// Macro Setup, will perform type checking
+/**
+ * @brief load the assert configuration file for processing
+ * 
+ * @param fileName[in] - filename to load
+ */
+extern void ut_kvp_assert_load(char *fileName);
 
-#define UT_KVP_GET_BOOL( key ) \
-{ \
-    bool kvpValue; \
-    kvpValue = ut_kvp_getField( gKVP_Instance, key ); \
-    kvpValue; \
-} \
+/**
+ * @brief unload the assert configuration
+ * 
+ */
+extern void ut_kvp_assert_unload(void);
 
-#define UT_KVP_GET_INT(key) \
-{ \
-    int kvpValue; \
-    kvpValue = ut_kvp_getField( gKVP_Instance, key ); \
-    kvpValue; \
-} \
+/**
+ * @brief get the current assert kvp instance
+*/
+extern ut_kvp_instance_t *ut_kvp_assert_getInstance(void);
 
-#if 0
-#define UT_KVP_GET_STRING(key) \
-{ \
-    const char *kvpValue; \
-    kvpValue = ut_kvp_getField( key ); \
-    kvpValue; \
-} \
-
-#endif
-
-//.. Expand as required
-
-#define UT_ASSERT_EQUAL_KVP_BOOL( checkValue, key ) \
-{ \
-    UT_ASSERT_EQUAL( UT_KVP_GET_BOOL( #key ), #checkValue ); \
-} \
-
-#define UT_ASSERT_EQUAL_KVP_INT( checkValue, key ) \
-{ \
-    UT_ASSERT_EQUAL( UT_KVP_GET_INT( #key ), #checkValue ); \
-} \
-
-#define UT_ASSERT_EQUAL_KVP_STRING( checkValue, key ) \
-{ \
-    UT_ASSERT_EQUAL_STRING( UT_KVP_GET_STRING( #key ), #checkValue ); \
-}
+/* ASSERT Macros */
+#define UT_ASSERT_EQUAL_KVP_BOOL( checkValue, key ) UT_ASSERT_EQUAL( ut_kvp_getBoolField(ut_kvp_assert_getInstance(), key), checkValue );
+#define UT_ASSERT_EQUAL_KVP_UINT32( checkValue, key ) UT_ASSERT_EQUAL( ut_kvp_getUInt32Field( ut_kvp_assert_getInstance(), key ), checkValue );
+#define UT_ASSERT_EQUAL_KVP_UINT64( checkValue, key ) UT_ASSERT_EQUAL( ut_kvp_getUInt64Field( ut_kvp_assert_getInstance(), key ), checkValue );
+#define UT_ASSERT_EQUAL_KVP_STRING( checkValue, key ) UT_ASSERT_STRING_EQUAL( ut_kvp_getField( ut_kvp_assert_getInstance(), key ), checkValue );

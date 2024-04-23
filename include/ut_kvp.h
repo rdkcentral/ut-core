@@ -23,32 +23,34 @@
 #include <stdint.h>
 #include <stdio.h>
 
-
+/**
+ * @brief Status return codes for this module
+ * 
+ */
 typedef enum
 {
-    UT_KVP_STATUS_OK=0,
-    UT_KVP_FILE_OPEN_ERROR,
-    UT_KVP_VALID_PARAM,
-    UT_KVP_FILE_READ_ERROR
+    UT_KVP_STATUS_OK=0,         /**!< Status ok */
+    UT_KVP_FILE_OPEN_ERROR,     /**!< File open error */
+    UT_KVP_INVALID_PARAM,       /**!< Invalid Param */
+    UT_KVP_FILE_READ_ERROR      /**!< Read Error */
 }
 ut_kvp_status_t;
 
-#define UT_KVP_MAX_STRING_ELEMENT_SIZE (256)
-#define UT_KVP_MAX_ARRAY_SIZE (32)
-
-typedef void *ut_kvp_instance_t;
-
-extern ut_kvp_instance_t gKVP_Instance;
+typedef void *ut_kvp_instance_t;    /**!< Instance type*/
 
 /**
  * @brief create instance handle to the kvp object
+ * 
+ * @returns ut_kvp_instance_t - Handle to the instance
  */
-ut_kvp_instance_t *ut_kvp_createInstance( void );
+ut_kvp_instance_t ut_kvp_createInstance( void );
 
 /**
- * @brief destory instance handle to the kvp object
+ * @brief destroy instance handle to the kvp object
+ * 
+ * @param pInstance[in] - Handle to the instance
  */
-ut_kvp_instance_t ut_kvp_destoryInstance( ut_kvp_instance_t *pInstance );
+void ut_kvp_destroyInstance( ut_kvp_instance_t *pInstance );
 
 /**
  * @brief get instance handle to the kvp object
@@ -57,16 +59,59 @@ ut_kvp_instance_t ut_kvp_destoryInstance( ut_kvp_instance_t *pInstance );
 
 /**
  * @brief read kvp file and ready for use
+ * 
+ * @param pInstance[in] - Handle to the instance
+ * @param pString[in] - Zero Terminated String Key
+ * @returns ut_kvp_status_t
+ * @retval UT_KVP_STATUS_OK - Success
+ * @retval UT_KVP_FILE_OPEN_ERROR - File open error
+ * @retval UT_KVP_INVALID_PARAM - Invalid param passed
+ * @retval UT_KVP_FILE_READ_ERROR - File read error
  */
 ut_kvp_status_t ut_kvp_read(ut_kvp_instance_t *pInstance, char* fileName);
 
 /**
  * @brief Get a key value pair from the passed configuration
  *
- * @param param[in] - Handle to the instance
- * @param key[in] - Zero Terminated String Key
+ * @param pInstance[in] - Handle to the instance
+ * @param pString[in] - Zero Terminated String Key
  *
  * @return ut_kvp_value_t  - Returned structure
  * @retval type == UT_KVP_INVALID_ELEMENT if the element is not found
  */
 const char *ut_kvp_getField( ut_kvp_instance_t *pInstance, const char *pszKey );
+
+/**
+ * @brief Get a bool key value pair from a passed configuration
+ * 
+ * @param pInstance[in] - Handle to the instance
+ * @param pString[in] - Zero Terminated String Key
+ *
+ * @return true 
+ * @return false 
+ */
+bool ut_kvp_getBoolField(ut_kvp_instance_t *pInstance, const char *pString);
+
+/**
+ * @brief Get a uint32_t field from a key value pair
+ *  This function may assert if a field is not convertible type uint32_t
+ * 
+ * @param pInstance[in] - Handle to the instance
+ * @param pString[in] - Zero Terminated String Key
+ *
+ * @returns uint32_t - int result
+ */
+uint32_t ut_kvp_getUInt32Field(ut_kvp_instance_t *pInstance, const char *pString);
+
+/**
+ * @brief Get a uint64_t field from a key value pair
+ *  This function may assert if a field is not convertible type uint32_t
+ * 
+ * @param pInstance[in] - Handle to the instance
+ * @param pString[in] - Zero Terminated String Key
+ *
+ * @returns uint64_t - int result
+ */
+uint64_t ut_kvp_getUInt64Field(ut_kvp_instance_t *pInstance, const char *pString);
+
+/* TOOD: We will need int32 & int64 field functions also */

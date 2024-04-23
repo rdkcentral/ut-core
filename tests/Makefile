@@ -80,3 +80,7 @@ list:
 clean:
 	@echo -e ${GREEN}Clean [$@]${NC}
 	@make -C ../ clean TARGET=linux
+
+cleanall:
+	@echo -e ${GREEN}Clean [$@]${NC}
+	@make -C ../ cleanall TARGET=linux
