@@ -35,23 +35,24 @@ else
     wget https://sourceforge.net/projects/cunit/files/CUnit/2.1-3/CUnit-2.1-3.tar.bz2 --no-check-certificate -P framework/
     tar xvfj framework/CUnit-2.1-3.tar.bz2 -C ./framework/
     cp framework/CUnit-2.1-3/CUnit/Headers/CUnit.h.in framework/CUnit-2.1-3/CUnit/Headers/CUnit.h
-    cp src/cunit/cunit_lgpl/patches/CorrectBuildWarningsInCunit.patch  framework/.
-    cd framework/
     echo "Patching Framework"
-    patch -u CUnit-2.1-3/CUnit/Sources/Framework/TestRun.c -i ../patches/CorrectBuildWarningsInCunit.patch
+    cp src/cunit/cunit_lgpl/patches/CorrectBuildWarningsInCunit.patch  framework/.
+    cd ${FRAMEWORK_DIR}
+    patch -u CUnit-2.1-3/CUnit/Sources/Framework/TestRun.c -i CorrectBuildWarningsInCunit.patch
     echo "Patching Complete"
 fi
 
 if [ -d "${LIBYAML_DIR}" ]; then
-    echo "Framework libyml already exists"
+    echo "Framework libyaml already exists"
 else
     pushd ${FRAMEWORK_DIR} > /dev/null
     echo "Clone libfyaml in ${LIBYAML_DIR}"
     wget https://github.com/pantoniou/libfyaml/archive/refs/heads/master.zip --no-check-certificate
     unzip master.zip
 
-    echo "Patching Framework"
-    patch -u . -i ../../patches/CorrectBuildIssuesInLibyaml.patch
+    echo "Patching Framework [${PWD}]"
+    cp ../src/libyaml/CorrectBuildIssuesInLibyaml.patch  .
+    patch -u -i CorrectBuildIssuesInLibyaml.patch -p0
     echo "Patching Complete"
 
 #    ./bootstrap.sh
