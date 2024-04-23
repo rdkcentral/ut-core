@@ -79,7 +79,7 @@ CUNIT_VARIANT=i686-pc-linux-gnu
 CC := gcc -ggdb -o0 -Wall
 endif
 
-XLDFLAGS += -Wl,-rpath, $(YLDFLAGS) $(LDFLAGS)
+XLDFLAGS += -Wl,-rpath, $(YLDFLAGS) $(LDFLAGS) -pthread  -lpthread
 
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 
