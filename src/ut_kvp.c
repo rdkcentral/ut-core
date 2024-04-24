@@ -111,10 +111,10 @@ ut_kvp_status_t ut_kvp_read(ut_kvp_instance_t *pInstance, char *fileName)
     return UT_KVP_STATUS_OK;
 }
 
-const char *ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pString)
+char *ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pString)
 {
     ut_kvp_instance_internal_t *pInternal = validateInstance(pInstance);
-    const char *result = NULL;
+    char *result;
 
     assert(pInternal != NULL);
     if (pInternal == NULL)
@@ -128,47 +128,50 @@ const char *ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pString)
 
 bool ut_kvp_getBoolField( ut_kvp_instance_t *pInstance, const char *pString )
 {
-    const char *pField = ut_kvp_getField(pInstance, pString);
+    char *pField;
+
+    pField = ut_kvp_getField(pInstance, pString);
 
     return str_to_bool(pField);
 }
 
 uint32_t ut_kvp_getUInt32Field( ut_kvp_instance_t *pInstance, const char *pString )
 {
-    const char *pField;
+    char *pField;
     char *pEndptr;
     uint32_t uValue;
     errno = 0; // Clear the stdlib errno
 
     pField = ut_kvp_getField(pInstance, pString);
+
     uValue = strtoul(pField, &pEndptr, 10);
 
     // Error checking
-    if (pField == pEndptr) 
+    if (pField == pEndptr)
     {
         UT_LOG_ERROR("No conversion performed!");
         assert(true);
         return 0;
     }
-    else if (*pEndptr != '\0') 
+    else if (*pEndptr != '\0')
     {
         UT_LOG_ERROR("Invalid characters in the string.");
         assert(true);
         return 0;
-    } 
-    else if (errno == ERANGE || uValue > UINT32_MAX) 
+    }
+    else if (errno == ERANGE || uValue > UINT32_MAX)
     {
         UT_LOG_ERROR("Value out of range for uint32_t.\n");
         assert(true);
         return 0;
-    } 
+    }
     UT_LOG_DEBUG("Converted value: %u", uValue);
     return uValue;
 }
 
 uint64_t ut_kvp_getUInt64Field( ut_kvp_instance_t *pInstance, const char *pString )
 {
-    const char *pField;
+    char *pField;
     char *pEndptr;
     uint64_t uValue;
 
