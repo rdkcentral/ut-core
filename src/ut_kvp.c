@@ -76,7 +76,7 @@ void ut_kvp_destroyInstance(ut_kvp_instance_t *pInstance)
 
     memset(pInternal, 0, sizeof(ut_kvp_instance_internal_t));
 
-    free(pInstance);
+    free(pInternal);
 }
 
 ut_kvp_status_t ut_kvp_read(ut_kvp_instance_t *pInstance, char *fileName)

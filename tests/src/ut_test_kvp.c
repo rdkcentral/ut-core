@@ -61,7 +61,7 @@ void test_ut_kvp_assert_bool(void)
 
 void register_kvp_functions(void)
 {
-    ut_kvp_assert_load("/home/jyotsna/xione.de.yaml");
+    ut_kvp_assert_load("/home/jpn323/workspace/xione.de.yaml");
 
     gpAssertSuite = UT_add_suite("ut-kvp - yaml", NULL, NULL);
     assert(gpAssertSuite != NULL);
@@ -85,5 +85,9 @@ void register_kvp_functions(void)
     UT_add_test(gpAssertSuite1, "kvp assert bool", test_ut_kvp_assert_bool);
 #endif
 
+}
+
+void unregister_kvp_functions(void)
+{
     ut_kvp_assert_unload();
 }

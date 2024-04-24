@@ -41,6 +41,8 @@ int main(int argc, char** argv)
     /* Begin test executions */
     UT_run_tests();
 
+    unregister_kvp_functions();
+
     return 0;
 }
 
