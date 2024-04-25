@@ -79,7 +79,7 @@ ut_kvp_status_t ut_kvp_read(ut_kvp_instance_t *pInstance, char* fileName);
  * @return ut_kvp_value_t  - Returned structure
  * @retval type == UT_KVP_INVALID_ELEMENT if the element is not found
  */
-char *ut_kvp_getField( ut_kvp_instance_t *pInstance, const char *pszKey );
+void ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pString, char *result );
 
 /**
  * @brief Get a bool key value pair from a passed configuration
@@ -113,5 +113,7 @@ uint32_t ut_kvp_getUInt32Field(ut_kvp_instance_t *pInstance, const char *pString
  * @returns uint64_t - int result
  */
 uint64_t ut_kvp_getUInt64Field(ut_kvp_instance_t *pInstance, const char *pString);
+
+void ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *pString, char *result);
 
 /* TOOD: We will need int32 & int64 field functions also */

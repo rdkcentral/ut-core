@@ -111,10 +111,9 @@ ut_kvp_status_t ut_kvp_read(ut_kvp_instance_t *pInstance, char *fileName)
     return UT_KVP_STATUS_OK;
 }
 
-char *ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pString)
+void ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pString, char *result )
 {
     ut_kvp_instance_internal_t *pInternal = validateInstance(pInstance);
-    char *result;
 
     assert(pInternal != NULL);
     if (pInternal == NULL)
@@ -122,27 +121,24 @@ char *ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pString)
         return NULL;
     }
     fy_document_scanf(pInternal->fy_handle, pString, result);
-
-    return result;
 }
 
-bool ut_kvp_getBoolField( ut_kvp_instance_t *pInstance, const char *pString )
+bool ut_kvp_getBoolField( ut_kvp_instance_t *pInstance, const char *pString)
 {
-    char *pField;
-
-    pField = ut_kvp_getField(pInstance, pString);
+    char pField[256] = {"0"}; 
+    ut_kvp_getField(pInstance, pString, pField);
 
     return str_to_bool(pField);
 }
 
 uint32_t ut_kvp_getUInt32Field( ut_kvp_instance_t *pInstance, const char *pString )
 {
-    char *pField;
+    char pField[256] = {"0"};
     char *pEndptr;
     uint32_t uValue;
     errno = 0; // Clear the stdlib errno
 
-    pField = ut_kvp_getField(pInstance, pString);
+    ut_kvp_getField(pInstance, pString, pField);
 
     uValue = strtoul(pField, &pEndptr, 10);
 
@@ -171,12 +167,12 @@ uint32_t ut_kvp_getUInt32Field( ut_kvp_instance_t *pInstance, const char *pStrin
 
 uint64_t ut_kvp_getUInt64Field( ut_kvp_instance_t *pInstance, const char *pString )
 {
-    char *pField;
+    char pField[256] = {"0"};
     char *pEndptr;
     uint64_t uValue;
 
     errno = 0; // Clear the stdlib errno
-    pField = ut_kvp_getField(pInstance, pString);
+    ut_kvp_getField(pInstance, pString, pField);
 
     uValue = strtoull(pField, &pEndptr, 10); // Base 10 conversion
 
@@ -202,6 +198,13 @@ uint64_t ut_kvp_getUInt64Field( ut_kvp_instance_t *pInstance, const char *pStrin
 
     UT_LOG_DEBUG("Converted value: %llu", uValue);
     return uValue;
+}
+
+void ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *pString, char *result)
+{
+    char pField[256] = {"0"};
+    ut_kvp_getField(pInstance, pString, pField);
+    strcpy(result, pField);
 }
 
 /** Static Functions */

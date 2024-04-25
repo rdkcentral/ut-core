@@ -48,9 +48,10 @@ void test_ut_kvp_assert_uint64(void)
 void test_ut_kvp_assert_string( void)
 {
     const char *checkField = "radio1";
-    char actualField = ut_kvp_getField( ut_kvp_assert_getInstance(), "/WifiRadioConfig/0/RadioName %s" );
-   // const char* actualFieldConst = actualField;
-    //UT_ASSERT_STRING_EQUAL(actualFieldConst, checkField);
+    char actualField[20] = {"0"};
+    ut_kvp_getStringField( ut_kvp_assert_getInstance(), "/WifiRadioConfig/0/RadioName %s", actualField );
+    const char* actualFieldConst = actualField;
+    UT_ASSERT_STRING_EQUAL(checkField, actualFieldConst);
 }
 
 void test_ut_kvp_assert_bool(void)
@@ -69,9 +70,9 @@ void register_kvp_functions(void)
     assert(gpAssertSuite != NULL);
 
     UT_add_test(gpAssertSuite, "kvp assert uint32", test_ut_kvp_assert_uint32);
-    //UT_add_test(gpAssertSuite, "kvp assert uint64", test_ut_kvp_assert_uint64); /*not working*/
-    //UT_add_test(gpAssertSuite, "kvp assert string", test_ut_kvp_assert_string); /*not working*/
-    //UT_add_test(gpAssertSuite, "kvp assert bool", test_ut_kvp_assert_bool); 
+    UT_add_test(gpAssertSuite, "kvp assert uint64", test_ut_kvp_assert_uint64);
+    UT_add_test(gpAssertSuite, "kvp assert string", test_ut_kvp_assert_string);
+    UT_add_test(gpAssertSuite, "kvp assert bool", test_ut_kvp_assert_bool);
 
 #if 0
     ut_kvp_assert_load( "testFile.json" );
