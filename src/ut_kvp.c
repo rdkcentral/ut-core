@@ -118,9 +118,13 @@ void ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pString, char *re
     assert(pInternal != NULL);
     if (pInternal == NULL)
     {
-        return NULL;
+        return;
     }
-    fy_document_scanf(pInternal->fy_handle, pString, result);
+    int count = fy_document_scanf(pInternal->fy_handle, pString, result);
+    if (count != 1)
+    {
+        UT_LOG_WARNING("data was not retrieved");
+    }
 }
 
 bool ut_kvp_getBoolField( ut_kvp_instance_t *pInstance, const char *pString)

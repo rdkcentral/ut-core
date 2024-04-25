@@ -30,19 +30,20 @@
 
 
 static UT_test_suite_t *gpAssertSuite = NULL;
+static UT_test_suite_t *gpAssertSuite1 = NULL;
 
 void test_ut_kvp_assert_uint32(void)
 {
-    uint32_t checkField = 0;
-    checkField = ut_kvp_getUInt32Field( ut_kvp_assert_getInstance(), "/WifiRadioConfig/0/RadioIndex %s" );
-    UT_ASSERT_EQUAL(0, checkField);
+    uint32_t checkField = 100;
+    uint32_t actualField = ut_kvp_getUInt32Field( ut_kvp_assert_getInstance(), "/WifiRadioConfig/0/CsaBeaconCount %s" );
+    UT_ASSERT_EQUAL(actualField, checkField);
 }
 
 void test_ut_kvp_assert_uint64(void)
 {
-    uint64_t checkField = 0;
-    checkField = ut_kvp_getUInt64Field( ut_kvp_assert_getInstance(), "/WifiRadioConfig/0/RadioIndex %s" );
-    UT_ASSERT_EQUAL(0, checkField);
+    uint64_t checkField = 12;
+    uint64_t actualField = ut_kvp_getUInt64Field( ut_kvp_assert_getInstance(), "/WifiRadioConfig/0/HwMode %s" );
+    UT_ASSERT_EQUAL(actualField, checkField);
 }
 
 void test_ut_kvp_assert_string( void)
@@ -62,6 +63,23 @@ void test_ut_kvp_assert_bool(void)
     UT_ASSERT_EQUAL(actualField, checkField);
 }
 
+void test_ut_kvp_assert_bool_json(void)
+{
+    /* Test that our macro's work */
+    bool checkField = true;
+    bool actualField = ut_kvp_getBoolField( ut_kvp_assert_getInstance(), "compilerOptions/allowJs %s" );
+    UT_ASSERT_EQUAL(actualField, checkField);
+}
+
+void test_ut_kvp_assert_string_json( void)
+{
+    const char *checkField = "ES2020";
+    char actualField[20] = {"0"};
+    ut_kvp_getStringField( ut_kvp_assert_getInstance(), "compilerOptions/target %s", actualField );
+    const char* actualFieldConst = actualField;
+    UT_ASSERT_STRING_EQUAL(checkField, actualFieldConst);
+}
+
 void register_kvp_functions(void)
 {
     ut_kvp_assert_load("/home/jpn323/workspace/xione.de.yaml");
@@ -74,19 +92,13 @@ void register_kvp_functions(void)
     UT_add_test(gpAssertSuite, "kvp assert string", test_ut_kvp_assert_string);
     UT_add_test(gpAssertSuite, "kvp assert bool", test_ut_kvp_assert_bool);
 
-#if 0
-    ut_kvp_assert_load( "testFile.json" );
+    ut_kvp_assert_load( "/home/jpn323/workspace/tsconfig.json" );
 
     gpAssertSuite1 = UT_add_suite("ut-kvp - json", NULL, NULL);
-    if (NULL == gpAssertSuite1)
-    {
-        return -1;
-    }
+    assert(gpAssertSuite != NULL);
 
-    UT_add_test(gpAssertSuite1, "kvp assert int", test_ut_kvp_assert_int);
-    T_add_test(gpAssertSuite1, "kvp assert string", test_ut_kvp_assert_string);
-    UT_add_test(gpAssertSuite1, "kvp assert bool", test_ut_kvp_assert_bool);
-#endif
+    UT_add_test(gpAssertSuite1, "kvp assert bool", test_ut_kvp_assert_bool_json);
+    UT_add_test(gpAssertSuite1, "kvp assert string", test_ut_kvp_assert_string_json);
 
 }
 
