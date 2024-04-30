@@ -51,8 +51,8 @@ else
     unzip master.zip
 
     echo "Patching Framework [${PWD}]"
-    cp ../src/libyaml/CorrectBuildIssuesInLibyaml.patch  .
-    patch -u -i CorrectBuildIssuesInLibyaml.patch -p0
+    cp ../src/libyaml/CorrectWarningsAndBuildIssuesInLibYaml.patch  .
+    patch -i CorrectWarningsAndBuildIssuesInLibYaml.patch -p0
     echo "Patching Complete"
 
 #    ./bootstrap.sh
