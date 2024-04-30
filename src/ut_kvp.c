@@ -95,6 +95,7 @@ ut_kvp_status_t ut_kvp_read(ut_kvp_instance_t *pInstance, char *fileName)
 
     if (pInternal->inputFilePtr != NULL)
     {
+        /* Current file was open we'll close it now */
         ut_kvp_close( pInstance );
     }
 
@@ -162,10 +163,10 @@ ut_kvp_status_t ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pszKey
         return UT_KVP_STATUS_INVALID_PARAM;
     }
 
-    if ( pInternal-> fy_handle == NULL )
+    if ( pInternal->fy_handle == NULL )
     {
         assert(pzResult != NULL);
-        return UT_KVP_STATUS_INVALID_PARAM;
+        return UT_KVP_STATUS_NO_DATA;
     }
 
     snprintf( zEntry, UT_KVP_MAX_ELEMENT_SIZE, "%s %s", pszKey, str );

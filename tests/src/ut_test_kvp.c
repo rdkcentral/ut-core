@@ -36,7 +36,10 @@ static ut_kvp_instance_t *gpMainTestInstance = NULL;
 static UT_test_suite_t *gpKVPSuite = NULL;
 static UT_test_suite_t *gpKVPSuite2 = NULL;
 
-void test_ut_kvp_testCreateDestroy( void )
+static int test_ut_kvp_freeGlobalInstance(void);
+static int test_ut_kvp_createGlobalInstance(void);
+
+void test_ut_kvp_testCreateDestroy(void)
 {
     ut_kvp_instance_t *pInstance = NULL;
     ut_kvp_instance_t *pInstance1 = NULL;
@@ -180,13 +183,15 @@ void test_ut_kvp_read_negative( void )
     bool result;
     /* Close our open read instance, and then try and use it */
     UT_LOG_STEP("ut_kvp_close() - main instance");
-    ut_kvp_close(gpMainTestInstance);
+    test_ut_kvp_freeGlobalInstance();
 
     /* Negative Tests */
     UT_LOG_STEP("ut_kvp_getBoolField() - negative");
     result = ut_kvp_getBoolField( gpMainTestInstance, "shouldNotWork/checkBoolTRUE" );
     UT_ASSERT( result == false );
 
+    /* Resort for future tests */
+    test_ut_kvp_createGlobalInstance();
 }
 
 void test_ut_kvp_bool(void)
@@ -211,7 +216,7 @@ void test_ut_kvp_bool(void)
     UT_ASSERT( result == false );
 }
 
-int test_ut_kvp_createGlobalInstance( void )
+static int test_ut_kvp_createGlobalInstance( void )
 {
     ut_kvp_status_t status;
 
@@ -236,7 +241,7 @@ int test_ut_kvp_createGlobalInstance( void )
     return 0;
 }
 
-int test_ut_kvp_freeGlobalInstance( void )
+static int test_ut_kvp_freeGlobalInstance( void )
 {
     ut_kvp_destroyInstance( gpMainTestInstance );
     return 0;

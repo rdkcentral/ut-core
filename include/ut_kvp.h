@@ -35,6 +35,7 @@ typedef enum
     UT_KVP_STATUS_FILE_OPEN_ERROR,  /**!< File open error */
     UT_KVP_STATUS_INVALID_PARAM,    /**!< Invalid Param */
     UT_KVP_STATUS_PARSING_ERROR,    /**!< Parsing error */
+    UT_KVP_STATUS_NO_DATA,          /**!< No Data to process */
     UT_KVP_STATUS_MAX               /**!< Out of range marker */
 }
 ut_kvp_status_t;
@@ -89,6 +90,7 @@ void ut_kvp_close(ut_kvp_instance_t *pInstance);
  * @retval UT_KVP_STATUS_SUCCESS - Success
  * @retval UT_KVP_STATUS_INVALID_PARAM   - Invalid param passed
  * @retval UT_KVP_STATUS_PARSING_ERROR   - File parsing error
+ * @retval UT_KVP_STATUS_NO_DATA         - No Data Available to process
  */
 ut_kvp_status_t ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pszKey, char *pszResult);
 
