@@ -24,12 +24,14 @@
 /* Application Includes */
 #include <ut_kvp.h>
 #include <ut_log.h>
+
+#define NDEBUG // Disable to switch on assert
 #include <assert.h>
 
 /* External libraries */
 #include <libfyaml.h>
 
-ut_kvp_instance_t gKVP_Instance = NULL;
+ut_kvp_instance_t *gKVP_Instance = NULL;
 
 /* TODO: This fields may not be used and should be removed if so*/
 #define UT_KVP_MAX_STRING_ELEMENT_SIZE (256)    /*!< Max String Size Supported */
@@ -46,53 +48,60 @@ typedef struct
 static ut_kvp_instance_internal_t *validateInstance(ut_kvp_instance_t *pInstance);
 static bool str_to_bool(const char *string);
 
-ut_kvp_instance_t ut_kvp_createInstance(void)
+ut_kvp_instance_t *ut_kvp_createInstance(void)
 {
     ut_kvp_instance_internal_t *pInstance = malloc(sizeof(ut_kvp_instance_internal_t));
+
+    if ( pInstance == NULL )
+    {
+        assert( pInstance != NULL );
+        return NULL;
+    }
+
     memset(pInstance, 0, sizeof(ut_kvp_instance_internal_t));
 
     pInstance->magic = 0xdeadbeef;
 
-    return (ut_kvp_instance_t)pInstance;
+    return (ut_kvp_instance_t *)pInstance;
 }
 
 void ut_kvp_destroyInstance(ut_kvp_instance_t *pInstance)
 {
-    // ut_kvp_instance_t *pInstance = get_ut_kvp_instance;
     ut_kvp_instance_internal_t *pInternal = validateInstance(pInstance);
 
-    assert(pInstance != NULL);
-    assert(pInternal->fy_handle != NULL);
-    assert(pInternal->inputFilePtr != NULL);
+    if ( pInternal == NULL )
+    {
+        assert(pInternal == NULL);
+        return;
+    }
 
-    if (pInternal->fy_handle != NULL)
+    if ( pInternal -> inputFilePtr == NULL )
     {
-        fy_document_destroy(pInternal->fy_handle);
+        assert(pInternal->inputFilePtr == NULL);
+        return;
     }
-    if (pInternal->inputFilePtr != NULL)
-    {
-        fclose(pInternal->inputFilePtr);
-    }
+
+    ut_kvp_close( pInstance );
 
     memset(pInternal, 0, sizeof(ut_kvp_instance_internal_t));
 
     free(pInternal);
+    pInternal = NULL;
+    pInstance = NULL;
 }
 
 ut_kvp_status_t ut_kvp_read(ut_kvp_instance_t *pInstance, char *fileName)
 {
     ut_kvp_instance_internal_t *pInternal = validateInstance(pInstance);
 
-    assert(pInternal != NULL);
-    if (pInternal == NULL)
+    if (pInternal == NULL || fileName == NULL)
     {
         return UT_KVP_INVALID_PARAM;
     }
 
     if (pInternal->inputFilePtr != NULL)
     {
-        fclose(pInternal->inputFilePtr);
-        pInternal->inputFilePtr = NULL;
+        ut_kvp_close( pInstance );
     }
 
     pInternal->inputFilePtr = fopen(fileName, "r");
@@ -105,46 +114,85 @@ ut_kvp_status_t ut_kvp_read(ut_kvp_instance_t *pInstance, char *fileName)
     if (NULL == pInternal->fy_handle)
     {
         UT_LOG_ERROR("Unable to build file\n");
+        ut_kvp_close( pInstance );
         return UT_KVP_FILE_READ_ERROR;
     }
 
     return UT_KVP_STATUS_OK;
 }
 
-void ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pString, char *result )
+void ut_kvp_close(ut_kvp_instance_t *pInstance)
 {
     ut_kvp_instance_internal_t *pInternal = validateInstance(pInstance);
 
-    assert(pInternal != NULL);
     if (pInternal == NULL)
     {
         return;
     }
-    int count = fy_document_scanf(pInternal->fy_handle, pString, result);
-    if (count != 1)
+
+    if (pInternal->inputFilePtr != NULL)
     {
-        UT_LOG_WARNING("data was not retrieved");
+        fclose(pInternal->inputFilePtr);
+        pInternal->inputFilePtr = NULL;
+    }
+
+    if ( pInternal->fy_handle != NULL)
+    {
+        fy_document_destroy(pInternal->fy_handle);
+        pInternal->fy_handle = NULL;
     }
 }
 
-bool ut_kvp_getBoolField( ut_kvp_instance_t *pInstance, const char *pString)
+const char *ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pszKey, char *pzResult)
 {
-    char pField[256] = {"0"}; 
-    ut_kvp_getField(pInstance, pString, pField);
+    ut_kvp_instance_internal_t *pInternal = validateInstance(pInstance);
+    char zEntry[UT_KVP_MAX_STRING_ELEMENT_SIZE];
+    char *str = "%s";
+    int fy_result;
+
+    if (pInternal == NULL)
+    {
+        assert(pInternal != NULL);
+        return NULL;
+    }
+
+    snprintf( zEntry, UT_KVP_MAX_STRING_ELEMENT_SIZE, "%s %s", pszKey, str );
+    fy_result = fy_document_scanf(pInternal->fy_handle, zEntry, pzResult);
+    if ( fy_result <= 0 )
+    {
+        assert( fy_result > 0 );
+        return NULL;
+    }
+
+    return pzResult;
+}
+
+bool ut_kvp_getBoolField( ut_kvp_instance_t *pInstance, const char *pszKey )
+{
+    char result[UT_KVP_MAX_STRING_ELEMENT_SIZE];
+    const char *pField = ut_kvp_getField(pInstance, pszKey, result);
 
     return str_to_bool(pField);
 }
 
-uint32_t ut_kvp_getUInt32Field( ut_kvp_instance_t *pInstance, const char *pString )
+uint32_t ut_kvp_getUInt32Field( ut_kvp_instance_t *pInstance, const char *pszKey )
 {
-    char pField[256] = {"0"};
+    const char *pField;
     char *pEndptr;
     uint32_t uValue;
+    char result[UT_KVP_MAX_STRING_ELEMENT_SIZE];
     errno = 0; // Clear the stdlib errno
 
-    ut_kvp_getField(pInstance, pString, pField);
+    pField = ut_kvp_getField(pInstance, pszKey, result);
 
-    uValue = strtoul(pField, &pEndptr, 10);
+    if (strstr(result, "0x"))
+    {
+        uValue = strtoul(pField, &pEndptr, 16); // Base 16 conversion
+    }
+    else
+    {
+        uValue = strtoul(pField, &pEndptr, 10); // Base 10 conversion
+    }
 
     // Error checking
     if (pField == pEndptr)
@@ -169,16 +217,24 @@ uint32_t ut_kvp_getUInt32Field( ut_kvp_instance_t *pInstance, const char *pStrin
     return uValue;
 }
 
-uint64_t ut_kvp_getUInt64Field( ut_kvp_instance_t *pInstance, const char *pString )
+uint64_t ut_kvp_getUInt64Field( ut_kvp_instance_t *pInstance, const char *pszKey )
 {
-    char pField[256] = {"0"};
+    const char *pField;
     char *pEndptr;
     uint64_t uValue;
+    char result[UT_KVP_MAX_STRING_ELEMENT_SIZE];
 
     errno = 0; // Clear the stdlib errno
-    ut_kvp_getField(pInstance, pString, pField);
+    pField = ut_kvp_getField(pInstance, pszKey, result);
 
-    uValue = strtoull(pField, &pEndptr, 10); // Base 10 conversion
+    if(strstr(result, "0x"))
+    {
+        uValue = strtoul(pField, &pEndptr, 16); // Base 16 conversion
+    }
+    else
+    {
+        uValue = strtoul(pField, &pEndptr, 10); // Base 10 conversion
+    }
 
     // Error checking
     if (pField == pEndptr) 
@@ -204,11 +260,10 @@ uint64_t ut_kvp_getUInt64Field( ut_kvp_instance_t *pInstance, const char *pStrin
     return uValue;
 }
 
-void ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *pString, char *result)
+const char *ut_kvp_getStringField(ut_kvp_instance_t *pInstance, const char *pszKey)
 {
-    char pField[256] = {"0"};
-    ut_kvp_getField(pInstance, pString, pField);
-    strcpy(result, pField);
+    char result[UT_KVP_MAX_STRING_ELEMENT_SIZE];
+    return ut_kvp_getField(pInstance, pszKey, result);
 }
 
 /** Static Functions */
@@ -216,11 +271,15 @@ static ut_kvp_instance_internal_t *validateInstance(ut_kvp_instance_t *pInstance
 {
     ut_kvp_instance_internal_t *pInternal = (ut_kvp_instance_internal_t *)pInstance;
 
-    assert(pInternal != NULL);
-    assert(pInternal->magic == 0xdeadbeef);
+    if ( pInstance == NULL )
+    {
+        assert(pInternal == NULL);
+        return NULL;
+    }
 
     if (pInternal->magic != 0xdeadbeef)
     {
+        assert(pInternal->magic != 0xdeadbeef);
         return NULL;
     }
 

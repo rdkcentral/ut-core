@@ -60,6 +60,7 @@ static bool decodeOptions( int argc, char **argv )
 
     memset(&gOptions,0,sizeof(gOptions));
 
+    /* Console mode is always enabled we don't need a switch for that */
     gOptions.testMode = UT_MODE_CONSOLE;
 
     /* Set the default path to ./ and then take the filename back and use that for automated mode */
@@ -72,14 +73,10 @@ static bool decodeOptions( int argc, char **argv )
     length -= strlen(".log");
     strncpy( gOptions.filenameRoot, logFilename, length );
 
-    while((opt = getopt(argc, argv, "cabhf:lp:")) != -1)
+    while((opt = getopt(argc, argv, "cabhf:ltp:")) != -1)
     {
         switch(opt)
         {
-            case 'c':
-                TEST_INFO(("Console Mode\n"));
-                gOptions.testMode = UT_MODE_CONSOLE;
-                break;
             case 'b':
                 TEST_INFO(("Basic Mode\n"));
                 gOptions.testMode = UT_MODE_BASIC;
@@ -88,7 +85,7 @@ static bool decodeOptions( int argc, char **argv )
                 TEST_INFO(("Automated Mode\n"));
                 gOptions.testMode = UT_MODE_AUTOMATED;
                 break;
-            case 'l':
+            case 't':
                 TEST_INFO(("Automated Mode: List Tests to File\n"));
                 gOptions.testMode = UT_MODE_AUTOMATED;
                 gOptions.listTest = true;

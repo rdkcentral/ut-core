@@ -19,7 +19,8 @@
 			"time.h": "c",
 			"*.conf": "bitbake",
 			"*.inc": "bitbake",
-			"stdlib.h": "c"
+			"stdlib.h": "c",
+			"assert.h": "c"
 		},
 		"python.autoComplete.extraPaths": [
 			"${workspaceFolder}/sources/poky/bitbake/lib",

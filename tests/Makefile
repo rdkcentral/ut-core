@@ -55,12 +55,12 @@ NC='\033[0m'
 .PHONY: clean list build all
 
 build: framework
-	@echo ${GREEN}Build [$@]${NC}
+	@echo -e ${GREEN}Build [$@]${NC}
 	@make -C ../ test TARGET=linux
 	@echo -e ${GREEN}Build Complete${NC}
 
 run: build
-	@echo ${GREEN}Running [$@]${NC}
+	@echo -e ${GREEN}Running [$@]${NC}
 	./bin/ut-test -bp ./logs
 
 rebuild: clean build

@@ -21,6 +21,7 @@
 #include <ut.h>
 
 extern void register_assert_functions(void);
+extern void register_kvp_assert_testing_functions(void);
 extern void register_kvp_functions(void);
 
 /**
@@ -37,11 +38,8 @@ int main(int argc, char** argv)
 
     register_assert_functions();
     register_kvp_functions();
-
-    /* Begin test executions */
+    register_kvp_assert_testing_functions();
     UT_run_tests();
-
-    unregister_kvp_functions();
 
     return 0;
 }

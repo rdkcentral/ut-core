@@ -1,0 +1,14 @@
+decodeTest:
+    checkUint8IsDeadHex: 0xde
+    checkUint8IsDeadDec: 222
+    checkUint16IsDead: 0xdead
+    checkUint32IsDeadBeefHex: 0xdeadbeef
+    checkUint32IsDeadBeefDec: 3735928559
+    checkUint64IsDeadBeef: 0xdeadbeefdeadbeef
+    checkStringDeadBeef: "the_beef_is_dead"
+    checkBoolFalse:  false
+    checkBoolFALSE:  FALSE
+    checkBoolFaLse:  FaLSE
+    checkBoolTRUE:  TRUE
+    checkBooltrue:  true
+    checkBoolTRuE:  TRuE

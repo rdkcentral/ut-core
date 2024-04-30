@@ -18,17 +18,21 @@
  */
 
 #include <ut_kvp_assert.h>
+#include <assert.h>
 
-static ut_kvp_instance_t gKVP_Instance = NULL;
+static ut_kvp_instance_t *gKVP_Instance = NULL;
 
 void ut_kvp_assert_load(char *fileName)
 {
+    ut_kvp_status_t result;
+
     if (gKVP_Instance == NULL)
     {
         gKVP_Instance = ut_kvp_createInstance();
     }
 
-    ut_kvp_read(gKVP_Instance, fileName);
+    result = ut_kvp_read(gKVP_Instance, fileName);
+    assert( result == UT_KVP_STATUS_OK );
 }
 
 void ut_kvp_assert_unload(void)
@@ -40,7 +44,7 @@ void ut_kvp_assert_unload(void)
     }
 }
 
-ut_kvp_instance_t* ut_kvp_assert_getInstance()
+ut_kvp_instance_t *ut_kvp_assert_getInstance( void )
 {
     return gKVP_Instance;
 }

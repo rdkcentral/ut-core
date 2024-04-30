@@ -25,84 +25,148 @@
 
 /* Module Includes */
 #include <ut.h>
+#include <ut_kvp.h>
 #include <ut_log.h>
-#include <ut_kvp_assert.h>
 
+#define KVP_VALID_TEST_YAML_FILE "/home/jpn323/workspace/rdk-halif-hdmi_cec/ut/ut-core/src/test_kvp.yaml"
 
-static UT_test_suite_t *gpAssertSuite = NULL;
-static UT_test_suite_t *gpAssertSuite1 = NULL;
+static ut_kvp_instance_t *gpMainTestInstance = NULL;
+static UT_test_suite_t *gpKVPSuite = NULL;
+static UT_test_suite_t *gpKVPSuite2 = NULL;
 
-void test_ut_kvp_assert_uint32(void)
+void test_ut_kvp_testCreateDestroy( void )
 {
-    uint32_t checkField = 100;
-    uint32_t actualField = ut_kvp_getUInt32Field( ut_kvp_assert_getInstance(), "/WifiRadioConfig/0/CsaBeaconCount %s" );
-    UT_ASSERT_EQUAL(actualField, checkField);
+    ut_kvp_instance_t *pInstance = NULL;
+    ut_kvp_instance_t *pInstance1 = NULL;
+
+    ut_kvp_destroyInstance(NULL);
+    UT_ASSERT( pInstance == NULL );
+
+    pInstance = ut_kvp_createInstance();
+    UT_ASSERT( pInstance != NULL );
+
+    pInstance1 = ut_kvp_createInstance();
+    UT_ASSERT( pInstance1 != NULL );
+
+    UT_ASSERT( pInstance != pInstance1 );
+
+    ut_kvp_destroyInstance(pInstance1);
+    ut_kvp_destroyInstance(pInstance);
 }
 
-void test_ut_kvp_assert_uint64(void)
+void test_ut_kvp_read( void )
 {
-    uint64_t checkField = 12;
-    uint64_t actualField = ut_kvp_getUInt64Field( ut_kvp_assert_getInstance(), "/WifiRadioConfig/0/HwMode %s" );
-    UT_ASSERT_EQUAL(actualField, checkField);
+    ut_kvp_instance_t *pInstance = NULL;
+    ut_kvp_status_t status;
+
+    UT_LOG_STEP("ut_kvp_createInstance");
+    pInstance = ut_kvp_createInstance();
+    UT_ASSERT( pInstance != NULL );
+
+    UT_LOG_STEP("ut_kvp_read( pInstance, NULL )");
+    status = ut_kvp_read( pInstance, NULL );
+    UT_ASSERT( status == UT_KVP_INVALID_PARAM );
+
+    UT_LOG_STEP("ut_kvp_read( pInstance, nofile.txt )");
+    status = ut_kvp_read( pInstance, "./nofile.txt" );
+    UT_ASSERT( status == UT_KVP_FILE_OPEN_ERROR );
+
+    UT_LOG_STEP("ut_kvp_read( pInstance, dummynodatafile.txt )");
+    status = ut_kvp_read( pInstance, "/home/jpn323/workspace/rdk-halif-hdmi_cec/ut/ut-core/src/dummynodatafile.txt" );
+    UT_ASSERT( status == UT_KVP_FILE_READ_ERROR );
+
+    UT_LOG_STEP("ut_kvp_read( pInstance,  KVP_VALID_TEST_YAML_FILE )");
+    status = ut_kvp_read( pInstance, KVP_VALID_TEST_YAML_FILE );
+    UT_ASSERT( status == UT_KVP_STATUS_OK );
+
+    /* Test Destory causes close */
+    ut_kvp_destroyInstance( pInstance );
+    ut_kvp_destroyInstance( pInstance );
+
+    /* Calling close after destory should have no effect */
+    ut_kvp_close(pInstance);
+    ut_kvp_close(pInstance);
+
+    /* Re-check close is actually ok by walking through and auto running */
+    pInstance = ut_kvp_createInstance();
+    UT_ASSERT( pInstance != NULL );
+
+    ut_kvp_close(pInstance);
+    ut_kvp_close(pInstance);
 }
 
-void test_ut_kvp_assert_string( void)
+void test_ut_kvp_uint32(void)
 {
-    const char *checkField = "radio1";
-    char actualField[20] = {"0"};
-    ut_kvp_getStringField( ut_kvp_assert_getInstance(), "/WifiRadioConfig/0/RadioName %s", actualField );
-    const char* actualFieldConst = actualField;
-    UT_ASSERT_STRING_EQUAL(checkField, actualFieldConst);
+    uint32_t result;
+    uint32_t checkField = 0xdeadbeef;
+    result = ut_kvp_getUInt32Field( gpMainTestInstance, "decodeTest/checkUint32IsDeadBeefHex" );
+    UT_ASSERT( result == checkField );
 }
 
-void test_ut_kvp_assert_bool(void)
+void test_ut_kvp_uint64(void)
 {
-    /* Test that our macro's work */
-    bool checkField = false;
-    bool actualField = ut_kvp_getBoolField( ut_kvp_assert_getInstance(), "/WifiRadioConfig/0/DcsEnabled %s" );
-    UT_ASSERT_EQUAL(actualField, checkField);
+    uint64_t result;
+    uint64_t checkField = 0xdeadbeefdeadbeef;
+    result = ut_kvp_getUInt64Field( gpMainTestInstance, "decodeTest/checkUint64IsDeadBeef" );
+    UT_ASSERT( result == checkField );
 }
 
-void test_ut_kvp_assert_bool_json(void)
+void test_ut_kvp_string(void)
 {
-    /* Test that our macro's work */
-    bool checkField = true;
-    bool actualField = ut_kvp_getBoolField( ut_kvp_assert_getInstance(), "compilerOptions/allowJs %s" );
-    UT_ASSERT_EQUAL(actualField, checkField);
+    const char *result;
+    const char *checkField = "the_beef_is_dead";
+    char result_kvp[256] = {0};
+    result = ut_kvp_getField( gpMainTestInstance, "decodeTest/checkStringDeadBeef", result_kvp);
+    UT_ASSERT_STRING_EQUAL( result, checkField );
 }
 
-void test_ut_kvp_assert_string_json( void)
+void test_ut_kvp_bool(void)
 {
-    const char *checkField = "ES2020";
-    char actualField[20] = {"0"};
-    ut_kvp_getStringField( ut_kvp_assert_getInstance(), "compilerOptions/target %s", actualField );
-    const char* actualFieldConst = actualField;
-    UT_ASSERT_STRING_EQUAL(checkField, actualFieldConst);
+    bool result;
+    result = ut_kvp_getBoolField( gpMainTestInstance, "decodeTest/checkBoolTRUE" );
+    UT_ASSERT( result == true );
+
+    result = ut_kvp_getBoolField( gpMainTestInstance, "decodeTest/checkBooltrue" );
+    UT_ASSERT( result == true );
+
+    result = ut_kvp_getBoolField( gpMainTestInstance, "decodeTest/checkBoolTRuE" );
+    UT_ASSERT( result == true );
+
+    result = ut_kvp_getBoolField( gpMainTestInstance, "decodeTest/checkBoolFalse" );
+    UT_ASSERT( result == false );
 }
 
-void register_kvp_functions(void)
+int test_ut_kvp_createGlobalInstance( void )
 {
-    ut_kvp_assert_load("/home/jpn323/workspace/xione.de.yaml");
+    ut_kvp_status_t status;
+    gpMainTestInstance = ut_kvp_createInstance();
+    assert( gpMainTestInstance != NULL );
 
-    gpAssertSuite = UT_add_suite("ut-kvp - yaml", NULL, NULL);
-    assert(gpAssertSuite != NULL);
+    status = ut_kvp_read( gpMainTestInstance, KVP_VALID_TEST_YAML_FILE );
+    assert( status == UT_KVP_STATUS_OK );
 
-    UT_add_test(gpAssertSuite, "kvp assert uint32", test_ut_kvp_assert_uint32);
-    UT_add_test(gpAssertSuite, "kvp assert uint64", test_ut_kvp_assert_uint64);
-    UT_add_test(gpAssertSuite, "kvp assert string", test_ut_kvp_assert_string);
-    UT_add_test(gpAssertSuite, "kvp assert bool", test_ut_kvp_assert_bool);
-
-    ut_kvp_assert_load( "/home/jpn323/workspace/tsconfig.json" );
-
-    gpAssertSuite1 = UT_add_suite("ut-kvp - json", NULL, NULL);
-    assert(gpAssertSuite != NULL);
-
-    UT_add_test(gpAssertSuite1, "kvp assert bool", test_ut_kvp_assert_bool_json);
-    UT_add_test(gpAssertSuite1, "kvp assert string", test_ut_kvp_assert_string_json);
-
+    return 0;
 }
 
-void unregister_kvp_functions(void)
+int test_ut_kvp_freeGlobalInstance( void )
 {
-    ut_kvp_assert_unload();
+    ut_kvp_destroyInstance( gpMainTestInstance );
+    return 0;
+}
+
+void register_kvp_functions( void )
+{
+    gpKVPSuite = UT_add_suite("ut-kvp - test functions ", NULL, NULL);
+    assert(gpKVPSuite != NULL);
+
+    UT_add_test(gpKVPSuite, "kvp create / destory", test_ut_kvp_testCreateDestroy);
+    UT_add_test(gpKVPSuite, "kvp read", test_ut_kvp_read);
+
+    gpKVPSuite2 = UT_add_suite("ut-kvp - test mainfunctions ", test_ut_kvp_createGlobalInstance, test_ut_kvp_freeGlobalInstance);
+    assert(gpKVPSuite2 != NULL);
+
+    UT_add_test(gpKVPSuite2, "kvp bool", test_ut_kvp_bool);
+    UT_add_test(gpKVPSuite2, "kvp string", test_ut_kvp_string);
+    UT_add_test(gpKVPSuite2, "kvp uint32", test_ut_kvp_uint32);
+    UT_add_test(gpKVPSuite2, "kvp uint64", test_ut_kvp_uint64);
 }

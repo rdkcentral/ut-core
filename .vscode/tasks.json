@@ -6,17 +6,6 @@
     },
 	"tasks": [
 		{
-			"label": "Make: build",
-			"command": "make",
-			"args": [
-				"make"
-			],
-			"detail": "Make build",
-			"problemMatcher": [
-				"$gcc"
-			]
-		},
-		{
 			"type": "make",
 			"targetName": "build",
 			"makeFileRelativePath": "tests/Makefile",
@@ -40,5 +29,4 @@
 				"isDefault": false
 			}
 		}
-	]
 }
