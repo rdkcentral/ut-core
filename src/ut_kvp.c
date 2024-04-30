@@ -162,6 +162,12 @@ ut_kvp_status_t ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pszKey
         return UT_KVP_STATUS_INVALID_PARAM;
     }
 
+    if ( pInternal-> fy_handle == NULL )
+    {
+        assert(pzResult != NULL);
+        return UT_KVP_STATUS_INVALID_PARAM;
+    }
+
     snprintf( zEntry, UT_KVP_MAX_ELEMENT_SIZE, "%s %s", pszKey, str );
     fy_result = fy_document_scanf(pInternal->fy_handle, zEntry, pzResult);
     if ( fy_result <= 0 )
@@ -233,7 +239,8 @@ uint32_t ut_kvp_getUInt32Field( ut_kvp_instance_t *pInstance, const char *pszKey
         assert(true);
         return 0;
     }
-    UT_LOG_DEBUG("Converted value: %u", uValue);
+
+    //UT_LOG_DEBUG("Converted value: %u", uValue);
     return uValue;
 }
 
@@ -282,7 +289,7 @@ uint64_t ut_kvp_getUInt64Field( ut_kvp_instance_t *pInstance, const char *pszKey
         return 0;
     }
 
-    UT_LOG_DEBUG("Converted value: %llu", uValue);
+    //UT_LOG_DEBUG("Converted value: %llu", uValue);
     return uValue;
 }
 

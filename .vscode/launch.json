@@ -10,7 +10,7 @@
         "-b"
       ],
       "stopAtEntry": false,
-      "cwd": "${workspaceFolder}/tests",
+      "cwd": "${workspaceFolder}/tests/bin",
       "environment": [],
       "externalConsole": false,
       "MIMode": "gdb",

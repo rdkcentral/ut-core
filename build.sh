@@ -19,6 +19,7 @@
 # * limitations under the License.
 # *
 
+set -e # error out if required
 SCRIPT_EXEC="$(realpath $0)"
 MY_DIR="$(dirname $SCRIPT_EXEC)"
 
@@ -36,8 +37,8 @@ else
     tar xvfj framework/CUnit-2.1-3.tar.bz2 -C ./framework/
     cp framework/CUnit-2.1-3/CUnit/Headers/CUnit.h.in framework/CUnit-2.1-3/CUnit/Headers/CUnit.h
     echo "Patching Framework"
-    cp patches/CorrectBuildWarningsInCunit.patch  framework/.
     cd ${FRAMEWORK_DIR}
+    cp ../src/cunit/patches/CorrectBuildWarningsInCunit.patch  .
     patch -u CUnit-2.1-3/CUnit/Sources/Framework/TestRun.c -i CorrectBuildWarningsInCunit.patch
     echo "Patching Complete"
 fi
@@ -51,7 +52,7 @@ else
     unzip master.zip
 
     echo "Patching Framework [${PWD}]"
-    cp ../patches/CorrectWarningsAndBuildIssuesInLibYaml.patch  .
+    cp ../src/libyaml/patches/CorrectWarningsAndBuildIssuesInLibYaml.patch  .
     patch -i CorrectWarningsAndBuildIssuesInLibYaml.patch -p0
     echo "Patching Complete"
 

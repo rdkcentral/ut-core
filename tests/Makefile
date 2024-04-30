@@ -56,9 +56,11 @@ NC='\033[0m'
 .PHONY: clean list build all
 
 build: framework
-	@echo -e ${GREEN}Build [$@]${NC}
+	@echo ${GREEN}Build [$@]${NC}
 	@make -C ../ test TARGET=linux
-	@echo -e ${GREEN}Build Complete${NC}
+	@echo ${GREEN}Copy Assets to [${BIN_DIR}]${NC}
+	@cp ./src/assets/* ${BIN_DIR}
+	@echo ${GREEN}Build Complete${NC}
 
 run: build
 	@echo -e ${GREEN}Running [$@]${NC}
@@ -70,7 +72,7 @@ framework:
 	make -C ../ framework TARGET=linux
 
 list:
-	@echo -e ${GREEN}List [$@]${NC}
+	@echo ${GREEN}List [$@]${NC}
 	@echo INC_DIRS: ${INC_DIRS}
 	@echo SRC_DIRS: ${SRC_DIRS}
 	@echo PKG_CONFIG_PATH: ${PKG_CONFIG_PATH}
@@ -79,9 +81,9 @@ list:
 	@make -C ../ list TARGET=linux
 
 clean:
-	@echo -e ${GREEN}Clean [$@]${NC}
+	@echo ${GREEN}Clean [$@]${NC}
 	@make -C ../ clean TARGET=linux
 
 cleanall:
-	@echo -e ${GREEN}Clean [$@]${NC}
+	@echo ${GREEN}Clean [$@]${NC}
 	@make -C ../ cleanall TARGET=linux
