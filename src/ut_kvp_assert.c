@@ -22,17 +22,20 @@
 
 static ut_kvp_instance_t *gKVP_Instance = NULL;
 
-void ut_kvp_assert_load(char *fileName)
+ut_kvp_status_t ut_kvp_assert_load(char *fileName)
 {
     ut_kvp_status_t result;
 
     if (gKVP_Instance == NULL)
     {
         gKVP_Instance = ut_kvp_createInstance();
+        assert(gKVP_Instance != NULL);
     }
 
     result = ut_kvp_read(gKVP_Instance, fileName);
-    assert( result == UT_KVP_STATUS_OK );
+    assert( result == UT_KVP_STATUS_SUCCESS );
+
+    return result;
 }
 
 void ut_kvp_assert_unload(void)

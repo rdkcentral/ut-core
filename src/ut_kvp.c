@@ -24,18 +24,12 @@
 /* Application Includes */
 #include <ut_kvp.h>
 #include <ut_log.h>
-
-#define NDEBUG // Disable to switch on assert
 #include <assert.h>
 
 /* External libraries */
 #include <libfyaml.h>
 
 ut_kvp_instance_t *gKVP_Instance = NULL;
-
-/* TODO: This fields may not be used and should be removed if so*/
-#define UT_KVP_MAX_STRING_ELEMENT_SIZE (256)    /*!< Max String Size Supported */
-#define UT_KVP_MAX_ARRAY_SIZE (32)              /*!< Max Array Size Supported */
 
 typedef struct
 {
@@ -96,7 +90,7 @@ ut_kvp_status_t ut_kvp_read(ut_kvp_instance_t *pInstance, char *fileName)
 
     if (pInternal == NULL || fileName == NULL)
     {
-        return UT_KVP_INVALID_PARAM;
+        return UT_KVP_STATUS_INVALID_PARAM;
     }
 
     if (pInternal->inputFilePtr != NULL)
@@ -108,17 +102,17 @@ ut_kvp_status_t ut_kvp_read(ut_kvp_instance_t *pInstance, char *fileName)
     if (NULL == pInternal->inputFilePtr)
     {
         UT_LOG_ERROR("Unable to open file\n");
-        return UT_KVP_FILE_OPEN_ERROR;
+        return UT_KVP_STATUS_FILE_OPEN_ERROR;
     }
     pInternal->fy_handle = fy_document_build_from_fp(NULL, pInternal->inputFilePtr);
     if (NULL == pInternal->fy_handle)
     {
-        UT_LOG_ERROR("Unable to build file\n");
+        UT_LOG_ERROR("Unable to parse file\n");
         ut_kvp_close( pInstance );
-        return UT_KVP_FILE_READ_ERROR;
+        return UT_KVP_STATUS_PARSING_ERROR;
     }
 
-    return UT_KVP_STATUS_OK;
+    return UT_KVP_STATUS_SUCCESS;
 }
 
 void ut_kvp_close(ut_kvp_instance_t *pInstance)
@@ -143,47 +137,73 @@ void ut_kvp_close(ut_kvp_instance_t *pInstance)
     }
 }
 
-const char *ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pszKey, char *pzResult)
+ut_kvp_status_t ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pszKey, char *pzResult)
 {
     ut_kvp_instance_internal_t *pInternal = validateInstance(pInstance);
-    char zEntry[UT_KVP_MAX_STRING_ELEMENT_SIZE];
+    char zEntry[UT_KVP_MAX_ELEMENT_SIZE];
     char *str = "%s";
     int fy_result;
 
     if (pInternal == NULL)
     {
         assert(pInternal != NULL);
-        return NULL;
+        return UT_KVP_STATUS_INVALID_PARAM;
     }
 
-    snprintf( zEntry, UT_KVP_MAX_STRING_ELEMENT_SIZE, "%s %s", pszKey, str );
+    if (pszKey == NULL)
+    {
+        assert(pszKey != NULL);
+        return UT_KVP_STATUS_INVALID_PARAM;
+    }
+
+    if (pzResult == NULL)
+    {
+        assert(pzResult != NULL);
+        return UT_KVP_STATUS_INVALID_PARAM;
+    }
+
+    snprintf( zEntry, UT_KVP_MAX_ELEMENT_SIZE, "%s %s", pszKey, str );
     fy_result = fy_document_scanf(pInternal->fy_handle, zEntry, pzResult);
     if ( fy_result <= 0 )
     {
         assert( fy_result > 0 );
-        return NULL;
+        return UT_KVP_STATUS_PARSING_ERROR;
     }
 
-    return pzResult;
+    return UT_KVP_STATUS_SUCCESS;
 }
 
 bool ut_kvp_getBoolField( ut_kvp_instance_t *pInstance, const char *pszKey )
 {
-    char result[UT_KVP_MAX_STRING_ELEMENT_SIZE];
-    const char *pField = ut_kvp_getField(pInstance, pszKey, result);
+    char result[UT_KVP_MAX_ELEMENT_SIZE];
+    ut_kvp_status_t status;
 
-    return str_to_bool(pField);
+    status = ut_kvp_getField(pInstance, pszKey, result);
+    if ( status == UT_KVP_STATUS_SUCCESS )
+    {
+        assert(status == UT_KVP_STATUS_SUCCESS);
+        return false;
+    }
+
+    return str_to_bool(result);
 }
 
 uint32_t ut_kvp_getUInt32Field( ut_kvp_instance_t *pInstance, const char *pszKey )
 {
-    const char *pField;
     char *pEndptr;
     uint32_t uValue;
-    char result[UT_KVP_MAX_STRING_ELEMENT_SIZE];
+    char result[UT_KVP_MAX_ELEMENT_SIZE];
+    ut_kvp_status_t status;
+    char *pField = &result[0];
+
     errno = 0; // Clear the stdlib errno
 
-    pField = ut_kvp_getField(pInstance, pszKey, result);
+    status = ut_kvp_getField(pInstance, pszKey, result);
+    if ( status != UT_KVP_STATUS_SUCCESS )
+    {
+        assert(status != UT_KVP_STATUS_SUCCESS);
+        return 0;
+    }
 
     if (strstr(result, "0x"))
     {
@@ -219,13 +239,19 @@ uint32_t ut_kvp_getUInt32Field( ut_kvp_instance_t *pInstance, const char *pszKey
 
 uint64_t ut_kvp_getUInt64Field( ut_kvp_instance_t *pInstance, const char *pszKey )
 {
-    const char *pField;
     char *pEndptr;
     uint64_t uValue;
-    char result[UT_KVP_MAX_STRING_ELEMENT_SIZE];
+    char result[UT_KVP_MAX_ELEMENT_SIZE];
+    ut_kvp_status_t status;
+    char *pField = &result[0];
 
     errno = 0; // Clear the stdlib errno
-    pField = ut_kvp_getField(pInstance, pszKey, result);
+    status = ut_kvp_getField(pInstance, pszKey, result);
+    if ( status != UT_KVP_STATUS_SUCCESS )
+    {
+        assert(status != UT_KVP_STATUS_SUCCESS);
+        return 0;
+    }
 
     if(strstr(result, "0x"))
     {
@@ -258,12 +284,6 @@ uint64_t ut_kvp_getUInt64Field( ut_kvp_instance_t *pInstance, const char *pszKey
 
     UT_LOG_DEBUG("Converted value: %llu", uValue);
     return uValue;
-}
-
-const char *ut_kvp_getStringField(ut_kvp_instance_t *pInstance, const char *pszKey)
-{
-    char result[UT_KVP_MAX_STRING_ELEMENT_SIZE];
-    return ut_kvp_getField(pInstance, pszKey, result);
 }
 
 /** Static Functions */

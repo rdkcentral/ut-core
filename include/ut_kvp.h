@@ -18,6 +18,8 @@
 */
 
 // ut_kvp.h, header to be expanded as required
+#ifndef __UT_KVP_H__
+#define __UT_KVP_H__
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -29,14 +31,17 @@
  */
 typedef enum
 {
-    UT_KVP_STATUS_OK=0,         /**!< Status ok */
-    UT_KVP_FILE_OPEN_ERROR,     /**!< File open error */
-    UT_KVP_INVALID_PARAM,       /**!< Invalid Param */
-    UT_KVP_FILE_READ_ERROR      /**!< Read Error */
+    UT_KVP_STATUS_SUCCESS=0,        /**!< Status ok */
+    UT_KVP_STATUS_FILE_OPEN_ERROR,  /**!< File open error */
+    UT_KVP_STATUS_INVALID_PARAM,    /**!< Invalid Param */
+    UT_KVP_STATUS_PARSING_ERROR,    /**!< Parsing error */
+    UT_KVP_STATUS_MAX               /**!< Out of range marker */
 }
 ut_kvp_status_t;
 
 typedef void ut_kvp_instance_t;    /**!< Instance type*/
+
+#define UT_KVP_MAX_ELEMENT_SIZE (256)    /*!< Max Element Size Supported */
 
 /**
  * @brief create instance handle to the kvp object
@@ -57,11 +62,12 @@ void ut_kvp_destroyInstance( ut_kvp_instance_t *pInstance );
  * 
  * @param pInstance[in] - Handle to the instance
  * @param fileName[in] - Zero Terminated filename
- * @returns ut_kvp_status_t
- * @retval UT_KVP_STATUS_OK - Success
- * @retval UT_KVP_FILE_OPEN_ERROR - File open error
- * @retval UT_KVP_INVALID_PARAM - Invalid param passed
- * @retval UT_KVP_FILE_READ_ERROR - File read error
+ * 
+ * @returns ut_kvp_status_t - result status
+ * @retval UT_KVP_STATUS_SUCCESS - Success
+ * @retval UT_KVP_STATUS_FILE_OPEN_ERROR - File open error
+ * @retval UT_KVP_STATUS_INVALID_PARAM   - Invalid param passed
+ * @retval UT_KVP_STATUS_PARSING_ERROR   - File parsing error
  */
 ut_kvp_status_t ut_kvp_read(ut_kvp_instance_t *pInstance, char* fileName);
 
@@ -77,12 +83,14 @@ void ut_kvp_close(ut_kvp_instance_t *pInstance);
  *
  * @param pInstance[in] - Handle to the instance
  * @param pszKey[in] - Zero Terminated String Key
+ * @param pszResult[out] - Caller must pass char array of UT_KVP_MAX_STRING_ELEMENT_SIZE size will which be populated with the result
  *
  * @return ut_kvp_value_t  - Returned structure
- * @retval type == UT_KVP_INVALID_ELEMENT if the element is not found
+ * @retval UT_KVP_STATUS_SUCCESS - Success
+ * @retval UT_KVP_STATUS_INVALID_PARAM   - Invalid param passed
+ * @retval UT_KVP_STATUS_PARSING_ERROR   - File parsing error
  */
-//const char *ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pszKey);
-const char *ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pszKey, char *result);
+ut_kvp_status_t ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pszKey, char *pszResult);
 
 /**
  * @brief Get a bool key value pair from a passed configuration
@@ -94,8 +102,6 @@ const char *ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pszKey, ch
  * @return false 
  */
 bool ut_kvp_getBoolField(ut_kvp_instance_t *pInstance, const char *pszKey);
-
-const char *ut_kvp_getStringField(ut_kvp_instance_t *pInstance, const char *pszKey);
 
 /* TODO:
 * ut_kvp_getUInt8Field
@@ -128,4 +134,4 @@ uint32_t ut_kvp_getUInt32Field(ut_kvp_instance_t *pInstance, const char *pszKey)
  */
 uint64_t ut_kvp_getUInt64Field(ut_kvp_instance_t *pInstance, const char *pszKey);
 
-/* TOOD: We will need int32 & int64 field functions also */
+#endif /* __UT_KVP_H__ */

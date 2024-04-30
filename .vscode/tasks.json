@@ -2,31 +2,30 @@
 	"version": "2.0.0",
 	"command": "bash",
 	"options": {
-        "cwd": "${workspaceRoot}"
+        "cwd": "${workspaceFolder}/tests"
     },
 	"tasks": [
 		{
-			"type": "make",
-			"targetName": "build",
-			"makeFileRelativePath": "tests/Makefile",
-			"problemMatcher": [],
+			"type": "shell",
+			"problemMatcher": [ "$gcc" ],
 			"label": "make: all",
-			"detail": "./tests/Makefile",
+			"command": "make -f Makefile",
+			"args": [],
 			"group": {
 				"kind": "build",
 				"isDefault": true
 			}
 		},
 		{
-			"type": "make",
-			"targetName": "clean",
-			"makeFileRelativePath": "tests/Makefile",
-			"problemMatcher": [],
+			"type": "shell",
+			"problemMatcher": [ "$gcc" ],
 			"label": "make: clean",
-			"detail": "./tests/Makefile",
+			"command": "make -f Makefile",
+			"args": [],
 			"group": {
 				"kind": "build",
 				"isDefault": false
 			}
-		}
+		},
+	]
 }

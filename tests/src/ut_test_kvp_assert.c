@@ -29,8 +29,8 @@
 
 #include <ut_kvp_assert.h>
 
-#define KVP_VALID_TEST_ASSERT_YAML_FILE "/home/jpn323/workspace/rdk-halif-hdmi_cec/ut/ut-core/src/test_kvp_assert.yaml"
-#define KVP_VALID_TEST_ASSERT_JSON_FILE "/home/jpn323/workspace/rdk-halif-hdmi_cec/ut/ut-core/src/test_kvp_assert.json"
+#define KVP_VALID_TEST_ASSERT_YAML_FILE "test_kvp_assert.yaml"
+#define KVP_VALID_TEST_ASSERT_JSON_FILE "test_kvp_assert.json"
 
 static UT_test_suite_t *gpAssertSuite1 = NULL;
 static UT_test_suite_t *gpAssertSuite2 = NULL;

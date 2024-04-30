@@ -25,7 +25,8 @@ SRC_DIRS = $(ROOT_DIR)/src
 INC_DIRS := $(ROOT_DIR)/include
 INC_DIRS += $(ROOT_DIR)/../include
 
-CFLAGS = -DBUILD_LINUX
+# Switch on Linux & disable asserts for the testing suites
+CFLAGS = -DNDEBUG
 TARGET_EXEC = ut-test
 
 TARGET = linux

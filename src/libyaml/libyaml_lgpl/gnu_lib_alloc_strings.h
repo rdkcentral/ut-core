@@ -17,6 +17,9 @@
  * limitations under the License.
 */
 
+#ifndef __GNU_LIB_ALLOC_H__
+#define __GNU_LIB_ALLOC_H__
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -25,3 +28,4 @@ int asprintf(char **ret, const char *format, ...);
 
 int vasprintf(char **ret, const char *format, va_list args); 
  
+#endif /** __GNU_LIB_ALLOC_H__*/

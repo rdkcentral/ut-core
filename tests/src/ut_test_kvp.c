@@ -28,7 +28,9 @@
 #include <ut_kvp.h>
 #include <ut_log.h>
 
-#define KVP_VALID_TEST_YAML_FILE "/home/jpn323/workspace/rdk-halif-hdmi_cec/ut/ut-core/src/test_kvp.yaml"
+#define KVP_VALID_TEST_NO_DATA_YAML_FILE "./no_data_file.yaml"
+#define KVP_VALID_TEST_NO_FILE "./this_does_not_exist.yaml"
+#define KVP_VALID_TEST_YAML_FILE "./test_kvp.yaml"
 
 static ut_kvp_instance_t *gpMainTestInstance = NULL;
 static UT_test_suite_t *gpKVPSuite = NULL;
@@ -65,25 +67,25 @@ void test_ut_kvp_read( void )
 
     UT_LOG_STEP("ut_kvp_read( pInstance, NULL )");
     status = ut_kvp_read( pInstance, NULL );
-    UT_ASSERT( status == UT_KVP_INVALID_PARAM );
+    UT_ASSERT( status == UT_KVP_STATUS_INVALID_PARAM );
 
-    UT_LOG_STEP("ut_kvp_read( pInstance, nofile.txt )");
-    status = ut_kvp_read( pInstance, "./nofile.txt" );
-    UT_ASSERT( status == UT_KVP_FILE_OPEN_ERROR );
+    UT_LOG_STEP("ut_kvp_read( pInstance, %s )", KVP_VALID_TEST_NO_FILE);
+    status = ut_kvp_read( pInstance, KVP_VALID_TEST_NO_FILE );
+    UT_ASSERT( status == UT_KVP_STATUS_FILE_OPEN_ERROR );
 
-    UT_LOG_STEP("ut_kvp_read( pInstance, dummynodatafile.txt )");
-    status = ut_kvp_read( pInstance, "/home/jpn323/workspace/rdk-halif-hdmi_cec/ut/ut-core/src/dummynodatafile.txt" );
-    UT_ASSERT( status == UT_KVP_FILE_READ_ERROR );
+    UT_LOG_STEP("ut_kvp_read( pInstance, %s )", KVP_VALID_TEST_NO_DATA_YAML_FILE);
+    status = ut_kvp_read( pInstance, KVP_VALID_TEST_NO_DATA_YAML_FILE );
+    UT_ASSERT( status == UT_KVP_STATUS_PARSING_ERROR );
 
     UT_LOG_STEP("ut_kvp_read( pInstance,  KVP_VALID_TEST_YAML_FILE )");
     status = ut_kvp_read( pInstance, KVP_VALID_TEST_YAML_FILE );
-    UT_ASSERT( status == UT_KVP_STATUS_OK );
+    UT_ASSERT( status == UT_KVP_STATUS_SUCCESS );
 
-    /* Test Destory causes close */
+    /* Test Destroy causes close */
     ut_kvp_destroyInstance( pInstance );
     ut_kvp_destroyInstance( pInstance );
 
-    /* Calling close after destory should have no effect */
+    /* Calling close after destroy should have no effect */
     ut_kvp_close(pInstance);
     ut_kvp_close(pInstance);
 
@@ -113,16 +115,41 @@ void test_ut_kvp_uint64(void)
 
 void test_ut_kvp_string(void)
 {
-    const char *result;
     const char *checkField = "the_beef_is_dead";
-    char result_kvp[256] = {0};
-    result = ut_kvp_getField( gpMainTestInstance, "decodeTest/checkStringDeadBeef", result_kvp);
-    UT_ASSERT_STRING_EQUAL( result, checkField );
+    char result_kvp[UT_KVP_MAX_ELEMENT_SIZE];
+    ut_kvp_status_t status;
+
+    status = status;
+    /* Check for INVALID_PARAM */
+    status = ut_kvp_getField(NULL, "decodeTest/checkStringDeadBeef", result_kvp);
+    UT_ASSERT(status == UT_KVP_STATUS_INVALID_PARAM );
+
+    status = ut_kvp_getField(gpMainTestInstance, NULL, result_kvp);
+    UT_ASSERT(status == UT_KVP_STATUS_INVALID_PARAM );
+
+    status = ut_kvp_getField(gpMainTestInstance, NULL, NULL);
+    UT_ASSERT(status == UT_KVP_STATUS_INVALID_PARAM );
+
+    /* Check for UT_KVP_STATUS_PARSING_ERROR */
+    status = ut_kvp_getField(gpMainTestInstance, "shouldNotWork/checkStringDeadBeef", result_kvp);
+    UT_ASSERT(status == UT_KVP_STATUS_PARSING_ERROR );
+
+    /* Check for UT_KVP_STATUS_SUCCESS */
+    status = ut_kvp_getField(gpMainTestInstance, "decodeTest/checkStringDeadBeef", result_kvp);
+    UT_ASSERT(status == UT_KVP_STATUS_SUCCESS );
+
+    UT_ASSERT_STRING_EQUAL(result_kvp, checkField);
 }
 
 void test_ut_kvp_bool(void)
 {
     bool result;
+
+    /* Negative Tests */
+    result = ut_kvp_getBoolField( gpMainTestInstance, "shouldNotWork/checkBoolTRUE" );
+    UT_ASSERT( result == false );
+
+    /* Positive Tests */
     result = ut_kvp_getBoolField( gpMainTestInstance, "decodeTest/checkBoolTRUE" );
     UT_ASSERT( result == true );
 
@@ -143,7 +170,8 @@ int test_ut_kvp_createGlobalInstance( void )
     assert( gpMainTestInstance != NULL );
 
     status = ut_kvp_read( gpMainTestInstance, KVP_VALID_TEST_YAML_FILE );
-    assert( status == UT_KVP_STATUS_OK );
+    assert( status == UT_KVP_STATUS_SUCCESS );
+    status = status;
 
     return 0;
 }
@@ -159,10 +187,10 @@ void register_kvp_functions( void )
     gpKVPSuite = UT_add_suite("ut-kvp - test functions ", NULL, NULL);
     assert(gpKVPSuite != NULL);
 
-    UT_add_test(gpKVPSuite, "kvp create / destory", test_ut_kvp_testCreateDestroy);
+    UT_add_test(gpKVPSuite, "kvp create / destroy", test_ut_kvp_testCreateDestroy);
     UT_add_test(gpKVPSuite, "kvp read", test_ut_kvp_read);
 
-    gpKVPSuite2 = UT_add_suite("ut-kvp - test mainfunctions ", test_ut_kvp_createGlobalInstance, test_ut_kvp_freeGlobalInstance);
+    gpKVPSuite2 = UT_add_suite("ut-kvp - test main functions ", test_ut_kvp_createGlobalInstance, test_ut_kvp_freeGlobalInstance);
     assert(gpKVPSuite2 != NULL);
 
     UT_add_test(gpKVPSuite2, "kvp bool", test_ut_kvp_bool);
