@@ -36,7 +36,7 @@ else
     tar xvfj framework/CUnit-2.1-3.tar.bz2 -C ./framework/
     cp framework/CUnit-2.1-3/CUnit/Headers/CUnit.h.in framework/CUnit-2.1-3/CUnit/Headers/CUnit.h
     echo "Patching Framework"
-    cp src/cunit/cunit_lgpl/patches/CorrectBuildWarningsInCunit.patch  framework/.
+    cp patches/CorrectBuildWarningsInCunit.patch  framework/.
     cd ${FRAMEWORK_DIR}
     patch -u CUnit-2.1-3/CUnit/Sources/Framework/TestRun.c -i CorrectBuildWarningsInCunit.patch
     echo "Patching Complete"
@@ -51,7 +51,7 @@ else
     unzip master.zip
 
     echo "Patching Framework [${PWD}]"
-    cp ../src/libyaml/CorrectWarningsAndBuildIssuesInLibYaml.patch  .
+    cp ../patches/CorrectWarningsAndBuildIssuesInLibYaml.patch  .
     patch -i CorrectWarningsAndBuildIssuesInLibYaml.patch -p0
     echo "Patching Complete"
 
