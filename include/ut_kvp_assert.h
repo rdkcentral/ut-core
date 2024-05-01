@@ -52,12 +52,9 @@ extern ut_kvp_instance_t *ut_kvp_assert_getInstance(void);
 #define UT_ASSERT_EQUAL_KVP_UINT64( checkValue, key ) UT_ASSERT_EQUAL( ut_kvp_getUInt64Field( ut_kvp_assert_getInstance(), key ), checkValue );
 #define UT_ASSERT_EQUAL_KVP_STRING(checkValue, key)                         \
     {                                                                       \
-        char result[UT_KVP_MAX_ELEMENT_SIZE];                               \
-        ut_kvp_status_t status;                                             \
-        status = ut_kvp_getField(ut_kvp_assert_getInstance(), key, result); \
-        assert(status == UT_KVP_STATUS_SUCCESS);                            \
-        status = status;                                                    \
-        UT_ASSERT_STRING_EQUAL(checkValue, result);                         \
+        const char* result_kvp = NULL;                                      \
+        result_kvp = ut_kvp_getStringField(ut_kvp_assert_getInstance(), key, result_kvp);  \
+        UT_ASSERT_STRING_EQUAL(checkValue, result_kvp);                         \
     }
 
 #endif /* __UT_KVP_ASSERT_H__ */

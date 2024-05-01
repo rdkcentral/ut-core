@@ -213,46 +213,41 @@ void test_ut_kvp_uint64(void)
 void test_ut_kvp_string(void)
 {
     const char *checkField = "the beef is dead";
-    char result_kvp[UT_KVP_MAX_ELEMENT_SIZE];
-    ut_kvp_status_t status;
+    const char* result_kvp = NULL;
 
     /* Check for INVALID_PARAM */
     UT_LOG_STEP("ut_kvp_getField() - Check for INVALID_PARAM");
 
-    status = ut_kvp_getField(NULL, "decodeTest/checkStringDeadBeef", result_kvp);
-    UT_ASSERT(status == UT_KVP_STATUS_INVALID_PARAM );
-    status = status;
+    result_kvp = ut_kvp_getStringField(NULL, "decodeTest/checkStringDeadBeef", result_kvp);
+    UT_ASSERT(result_kvp == NULL );
 
-    status = ut_kvp_getField(gpMainTestInstance, NULL, result_kvp);
-    UT_ASSERT(status == UT_KVP_STATUS_INVALID_PARAM );
+    result_kvp = ut_kvp_getStringField(gpMainTestInstance, NULL, result_kvp);
+    UT_ASSERT(result_kvp == NULL );
 
-    status = ut_kvp_getField(gpMainTestInstance, NULL, NULL);
-    UT_ASSERT(status == UT_KVP_STATUS_INVALID_PARAM );
+    result_kvp = ut_kvp_getStringField(gpMainTestInstance, NULL, NULL);
+     UT_ASSERT(result_kvp == NULL );
 
     /* Check for UT_KVP_STATUS_PARSING_ERROR */
-    UT_LOG_STEP("ut_kvp_getField() - Check for UT_KVP_STATUS_PARSING_ERROR");
-    status = ut_kvp_getField(gpMainTestInstance, "shouldNotWork/checkStringDeadBeef", result_kvp);
-    UT_ASSERT(status == UT_KVP_STATUS_PARSING_ERROR );
+    UT_LOG_STEP("ut_kvp_getStringField() - Check for UT_KVP_STATUS_PARSING_ERROR");
+    result_kvp = ut_kvp_getStringField(gpMainTestInstance, "shouldNotWork/checkStringDeadBeef", result_kvp);
+     UT_ASSERT(result_kvp == NULL );
 
     /* Check for UT_KVP_STATUS_SUCCESS */
 
     /* Not supported in JSON format, but the json format one is with quotes either way */
-    UT_LOG_STEP("ut_kvp_getField() - Check String with no quotes for UT_KVP_STATUS_SUCCESS");
-    status = ut_kvp_getField(gpMainTestInstance, "decodeTest/checkStringDeadBeefNoQuotes", result_kvp);
-    UT_ASSERT(status == UT_KVP_STATUS_SUCCESS );
+    UT_LOG_STEP("ut_kvp_getStringField() - Check String with no quotes for UT_KVP_STATUS_SUCCESS");
+    result_kvp = ut_kvp_getStringField(gpMainTestInstance, "decodeTest/checkStringDeadBeefNoQuotes", result_kvp);
     UT_ASSERT_STRING_EQUAL(result_kvp, checkField);
 
-    UT_LOG_STEP("ut_kvp_getField() - Check String with Quotes for UT_KVP_STATUS_SUCCESS");
-    status = ut_kvp_getField(gpMainTestInstance, "decodeTest/checkStringDeadBeef", result_kvp);
-    UT_ASSERT(status == UT_KVP_STATUS_SUCCESS );
+    UT_LOG_STEP("ut_kvp_getStringField() - Check String with Quotes for UT_KVP_STATUS_SUCCESS");
+    result_kvp = ut_kvp_getStringField(gpMainTestInstance, "decodeTest/checkStringDeadBeef", result_kvp);
     UT_ASSERT_STRING_EQUAL(result_kvp, checkField);
 }
 
 void test_ut_kvp_get_field_without_open( void )
 {
     bool result;
-    char result_kvp[UT_KVP_MAX_ELEMENT_SIZE];
-    ut_kvp_status_t status;
+    const char* result_kvp = NULL;
 
     /* Negative Tests */
     UT_LOG_STEP("ut_kvp_getBoolField() - negative");
@@ -265,9 +260,8 @@ void test_ut_kvp_get_field_without_open( void )
     result = ut_kvp_getUInt64Field( gpMainTestInstance, "decodeTest/checkUint64IsDeadBeefHex" );
     UT_ASSERT( result == 0 );
 
-    status = ut_kvp_getField(gpMainTestInstance, "decodeTest/checkStringDeadBeefNoQuotes", result_kvp);
-    UT_ASSERT(status == UT_KVP_STATUS_NO_DATA );
-    status = status;
+    result_kvp = ut_kvp_getStringField(gpMainTestInstance, "decodeTest/checkStringDeadBeef", result_kvp);
+    UT_ASSERT( result_kvp == NULL );
 }
 
 void test_ut_kvp_bool(void)
@@ -351,33 +345,27 @@ static int test_ut_kvp_freeGlobalInstance( void )
 void register_kvp_functions( void )
 {
     gpKVPSuite=gpKVPSuite;
-#if 0
     gpKVPSuite = UT_add_suite("ut-kvp - test functions ", NULL, NULL);
     assert(gpKVPSuite != NULL);
 
     UT_add_test(gpKVPSuite, "kvp create / destroy", test_ut_kvp_testCreateDestroy);
     UT_add_test(gpKVPSuite, "kvp read", test_ut_kvp_open);
 
-#endif
     gpKVPSuite2 = UT_add_suite("ut-kvp - test main functions YAML Decoder ", test_ut_kvp_createGlobalYAMLInstance, test_ut_kvp_freeGlobalInstance);
     assert(gpKVPSuite2 != NULL);
 
-    UT_add_test(gpKVPSuite2, "kvp string", test_ut_kvp_string);
     UT_add_test(gpKVPSuite2, "kvp uint8", test_ut_kvp_uint8);
     UT_add_test(gpKVPSuite2, "kvp uint16", test_ut_kvp_uint16);
-#if 0
     UT_add_test(gpKVPSuite2, "kvp bool", test_ut_kvp_bool);
     UT_add_test(gpKVPSuite2, "kvp string", test_ut_kvp_string);
     UT_add_test(gpKVPSuite2, "kvp uint32", test_ut_kvp_uint32);
     UT_add_test(gpKVPSuite2, "kvp uint64", test_ut_kvp_uint64);
 
-#endif
-
     /* Perform the same parsing tests but use a json file instead */
     gpKVPSuite3 = UT_add_suite("ut-kvp - test main functions JSON Decoder ", test_ut_kvp_createGlobalJSONInstance, test_ut_kvp_freeGlobalInstance);
     assert(gpKVPSuite3 != NULL);
 
-#if 0
+
     UT_add_test(gpKVPSuite3, "kvp string", test_ut_kvp_string);
     UT_add_test(gpKVPSuite3, "kvp uint8", test_ut_kvp_uint8);
     UT_add_test(gpKVPSuite3, "kvp uint16", test_ut_kvp_uint16);
@@ -385,13 +373,10 @@ void register_kvp_functions( void )
     UT_add_test(gpKVPSuite3, "kvp bool", test_ut_kvp_bool);
     UT_add_test(gpKVPSuite3, "kvp uint32", test_ut_kvp_uint32);
     UT_add_test(gpKVPSuite3, "kvp uint64", test_ut_kvp_uint64);
-#endif
 
     gpKVPSuite4 = UT_add_suite("ut-kvp - test main functions Test without Open ", NULL, NULL);
     assert(gpKVPSuite4 != NULL);
 
-#if 0
     UT_add_test(gpKVPSuite4, "kvp read negative", test_ut_kvp_get_field_without_open);
-#endif
 
 }

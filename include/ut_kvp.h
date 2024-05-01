@@ -156,4 +156,15 @@ uint32_t ut_kvp_getUInt32Field(ut_kvp_instance_t *pInstance, const char *pszKey)
  */
 uint64_t ut_kvp_getUInt64Field(ut_kvp_instance_t *pInstance, const char *pszKey);
 
+/**
+ * @brief Get a key value pair from the passed string configuration
+ *
+ * @param pInstance[in] - Handle to the instance
+ * @param pszKey[in] - Zero Terminated String Key
+ * @param psValue[out] - Caller must pass const char pointer which will be populated with the result
+ *
+ * @return const char*  - Returned string value
+ */
+const char* ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *pszKey, const char *psValue );
+
 #endif /* __UT_KVP_H__ */

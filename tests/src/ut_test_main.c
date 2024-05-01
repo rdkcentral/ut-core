@@ -36,9 +36,9 @@ int main(int argc, char** argv)
     /* Register tests as required, then call the UT-main to support switches and triggering */
     UT_init( argc, argv );
 
-    //register_assert_functions();
+    register_assert_functions();
     register_kvp_functions();
-    //register_kvp_assert_testing_functions();
+    register_kvp_assert_testing_functions();
     UT_run_tests();
 
     return 0;

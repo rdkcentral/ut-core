@@ -57,7 +57,7 @@ void test_ut_kvp_assert_string(void)
 void test_ut_kvp_assert_bool(void)
 {
     UT_ASSERT_EQUAL_KVP_BOOL( false, "decodeTest/checkBoolFalse" );
-    UT_ASSERT_EQUAL_KVP_BOOL( true, "decodeTest/checkBoolTrue" );
+    UT_ASSERT_EQUAL_KVP_BOOL( true, "decodeTest/checkBoolTRUE" );
 }
 
 void test_ut_kvp_assert_load( void )

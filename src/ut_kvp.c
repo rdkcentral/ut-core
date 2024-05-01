@@ -333,6 +333,58 @@ uint64_t ut_kvp_getUInt64Field( ut_kvp_instance_t *pInstance, const char *pszKey
     return u64Value;
 }
 
+const char* ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *pszKey, const char *psValue )
+{
+    struct fy_node *node = NULL;
+    struct fy_node *root = NULL;
+
+    ut_kvp_instance_internal_t *pInternal = validateInstance(pInstance);
+
+     if (pInternal == NULL)
+    {
+        assert(pInternal != NULL);
+        return NULL;
+    }
+
+    if (pszKey == NULL)
+    {
+        assert(pszKey != NULL);
+        UT_LOG_ERROR("Invalid Param - pszKey");
+        return NULL;
+    }
+
+    if ( pInternal->fy_handle == NULL )
+    {
+        assert(pInternal->fy_handle != NULL);
+        UT_LOG_ERROR("No Data File open");
+        return NULL;
+    }
+    // Get the root node
+    root = fy_document_root(pInternal->fy_handle);
+    if ( root == NULL )
+    {
+        assert( root != NULL );
+        UT_LOG_ERROR("Empty document");
+        return NULL;
+    }
+
+    // Find the node corresponding to the key
+    node = fy_node_by_path(root, pszKey, -1, FYNWF_DONT_FOLLOW);
+    if ( node == NULL )
+    {
+        assert( node != NULL );
+        UT_LOG_ERROR("node not found");
+        return NULL;
+    }
+
+    if (node && fy_node_is_scalar(node)) {
+        // Get the string value
+        psValue = fy_node_get_scalar0(node);
+    }
+    return psValue;
+
+}
+
 /** Static Functions */
 static ut_kvp_instance_internal_t *validateInstance(ut_kvp_instance_t *pInstance)
 {
