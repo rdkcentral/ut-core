@@ -56,10 +56,11 @@ NC='\033[0m'
 .PHONY: clean list build all
 
 build: framework
-	@echo ${GREEN}Build [$@] ${NC}
+	@echo -e ${GREEN}Build [$@] ${NC}
 	@make -C ../ test TARGET=linux
-	@echo ${GREEN}Copy Assets to [${BIN_DIR}] ${NC}
-	@cp ./src/assets/* ${BIN_DIR}
+	@echo -e ${GREEN}Copy Assets to [${BIN_DIR}/assets] ${NC}
+	@mkdir -p ${BIN_DIR}/assets
+	@cp ./src/assets/* ${BIN_DIR}/assets
 	@echo -e ${GREEN}Build Complete${NC}
 
 run: build

@@ -59,7 +59,7 @@ ut_kvp_instance_t *ut_kvp_createInstance( void );
 void ut_kvp_destroyInstance( ut_kvp_instance_t *pInstance );
 
 /**
- * @brief read kvp file and ready for use
+ * @brief open and read kvp file and ready for use
  * 
  * @param pInstance[in] - Handle to the instance
  * @param fileName[in] - Zero Terminated filename
@@ -70,7 +70,7 @@ void ut_kvp_destroyInstance( ut_kvp_instance_t *pInstance );
  * @retval UT_KVP_STATUS_INVALID_PARAM   - Invalid param passed
  * @retval UT_KVP_STATUS_PARSING_ERROR   - File parsing error
  */
-ut_kvp_status_t ut_kvp_read(ut_kvp_instance_t *pInstance, char* fileName);
+ut_kvp_status_t ut_kvp_open(ut_kvp_instance_t *pInstance, char* fileName);
 
 /**
  * @brief close kvp file previously read and free the memory
@@ -106,13 +106,33 @@ ut_kvp_status_t ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pszKey
 bool ut_kvp_getBoolField(ut_kvp_instance_t *pInstance, const char *pszKey);
 
 /* TODO:
-* ut_kvp_getUInt8Field
-* ut_kvp_getUInt16Field
 * ut_kvp_getInt8Field
 * ut_kvp_getInt16Field
 * ut_kvp_getInt32Field
 * ut_kvp_getInt64Field
 */
+
+/**
+ * @brief Get a uint8_t field from a key value pair
+ *  This function may assert if a field is not convertible type uint8_t
+ * 
+ * @param pInstance[in] - Handle to the instance
+ * @param pszKey[in] - Zero Terminated String Key
+ *
+ * @returns uint8_t - int result
+ */
+uint8_t ut_kvp_getUInt8Field( ut_kvp_instance_t *pInstance, const char *pszKey );
+
+/**
+ * @brief Get a uint16_t field from a key value pair
+ *  This function may assert if a field is not convertible type uint16_t
+ * 
+ * @param pInstance[in] - Handle to the instance
+ * @param pszKey[in] - Zero Terminated String Key
+ *
+ * @returns uint16_t - int result
+ */
+uint16_t ut_kvp_getUInt16Field( ut_kvp_instance_t *pInstance, const char *pszKey );
 
 /**
  * @brief Get a uint32_t field from a key value pair

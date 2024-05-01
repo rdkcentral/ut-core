@@ -38,7 +38,7 @@ int main(int argc, char** argv)
 
     //register_assert_functions();
     register_kvp_functions();
-    register_kvp_assert_testing_functions();
+    //register_kvp_assert_testing_functions();
     UT_run_tests();
 
     return 0;

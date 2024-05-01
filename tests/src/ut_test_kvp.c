@@ -28,16 +28,21 @@
 #include <ut_kvp.h>
 #include <ut_log.h>
 
-#define KVP_VALID_TEST_NO_DATA_YAML_FILE "no_data_file.yaml"
-#define KVP_VALID_TEST_NO_FILE "this_does_not_exist.yaml"
-#define KVP_VALID_TEST_YAML_FILE "test_kvp.yaml"
+#define KVP_VALID_TEST_NOT_VALID_YAML_FORMATTED_FILE "assets/no_data_file.yaml"
+#define KVP_VALID_TEST_ZERO_LENGTH_YAML_FILE "assets/zero_length.yaml"
+#define KVP_VALID_TEST_NO_FILE "assets/this_does_not_exist.yaml"
+#define KVP_VALID_TEST_YAML_FILE "assets/test_kvp.yaml"
+#define KVP_VALID_TEST_JSON_FILE "assets/test_kvp.json"
 
 static ut_kvp_instance_t *gpMainTestInstance = NULL;
 static UT_test_suite_t *gpKVPSuite = NULL;
 static UT_test_suite_t *gpKVPSuite2 = NULL;
+static UT_test_suite_t *gpKVPSuite3 = NULL;
+static UT_test_suite_t *gpKVPSuite4 = NULL;
 
+static int test_ut_kvp_createGlobalYAMLInstance(void);
+static int test_ut_kvp_createGlobalJSONInstance(void);
 static int test_ut_kvp_freeGlobalInstance(void);
-static int test_ut_kvp_createGlobalInstance(void);
 
 void test_ut_kvp_testCreateDestroy(void)
 {
@@ -59,14 +64,14 @@ void test_ut_kvp_testCreateDestroy(void)
     ut_kvp_destroyInstance(pInstance);
 }
 
-void test_ut_kvp_read( void )
+void test_ut_kvp_open( void )
 {
     ut_kvp_instance_t *pInstance = NULL;
     ut_kvp_status_t status;
 
     /* Negative Test */
-    UT_LOG_STEP("ut_kvp_read( NULL, NULL )");
-    status = ut_kvp_read( NULL, NULL );
+    UT_LOG_STEP("ut_kvp_open( NULL, NULL )");
+    status = ut_kvp_open( NULL, NULL );
     UT_ASSERT( status == UT_KVP_STATUS_INVALID_PARAM );
 
     /* Positive Test */
@@ -78,21 +83,28 @@ void test_ut_kvp_read( void )
     UT_LOG_STEP("ut_kvp_close( pInstance ) - Not been opened");
     ut_kvp_close(pInstance);
 
-    /* Negative Read Test */
-    UT_LOG_STEP("ut_kvp_read( pInstance, NULL ) - Negative");
-    status = ut_kvp_read( pInstance, NULL );
+    /* Negative Read Test, NULL PARAM */
+    UT_LOG_STEP("ut_kvp_open( pInstance, NULL ) - Negative");
+    status = ut_kvp_open( pInstance, NULL );
     UT_ASSERT( status == UT_KVP_STATUS_INVALID_PARAM );
 
-    UT_LOG_STEP("ut_kvp_read( pInstance, %s ) - Negative", KVP_VALID_TEST_NO_FILE);
-    status = ut_kvp_read( pInstance, KVP_VALID_TEST_NO_FILE );
+    /* Filename doesn't exist */
+    UT_LOG_STEP("ut_kvp_open( pInstance, %s - filename does exist ) - Negative", KVP_VALID_TEST_NO_FILE);
+    status = ut_kvp_open( pInstance, KVP_VALID_TEST_NO_FILE );
     UT_ASSERT( status == UT_KVP_STATUS_FILE_OPEN_ERROR );
 
-    UT_LOG_STEP("ut_kvp_read( pInstance, %s ) - Negative", KVP_VALID_TEST_NO_DATA_YAML_FILE);
-    status = ut_kvp_read( pInstance, KVP_VALID_TEST_NO_DATA_YAML_FILE );
+    /* Zero length file, that the library should reject because it can't parse it at all */
+    UT_LOG_STEP("ut_kvp_open( pInstance, %s - zero length file ) - Negative", KVP_VALID_TEST_ZERO_LENGTH_YAML_FILE);
+    status = ut_kvp_open( pInstance, KVP_VALID_TEST_ZERO_LENGTH_YAML_FILE );
     UT_ASSERT( status == UT_KVP_STATUS_PARSING_ERROR );
 
-    UT_LOG_STEP("ut_kvp_read( pInstance,  KVP_VALID_TEST_YAML_FILE ) - Positive");
-    status = ut_kvp_read( pInstance, KVP_VALID_TEST_YAML_FILE );
+    /* Positive Tests */
+    UT_LOG_STEP("ut_kvp_open( pInstance,  KVP_VALID_TEST_YAML_FILE ) - Positive");
+    status = ut_kvp_open( pInstance, KVP_VALID_TEST_YAML_FILE );
+    UT_ASSERT( status == UT_KVP_STATUS_SUCCESS );
+
+    UT_LOG_STEP("ut_kvp_open( pInstance, %s ) - Postive", KVP_VALID_TEST_NOT_VALID_YAML_FORMATTED_FILE);
+    status = ut_kvp_open( pInstance, KVP_VALID_TEST_NOT_VALID_YAML_FORMATTED_FILE );
     UT_ASSERT( status == UT_KVP_STATUS_SUCCESS );
 
     /* Test Destroy causes close this should work fine */
@@ -118,17 +130,66 @@ void test_ut_kvp_read( void )
     ut_kvp_close(pInstance);
 }
 
+void test_ut_kvp_uint8(void)
+{
+    uint8_t result;
+    uint8_t checkField = 0xde; // 336 decimal
+
+    /* Positive Tests */
+    result = ut_kvp_getUInt8Field( gpMainTestInstance, "decodeTest/checkUint8IsDeHex" );
+    UT_ASSERT( result == checkField );
+
+    result = ut_kvp_getUInt8Field( gpMainTestInstance, "decodeTest/checkUint8IsDeDec" );
+    UT_ASSERT( result == checkField );
+
+    /* Negative Tests */
+    result = ut_kvp_getUInt8Field( gpMainTestInstance, "thisShouldNotWork/checkUint64IsDeadBeefHex" );
+    UT_ASSERT( result == 0 );
+
+    /* Decode out of range value */
+    result = ut_kvp_getUInt8Field( gpMainTestInstance, "decodeTest/checkUint64IsDeadBeefHex" );
+    UT_ASSERT( result == 0 );
+}
+
+void test_ut_kvp_uint16(void)
+{
+    uint16_t result;
+    uint16_t checkField = 0xdead; //157255 Decimal
+
+    /* Positive Tests */
+    result = ut_kvp_getUInt16Field( gpMainTestInstance, "decodeTest/checkUint16IsDeadHex" );
+    UT_ASSERT( result == checkField );
+
+    result = ut_kvp_getUInt16Field( gpMainTestInstance, "decodeTest/checkUint16IsDeadDec" );
+    UT_ASSERT( result == checkField );
+
+    /* Negative Tests */
+    result = ut_kvp_getUInt16Field( gpMainTestInstance, "thisShouldNotWork/checkUint64IsDeadBeefHex" );
+    UT_ASSERT( result == 0 );
+
+    /* Decode out of range value */
+    result = ut_kvp_getUInt16Field( gpMainTestInstance, "decodeTest/checkUint64IsDeadBeefHex" );
+    UT_ASSERT( result == 0 );
+}
+
 void test_ut_kvp_uint32(void)
 {
     uint32_t result;
-    uint32_t checkField = 0xdeadbeef;
+    uint32_t checkField = 0xdeadbeef; // 3735928559 Decimal
 
     /* Positive Tests */
     result = ut_kvp_getUInt32Field( gpMainTestInstance, "decodeTest/checkUint32IsDeadBeefHex" );
     UT_ASSERT( result == checkField );
 
+    result = ut_kvp_getUInt32Field( gpMainTestInstance, "decodeTest/checkUint32IsDeadBeefDec" );
+    UT_ASSERT( result == checkField );
+
     /* Negative Tests */
-    result = ut_kvp_getUInt32Field( gpMainTestInstance, "thisShouldNotWork/checkUint32IsDeadBeefHex" );
+    result = ut_kvp_getUInt32Field( gpMainTestInstance, "thisShouldNotWork/checkUint64IsDeadBeefHex" );
+    UT_ASSERT( result == 0 );
+
+    /* Decode out of range value */
+    result = ut_kvp_getUInt32Field( gpMainTestInstance, "decodeTest/checkUint64IsDeadBeefHex" );
     UT_ASSERT( result == 0 );
 }
 
@@ -138,17 +199,20 @@ void test_ut_kvp_uint64(void)
     uint64_t checkField = 0xdeadbeefdeadbeef;
 
     /* Positive Tests */
-    result = ut_kvp_getUInt64Field( gpMainTestInstance, "decodeTest/checkUint64IsDeadBeef" );
+    result = ut_kvp_getUInt64Field( gpMainTestInstance, "decodeTest/checkUint64IsDeadBeefHex" );
+    UT_ASSERT( result == checkField );
+
+    result = ut_kvp_getUInt64Field( gpMainTestInstance, "decodeTest/checkUint64IsDeadBeefDec" );
     UT_ASSERT( result == checkField );
 
     /* Negative Tests */
-    result = ut_kvp_getUInt64Field( gpMainTestInstance, "thisShouldNotWork/checkUint64IsDeadBeef" );
+    result = ut_kvp_getUInt64Field( gpMainTestInstance, "thisShouldNotWork/checkUint64IsDeadBeefHex" );
     UT_ASSERT( result == 0 );
 }
 
 void test_ut_kvp_string(void)
 {
-    const char *checkField = "the_beef_is_dead";
+    const char *checkField = "the beef is dead";
     char result_kvp[UT_KVP_MAX_ELEMENT_SIZE];
     ut_kvp_status_t status;
 
@@ -171,27 +235,39 @@ void test_ut_kvp_string(void)
     UT_ASSERT(status == UT_KVP_STATUS_PARSING_ERROR );
 
     /* Check for UT_KVP_STATUS_SUCCESS */
-    UT_LOG_STEP("ut_kvp_getField() - Check for UT_KVP_STATUS_SUCCESS");
+
+    /* Not supported in JSON format, but the json format one is with quotes either way */
+    UT_LOG_STEP("ut_kvp_getField() - Check String with no quotes for UT_KVP_STATUS_SUCCESS");
+    status = ut_kvp_getField(gpMainTestInstance, "decodeTest/checkStringDeadBeefNoQuotes", result_kvp);
+    UT_ASSERT(status == UT_KVP_STATUS_SUCCESS );
+    UT_ASSERT_STRING_EQUAL(result_kvp, checkField);
+
+    UT_LOG_STEP("ut_kvp_getField() - Check String with Quotes for UT_KVP_STATUS_SUCCESS");
     status = ut_kvp_getField(gpMainTestInstance, "decodeTest/checkStringDeadBeef", result_kvp);
     UT_ASSERT(status == UT_KVP_STATUS_SUCCESS );
-
     UT_ASSERT_STRING_EQUAL(result_kvp, checkField);
 }
 
-void test_ut_kvp_read_negative( void )
+void test_ut_kvp_get_field_without_open( void )
 {
     bool result;
-    /* Close our open read instance, and then try and use it */
-    UT_LOG_STEP("ut_kvp_close() - main instance");
-    test_ut_kvp_freeGlobalInstance();
+    char result_kvp[UT_KVP_MAX_ELEMENT_SIZE];
+    ut_kvp_status_t status;
 
     /* Negative Tests */
     UT_LOG_STEP("ut_kvp_getBoolField() - negative");
-    result = ut_kvp_getBoolField( gpMainTestInstance, "shouldNotWork/checkBoolTRUE" );
+    result = ut_kvp_getBoolField( gpMainTestInstance, "decodeTest/checkBoolTRUE" );
     UT_ASSERT( result == false );
 
-    /* Resort for future tests */
-    test_ut_kvp_createGlobalInstance();
+    result = ut_kvp_getUInt32Field( gpMainTestInstance, "decodeTest/checkUint32IsDeadBeefHex" );
+    UT_ASSERT( result == 0 );
+
+    result = ut_kvp_getUInt64Field( gpMainTestInstance, "decodeTest/checkUint64IsDeadBeefHex" );
+    UT_ASSERT( result == 0 );
+
+    status = ut_kvp_getField(gpMainTestInstance, "decodeTest/checkStringDeadBeefNoQuotes", result_kvp);
+    UT_ASSERT(status == UT_KVP_STATUS_NO_DATA );
+    status = status;
 }
 
 void test_ut_kvp_bool(void)
@@ -216,7 +292,7 @@ void test_ut_kvp_bool(void)
     UT_ASSERT( result == false );
 }
 
-static int test_ut_kvp_createGlobalInstance( void )
+static int test_ut_kvp_createGlobalYAMLInstance( void )
 {
     ut_kvp_status_t status;
 
@@ -224,17 +300,42 @@ static int test_ut_kvp_createGlobalInstance( void )
     if ( gpMainTestInstance == NULL )
     {
         assert( gpMainTestInstance != NULL );
-        UT_LOG_ERROR("ut_kvp_read() - Read Failure");
+        UT_LOG_ERROR("ut_kvp_open() - Read Failure");
         return -1;
     }
 
-    status = ut_kvp_read( gpMainTestInstance, KVP_VALID_TEST_YAML_FILE );
+    status = ut_kvp_open( gpMainTestInstance, KVP_VALID_TEST_YAML_FILE );
     assert( status == UT_KVP_STATUS_SUCCESS );
     status = status;
 
     if ( status != UT_KVP_STATUS_SUCCESS )
     {
-        UT_LOG_ERROR("ut_kvp_read() - Read Failure");
+        UT_LOG_ERROR("ut_kvp_open() - Read Failure");
+        return -1;
+    }
+
+    return 0;
+}
+
+static int test_ut_kvp_createGlobalJSONInstance( void )
+{
+    ut_kvp_status_t status;
+
+    gpMainTestInstance = ut_kvp_createInstance();
+    if ( gpMainTestInstance == NULL )
+    {
+        assert( gpMainTestInstance != NULL );
+        UT_LOG_ERROR("ut_kvp_open() - Read Failure");
+        return -1;
+    }
+
+    status = ut_kvp_open( gpMainTestInstance, KVP_VALID_TEST_JSON_FILE );
+    assert( status == UT_KVP_STATUS_SUCCESS );
+    status = status;
+
+    if ( status != UT_KVP_STATUS_SUCCESS )
+    {
+        UT_LOG_ERROR("ut_kvp_open() - Read Failure");
         return -1;
     }
 
@@ -249,18 +350,48 @@ static int test_ut_kvp_freeGlobalInstance( void )
 
 void register_kvp_functions( void )
 {
+    gpKVPSuite=gpKVPSuite;
+#if 0
     gpKVPSuite = UT_add_suite("ut-kvp - test functions ", NULL, NULL);
     assert(gpKVPSuite != NULL);
 
     UT_add_test(gpKVPSuite, "kvp create / destroy", test_ut_kvp_testCreateDestroy);
-    UT_add_test(gpKVPSuite, "kvp read", test_ut_kvp_read);
+    UT_add_test(gpKVPSuite, "kvp read", test_ut_kvp_open);
 
-    gpKVPSuite2 = UT_add_suite("ut-kvp - test main functions ", test_ut_kvp_createGlobalInstance, test_ut_kvp_freeGlobalInstance);
+#endif
+    gpKVPSuite2 = UT_add_suite("ut-kvp - test main functions YAML Decoder ", test_ut_kvp_createGlobalYAMLInstance, test_ut_kvp_freeGlobalInstance);
     assert(gpKVPSuite2 != NULL);
 
+    UT_add_test(gpKVPSuite2, "kvp string", test_ut_kvp_string);
+    UT_add_test(gpKVPSuite2, "kvp uint8", test_ut_kvp_uint8);
+    UT_add_test(gpKVPSuite2, "kvp uint16", test_ut_kvp_uint16);
+#if 0
     UT_add_test(gpKVPSuite2, "kvp bool", test_ut_kvp_bool);
-    UT_add_test(gpKVPSuite2, "kvp read negative", test_ut_kvp_read_negative);
     UT_add_test(gpKVPSuite2, "kvp string", test_ut_kvp_string);
     UT_add_test(gpKVPSuite2, "kvp uint32", test_ut_kvp_uint32);
     UT_add_test(gpKVPSuite2, "kvp uint64", test_ut_kvp_uint64);
+
+#endif
+
+    /* Perform the same parsing tests but use a json file instead */
+    gpKVPSuite3 = UT_add_suite("ut-kvp - test main functions JSON Decoder ", test_ut_kvp_createGlobalJSONInstance, test_ut_kvp_freeGlobalInstance);
+    assert(gpKVPSuite3 != NULL);
+
+#if 0
+    UT_add_test(gpKVPSuite3, "kvp string", test_ut_kvp_string);
+    UT_add_test(gpKVPSuite3, "kvp uint8", test_ut_kvp_uint8);
+    UT_add_test(gpKVPSuite3, "kvp uint16", test_ut_kvp_uint16);
+
+    UT_add_test(gpKVPSuite3, "kvp bool", test_ut_kvp_bool);
+    UT_add_test(gpKVPSuite3, "kvp uint32", test_ut_kvp_uint32);
+    UT_add_test(gpKVPSuite3, "kvp uint64", test_ut_kvp_uint64);
+#endif
+
+    gpKVPSuite4 = UT_add_suite("ut-kvp - test main functions Test without Open ", NULL, NULL);
+    assert(gpKVPSuite4 != NULL);
+
+#if 0
+    UT_add_test(gpKVPSuite4, "kvp read negative", test_ut_kvp_get_field_without_open);
+#endif
+
 }

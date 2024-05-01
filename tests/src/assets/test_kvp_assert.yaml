@@ -1,8 +1,0 @@
-decodeTest:
-    checkUint8IsDead: 0xde
-    checkUint16IsDead: 0xdead
-    checkUint32IsDeadBeef: 0xdeadbeef
-    checkUint64IsDeadBeef: 0xdeadbeefdeadbeef
-    checkStringDeadBeef: "the_beef_is_dead"
-    checkBoolFalse:  false
-    checkBoolTrue:  true

@@ -1,11 +1,14 @@
 decodeTest:
-    checkUint8IsDeadHex: 0xde
-    checkUint8IsDeadDec: 222
-    checkUint16IsDead: 0xdead
+    checkUint8IsDeHex: 0xde
+    checkUint8IsDeDec: 222
+    checkUint16IsDeadHex: 0xdead
+    checkUint16IsDeadDec: 57005
     checkUint32IsDeadBeefHex: 0xdeadbeef
     checkUint32IsDeadBeefDec: 3735928559
-    checkUint64IsDeadBeef: 0xdeadbeefdeadbeef
-    checkStringDeadBeef: "the_beef_is_dead"
+    checkUint64IsDeadBeefHex: 0xdeadbeefdeadbeef
+    checkUint64IsDeadBeefDec: 16045690984833335023
+    checkStringDeadBeef: "the beef is dead"
+    checkStringDeadBeefNoQuotes: the beef is dead
     checkBoolFalse:  false
     checkBoolFALSE:  FALSE
     checkBoolFaLse:  FaLSE

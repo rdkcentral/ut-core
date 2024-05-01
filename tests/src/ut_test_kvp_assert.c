@@ -29,8 +29,8 @@
 
 #include <ut_kvp_assert.h>
 
-#define KVP_VALID_TEST_ASSERT_YAML_FILE "test_kvp_assert.yaml"
-#define KVP_VALID_TEST_ASSERT_JSON_FILE "test_kvp_assert.json"
+#define KVP_VALID_TEST_ASSERT_YAML_FILE "assets/test_kvp.yaml"
+#define KVP_VALID_TEST_ASSERT_JSON_FILE "assets/test_kvp.json"
 
 static UT_test_suite_t *gpAssertSuite1 = NULL;
 static UT_test_suite_t *gpAssertSuite2 = NULL;
@@ -39,18 +39,18 @@ static UT_test_suite_t *gpAssertSuite3 = NULL;
 void test_ut_kvp_assert_uint32(void)
 {
     uint32_t checkField = 0xdeadbeef;
-    UT_ASSERT_EQUAL_KVP_UINT32( checkField, "decodeTest/checkUint32IsDeadBeef" );
+    UT_ASSERT_EQUAL_KVP_UINT32( checkField, "decodeTest/checkUint32IsDeadBeefDec" );
 }
 
 void test_ut_kvp_assert_uint64(void)
 {
     uint64_t checkField = 0xdeadbeefdeadbeef;
-    UT_ASSERT_EQUAL_KVP_UINT64( checkField, "decodeTest/checkUint64IsDeadBeef" );
+    UT_ASSERT_EQUAL_KVP_UINT64( checkField, "decodeTest/checkUint64IsDeadBeefDec" );
 }
 
 void test_ut_kvp_assert_string(void)
 {
-    const char *checkField = "the_beef_is_dead";
+    const char *checkField = "the beef is dead";
     UT_ASSERT_EQUAL_KVP_STRING( checkField, "decodeTest/checkStringDeadBeef");
 }
 

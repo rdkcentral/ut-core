@@ -24,7 +24,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
-$(info $(shell echo ${GREEN}TARGET_EXEC [$(TARGET_EXEC)]${NC}))
+$(info $(shell echo -e ${GREEN}TARGET_EXEC [$(TARGET_EXEC)]${NC}))
 
 UT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 export PATH := $(shell pwd)/toolchain:$(PATH)
