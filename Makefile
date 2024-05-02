@@ -96,7 +96,6 @@ $(info VERSION [$(VERSION)])
 DEPS += $(OBJS:.o=.d)
 
 XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\"
-XCLFAGS += -l ${LIBFYAML}
 
 # Library Path
 VPATH += $(UT_DIR)
@@ -182,8 +181,6 @@ list:
 	@echo DEPS:$(DEPS)
 	@echo
 	@echo CONFIGURE_FLAGS:$(CONFIGURE_FLAGS)
-	@echo
-	@echo PKG_CONFIG_PATH:$(PKG_CONFIG_PATH)
 	@echo
 
 -include $(DEPS)

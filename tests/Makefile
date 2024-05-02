@@ -41,12 +41,8 @@ export SRC_DIRS
 export INC_DIRS
 export BUILD_DIR
 #export TOP_DIR
-export CFLAGS
 export TARGET
 export TARGET_EXEC
-export TARGET_TMP_FYAML_EXEC
-export TARGET_UTTEST_FYAML_EXEC
-export PKG_CONFIG_PATH
 export CFLAGS
 export LDFLAGS
 
@@ -77,7 +73,6 @@ list:
 	@echo ${GREEN}List [$@]${NC}
 	@echo INC_DIRS: ${INC_DIRS}
 	@echo SRC_DIRS: ${SRC_DIRS}
-	@echo PKG_CONFIG_PATH: ${PKG_CONFIG_PATH}
 	@echo CFLAGS: ${CFLAGS}
 	@echo LDFLAGS: ${LDFLAGS}
 	@make -C ../ list TARGET=linux

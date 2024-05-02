@@ -27,19 +27,19 @@
 #include <assert.h>
 
 /**
- * @brief load the assert configuration file for processing
+ * @brief open the assert configuration file for processing
  * 
- * @param fileName[in] - filename to load
+ * @param fileName[in] - filename to open
  * @returns ut_kvp_status_t - status
  * @retval UT_KVP_
  */
-extern ut_kvp_status_t ut_kvp_assert_load(char *fileName);
+extern ut_kvp_status_t ut_kvp_assert_open(char *fileName);
 
 /**
- * @brief unload the assert configuration
+ * @brief close the assert configuration
  * 
  */
-extern void ut_kvp_assert_unload(void);
+extern void ut_kvp_assert_close(void);
 
 /**
  * @brief get the current assert kvp instance

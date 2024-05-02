@@ -22,7 +22,7 @@
 
 static ut_kvp_instance_t *gKVP_Instance = NULL;
 
-ut_kvp_status_t ut_kvp_assert_load(char *fileName)
+ut_kvp_status_t ut_kvp_assert_open(char *fileName)
 {
     ut_kvp_status_t result;
 
@@ -38,7 +38,7 @@ ut_kvp_status_t ut_kvp_assert_load(char *fileName)
     return result;
 }
 
-void ut_kvp_assert_unload(void)
+void ut_kvp_assert_close(void)
 {
     if ( gKVP_Instance != NULL )
     {

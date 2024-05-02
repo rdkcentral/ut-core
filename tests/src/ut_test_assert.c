@@ -63,7 +63,7 @@ void test_ut_logging_too_long_string( void )
                         " ensure the AI-generated text has similar content and structure to a fourth-grade reading passage. For each prompt, we generated"\
                         " multiple passages, the final passage was selected according to the Lexile score agreement with the original passage. In the final"\
                         " round, the selected passage went through a simple revision by a human editor to ensure the text was free of any grammatical and factual"\
-                        " errors. All AI-generated passages, along with original passages were evaluated by human judges according to their coher, "\
+                        " errors. All AI-generated passages, along with original passages were evaluated by human judges according to their coherence, "\
                         "appropriateness to fourth graders, and readability.";
 
     UT_LOG_STEP( "This passage must be truncated to [%d] from it's current size of [%d]", UT_LOG_MAX_LINE_SIZE, strlen(string) );

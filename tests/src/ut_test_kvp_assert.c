@@ -60,44 +60,44 @@ void test_ut_kvp_assert_bool(void)
     UT_ASSERT_EQUAL_KVP_BOOL( true, "decodeTest/checkBoolTRUE" );
 }
 
-void test_ut_kvp_assert_load( void )
+void test_ut_kvp_assert_open( void )
 {
-    ut_kvp_assert_load( KVP_VALID_TEST_ASSERT_YAML_FILE );
-    ut_kvp_assert_load( KVP_VALID_TEST_ASSERT_YAML_FILE );
-    ut_kvp_assert_load( KVP_VALID_TEST_ASSERT_YAML_FILE );
+    ut_kvp_assert_open( KVP_VALID_TEST_ASSERT_YAML_FILE );
+    ut_kvp_assert_open( KVP_VALID_TEST_ASSERT_YAML_FILE );
+    ut_kvp_assert_open( KVP_VALID_TEST_ASSERT_YAML_FILE );
 }
 
-void test_ut_kvp_assert_unload( void )
+void test_ut_kvp_assert_close( void )
 {
-    ut_kvp_assert_unload();
-    ut_kvp_assert_unload();
-    ut_kvp_assert_unload();
+    ut_kvp_assert_close();
+    ut_kvp_assert_close();
+    ut_kvp_assert_close();
 }
 
 int test_ut_kvp_assert_init_yaml( void )
 {
-    ut_kvp_assert_load( KVP_VALID_TEST_ASSERT_YAML_FILE );
+    ut_kvp_assert_open( KVP_VALID_TEST_ASSERT_YAML_FILE );
     return 0;
 }
 
 int test_ut_kvp_assert_init_json( void )
 {
-    ut_kvp_assert_load( KVP_VALID_TEST_ASSERT_JSON_FILE );
+    ut_kvp_assert_open( KVP_VALID_TEST_ASSERT_JSON_FILE );
     return 0;
 }
 
 int test_ut_kvp_assert_cleanup( void )
 {
-    ut_kvp_assert_unload();
+    ut_kvp_assert_close();
     return 0;
 }
 
 void register_kvp_assert_testing_functions(void)
 {
-    gpAssertSuite1 = UT_add_suite("ut-kvp - assert load / unload", NULL, NULL);
+    gpAssertSuite1 = UT_add_suite("ut-kvp - assert open / close", NULL, NULL);
     assert(gpAssertSuite1 != NULL);
-    UT_add_test(gpAssertSuite1, "kvp assert load()", test_ut_kvp_assert_load);
-    UT_add_test(gpAssertSuite1, "kvp assert unload()", test_ut_kvp_assert_unload);
+    UT_add_test(gpAssertSuite1, "kvp assert open()", test_ut_kvp_assert_open);
+    UT_add_test(gpAssertSuite1, "kvp assert close()", test_ut_kvp_assert_close);
 
     gpAssertSuite2 = UT_add_suite("ut-kvp - assert testing yaml ", test_ut_kvp_assert_init_yaml, test_ut_kvp_assert_cleanup);
     assert(gpAssertSuite2 != NULL);

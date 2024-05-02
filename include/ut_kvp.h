@@ -97,7 +97,7 @@ bool ut_kvp_getBoolField(ut_kvp_instance_t *pInstance, const char *pszKey);
  * @param pInstance[in] - Handle to the instance
  * @param pszKey[in] - Zero Terminated String Key
  *
- * @returns uint8_t - int result
+ * @returns uint8_t - int result on success, 0 on error
  */
 uint8_t ut_kvp_getUInt8Field( ut_kvp_instance_t *pInstance, const char *pszKey );
 
@@ -108,7 +108,7 @@ uint8_t ut_kvp_getUInt8Field( ut_kvp_instance_t *pInstance, const char *pszKey )
  * @param pInstance[in] - Handle to the instance
  * @param pszKey[in] - Zero Terminated String Key
  *
- * @returns uint16_t - int result
+ * @returns uint16_t - int result on success, 0 on error
  */
 uint16_t ut_kvp_getUInt16Field( ut_kvp_instance_t *pInstance, const char *pszKey );
 
@@ -119,7 +119,7 @@ uint16_t ut_kvp_getUInt16Field( ut_kvp_instance_t *pInstance, const char *pszKey
  * @param pInstance[in] - Handle to the instance
  * @param pszKey[in] - Zero Terminated String Key
  *
- * @returns uint32_t - int result
+ * @returns uint32_t - int result on success, 0 on error
  */
 uint32_t ut_kvp_getUInt32Field(ut_kvp_instance_t *pInstance, const char *pszKey);
 
@@ -130,7 +130,7 @@ uint32_t ut_kvp_getUInt32Field(ut_kvp_instance_t *pInstance, const char *pszKey)
  * @param pInstance[in] - Handle to the instance
  * @param pszKey[in] - Zero Terminated String Key
  *
- * @returns uint64_t - int result
+ * @returns uint64_t - int result on success, 0 on error
  */
 uint64_t ut_kvp_getUInt64Field(ut_kvp_instance_t *pInstance, const char *pszKey);
 
