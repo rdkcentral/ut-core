@@ -31,7 +31,10 @@
  * 
  * @param fileName[in] - filename to open
  * @returns ut_kvp_status_t - status
- * @retval UT_KVP_
+ * @retval UT_KVP_STATUS_SUCCESS - Success
+ * @retval UT_KVP_STATUS_FILE_OPEN_ERROR - File open error
+ * @retval UT_KVP_STATUS_INVALID_PARAM   - Invalid param passed
+ * @retval UT_KVP_STATUS_PARSING_ERROR   - File parsing error
  */
 extern ut_kvp_status_t ut_kvp_assert_open(char *fileName);
 
