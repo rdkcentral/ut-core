@@ -80,21 +80,6 @@ ut_kvp_status_t ut_kvp_open(ut_kvp_instance_t *pInstance, char* fileName);
 void ut_kvp_close(ut_kvp_instance_t *pInstance);
 
 /**
- * @brief Get a key value pair from the passed configuration
- *
- * @param pInstance[in] - Handle to the instance
- * @param pszKey[in] - Zero Terminated String Key
- * @param pszResult[out] - Caller must pass char array of UT_KVP_MAX_STRING_ELEMENT_SIZE size will which be populated with the result
- *
- * @return ut_kvp_value_t  - Returned structure
- * @retval UT_KVP_STATUS_SUCCESS - Success
- * @retval UT_KVP_STATUS_INVALID_PARAM   - Invalid param passed
- * @retval UT_KVP_STATUS_PARSING_ERROR   - File parsing error
- * @retval UT_KVP_STATUS_NO_DATA         - No Data Available to process
- */
-ut_kvp_status_t ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pszKey, char *pszResult);
-
-/**
  * @brief Get a bool key value pair from a passed configuration
  * 
  * @param pInstance[in] - Handle to the instance
@@ -104,13 +89,6 @@ ut_kvp_status_t ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pszKey
  * @return false 
  */
 bool ut_kvp_getBoolField(ut_kvp_instance_t *pInstance, const char *pszKey);
-
-/* TODO:
-* ut_kvp_getInt8Field
-* ut_kvp_getInt16Field
-* ut_kvp_getInt32Field
-* ut_kvp_getInt64Field
-*/
 
 /**
  * @brief Get a uint8_t field from a key value pair
@@ -166,5 +144,12 @@ uint64_t ut_kvp_getUInt64Field(ut_kvp_instance_t *pInstance, const char *pszKey)
  * @return const char*  - Returned string value
  */
 const char* ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *pszKey, const char *psValue );
+
+/* TODO:
+* ut_kvp_getInt8Field
+* ut_kvp_getInt16Field
+* ut_kvp_getInt32Field
+* ut_kvp_getInt64Field
+*/
 
 #endif /* __UT_KVP_H__ */

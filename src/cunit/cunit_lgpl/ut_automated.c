@@ -268,6 +268,7 @@ static void automated_test_start_message_handler(const CU_pTest pTest, const CU_
   assert(NULL != f_pTestResultFile);
 
   /* Comparing the Addresses rather than the Group Names. */
+  UT_LOG( "\n" );
   if ((NULL == f_pRunningSuite) || (f_pRunningSuite != pSuite)) 
   {
     UT_LOG( UT_LOG_ASCII_BLUE"Running Suite : "UT_LOG_ASCII_CYAN"%s"UT_LOG_ASCII_NC, pSuite->pName);

@@ -32,6 +32,8 @@
 
 ut_kvp_instance_t *gKVP_Instance = NULL;
 
+#define UT_KVP_MAGIC (0xdeadbeef)
+
 typedef struct
 {
     uint32_t magic;
@@ -43,6 +45,7 @@ typedef struct
 static ut_kvp_instance_internal_t *validateInstance(ut_kvp_instance_t *pInstance);
 static unsigned long getUIntField( ut_kvp_instance_t *pInstance, const char *pszKey, unsigned long maxRange );
 static bool str_to_bool(const char *string);
+static ut_kvp_status_t ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pszKey, char *pszResult);
 
 ut_kvp_instance_t *ut_kvp_createInstance(void)
 {
@@ -56,7 +59,7 @@ ut_kvp_instance_t *ut_kvp_createInstance(void)
 
     memset(pInstance, 0, sizeof(ut_kvp_instance_internal_t));
 
-    pInstance->magic = 0xdeadbeef;
+    pInstance->magic = UT_KVP_MAGIC;
 
     return (ut_kvp_instance_t *)pInstance;
 }
@@ -147,7 +150,7 @@ void ut_kvp_close(ut_kvp_instance_t *pInstance)
     }
 }
 
-ut_kvp_status_t ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pszKey, char *pzResult)
+static ut_kvp_status_t ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pszKey, char *pzResult)
 {
     ut_kvp_instance_internal_t *pInternal = validateInstance(pInstance);
     char zEntry[UT_KVP_MAX_ELEMENT_SIZE];
@@ -251,7 +254,7 @@ static unsigned long getUIntField( ut_kvp_instance_t *pInstance, const char *psz
     }
     else if (errno == ERANGE || uValue > maxRange)
     {
-        UT_LOG_ERROR("Value out of range for maxRange [0x%x,%d].\n", maxRange, maxRange);
+        UT_LOG_ERROR("Value out of range for maxRange [0x%x,%d].", maxRange, maxRange);
         assert(true);
         return 0;
     }
@@ -340,7 +343,7 @@ const char* ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *psz
 
     ut_kvp_instance_internal_t *pInternal = validateInstance(pInstance);
 
-     if (pInternal == NULL)
+    if (pInternal == NULL)
     {
         assert(pInternal != NULL);
         return NULL;
@@ -377,7 +380,8 @@ const char* ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *psz
         return NULL;
     }
 
-    if (node && fy_node_is_scalar(node)) {
+    if (node && fy_node_is_scalar(node))
+    {
         // Get the string value
         psValue = fy_node_get_scalar0(node);
     }
@@ -397,9 +401,9 @@ static ut_kvp_instance_internal_t *validateInstance(ut_kvp_instance_t *pInstance
         return NULL;
     }
 
-    if (pInternal->magic != 0xdeadbeef)
+    if (pInternal->magic != UT_KVP_MAGIC)
     {
-        assert(pInternal->magic != 0xdeadbeef);
+        assert(pInternal->magic != UT_KVP_MAGIC);
         UT_LOG_ERROR("Invalid Handle - magic failure");
         return NULL;
     }

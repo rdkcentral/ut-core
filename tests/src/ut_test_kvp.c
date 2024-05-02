@@ -365,7 +365,6 @@ void register_kvp_functions( void )
     gpKVPSuite3 = UT_add_suite("ut-kvp - test main functions JSON Decoder ", test_ut_kvp_createGlobalJSONInstance, test_ut_kvp_freeGlobalInstance);
     assert(gpKVPSuite3 != NULL);
 
-
     UT_add_test(gpKVPSuite3, "kvp string", test_ut_kvp_string);
     UT_add_test(gpKVPSuite3, "kvp uint8", test_ut_kvp_uint8);
     UT_add_test(gpKVPSuite3, "kvp uint16", test_ut_kvp_uint16);

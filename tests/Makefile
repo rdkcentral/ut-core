@@ -65,7 +65,8 @@ build: framework
 
 run: build
 	@echo -e ${GREEN}Running [$@]${NC}
-	./bin/ut-test -bp ./logs
+	@mkdir -p ./tests/logs
+	@bash -c "cd ./bin;./ut-test -bp ./../logs"
 
 rebuild: clean build
 

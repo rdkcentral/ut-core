@@ -243,6 +243,7 @@ static void basic_test_start_message_handler(const CU_pTest pTest, const CU_pSui
   assert(NULL != pTest);
 
   assert(NULL != pTest->pName);
+  UT_LOG( "\n" );
   if ((NULL == f_pRunningSuite) || (f_pRunningSuite != pSuite)) 
   {
     assert(NULL != pSuite->pName);
