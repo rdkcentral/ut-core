@@ -32,7 +32,7 @@
 typedef enum
 {
     UT_KVP_STATUS_SUCCESS=0,        /**!< Status ok */
-    UT_KVP_STATUS_FILE_OPEN_ERROR,  /**!< File open error */
+    UT_KVP_STATUS_FILE_DONT_EXIST,  /**!< File doesn't exist */
     UT_KVP_STATUS_INVALID_PARAM,    /**!< Invalid Param */
     UT_KVP_STATUS_PARSING_ERROR,    /**!< Parsing error */
     UT_KVP_STATUS_NO_DATA,          /**!< No Data to process */
@@ -144,6 +144,10 @@ uint64_t ut_kvp_getUInt64Field(ut_kvp_instance_t *pInstance, const char *pszKey)
  * @return const char*  - Returned string value on success, NULL on error, ERROR logging will be output
  */
 const char* ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *pszKey, const char *psValue );
+
+void ut_kvp_set_file_from_argument(char *inputFilePath, int argc);
+char* ut_kvp_get_file_from_argument(void);
+
 
 /* TODO:
 * ut_kvp_getInt8Field
