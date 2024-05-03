@@ -49,6 +49,7 @@ static void usage( void )
     TEST_INFO(( "-f - <filename> - set the output filename for automated mode\n" ));
     TEST_INFO(( "-l - List all tests run to a file\n" ));
     TEST_INFO(( "-p - Set the log Path\n" ));
+    TEST_INFO(( "-y - Set the profile Path\n" ));
     TEST_INFO(( "-h - Help\n" ));
 }
 
@@ -73,7 +74,7 @@ static bool decodeOptions( int argc, char **argv )
     length -= strlen(".log");
     strncpy( gOptions.filenameRoot, logFilename, length );
 
-    while((opt = getopt(argc, argv, "cabhf:ltp:")) != -1)
+    while((opt = getopt(argc, argv, "cabhf:ltp:y:")) != -1)
     {
         switch(opt)
         {
@@ -98,6 +99,10 @@ static bool decodeOptions( int argc, char **argv )
             case 'p':
                 TEST_INFO(("Setting Log Path [%s]\n", optarg));
                 UT_log_setLogFilePath(optarg);
+                break;
+            case 'y':
+                TEST_INFO(("Setting KVP argument [%s]\n", optarg));
+                ut_kvp_set_file_from_argument(optarg, argc);
                 break;
             case 'h':
                 TEST_INFO(("Help\n"));
