@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <string.h>
 #include <limits.h>
+#include <unistd.h>
 
 /* Application Includes */
 #include <ut_kvp.h>
@@ -31,9 +32,6 @@
 #include <libfyaml.h>
 
 ut_kvp_instance_t *gKVP_Instance = NULL;
-
-static char* file_path = NULL;
-static int arg_count;
 
 #define UT_KVP_MAGIC (0xdeadbeef)
 
@@ -86,7 +84,6 @@ void ut_kvp_destroyInstance(ut_kvp_instance_t *pInstance)
 
 ut_kvp_status_t ut_kvp_open(ut_kvp_instance_t *pInstance, char *fileName)
 {
-    FILE *fp = NULL;
     ut_kvp_instance_internal_t *pInternal = validateInstance(pInstance);
 
     if (pInstance == NULL)
@@ -101,16 +98,11 @@ ut_kvp_status_t ut_kvp_open(ut_kvp_instance_t *pInstance, char *fileName)
         return UT_KVP_STATUS_INVALID_PARAM;
     }
 
-#if 0
-/* Do we need to check this? do fstat instead? */
-    fp = fopen(fileName, "r");
-    if (fp == NULL)
+    if (access(fileName, F_OK) != 0)
     {
-        UT_LOG_ERROR( "[%s] file open error", fileName );
+        UT_LOG_ERROR( "[%s] cannot be accesed", fileName );
         return UT_KVP_STATUS_FILE_OPEN_ERROR;
     }
-    fclose(fp);
-#endif
 
     pInternal->fy_handle = fy_document_build_from_file(NULL, fileName);
     if (NULL == pInternal->fy_handle)
@@ -376,24 +368,6 @@ const char* ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *psz
     }
     return psValue;
 
-}
-
-void ut_kvp_set_file_from_argument(char *inputFilePath, int argc)
-{
-    file_path = inputFilePath;
-    arg_count = argc;
-}
-
-char* ut_kvp_get_file_from_argument(void)
-{
-    if(arg_count > 1)
-    {
-        return file_path;
-    }
-    else
-    {
-        return NULL;
-    }
 }
 
 /** Static Functions */

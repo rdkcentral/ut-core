@@ -145,10 +145,6 @@ uint64_t ut_kvp_getUInt64Field(ut_kvp_instance_t *pInstance, const char *pszKey)
  */
 const char* ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *pszKey, const char *psValue );
 
-void ut_kvp_set_file_from_argument(char *inputFilePath, int argc);
-char* ut_kvp_get_file_from_argument(void);
-
-
 /* TODO:
 * ut_kvp_getInt8Field
 * ut_kvp_getInt16Field
