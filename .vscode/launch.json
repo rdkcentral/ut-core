@@ -7,9 +7,9 @@
       "request": "launch",
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "${workspaceFolder}/tests/bin",
-      "program": "${workspaceFolder}/tests/bin/ut-test",
-      "args": [ "-b -y ${workspaceFolder}/tests/bin/assets/test_kvp.yaml" ], 
+      "cwd": "/home/jpn323/workspace/rdk-halif-hdmi_cec/ut/ut-core/tests/bin/",
+      "program": "/home/jpn323/workspace/rdk-halif-hdmi_cec/ut/ut-core/tests/bin/ut-test",
+      "args": [ "-b", "-p", "/home/jpn323/workspace/rdk-halif-hdmi_cec/ut/ut-core/tests/bin/assets/test_kvp.yaml" ],
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

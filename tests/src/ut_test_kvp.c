@@ -25,7 +25,7 @@
 
 /* Module Includes */
 #include <ut.h>
-#include <ut_kvp.h>
+#include <ut_main.h>
 #include <ut_log.h>
 
 #define KVP_VALID_TEST_NOT_VALID_YAML_FORMATTED_FILE "assets/no_data_file.yaml"
@@ -92,7 +92,7 @@ void test_ut_kvp_open( void )
     /* Filename doesn't exist */
     UT_LOG_STEP("ut_kvp_open( pInstance, %s - filename doesn't exist ) - Negative", KVP_VALID_TEST_NO_FILE);
     status = ut_kvp_open( pInstance, KVP_VALID_TEST_NO_FILE );
-    UT_ASSERT( status == UT_KVP_STATUS_FILE_DONT_EXIST );
+    UT_ASSERT( status == UT_KVP_STATUS_FILE_OPEN_ERROR );
 
     /* Zero length file, that the library should reject because it can't parse it at all */
     UT_LOG_STEP("ut_kvp_open( pInstance, %s - zero length file ) - Negative", KVP_VALID_TEST_ZERO_LENGTH_YAML_FILE);
@@ -337,42 +337,21 @@ static int test_ut_kvp_createGlobalJSONInstance( void )
     return 0;
 }
 
-static int test_ut_kvp_createGlobalYAMLInstanceFromArgument( void )
+static int test_ut_kvp_freeGlobalInstance( void )
 {
-    ut_kvp_status_t status;
-    char *filename_t = NULL;
+    ut_kvp_destroyInstance( gpMainTestInstance );
+    return 0;
+}
 
-    gpMainTestInstance = ut_kvp_createInstance();
+static int test_ut_kvp_getPlatformProfileInstance( void )
+{
+    gpMainTestInstance = ut_getPlatformProfile();
     if ( gpMainTestInstance == NULL )
     {
         assert( gpMainTestInstance != NULL );
         UT_LOG_ERROR("ut_kvp_open() - Read Failure");
         return -1;
     }
-
-    filename_t = ut_kvp_get_file_from_argument();
-    if(filename_t == NULL)
-    {
-        UT_LOG_ERROR("ut_kvp_get_file_from_argument() - no arguments passed");
-        return -1;
-    }
-
-    status = ut_kvp_open( gpMainTestInstance, filename_t );
-    assert( status == UT_KVP_STATUS_SUCCESS );
-    status = status;
-
-    if ( status != UT_KVP_STATUS_SUCCESS )
-    {
-        UT_LOG_ERROR("ut_kvp_open() - Read Failure");
-        return -1;
-    }
-
-    return 0;
-}
-
-static int test_ut_kvp_freeGlobalInstance( void )
-{
-    ut_kvp_destroyInstance( gpMainTestInstance );
     return 0;
 }
 
@@ -412,7 +391,7 @@ void register_kvp_functions( void )
 
     UT_add_test(gpKVPSuite4, "kvp read negative", test_ut_kvp_get_field_without_open);
 
-    gpKVPSuite5 = UT_add_suite("ut-kvp - test main functions YAML Decoder from file passed as argument", test_ut_kvp_createGlobalYAMLInstanceFromArgument, test_ut_kvp_freeGlobalInstance);
+    gpKVPSuite5 = UT_add_suite("ut-kvp - test main functions YAML Decoder from file passed as argument", test_ut_kvp_getPlatformProfileInstance, NULL);
     assert(gpKVPSuite5 != NULL);
 
     UT_add_test(gpKVPSuite5, "kvp uint8", test_ut_kvp_uint8);
