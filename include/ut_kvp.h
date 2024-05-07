@@ -32,7 +32,7 @@
 typedef enum
 {
     UT_KVP_STATUS_SUCCESS=0,        /**!< Status ok */
-    UT_KVP_STATUS_FILE_DONT_EXIST,  /**!< File doesn't exist */
+    UT_KVP_STATUS_FILE_OPEN_ERROR,  /**!< File open error */
     UT_KVP_STATUS_INVALID_PARAM,    /**!< Invalid Param */
     UT_KVP_STATUS_PARSING_ERROR,    /**!< Parsing error */
     UT_KVP_STATUS_NO_DATA,          /**!< No Data to process */
