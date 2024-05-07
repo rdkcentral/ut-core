@@ -82,7 +82,6 @@ void ut_kvp_destroyInstance(ut_kvp_instance_t *pInstance)
 
     free(pInternal);
     pInternal = NULL;
-    pInstance = NULL;
 }
 
 ut_kvp_status_t ut_kvp_open(ut_kvp_instance_t *pInstance, char *fileName)
@@ -102,15 +101,16 @@ ut_kvp_status_t ut_kvp_open(ut_kvp_instance_t *pInstance, char *fileName)
         return UT_KVP_STATUS_INVALID_PARAM;
     }
 
+#if 0
+/* Do we need to check this? do fstat instead? */
     fp = fopen(fileName, "r");
-    if (fp != NULL)
+    if (fp == NULL)
     {
-        fclose(fp);
+        UT_LOG_ERROR( "[%s] file open error", fileName );
+        return UT_KVP_STATUS_FILE_OPEN_ERROR;
     }
-    else{
-        UT_LOG_ERROR( "[%s] doesn't exist", fileName );
-        return UT_KVP_STATUS_FILE_DONT_EXIST;
-    }
+    fclose(fp);
+#endif
 
     pInternal->fy_handle = fy_document_build_from_file(NULL, fileName);
     if (NULL == pInternal->fy_handle)
