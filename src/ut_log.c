@@ -32,6 +32,7 @@
 #define UT_LOG_DEFAULT_PATH "/tmp/"  // Move to "./" in the future, when 
 static char gLogFileName[UT_LOG_MAX_PATH] = {0};    /*!< Path + Filename of the currently active log file*/
 static bool gLogInit = false;
+static char* UT_stripColorCode(char *in_string);
 
 void UT_log_setLogFilePath(char *inputFilePath)
 {
@@ -153,6 +154,32 @@ void UT_logPrefix(const char *file, int line, const char *prefix, const char * f
     printf( "%s", singleLineBuffer );
 
     /* Print the data to the stream */
-    fprintf( fp, "%s", singleLineBuffer );
+    fprintf( fp, "%s", UT_stripColorCode(singleLineBuffer));
     fclose(fp);
+}
+
+static char* UT_stripColorCode(char *in_string)
+{
+    int i = 0, j = 0;
+    while (in_string[i])
+    {
+        if (in_string[i] == '\033')
+        {
+            while (in_string[i] != 'm' && in_string[i])
+            {
+                i++;
+            }
+            if (in_string[i] == '\0')
+            {
+                break;
+            }
+            i++;
+        }
+        else
+        {
+            in_string[j++] = in_string[i++];
+        }
+    }
+    in_string[j] = '\0';
+    return in_string;
 }
