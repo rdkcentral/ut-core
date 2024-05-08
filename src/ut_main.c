@@ -179,13 +179,10 @@ void UT_exit( void )
 /* External functions */
 ut_kvp_instance_t *ut_getPlatformProfile(void)
 {
-    if (gPlatformProfileInstance)
-    {
-        return gPlatformProfileInstance;
-    }
-    else
+    if (gPlatformProfileInstance == NULL)
     {
         TEST_INFO(("\nKVP Profile instance not created\n"));
         return NULL;
     }
+    return gPlatformProfileInstance;
 }

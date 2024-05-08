@@ -40,6 +40,7 @@ static UT_test_suite_t *gpKVPSuite2 = NULL;
 static UT_test_suite_t *gpKVPSuite3 = NULL;
 static UT_test_suite_t *gpKVPSuite4 = NULL;
 static UT_test_suite_t *gpKVPSuite5 = NULL;
+static UT_test_suite_t *gpKVPSuite6 = NULL;
 
 static int test_ut_kvp_createGlobalYAMLInstance(void);
 static int test_ut_kvp_createGlobalJSONInstance(void);
@@ -287,6 +288,26 @@ void test_ut_kvp_bool(void)
     UT_ASSERT( result == false );
 }
 
+void test_ut_kvp_getPlatformProfile( void )
+{
+    ut_kvp_instance_t *pInstance = NULL;
+    bool result;
+
+    pInstance = ut_getPlatformProfile();
+    if(pInstance == NULL)
+    {
+        UT_LOG_ERROR("perhaps platform profile was not passed using -p switch");
+        UT_ASSERT(pInstance == NULL);
+        return;
+    }
+
+    UT_ASSERT(pInstance != NULL);
+    result = ut_kvp_getBoolField( pInstance, "decodeTest/checkBoolTRUE" );
+    UT_ASSERT( result == true );
+
+
+}
+
 static int test_ut_kvp_createGlobalYAMLInstance( void )
 {
     ut_kvp_status_t status;
@@ -391,14 +412,18 @@ void register_kvp_functions( void )
 
     UT_add_test(gpKVPSuite4, "kvp read negative", test_ut_kvp_get_field_without_open);
 
-    gpKVPSuite5 = UT_add_suite("ut-kvp - test main functions YAML Decoder from file passed as argument", test_ut_kvp_getPlatformProfileInstance, NULL);
+    gpKVPSuite5 = UT_add_suite("ut-kvp - test get profile function", NULL, NULL);
     assert(gpKVPSuite5 != NULL);
 
-    UT_add_test(gpKVPSuite5, "kvp uint8", test_ut_kvp_uint8);
-    UT_add_test(gpKVPSuite5, "kvp uint16", test_ut_kvp_uint16);
-    UT_add_test(gpKVPSuite5, "kvp bool", test_ut_kvp_bool);
-    UT_add_test(gpKVPSuite5, "kvp string", test_ut_kvp_string);
-    UT_add_test(gpKVPSuite5, "kvp uint32", test_ut_kvp_uint32);
-    UT_add_test(gpKVPSuite5, "kvp uint64", test_ut_kvp_uint64);
+    UT_add_test(gpKVPSuite5, "kvp profile instance create", test_ut_kvp_getPlatformProfile);
 
+    gpKVPSuite6 = UT_add_suite("ut-kvp - test main functions YAML Decoder from file passed as argument", test_ut_kvp_getPlatformProfileInstance, NULL);
+    assert(gpKVPSuite6 != NULL);
+
+    UT_add_test(gpKVPSuite6, "kvp uint8", test_ut_kvp_uint8);
+    UT_add_test(gpKVPSuite6, "kvp uint16", test_ut_kvp_uint16);
+    UT_add_test(gpKVPSuite6, "kvp bool", test_ut_kvp_bool);
+    UT_add_test(gpKVPSuite6, "kvp string", test_ut_kvp_string);
+    UT_add_test(gpKVPSuite6, "kvp uint32", test_ut_kvp_uint32);
+    UT_add_test(gpKVPSuite6, "kvp uint64", test_ut_kvp_uint64);
 }
