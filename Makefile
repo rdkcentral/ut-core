@@ -48,6 +48,10 @@ SRC_DIRS += $(CUNIT_SRC_DIRS)/Framework
 #SRC_DIRS += $(CUNIT_SRC_DIRS)/Win
 #SRC_DIRS += $(CUNIT_SRC_DIRS)/Test
 
+# LIBWEBSOCKETS Requirements
+LIBWEBSOCKETS_DIR = $(UT_DIR)/framework/libwebsockets-main
+INC_DIRS += $(LIBWEBSOCKETS_DIR)/include
+
 INC_DIRS += $(UT_DIR)/include
 INC_DIRS += $(UT_DIR)/src
 

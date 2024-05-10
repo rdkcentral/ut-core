@@ -361,6 +361,8 @@ int main(int argc, char** argv)
     /* Begin test executions */
     UT_run_tests();
 
+    ut_control_panel();
+
     return 0;
 }
 
