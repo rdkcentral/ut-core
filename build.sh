@@ -27,6 +27,7 @@ pushd ${MY_DIR} > /dev/null
 
 FRAMEWORK_DIR=${MY_DIR}/framework
 LIBYAML_DIR=${FRAMEWORK_DIR}/libfyaml-master
+ASPRINTF_DIR=${FRAMEWORK_DIR}/asprintf
 
 # Clone CUnit
 if [ -d "./framework/" ]; then
@@ -52,7 +53,7 @@ else
     unzip master.zip
 
     echo "Patching Framework [${PWD}]"
-    cp ../src/libyaml/libyaml_lgpl/patches/CorrectWarningsAndBuildIssuesInLibYaml.patch  .
+    cp ../src/libyaml/patches/CorrectWarningsAndBuildIssuesInLibYaml.patch  .
     patch -i CorrectWarningsAndBuildIssuesInLibYaml.patch -p0
     echo "Patching Complete"
 
@@ -60,5 +61,15 @@ else
 #    ./configure --prefix=${LIBYAML_DIR}
 #    make
     popd > /dev/null
+fi
+
+if [ -d "${ASPRINTF_DIR}" ]; then
+    echo "Framework libyaml already exists"
+else
+    echo "Clone asprintf in ${ASPRINTF_DIR}"
+    wget https://github.com/jwerle/asprintf.c/archive/refs/heads/master.zip -P asprintf/. --no-check-certificate
+    cd asprintf
+    unzip master.zip
+    rm asprintf.c-master/test.c
 fi
 popd > /dev/null

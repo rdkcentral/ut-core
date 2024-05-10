@@ -50,11 +50,14 @@ SRC_DIRS += $(CUNIT_SRC_DIRS)/Framework
 
 # Enable libyaml Requirements
 LIBFYAML_DIR = ${UT_DIR}/framework/libfyaml-master
+ASPRINTF_DIR = ${UT_DIR}/framework/asprintf/asprintf.c-master/
 SRC_DIRS += $(LIBFYAML_DIR)/src/lib
 SRC_DIRS += $(LIBFYAML_DIR)/src/thread
 SRC_DIRS += $(LIBFYAML_DIR)/src/util
 SRC_DIRS += $(LIBFYAML_DIR)/src/xxhash
+SRC_DIRS += $(ASPRINTF_DIR)
 INC_DIRS += $(LIBFYAML_DIR)/include
+INC_DIRS += $(ASPRINTF_DIR)
 
 INC_DIRS += $(UT_DIR)/include
 INC_DIRS += $(UT_DIR)/src
