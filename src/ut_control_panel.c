@@ -1,68 +1,70 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 #include <libwebsockets.h>
+#include <stdio.h>
 
-#define WEBSOCKET_SERVER_ADDRESS "10.242.27.138"
+char *test_message="HI FROM SERVER";
 
-static int callback_http(struct lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len) {
+static int callback_echo(struct lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len)
+{
+    switch (reason)
+    {
+    case LWS_CALLBACK_ESTABLISHED:
+        printf("Client connected\n");
+        break;
 
-    switch (reason) {
-        case LWS_CALLBACK_CLIENT_ESTABLISHED:
-            printf("Connection established\n");
-            break;
+    case LWS_CALLBACK_RECEIVE:
+        printf("LWS_CALLBACK_RECEIVE\n");
+        // Echo back received message
+        printf("Received message: %.*s\n", (int)len, (char *)in);
+        lws_write(wsi, in, len, LWS_WRITE_TEXT);
+        break;
 
-        case LWS_CALLBACK_CLIENT_RECEIVE:
-            // Message received - assuming JSON format like {"symbol": "AAPL", "price": 155.23}
-            printf("Received message: %.*s\n", (int)len, (char *)in);  
-            // TODO: Parse the JSON for symbol and price
-            break;
-
-        // Other events as needed ... (connection closed, etc.)
-
-        default:
-            break;
+    default:
+        break;
     }
 
     return 0;
 }
 
 static struct lws_protocols protocols[] = {
-    { "http-only", callback_http, 0, 0 },
-    { NULL, NULL, 0, 0 } /* terminator */
+    {
+        "echo-protocol",    // protocol name
+        callback_echo,      // callback function
+        0,                  // per-session data size
+        0,                  // rx buffer size
+        0,                  // id
+        NULL,               // reserved
+        0                   // tx packet size
+    },
+    { NULL, NULL, 0, 0 }    // end of list
 };
 
-int ut_control_panel(void) {
+void ut_control_panel()
+{
     struct lws_context_creation_info info;
     struct lws_context *context;
-    const char *server_address = WEBSOCKET_SERVER_ADDRESS;
-    int port = 80; // Or whatever port is used by your provider
+    const char *address = "localhost";
+    int port = 8080;
 
-    memset(&info, 0, sizeof info);
-    info.port = CONTEXT_PORT_NO_LISTEN;
+    memset(&info, 0, sizeof(info));
+    info.port = port;
+    info.iface = NULL;
     info.protocols = protocols;
 
     context = lws_create_context(&info);
-    if (!context) {
-        fprintf(stderr, "Failed to create libwebsockets context\n");
-        return 1;
+    if (!context)
+    {
+        fprintf(stderr, "Error creating libwebsockets context\n");
+        return;
     }
-#if 0
-    // Connect to the server
-    struct lws *wsi = lws_client_connect (context, server_address, port, 0, "/", server_address, NULL, NULL, -1);
-    if (!wsi) {
-        fprintf(stderr, "Failed to connect to server\n");
-        lws_context_destroy(context);
-        return 1;
-    }
-#endif
 
-    // Event loop
-    while (1) {
-        lws_service(context, 1000); // Timeout of 1000 ms
+    printf("WebSocket server started at %s:%d\n", address, port);
+
+    while (1)
+    {
+        lws_service(context, 1000);
     }
 
     lws_context_destroy(context);
-    return 0;
+
+    return;
 }

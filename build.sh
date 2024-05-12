@@ -21,7 +21,7 @@
 
 SCRIPT_EXEC="$(realpath $0)"
 MY_DIR="$(dirname $SCRIPT_EXEC)"
-LIBWEBSOCKETS_DIR="$(MY_DIR)/framework/libwebsockets-main"
+LIBWEBSOCKETS_DIR="$(MY_DIR)/framework/libwebsockets-4.3.3"
 
 pushd ${MY_DIR} > /dev/null
 # Clone CUnit
@@ -42,13 +42,13 @@ if [ -d "${LIBWEBSOCKETS_DIR}" ]; then
 else
     pushd ${MY_DIR}/framework > /dev/null
     echo "Clone libwebsockets in ${LIBWEBSOCKETS_DIR}"
-    wget https://github.com/warmcat/libwebsockets/archive/refs/heads/main.zip --no-check-certificate
-    unzip main.zip
-    cd ..
-    cd ./${LIBWEBSOCKETS_DIR}
+    wget https://github.com/warmcat/libwebsockets/archive/refs/tags/v4.3.3.zip --no-check-certificate
+    unzip v4.3.3.zip
+    cd ../${LIBWEBSOCKETS_DIR}
     mkdir build
     cd build
     cmake ..
     make
+    make install DESTDIR=.
 fi
 popd > /dev/null

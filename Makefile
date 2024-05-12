@@ -49,8 +49,8 @@ SRC_DIRS += $(CUNIT_SRC_DIRS)/Framework
 #SRC_DIRS += $(CUNIT_SRC_DIRS)/Test
 
 # LIBWEBSOCKETS Requirements
-LIBWEBSOCKETS_DIR = $(UT_DIR)/framework/libwebsockets-main
-INC_DIRS += $(LIBWEBSOCKETS_DIR)/include
+LIBWEBSOCKETS_DIR = $(UT_DIR)/framework/libwebsockets-4.3.3
+INC_DIRS += $(LIBWEBSOCKETS_DIR)/build/include
 
 INC_DIRS += $(UT_DIR)/include
 INC_DIRS += $(UT_DIR)/src
@@ -90,7 +90,7 @@ $(info VERSION [$(VERSION)])
 
 # Final conversions
 DEPS += $(OBJS:.o=.d)
-XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\"
+XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\" -L$(LIBWEBSOCKETS_DIR)/build/lib -lwebsockets
 
 # Library Path
 VPATH += $(UT_DIR)
