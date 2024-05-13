@@ -21,7 +21,8 @@
 			"*.inc": "bitbake",
 			"stdlib.h": "c",
 			"assert.h": "c",
-			"cstdlib": "c"
+			"cstdlib": "c",
+			"ut_internal.h": "c"
 		},
 		"python.autoComplete.extraPaths": [
 			"${workspaceFolder}/sources/poky/bitbake/lib",

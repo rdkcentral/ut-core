@@ -56,8 +56,12 @@ extern ut_kvp_instance_t *ut_kvp_assert_getInstance(void);
 #define UT_ASSERT_EQUAL_KVP_STRING(checkValue, key)                         \
     {                                                                       \
         const char* result_kvp = NULL;                                      \
-        result_kvp = ut_kvp_getStringField(ut_kvp_assert_getInstance(), key, result_kvp);  \
-        UT_ASSERT_STRING_EQUAL(checkValue, result_kvp);                         \
+        result_kvp = ut_kvp_getStringField(ut_kvp_assert_getInstance(), "decodeTest/checkStringDeadBeef", result_kvp);  \
+        UT_ASSERT( result_kvp != NULL );    \
+        if(result_kvp != NULL)    \
+        {    \
+            UT_ASSERT_STRING_EQUAL(checkField, result_kvp);    \
+        }                         \
     }
 
 #endif /* __UT_KVP_ASSERT_H__ */

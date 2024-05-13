@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <string.h>
 #include <limits.h>
+#include <unistd.h>
 
 /* Application Includes */
 #include <ut_kvp.h>
@@ -37,7 +38,6 @@ ut_kvp_instance_t *gKVP_Instance = NULL;
 typedef struct
 {
     uint32_t magic;
-    FILE *inputFilePtr;
     struct fy_document *fy_handle;
 } ut_kvp_instance_internal_t;
 
@@ -74,19 +74,12 @@ void ut_kvp_destroyInstance(ut_kvp_instance_t *pInstance)
         return;
     }
 
-    if ( pInternal -> inputFilePtr == NULL )
-    {
-        assert(pInternal->inputFilePtr == NULL);
-        return;
-    }
-
     ut_kvp_close( pInstance );
 
     memset(pInternal, 0, sizeof(ut_kvp_instance_internal_t));
 
     free(pInternal);
     pInternal = NULL;
-    pInstance = NULL;
 }
 
 ut_kvp_status_t ut_kvp_open(ut_kvp_instance_t *pInstance, char *fileName)
@@ -105,19 +98,13 @@ ut_kvp_status_t ut_kvp_open(ut_kvp_instance_t *pInstance, char *fileName)
         return UT_KVP_STATUS_INVALID_PARAM;
     }
 
-    if (pInternal->inputFilePtr != NULL)
+    if (access(fileName, F_OK) != 0)
     {
-        /* Current file was open we'll close it now */
-        ut_kvp_close( pInstance );
-    }
-
-    pInternal->inputFilePtr = fopen(fileName, "r");
-    if (NULL == pInternal->inputFilePtr)
-    {
-        UT_LOG_ERROR("Unable to open file");
+        UT_LOG_ERROR( "[%s] cannot be accesed", fileName );
         return UT_KVP_STATUS_FILE_OPEN_ERROR;
     }
-    pInternal->fy_handle = fy_document_build_from_fp(NULL, pInternal->inputFilePtr);
+
+    pInternal->fy_handle = fy_document_build_from_file(NULL, fileName);
     if (NULL == pInternal->fy_handle)
     {
         UT_LOG_ERROR("Unable to parse file");
@@ -135,12 +122,6 @@ void ut_kvp_close(ut_kvp_instance_t *pInstance)
     if (pInternal == NULL)
     {
         return;
-    }
-
-    if (pInternal->inputFilePtr != NULL)
-    {
-        fclose(pInternal->inputFilePtr);
-        pInternal->inputFilePtr = NULL;
     }
 
     if ( pInternal->fy_handle != NULL)
