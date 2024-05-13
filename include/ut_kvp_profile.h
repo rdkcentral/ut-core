@@ -60,10 +60,12 @@ extern ut_kvp_instance_t *ut_kvp_profile_getInstance(void);
 /**! Asserts that a string KVP field matches the expected value. */
 #define UT_ASSERT_EQUAL_KVP_PROFILE_STRING(checkValue, key) \
     {                                                                       \
-        const char* result_kvp = NULL;                                      \
-        result_kvp = ut_kvp_getStringField(ut_kvp_profile_getInstance(), key, result_kvp);  \
-        UT_ASSERT(result_kvp != NULL);                                        \
-        if (result_kvp != NULL) {                                           \
+        char result_kvp[UT_KVP_MAX_ELEMENT_SIZE]={0};                        \
+        ut_kvp_status_t status;                 \
+        status = ut_kvp_getStringField(ut_kvp_profile_getInstance(), key, result_kvp, UT_KVP_MAX_ELEMENT_SIZE);  \
+        UT_ASSERT( status == UT_KVP_STATUS_SUCCESS ); \
+        if ( status != UT_KVP_STATUS_SUCCESS ) \
+        {\
             UT_ASSERT_STRING_EQUAL(checkValue, result_kvp);                       \
         }                                                                   \
     } 

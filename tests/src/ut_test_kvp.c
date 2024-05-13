@@ -72,7 +72,7 @@ void test_ut_kvp_open( void )
     /* Negative Test */
     UT_LOG_STEP("ut_kvp_open( NULL, NULL )");
     status = ut_kvp_open( NULL, NULL );
-    UT_ASSERT( status == UT_KVP_STATUS_INVALID_PARAM );
+    UT_ASSERT( status == UT_KVP_STATUS_INVALID_INSTANCE );
 
     /* Positive Test */
     UT_LOG_STEP("ut_kvp_createInstance");
@@ -213,48 +213,59 @@ void test_ut_kvp_uint64(void)
 void test_ut_kvp_string(void)
 {
     const char *checkField = "the beef is dead";
-    const char* result_kvp = NULL;
+    char result_kvp[UT_KVP_MAX_ELEMENT_SIZE]={0xff};
+    ut_kvp_status_t status;
 
     /* Check for INVALID_PARAM */
     UT_LOG_STEP("ut_kvp_getField() - Check for INVALID_PARAM");
 
-    result_kvp = ut_kvp_getStringField(NULL, "decodeTest/checkStringDeadBeef", result_kvp);
-    UT_ASSERT(result_kvp == NULL );
+    status = ut_kvp_getStringField(NULL, "decodeTest/checkStringDeadBeef", result_kvp, UT_KVP_MAX_ELEMENT_SIZE);
+    UT_ASSERT(status == UT_KVP_STATUS_INVALID_INSTANCE );
 
-    result_kvp = ut_kvp_getStringField(gpMainTestInstance, NULL, result_kvp);
-    UT_ASSERT(result_kvp == NULL );
+    status = ut_kvp_getStringField(gpMainTestInstance, NULL, result_kvp, UT_KVP_MAX_ELEMENT_SIZE);
+    UT_ASSERT(status == UT_KVP_STATUS_NULL_PARAM );
 
-    result_kvp = ut_kvp_getStringField(gpMainTestInstance, NULL, NULL);
-    UT_ASSERT(result_kvp == NULL );
+    status = ut_kvp_getStringField(gpMainTestInstance, NULL, NULL, UT_KVP_MAX_ELEMENT_SIZE);
+    UT_ASSERT(status == UT_KVP_STATUS_NULL_PARAM );
+
+    /* Check for UT_KVP_STATUS_KEY_NOT_FOUND */
+    UT_LOG_STEP("ut_kvp_getStringField() - Check for UT_KVP_STATUS_KEY_NOT_FOUND");
+    status = ut_kvp_getStringField(gpMainTestInstance, "shouldNotWork/checkStringDeadBeef", result_kvp, UT_KVP_MAX_ELEMENT_SIZE);
+    UT_ASSERT(status == UT_KVP_STATUS_KEY_NOT_FOUND );
 
     /* Check for UT_KVP_STATUS_PARSING_ERROR */
-    UT_LOG_STEP("ut_kvp_getStringField() - Check for UT_KVP_STATUS_PARSING_ERROR");
-    result_kvp = ut_kvp_getStringField(gpMainTestInstance, "shouldNotWork/checkStringDeadBeef", result_kvp);
-    UT_ASSERT(result_kvp == NULL );
+    // TODO
+    //UT_LOG_STEP("ut_kvp_getStringField() - Check for UT_KVP_STATUS_PARSING_ERROR");
+    //status = ut_kvp_getStringField(gpMainTestInstance, "shouldNotWork/checkStringDeadBeef", result_kvp, UT_KVP_MAX_ELEMENT_SIZE);
+    //UT_ASSERT(status == UT_KVP_STATUS_PARSING_ERROR );
 
     /* Check for UT_KVP_STATUS_SUCCESS */
 
     /* Not supported in JSON format, but the json format one is with quotes either way */
     UT_LOG_STEP("ut_kvp_getStringField() - Check String with no quotes for UT_KVP_STATUS_SUCCESS");
-    result_kvp = ut_kvp_getStringField(gpMainTestInstance, "decodeTest/checkStringDeadBeefNoQuotes", result_kvp);
-    UT_ASSERT(result_kvp != NULL );
+    status = ut_kvp_getStringField(gpMainTestInstance, "decodeTest/checkStringDeadBeefNoQuotes", result_kvp, UT_KVP_MAX_ELEMENT_SIZE);
+    UT_ASSERT(status == UT_KVP_STATUS_SUCCESS );
     UT_ASSERT_STRING_EQUAL(result_kvp, checkField);
+    UT_LOG( "checkStringDeadBeefNoQuotes[%s]", result_kvp );
 
     UT_LOG_STEP("ut_kvp_getStringField() - Check String with Quotes for UT_KVP_STATUS_SUCCESS");
-    result_kvp = ut_kvp_getStringField(gpMainTestInstance, "decodeTest/checkStringDeadBeef", result_kvp);
-    UT_ASSERT(result_kvp != NULL );
+    status = ut_kvp_getStringField(gpMainTestInstance, "decodeTest/checkStringDeadBeef", result_kvp, UT_KVP_MAX_ELEMENT_SIZE);
+    UT_ASSERT(status == UT_KVP_STATUS_SUCCESS );
     UT_ASSERT_STRING_EQUAL(result_kvp, checkField);
+    UT_LOG( "checkStringDeadBeef[%s]", result_kvp );
 
     UT_LOG_STEP("ut_kvp_getStringField() - Check String with Quotes for UT_KVP_STATUS_SUCCESS");
-    result_kvp = ut_kvp_getStringField(gpMainTestInstance, "decodeTest/checkStringDeadBeef2", result_kvp);
-    UT_ASSERT(result_kvp != NULL );
+    status = ut_kvp_getStringField(gpMainTestInstance, "decodeTest/checkStringDeadBeef2", result_kvp, UT_KVP_MAX_ELEMENT_SIZE);
+    UT_ASSERT(status == UT_KVP_STATUS_SUCCESS );
     UT_ASSERT_STRING_EQUAL(result_kvp, "the beef is also dead" );
+    UT_LOG( "checkStringDeadBeef2[%s]", result_kvp );
 }
 
 void test_ut_kvp_get_field_without_open( void )
 {
     bool result;
-    const char* result_kvp = NULL;
+    char result_kvp[UT_KVP_MAX_ELEMENT_SIZE]={0xff};
+    ut_kvp_status_t status;
 
     /* Negative Tests */
     UT_LOG_STEP("ut_kvp_getBoolField() - negative");
@@ -267,8 +278,15 @@ void test_ut_kvp_get_field_without_open( void )
     result = ut_kvp_getUInt64Field( gpMainTestInstance, "decodeTest/checkUint64IsDeadBeefHex" );
     UT_ASSERT( result == 0 );
 
-    result_kvp = ut_kvp_getStringField(gpMainTestInstance, "decodeTest/checkStringDeadBeef", result_kvp);
-    UT_ASSERT( result_kvp == NULL );
+    status = ut_kvp_getStringField(gpMainTestInstance, "decodeTest/checkStringDeadBeef", result_kvp, UT_KVP_MAX_ELEMENT_SIZE);
+    UT_ASSERT( status == UT_KVP_STATUS_INVALID_INSTANCE );
+
+    gpMainTestInstance = ut_kvp_createInstance();
+
+    status = ut_kvp_getStringField(gpMainTestInstance, "decodeTest/checkStringDeadBeef", result_kvp, UT_KVP_MAX_ELEMENT_SIZE);
+    UT_ASSERT( status == UT_KVP_STATUS_NO_DATA );
+
+    ut_kvp_destroyInstance(gpMainTestInstance);
 }
 
 void test_ut_kvp_bool(void)

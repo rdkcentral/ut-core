@@ -39,25 +39,30 @@ static UT_test_suite_t *gpAssertSuite3 = NULL;
 void test_ut_kvp_profile_uint32(void)
 {
     uint32_t checkField = 0xdeadbeef;
+    UT_LOG_STEP( "test_ut_kvp_profile_uint32" );
     UT_ASSERT_KVP_EQUAL_PROFILE_UINT32( checkField, "decodeTest/checkUint32IsDeadBeefDec" );
+    UT_LOG_STEP( "test_ut_kvp_profile_uint32 - end" );
 }
 
 void test_ut_kvp_profile_uint64(void)
 {
     uint64_t checkField = 0xdeadbeefdeadbeef;
     UT_ASSERT_EQUAL_KVP_PROFILE_UINT64( checkField, "decodeTest/checkUint64IsDeadBeefDec" );
+    UT_LOG_STEP( "test_ut_kvp_profile_uint64 - end" );
 }
 
 void test_ut_kvp_profile_string(void)
 {
     const char *checkField = "the beef is dead";
     UT_ASSERT_EQUAL_KVP_PROFILE_STRING( checkField, "decodeTest/checkStringDeadBeef");
+    UT_LOG_STEP( "test_ut_kvp_profile_string - end" );
 }
 
 void test_ut_kvp_profile_bool(void)
 {
     UT_ASSERT_EQUAL_KVP_PROFILE_BOOL( false, "decodeTest/checkBoolFalse" );
     UT_ASSERT_EQUAL_KVP_PROFILE_BOOL( true, "decodeTest/checkBoolTRUE" );
+    UT_LOG_STEP( "test_ut_kvp_profile_bool - end" );
 }
 
 void test_ut_kvp_profile_open( void )
@@ -65,6 +70,7 @@ void test_ut_kvp_profile_open( void )
     ut_kvp_profile_open( KVP_VALID_TEST_ASSERT_YAML_FILE );
     ut_kvp_profile_open( KVP_VALID_TEST_ASSERT_YAML_FILE );
     ut_kvp_profile_open( KVP_VALID_TEST_ASSERT_YAML_FILE );
+    UT_LOG_STEP( "test_ut_kvp_profile_open - end" );
 }
 
 void test_ut_kvp_profile_close( void )
@@ -72,6 +78,7 @@ void test_ut_kvp_profile_close( void )
     ut_kvp_profile_close();
     ut_kvp_profile_close();
     ut_kvp_profile_close();
+    UT_LOG_STEP( "test_ut_kvp_profile_close - end" );
 }
 
 int test_ut_kvp_profile_init_yaml( void )
