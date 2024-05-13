@@ -106,6 +106,12 @@ typedef int (*UT_CleanupFunction_t)(void);
 UT_status_t UT_init(int argc, char** argv);
 
 /**
+ * @brief Exit testing framework and shut down resources
+ * 
+ */
+void UT_exit(void);
+
+/**
  * @brief run the registered tests as required
  * In order for tests to be registered and ran the client will use
  * - UT_add_suite

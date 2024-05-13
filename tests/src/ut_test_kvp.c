@@ -25,7 +25,7 @@
 
 /* Module Includes */
 #include <ut.h>
-#include <ut_main.h>
+#include <ut_kvp.h>
 #include <ut_log.h>
 
 #define KVP_VALID_TEST_NOT_VALID_YAML_FORMATTED_FILE "assets/no_data_file.yaml"
@@ -39,7 +39,6 @@ static UT_test_suite_t *gpKVPSuite = NULL;
 static UT_test_suite_t *gpKVPSuite2 = NULL;
 static UT_test_suite_t *gpKVPSuite3 = NULL;
 static UT_test_suite_t *gpKVPSuite4 = NULL;
-static UT_test_suite_t *gpKVPSuite5 = NULL;
 
 static int test_ut_kvp_createGlobalYAMLInstance(void);
 static int test_ut_kvp_createGlobalJSONInstance(void);
@@ -245,6 +244,11 @@ void test_ut_kvp_string(void)
     result_kvp = ut_kvp_getStringField(gpMainTestInstance, "decodeTest/checkStringDeadBeef", result_kvp);
     UT_ASSERT(result_kvp != NULL );
     UT_ASSERT_STRING_EQUAL(result_kvp, checkField);
+
+    UT_LOG_STEP("ut_kvp_getStringField() - Check String with Quotes for UT_KVP_STATUS_SUCCESS");
+    result_kvp = ut_kvp_getStringField(gpMainTestInstance, "decodeTest/checkStringDeadBeef2", result_kvp);
+    UT_ASSERT(result_kvp != NULL );
+    UT_ASSERT_STRING_EQUAL(result_kvp, "the beef is also dead" );
 }
 
 void test_ut_kvp_get_field_without_open( void )
@@ -289,23 +293,6 @@ void test_ut_kvp_bool(void)
     UT_ASSERT( result == false );
 }
 
-void test_ut_kvp_getPlatformProfile( void )
-{
-    bool result;
-
-    gpMainTestInstance = ut_getPlatformProfile();
-    UT_ASSERT( gpMainTestInstance != NULL );
-    if(gpMainTestInstance == NULL)
-    {
-        UT_LOG_STEP("Check ut_getPlatformProfile() - Negative");
-        UT_LOG_ERROR("perhaps platform profile was not passed using -p switch");
-        return;
-    }
-    UT_LOG_STEP("Check ut_getPlatformProfile() - Positive");
-    // Check for decoding correctly a field from the platformProfile
-    result = ut_kvp_getBoolField( gpMainTestInstance, "decodeTest/checkBoolTRUE" );
-    UT_ASSERT( result == true );
-}
 
 static int test_ut_kvp_createGlobalYAMLInstance( void )
 {
@@ -399,14 +386,5 @@ void register_kvp_functions( void )
 
     UT_add_test(gpKVPSuite4, "kvp read negative", test_ut_kvp_get_field_without_open);
 
-    gpKVPSuite5 = UT_add_suite("ut-kvp - test get profile function", NULL, NULL);
-    assert(gpKVPSuite5 != NULL);
 
-    UT_add_test(gpKVPSuite5, "kvp platform profile instance create", test_ut_kvp_getPlatformProfile);
-    UT_add_test(gpKVPSuite5, "kvp platform profile uint8", test_ut_kvp_uint8);
-    UT_add_test(gpKVPSuite5, "kvp platform profile uint16", test_ut_kvp_uint16);
-    UT_add_test(gpKVPSuite5, "kvp platform profile bool", test_ut_kvp_bool);
-    UT_add_test(gpKVPSuite5, "kvp platform profile string", test_ut_kvp_string);
-    UT_add_test(gpKVPSuite5, "kvp platform profile uint32", test_ut_kvp_uint32);
-    UT_add_test(gpKVPSuite5, "kvp platform profile uint64", test_ut_kvp_uint64);
 }
