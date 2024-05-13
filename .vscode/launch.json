@@ -7,7 +7,7 @@
       "request": "launch",
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "${workspaceFolder}/tests/bin/",
+      "cwd": "${workspaceFolder}/tests/bin",
       "program": "${workspaceFolder}/tests/bin/ut-test",
       "args": [ "-b", "-p", "${workspaceFolder}/tests/bin/assets/test_kvp.yaml" ],
       "MIMode": "gdb",

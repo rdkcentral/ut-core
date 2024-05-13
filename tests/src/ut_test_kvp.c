@@ -239,12 +239,18 @@ void test_ut_kvp_string(void)
     UT_LOG_STEP("ut_kvp_getStringField() - Check String with no quotes for UT_KVP_STATUS_SUCCESS");
     result_kvp = ut_kvp_getStringField(gpMainTestInstance, "decodeTest/checkStringDeadBeefNoQuotes", result_kvp);
     UT_ASSERT(result_kvp != NULL );
-    UT_ASSERT_STRING_EQUAL(result_kvp, checkField);
+    if (result_kvp != NULL )
+    {
+        UT_ASSERT_STRING_EQUAL(result_kvp, checkField);
+    }
 
     UT_LOG_STEP("ut_kvp_getStringField() - Check String with Quotes for UT_KVP_STATUS_SUCCESS");
     result_kvp = ut_kvp_getStringField(gpMainTestInstance, "decodeTest/checkStringDeadBeef", result_kvp);
     UT_ASSERT(result_kvp != NULL );
-    UT_ASSERT_STRING_EQUAL(result_kvp, checkField);
+    if (result_kvp != NULL )
+    {
+        UT_ASSERT_STRING_EQUAL(result_kvp, checkField);
+    }
 }
 
 void test_ut_kvp_get_field_without_open( void )

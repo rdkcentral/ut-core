@@ -62,7 +62,7 @@ build: framework
 run: build
 	@echo -e ${GREEN}Running [$@]${NC}
 	@mkdir -p ./tests/logs
-	@bash -c "cd ./bin;./ut-test -bp ./../logs"
+	@bash -c "cd ./bin;./ut-test -bp ./assets/test_kvp.yaml"
 
 rebuild: clean build
 
