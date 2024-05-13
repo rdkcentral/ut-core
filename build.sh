@@ -30,7 +30,7 @@ LIBYAML_DIR=${FRAMEWORK_DIR}/libfyaml-master
 ASPRINTF_DIR=${FRAMEWORK_DIR}/asprintf
 
 # Clone CUnit
-if [ -d "./framework/" ]; then
+if [ -d "${FRAMEWORK_DIR}/CUnit-2.1-3" ]; then
     echo "Framework CUnit already exists"
 else
     echo "Clone Framework"
@@ -63,6 +63,7 @@ else
     popd > /dev/null
 fi
 
+pushd ${FRAMEWORK_DIR} > /dev/null
 if [ -d "${ASPRINTF_DIR}" ]; then
     echo "Framework libyaml already exists"
 else
@@ -72,4 +73,6 @@ else
     unzip master.zip
     rm asprintf.c-master/test.c
 fi
+popd > /dev/null # ${FRAMEWORK_DIR}
+
 popd > /dev/null
