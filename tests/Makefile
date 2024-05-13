@@ -23,8 +23,10 @@ BUILD_DIR := $(ROOT_DIR)/obj
 
 SRC_DIRS = $(ROOT_DIR)/src
 INC_DIRS := $(ROOT_DIR)/include
+INC_DIRS += $(ROOT_DIR)/../include
 
-CFLAGS = -DBUILD_LINUX
+# Switch on Linux & disable asserts for the testing suites
+CFLAGS = -DNDEBUG
 TARGET_EXEC = ut-test
 
 TARGET = linux
@@ -39,9 +41,10 @@ export SRC_DIRS
 export INC_DIRS
 export BUILD_DIR
 #export TOP_DIR
-export CFLAGS
 export TARGET
 export TARGET_EXEC
+export CFLAGS
+export LDFLAGS
 
 GREEN='\033[0;32m'
 NC='\033[0m'
@@ -49,13 +52,17 @@ NC='\033[0m'
 .PHONY: clean list build all
 
 build: framework
-	@echo ${GREEN}Build [$@]${NC}
+	@echo -e ${GREEN}Build [$@] ${NC}
 	@make -C ../ test TARGET=linux
+	@echo -e ${GREEN}Copy Assets to [${BIN_DIR}/assets] ${NC}
+	@mkdir -p ${BIN_DIR}/assets
+	@cp ./src/assets/* ${BIN_DIR}/assets
 	@echo -e ${GREEN}Build Complete${NC}
 
 run: build
-	@echo ${GREEN}Running [$@]${NC}
-	./bin/ut-test -bp ./logs
+	@echo -e ${GREEN}Running [$@]${NC}
+	@mkdir -p ./tests/logs
+	@bash -c "cd ./bin;./ut-test -bp ./../logs"
 
 rebuild: clean build
 
@@ -63,11 +70,17 @@ framework:
 	make -C ../ framework TARGET=linux
 
 list:
-	@echo -e ${GREEN}List [$@]${NC}
+	@echo ${GREEN}List [$@]${NC}
 	@echo INC_DIRS: ${INC_DIRS}
 	@echo SRC_DIRS: ${SRC_DIRS}
+	@echo CFLAGS: ${CFLAGS}
+	@echo LDFLAGS: ${LDFLAGS}
 	@make -C ../ list TARGET=linux
 
 clean:
-	@echo -e ${GREEN}Clean [$@]${NC}
+	@echo ${GREEN}Clean [$@]${NC}
 	@make -C ../ clean TARGET=linux
+
+cleanall:
+	@echo ${GREEN}Clean [$@]${NC}
+	@make -C ../ cleanall TARGET=linux

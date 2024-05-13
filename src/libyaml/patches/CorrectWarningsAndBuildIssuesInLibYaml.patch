@@ -1,0 +1,132 @@
+#Date: May 10, 2024
+#Subject: [PATCH] Patch to fix compilation warning in libfyaml-master directory.
+#
+#Source: Uses code from the libfyaml-master and asprintf.c
+#See NOTICE for license details.
+#
+#Signed-off-by: kanjoe24 <165808281+kanjoe24@users.noreply.github.com>
+#---
+#
+#==========================================================================================
+diff -crB libfyaml-master/src/lib/fy-composer.h libfyaml-master-updated/src/lib/fy-composer.h
+*** libfyaml-master/src/lib/fy-composer.h	2024-04-22 17:20:09.000000000 +0000
+--- libfyaml-master-updated/src/lib/fy-composer.h	2024-05-10 12:50:19.165421994 +0000
+***************
+*** 48,54 ****
+  
+  struct fy_composer *fy_composer_create(struct fy_composer_cfg *cfg);
+  void fy_composer_destroy(struct fy_composer *fyc);
+! int fy_composer_process_event(struct fy_composer *fyc, struct fy_event *fye);
+  
+  struct fy_composer_cfg *fy_composer_get_cfg(struct fy_composer *fyc);
+  void *fy_composer_get_cfg_userdata(struct fy_composer *fyc);
+--- 48,54 ----
+  
+  struct fy_composer *fy_composer_create(struct fy_composer_cfg *cfg);
+  void fy_composer_destroy(struct fy_composer *fyc);
+! enum fy_composer_return fy_composer_process_event(struct fy_composer *fyc, struct fy_event *fye);
+  
+  struct fy_composer_cfg *fy_composer_get_cfg(struct fy_composer *fyc);
+  void *fy_composer_get_cfg_userdata(struct fy_composer *fyc);
+diff -crB libfyaml-master/src/lib/fy-diag.c libfyaml-master-updated/src/lib/fy-diag.c
+*** libfyaml-master/src/lib/fy-diag.c	2024-04-22 17:20:09.000000000 +0000
+--- libfyaml-master-updated/src/lib/fy-diag.c	2024-05-10 12:59:03.172799624 +0000
+***************
+*** 21,26 ****
+--- 21,27 ----
+  #include <ctype.h>
+  
+  #include <libfyaml.h>
++ #include <asprintf.h>
+  
+  #include "fy-parse.h"
+  
+diff -crB libfyaml-master/src/lib/fy-doc.c libfyaml-master-updated/src/lib/fy-doc.c
+*** libfyaml-master/src/lib/fy-doc.c	2024-04-22 17:20:09.000000000 +0000
+--- libfyaml-master-updated/src/lib/fy-doc.c	2024-05-10 12:59:03.168799628 +0000
+***************
+*** 20,25 ****
+--- 20,27 ----
+  
+  #include <libfyaml.h>
+  
++ #include <asprintf.h>
++ 
+  #include "fy-parse.h"
+  #include "fy-doc.h"
+  
+diff -crB libfyaml-master/src/lib/fy-event.c libfyaml-master-updated/src/lib/fy-event.c
+*** libfyaml-master/src/lib/fy-event.c	2024-04-22 17:20:09.000000000 +0000
+--- libfyaml-master-updated/src/lib/fy-event.c	2024-05-10 12:59:03.172799624 +0000
+***************
+*** 19,24 ****
+--- 19,25 ----
+  #include <stdarg.h>
+  
+  #include <libfyaml.h>
++ #include <asprintf.h>
+  
+  #include "fy-parse.h"
+  #include "fy-emit.h"
+diff -crB libfyaml-master/src/lib/fy-input.c libfyaml-master-updated/src/lib/fy-input.c
+*** libfyaml-master/src/lib/fy-input.c	2024-04-22 17:20:09.000000000 +0000
+--- libfyaml-master-updated/src/lib/fy-input.c	2024-05-10 12:59:03.176799618 +0000
+***************
+*** 24,29 ****
+--- 24,30 ----
+  #include <errno.h>
+  
+  #include <libfyaml.h>
++ #include <asprintf.h>
+  
+  #include "fy-parse.h"
+  #include "fy-ctype.h"
+diff -crB libfyaml-master/src/lib/fy-parse.c libfyaml-master-updated/src/lib/fy-parse.c
+*** libfyaml-master/src/lib/fy-parse.c	2024-04-22 17:20:09.000000000 +0000
+--- libfyaml-master-updated/src/lib/fy-parse.c	2024-05-10 12:50:19.169421989 +0000
+***************
+*** 34,39 ****
+--- 34,40 ----
+  #define ATOM_SIZE_CHECK
+  #endif
+  
++ #if 0
+  const char *fy_library_version(void)
+  {
+  #ifndef VERSION
+***************
+*** 43,48 ****
+--- 44,50 ----
+  	return VERSION;
+  #endif
+  }
++ #endif
+  
+  int fy_parse_input_append(struct fy_parser *fyp, const struct fy_input_cfg *fyic)
+  {
+diff -crB libfyaml-master/src/lib/fy-token.c libfyaml-master-updated/src/lib/fy-token.c
+*** libfyaml-master/src/lib/fy-token.c	2024-04-22 17:20:09.000000000 +0000
+--- libfyaml-master-updated/src/lib/fy-token.c	2024-05-10 12:59:03.172799624 +0000
+***************
+*** 19,24 ****
+--- 19,25 ----
+  #include <stdarg.h>
+  
+  #include <libfyaml.h>
++ #include <asprintf.h>
+  
+  #include "fy-parse.h"
+  
+diff -crB libfyaml-master/src/lib/fy-walk.c libfyaml-master-updated/src/lib/fy-walk.c
+*** libfyaml-master/src/lib/fy-walk.c	2024-04-22 17:20:09.000000000 +0000
+--- libfyaml-master-updated/src/lib/fy-walk.c	2024-05-10 12:59:03.172799624 +0000
+***************
+*** 20,25 ****
+--- 20,26 ----
+  #include <limits.h>
+  
+  #include <libfyaml.h>
++ #include <asprintf.h>
+  
+  #include "fy-parse.h"
+  #include "fy-doc.h"
