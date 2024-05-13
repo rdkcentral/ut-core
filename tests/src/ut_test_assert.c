@@ -19,6 +19,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <assert.h>
 
 #include <ut.h>
 #include <ut_log.h>
@@ -122,7 +123,7 @@ void test_ut_assert_ptr_NULL()
 {
     int *pTR = (int *)1;
     
-    UT_LOG_STEP( "1: UT_ASSERT_PTR_NULL (pTR == NULL ) : no assert");
+    UT_LOG_STEP( "1: UT_ASSERT_PTR_NULL (pTR == NULL ) : no assertest_ut_logging_too_long_stringt");
     UT_ASSERT_PTR_NULL( NULL );
 
     UT_LOG_STEP( "2: UT_ASSERT_PTR_NULL (pTR == 1 ) - This step should assert");
@@ -313,33 +314,20 @@ void test_ut_assert_log( void )
 }
 
 /**
- * @brief Main launch function for the test app
- * 
- * @param argc - param count from the command line
- * @param argv  - param list from the command line
- * @return int - 0 on success, othersise failure
+ * @brief Main launch function for assert functions
  */
-int main(int argc, char** argv) 
+void register_assert_functions(void) 
 {
-    /* Register tests as required, then call the UT-main to support switches and triggering */
-    UT_init( argc, argv );
-
     /* add a suite to the registry */
     gpLogSuite = UT_add_suite("ut-core-log-tests", ut_init_function, ut_clean_function);
-    if (NULL == gpLogSuite)
-    {
-        return -1;
-    }
+    assert(gpLogSuite != NULL);
 
     UT_add_test( gpLogSuite, "UT_LOG Tests", test_ut_logging);
     UT_add_test( gpLogSuite, "UT_LOG Tests - Too Long String", test_ut_logging_too_long_string);
     UT_add_test( gpLogSuite, "UT_LOG Tests - Colour Test", test_ut_logging_colour_test);
 
     gpAssertSuite = UT_add_suite("ut-core-assert-tests", ut_init_function, ut_clean_function);
-    if (NULL == gpAssertSuite)
-    {
-        return -1;
-    }
+    assert(gpAssertSuite != NULL);
 
     UT_add_test( gpAssertSuite, "UT_PASS Pass", test_ut_assert_pass);
     UT_add_test( gpAssertSuite, "UT_FAIL Fail", test_ut_assert_fail);
@@ -357,10 +345,5 @@ int main(int argc, char** argv)
     UT_add_test( gpAssertSuite, "UT_ASSERT_TRUE_MSG", test_ut_assert_msg_true);
     UT_add_test( gpAssertSuite, "UT_ASSERT_FALSE_MSG", test_ut_assert_msg_false);
     UT_add_test( gpAssertSuite, "UT_ASSERT Log", test_ut_assert_log);
-
-    /* Begin test executions */
-    UT_run_tests();
-
-    return 0;
 }
 

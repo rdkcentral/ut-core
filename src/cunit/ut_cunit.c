@@ -34,6 +34,7 @@
 #include <MyMem.h>
 
 #include <ut.h>
+#include <ut_main.h>
 #include "ut_internal.h"
 #include "ut_cunit_internal.h"
 
@@ -127,6 +128,8 @@ UT_status_t UT_run_tests( void )
     }
 
     UT_LOG( UT_LOG_ASCII_GREEN"---- end of test run ----\n"UT_LOG_ASCII_NC );
+
+    UT_exit();
 
     return UT_STATUS_OK;
 }

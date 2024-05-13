@@ -19,20 +19,57 @@
 # * limitations under the License.
 # *
 
+set -e # error out if required
 SCRIPT_EXEC="$(realpath $0)"
 MY_DIR="$(dirname $SCRIPT_EXEC)"
 
 pushd ${MY_DIR} > /dev/null
+
+FRAMEWORK_DIR=${MY_DIR}/framework
+LIBYAML_DIR=${FRAMEWORK_DIR}/libfyaml-master
+ASPRINTF_DIR=${FRAMEWORK_DIR}/asprintf
+
 # Clone CUnit
 if [ -d "./framework/" ]; then
-    echo "Framework already exists"
+    echo "Framework CUnit already exists"
 else
     echo "Clone Framework"
     wget https://sourceforge.net/projects/cunit/files/CUnit/2.1-3/CUnit-2.1-3.tar.bz2 --no-check-certificate -P framework/
     tar xvfj framework/CUnit-2.1-3.tar.bz2 -C ./framework/
     cp framework/CUnit-2.1-3/CUnit/Headers/CUnit.h.in framework/CUnit-2.1-3/CUnit/Headers/CUnit.h
-    cp src/cunit/cunit_lgpl/patches/CorrectBuildWarningsInCunit.patch  framework/.
-    cd framework/
-    patch -u -b CUnit-2.1-3/CUnit/Sources/Framework/TestRun.c -i CorrectBuildWarningsInCunit.patch
+    echo "Patching Framework"
+    cd ${FRAMEWORK_DIR}
+    cp ../src/cunit/cunit_lgpl/patches/CorrectBuildWarningsInCunit.patch  .
+    patch -u CUnit-2.1-3/CUnit/Sources/Framework/TestRun.c -i CorrectBuildWarningsInCunit.patch
+    echo "Patching Complete"
+fi
+
+if [ -d "${LIBYAML_DIR}" ]; then
+    echo "Framework libyaml already exists"
+else
+    pushd ${FRAMEWORK_DIR} > /dev/null
+    echo "Clone libfyaml in ${LIBYAML_DIR}"
+    wget https://github.com/pantoniou/libfyaml/archive/refs/heads/master.zip --no-check-certificate
+    unzip master.zip
+
+    echo "Patching Framework [${PWD}]"
+    cp ../src/libyaml/patches/CorrectWarningsAndBuildIssuesInLibYaml.patch  .
+    patch -i CorrectWarningsAndBuildIssuesInLibYaml.patch -p0
+    echo "Patching Complete"
+
+#    ./bootstrap.sh
+#    ./configure --prefix=${LIBYAML_DIR}
+#    make
+    popd > /dev/null
+fi
+
+if [ -d "${ASPRINTF_DIR}" ]; then
+    echo "Framework libyaml already exists"
+else
+    echo "Clone asprintf in ${ASPRINTF_DIR}"
+    wget https://github.com/jwerle/asprintf.c/archive/refs/heads/master.zip -P asprintf/. --no-check-certificate
+    cd asprintf
+    unzip master.zip
+    rm asprintf.c-master/test.c
 fi
 popd > /dev/null

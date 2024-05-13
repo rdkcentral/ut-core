@@ -28,7 +28,9 @@
 
 #include <ut.h>
 #include <ut_log.h>
+#include <ut_main.h>
 #include "ut_internal.h"
+
 
 #define DEFAULT_FILENAME "ut_test"
 
@@ -38,6 +40,7 @@ extern UT_status_t startup_system( void );
 
 /* Global variables */
 optionFlags_t gOptions;  /*!< Control flags */
+ut_kvp_instance_t *gPlatformProfileInstance;
 
 /* Function prototypes */
 
@@ -47,8 +50,9 @@ static void usage( void )
     TEST_INFO(( "-a - Automated Mode\n" ));
     TEST_INFO(( "-b - Basic Mode\n" ));
     TEST_INFO(( "-f - <filename> - set the output filename for automated mode\n" ));
-    TEST_INFO(( "-l - List all tests run to a file\n" ));
-    TEST_INFO(( "-p - Set the log Path\n" ));
+    TEST_INFO(( "-t - List all tests run to a file\n" ));
+    TEST_INFO(( "-l - Set the log Path\n" ));
+    TEST_INFO(( "-p - <filename> - set the profile Path\n" ));
     TEST_INFO(( "-h - Help\n" ));
 }
 
@@ -57,9 +61,11 @@ static bool decodeOptions( int argc, char **argv )
     int opt;
     const char *logFilename;
     size_t length;
+    ut_kvp_status_t status;
 
     memset(&gOptions,0,sizeof(gOptions));
 
+    /* Console mode is always enabled we don't need a switch for that */
     gOptions.testMode = UT_MODE_CONSOLE;
 
     /* Set the default path to ./ and then take the filename back and use that for automated mode */
@@ -72,14 +78,10 @@ static bool decodeOptions( int argc, char **argv )
     length -= strlen(".log");
     strncpy( gOptions.filenameRoot, logFilename, length );
 
-    while((opt = getopt(argc, argv, "cabhf:lp:")) != -1)
+    while((opt = getopt(argc, argv, "cabhf:l:tp:")) != -1)
     {
         switch(opt)
         {
-            case 'c':
-                TEST_INFO(("Console Mode\n"));
-                gOptions.testMode = UT_MODE_CONSOLE;
-                break;
             case 'b':
                 TEST_INFO(("Basic Mode\n"));
                 gOptions.testMode = UT_MODE_BASIC;
@@ -88,7 +90,7 @@ static bool decodeOptions( int argc, char **argv )
                 TEST_INFO(("Automated Mode\n"));
                 gOptions.testMode = UT_MODE_AUTOMATED;
                 break;
-            case 'l':
+            case 't':
                 TEST_INFO(("Automated Mode: List Tests to File\n"));
                 gOptions.testMode = UT_MODE_AUTOMATED;
                 gOptions.listTest = true;
@@ -98,10 +100,23 @@ static bool decodeOptions( int argc, char **argv )
                 gOptions.testMode = UT_MODE_AUTOMATED;
                 strncpy(gOptions.filenameRoot,optarg,UT_MAX_FILENAME_STRING_SIZE);
                 break;
-            case 'p':
+            case 'l':
                 TEST_INFO(("Setting Log Path [%s]\n", optarg));
                 UT_log_setLogFilePath(optarg);
                 break;
+            case 'p':
+                TEST_INFO(("Using Profile[%s]\n", optarg));
+                if ( gPlatformProfileInstance == NULL )
+                {
+                    gPlatformProfileInstance = ut_kvp_createInstance();
+                }
+                status = ut_kvp_open(gPlatformProfileInstance, optarg);
+                if ( status != UT_KVP_STATUS_SUCCESS )
+                {
+                    UT_LOG_ERROR("Failed to Load [%s]", optarg);
+                }
+                break;
+
             case 'h':
                 TEST_INFO(("Help\n"));
                 usage();
@@ -151,3 +166,23 @@ UT_status_t UT_init(int argc, char** argv)
     return UT_STATUS_OK;
 }
 
+void UT_exit( void )
+{
+    ut_kvp_instance_t *pInstance = ut_getPlatformProfile();
+
+    if ( pInstance != NULL )
+    {
+        ut_kvp_destroyInstance(pInstance);
+    }
+}
+
+/* External functions */
+ut_kvp_instance_t *ut_getPlatformProfile(void)
+{
+    if (gPlatformProfileInstance == NULL)
+    {
+        TEST_INFO(("\nKVP Profile instance not created\n"));
+        return NULL;
+    }
+    return gPlatformProfileInstance;
+}
