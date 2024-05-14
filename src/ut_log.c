@@ -25,6 +25,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <time.h>
+#include <libgen.h>
 
 #define UT_MAX_TIME_STRING (20)
 
@@ -139,7 +140,7 @@ void UT_logPrefix(const char *file, int line, const char *prefix, const char * f
     tmp = localtime(&now);
     strftime(time_now, sizeof(time_now), "%Y-%m-%d-%X", tmp);
 #if 1
-    snprintf( singleLineBuffer, UT_LOG_MAX_LINE_SIZE, "\n%s, %*s, %s,%6d : ", time_now, 16, prefix, file, line );
+    snprintf( singleLineBuffer, UT_LOG_MAX_LINE_SIZE, "\n%s, %*s, %s,%6d : ", time_now, 16, prefix, basename((char *)file), line );
 #else
     file=file;  /* unused */
     snprintf( singleLineBuffer, UT_LOG_MAX_LINE_SIZE, "\n%s, %s, %6d : ", time_now, prefix, line );

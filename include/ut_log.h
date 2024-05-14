@@ -22,7 +22,6 @@
 
 /* System Includes */
 #include <stdarg.h>
-#include <libgen.h>
 
 #define UT_LOG_MAX_LINE_SIZE (255)  /*!< Max String size that UT_LOG will display */
 #define UT_LOG_MAX_PATH      (260)  /*!< Default max path length */
@@ -43,14 +42,14 @@
  * @param format        - string formatting to be applied
  * @param ...           - variable args
  */
-#define UT_LOG(format, ...)                 UT_logPrefix(basename(__FILE__), __LINE__, UT_LOG_ASCII_MAGENTA"LOG   "UT_LOG_ASCII_NC, format, ## __VA_ARGS__)
-#define UT_LOG_PREFIX(prefix, format, ...)  UT_logPrefix(basename(__FILE__), __LINE__, prefix, format, ## __VA_ARGS__)
-#define UT_LOG_STEP(format, ...)            UT_logPrefix(basename(__FILE__), __LINE__, UT_LOG_ASCII_BLUE"STEP  "UT_LOG_ASCII_NC, format, ## __VA_ARGS__)
-#define UT_LOG_INFO(format, ...)            UT_logPrefix(basename(__FILE__), __LINE__, UT_LOG_ASCII_CYAN"INFO  "UT_LOG_ASCII_NC, format, ## __VA_ARGS__)
-#define UT_LOG_DEBUG(format, ...)           UT_logPrefix(basename(__FILE__), __LINE__, UT_LOG_ASCII_MAGENTA"DEBUG "UT_LOG_ASCII_NC, format, ## __VA_ARGS__)
-#define UT_LOG_WARNING(format, ...)         UT_logPrefix(basename(__FILE__), __LINE__, UT_LOG_ASCII_YELLOW"WARN  "UT_LOG_ASCII_NC, format, ## __VA_ARGS__)
-#define UT_LOG_ERROR(format, ...)           UT_logPrefix(basename(__FILE__), __LINE__, UT_LOG_ASCII_RED"ERROR "UT_LOG_ASCII_NC, format, ## __VA_ARGS__)
-#define UT_LOG_ASSERT(prefix, format, ...)  UT_logPrefix(basename(__FILE__), __LINE__, UT_LOG_ASCII_RED"ASSERT"UT_LOG_ASCII_NC, UT_LOG_ASCII_RED#prefix":"UT_LOG_ASCII_NC #format, ## __VA_ARGS__)
+#define UT_LOG(format, ...)                 UT_logPrefix(__FILE__, __LINE__, UT_LOG_ASCII_MAGENTA"LOG   "UT_LOG_ASCII_NC, format, ## __VA_ARGS__)
+#define UT_LOG_PREFIX(prefix, format, ...)  UT_logPrefix(__FILE__, __LINE__, prefix, format, ## __VA_ARGS__)
+#define UT_LOG_STEP(format, ...)            UT_logPrefix(__FILE__, __LINE__, UT_LOG_ASCII_BLUE"STEP  "UT_LOG_ASCII_NC, format, ## __VA_ARGS__)
+#define UT_LOG_INFO(format, ...)            UT_logPrefix(__FILE__, __LINE__, UT_LOG_ASCII_CYAN"INFO  "UT_LOG_ASCII_NC, format, ## __VA_ARGS__)
+#define UT_LOG_DEBUG(format, ...)           UT_logPrefix(__FILE__, __LINE__, UT_LOG_ASCII_MAGENTA"DEBUG "UT_LOG_ASCII_NC, format, ## __VA_ARGS__)
+#define UT_LOG_WARNING(format, ...)         UT_logPrefix(__FILE__, __LINE__, UT_LOG_ASCII_YELLOW"WARN  "UT_LOG_ASCII_NC, format, ## __VA_ARGS__)
+#define UT_LOG_ERROR(format, ...)           UT_logPrefix(__FILE__, __LINE__, UT_LOG_ASCII_RED"ERROR "UT_LOG_ASCII_NC, format, ## __VA_ARGS__)
+#define UT_LOG_ASSERT(prefix, format, ...)  UT_logPrefix(__FILE__, __LINE__, UT_LOG_ASCII_RED"ASSERT"UT_LOG_ASCII_NC, UT_LOG_ASCII_RED#prefix":"UT_LOG_ASCII_NC #format, ## __VA_ARGS__)
 
 /**
  * @brief Set the path of the active logfile
