@@ -9,6 +9,7 @@
     "checkUint64IsDeadBeefHex": "0xdeadbeefdeadbeef",
     "checkUint64IsDeadBeefDec": 16045690984833335023,
     "checkStringDeadBeef": "the beef is dead",
+    "checkStringDeadBeef2": "the beef is also dead",
     "checkStringDeadBeefNoQuotes": "the beef is dead",
     "checkBoolFalse":  false,
     "checkBoolFALSE":  "FALSE",

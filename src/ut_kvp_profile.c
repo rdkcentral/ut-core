@@ -17,12 +17,12 @@
  * limitations under the License.
  */
 
-#include <ut_kvp_assert.h>
+#include <ut_kvp_profile.h>
 #include <assert.h>
 
 static ut_kvp_instance_t *gKVP_Instance = NULL;
 
-ut_kvp_status_t ut_kvp_assert_open(char *fileName)
+ut_kvp_status_t ut_kvp_profile_open(char *fileName)
 {
     ut_kvp_status_t result;
 
@@ -38,7 +38,7 @@ ut_kvp_status_t ut_kvp_assert_open(char *fileName)
     return result;
 }
 
-void ut_kvp_assert_close(void)
+void ut_kvp_profile_close(void)
 {
     if ( gKVP_Instance != NULL )
     {
@@ -47,7 +47,7 @@ void ut_kvp_assert_close(void)
     }
 }
 
-ut_kvp_instance_t *ut_kvp_assert_getInstance( void )
+ut_kvp_instance_t *ut_kvp_profile_getInstance( void )
 {
     return gKVP_Instance;
 }

@@ -21,7 +21,7 @@
 #include <ut.h>
 
 extern void register_assert_functions(void);
-extern void register_kvp_assert_testing_functions(void);
+extern void register_kvp_profile_testing_functions(void);
 extern void register_kvp_functions(void);
 
 /**
@@ -38,7 +38,7 @@ int main(int argc, char** argv)
 
     //register_assert_functions(); /* FIXME: Enable when any change is performed to the UT_ASSERT functions. Since this always fails we want it outside our normal testing, which currently is 100% PASS */
     register_kvp_functions();
-    register_kvp_assert_testing_functions();
+    register_kvp_profile_testing_functions();
     UT_run_tests();
 
     return 0;

@@ -88,7 +88,7 @@ ut_kvp_status_t ut_kvp_open(ut_kvp_instance_t *pInstance, char *fileName)
 
     if (pInstance == NULL)
     {
-        return UT_KVP_STATUS_INVALID_PARAM;
+        return UT_KVP_STATUS_INVALID_INSTANCE;
     }
 
     if (fileName == NULL)
@@ -141,7 +141,7 @@ static ut_kvp_status_t ut_kvp_getField(ut_kvp_instance_t *pInstance, const char 
     if (pInternal == NULL)
     {
         assert(pInternal != NULL);
-        return UT_KVP_STATUS_INVALID_PARAM;
+        return UT_KVP_STATUS_INVALID_INSTANCE;
     }
 
     if (pszKey == NULL)
@@ -317,31 +317,41 @@ uint64_t ut_kvp_getUInt64Field( ut_kvp_instance_t *pInstance, const char *pszKey
     return u64Value;
 }
 
-const char* ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *pszKey, const char *psValue )
+ut_kvp_status_t ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *pszKey, char *pszReturnedString, uint32_t uStringSize )
 {
     struct fy_node *node = NULL;
     struct fy_node *root = NULL;
+    const char *pString = NULL;
 
     ut_kvp_instance_internal_t *pInternal = validateInstance(pInstance);
 
     if (pInternal == NULL)
     {
         assert(pInternal != NULL);
-        return NULL;
+        return UT_KVP_STATUS_INVALID_INSTANCE;
     }
 
     if (pszKey == NULL)
     {
         assert(pszKey != NULL);
         UT_LOG_ERROR("Invalid Param - pszKey");
-        return NULL;
+        return UT_KVP_STATUS_NULL_PARAM;
     }
 
+    if ( pszReturnedString == NULL )
+    {
+        assert(pszReturnedString != NULL);
+        UT_LOG_ERROR("Invalid Param - pszReturnedString");
+        return UT_KVP_STATUS_NULL_PARAM;
+    }
+
+    /* Make sure we populate the returned string with zt before any other action */
+    *pszReturnedString=0;
     if ( pInternal->fy_handle == NULL )
     {
         assert(pInternal->fy_handle != NULL);
         UT_LOG_ERROR("No Data File open");
-        return NULL;
+        return UT_KVP_STATUS_NO_DATA;
     }
     // Get the root node
     root = fy_document_root(pInternal->fy_handle);
@@ -349,7 +359,7 @@ const char* ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *psz
     {
         assert( root != NULL );
         UT_LOG_ERROR("Empty document");
-        return NULL;
+        return UT_KVP_STATUS_PARSING_ERROR;
     }
 
     // Find the node corresponding to the key
@@ -357,17 +367,23 @@ const char* ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *psz
     if ( node == NULL )
     {
         assert( node != NULL );
-        UT_LOG_ERROR("node not found");
-        return NULL;
+        UT_LOG_ERROR("node not found: UT_KVP_STATUS_KEY_NOT_FOUND");
+        return UT_KVP_STATUS_KEY_NOT_FOUND;
     }
 
     if (node && fy_node_is_scalar(node))
     {
         // Get the string value
-        psValue = fy_node_get_scalar0(node);
+        pString = fy_node_get_scalar0(node);
+        if ( pString == NULL )
+        {
+            assert( pString != NULL );
+            UT_LOG_ERROR("field not found: UT_KVP_STATUS_KEY_NOT_FOUND");
+            return UT_KVP_STATUS_KEY_NOT_FOUND;
+        }
     }
-    return psValue;
-
+    strncpy( pszReturnedString, pString, uStringSize );
+    return UT_KVP_STATUS_SUCCESS;
 }
 
 /** Static Functions */
