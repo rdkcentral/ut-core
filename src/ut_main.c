@@ -52,7 +52,7 @@ static void usage( void )
     TEST_INFO(( "-f - <filename> - set the output filename for automated mode\n" ));
     TEST_INFO(( "-t - List all tests run to a file\n" ));
     TEST_INFO(( "-l - Set the log Path\n" ));
-    TEST_INFO(( "-p - <filename> - set the profile Path\n" ));
+    TEST_INFO(( "-p - <profile_filename> - specify the profile to load YAML or JSON, also used by kvp_assert\n" ));
     TEST_INFO(( "-h - Help\n" ));
 }
 
@@ -98,7 +98,7 @@ static bool decodeOptions( int argc, char **argv )
             case 'f':
                 TEST_INFO(("Automated Mode: Set Output File Prefix\n"));
                 gOptions.testMode = UT_MODE_AUTOMATED;
-                strncpy(gOptions.filenameRoot,optarg,UT_MAX_FILENAME_STRING_SIZE);
+                sprintf(gOptions.filenameRoot,"%s%s", optarg, strstr(logFilename, "/tmp/") + strlen("/tmp/"));
                 break;
             case 'l':
                 TEST_INFO(("Setting Log Path [%s]\n", optarg));

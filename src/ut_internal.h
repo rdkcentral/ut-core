@@ -30,7 +30,7 @@
 
 #include <string.h>
 
-#define UT_MAX_FILENAME_STRING_SIZE (32)
+#define UT_MAX_FILENAME_STRING_SIZE (128)
 
 /**
  * @brief Testing Modes
