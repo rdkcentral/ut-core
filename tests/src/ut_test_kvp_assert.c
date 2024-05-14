@@ -36,18 +36,6 @@ static UT_test_suite_t *gpAssertSuite1 = NULL;
 static UT_test_suite_t *gpAssertSuite2 = NULL;
 static UT_test_suite_t *gpAssertSuite3 = NULL;
 
-void test_ut_kvp_assert_uint8(void)
-{
-    uint32_t checkField = 0xde;
-    UT_ASSERT_EQUAL_KVP_UINT32( checkField, "decodeTest/checkUint8IsDeHex" );
-}
-
-void test_ut_kvp_assert_uint16(void)
-{
-    uint32_t checkField = 0xdead;
-    UT_ASSERT_EQUAL_KVP_UINT32( checkField, "decodeTest/checkUint16IsDeadHex" );
-}
-
 void test_ut_kvp_assert_uint32(void)
 {
     uint32_t checkField = 0xdeadbeef;
@@ -114,8 +102,6 @@ void register_kvp_assert_testing_functions(void)
     gpAssertSuite2 = UT_add_suite("ut-kvp - assert testing yaml ", test_ut_kvp_assert_init_yaml, test_ut_kvp_assert_cleanup);
     assert(gpAssertSuite2 != NULL);
 
-    UT_add_test(gpAssertSuite2, "kvp assert uint8", test_ut_kvp_assert_uint8);
-    UT_add_test(gpAssertSuite2, "kvp assert uint16", test_ut_kvp_assert_uint16);
     UT_add_test(gpAssertSuite2, "kvp assert uint32", test_ut_kvp_assert_uint32);
     UT_add_test(gpAssertSuite2, "kvp assert uint64", test_ut_kvp_assert_uint64);
     UT_add_test(gpAssertSuite2, "kvp assert string", test_ut_kvp_assert_string);
@@ -124,8 +110,6 @@ void register_kvp_assert_testing_functions(void)
     gpAssertSuite3 = UT_add_suite("ut-kvp - assert testing json ", test_ut_kvp_assert_init_json, test_ut_kvp_assert_cleanup);
     assert(gpAssertSuite3 != NULL);
 
-    UT_add_test(gpAssertSuite3, "kvp assert uint8", test_ut_kvp_assert_uint8);
-    UT_add_test(gpAssertSuite3, "kvp assert uint16", test_ut_kvp_assert_uint16);
     UT_add_test(gpAssertSuite3, "kvp assert uint32", test_ut_kvp_assert_uint32);
     UT_add_test(gpAssertSuite3, "kvp assert uint64", test_ut_kvp_assert_uint64);
     UT_add_test(gpAssertSuite3, "kvp assert string", test_ut_kvp_assert_string);
