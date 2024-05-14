@@ -25,131 +25,139 @@
 #include <stdint.h>
 #include <stdio.h>
 
-/**
- * @brief Status return codes for this module
- * 
- */
+/**! Status codes for the unit testing (UT) Key-Value Pair (KVP) framework. */
 typedef enum
 {
-    UT_KVP_STATUS_SUCCESS=0,        /**!< Status ok */
-    UT_KVP_STATUS_FILE_OPEN_ERROR,  /**!< File open error */
-    UT_KVP_STATUS_INVALID_PARAM,    /**!< Invalid Param */
-    UT_KVP_STATUS_PARSING_ERROR,    /**!< Parsing error */
-    UT_KVP_STATUS_NO_DATA,          /**!< No Data to process */
-    UT_KVP_STATUS_MAX               /**!< Out of range marker */
-}
-ut_kvp_status_t;
+    UT_KVP_STATUS_SUCCESS = 0,       /**!< Operation successful. */
+    UT_KVP_STATUS_FILE_OPEN_ERROR,   /**!< Failed to open the file. */
+    UT_KVP_STATUS_INVALID_PARAM,     /**!< Invalid parameter passed. */
+    UT_KVP_STATUS_PARSING_ERROR,     /**!< Error parsing the file. */
+    UT_KVP_STATUS_KEY_NOT_FOUND,     /**!< Key not found in the KVP instance. */
+    UT_KVP_STATUS_NO_DATA,           /**!< No data to process. */
+    UT_KVP_STATUS_NULL_PARAM,        /**!< Null parameter passed. */
+    UT_KVP_STATUS_INVALID_INSTANCE,  /**!< Invalid KVP instance handle. */
+    UT_KVP_STATUS_MAX                /**!< Out of range marker (not a valid status). */
+} ut_kvp_status_t;
 
-typedef void ut_kvp_instance_t;    /**!< Instance type*/
+/**! Handle to a KVP instance. */
+typedef void ut_kvp_instance_t;    
 
-#define UT_KVP_MAX_ELEMENT_SIZE (256)    /*!< Max Element Size Supported */
+#define UT_KVP_MAX_ELEMENT_SIZE (256)  /**!< Maximum size of a single KVP element (in bytes). */
 
-/**
- * @brief create instance handle to the kvp object
+/**!
+ * @brief Creates a new KVP instance.
+ * @returns Handle to the created KVP instance, or NULL on failure. 
+ */ 
+ut_kvp_instance_t *ut_kvp_createInstance(void);
+
+/**!
+ * @brief Destroys a KVP instance.
  * 
- * @returns ut_kvp_instance_t - Handle to the instance
+ * Releases resources associated with the KVP instance.
+ * 
+ * @param[in] pInstance - Handle to the instance to destroy.
  */
-ut_kvp_instance_t *ut_kvp_createInstance( void );
+void ut_kvp_destroyInstance(ut_kvp_instance_t *pInstance);
 
-/**
- * @brief destroy instance handle to the kvp object
- * 
- * @param pInstance[in] - Handle to the instance
- */
-void ut_kvp_destroyInstance( ut_kvp_instance_t *pInstance );
-
-/**
- * @brief open and read kvp file and ready for use
- * 
- * @param pInstance[in] - Handle to the instance
- * @param fileName[in] - Zero Terminated filename
- * 
- * @returns ut_kvp_status_t - result status
- * @retval UT_KVP_STATUS_SUCCESS - Success
- * @retval UT_KVP_STATUS_FILE_OPEN_ERROR - File open error
- * @retval UT_KVP_STATUS_INVALID_PARAM   - Invalid param passed
- * @retval UT_KVP_STATUS_PARSING_ERROR   - File parsing error
+/**!
+ * @brief Opens and parses a Key-Value Pair (KVP) file into a KVP instance.
+ *
+ * This function opens the specified KVP file, reads its contents, and parses the key-value pairs into the given KVP instance.
+ *
+ * @param[in] pInstance - Handle to the KVP instance where the parsed data will be stored.
+ * @param[in] fileName - Null-terminated string containing the path to the KVP file.
+ *
+ * @returns Status of the operation (`ut_kvp_status_t`):
+ * @retval UT_KVP_STATUS_SUCCESS - The file was opened and parsed successfully.
+ * @retval UT_KVP_STATUS_FILE_OPEN_ERROR - The file could not be opened.
+ * @retval UT_KVP_STATUS_INVALID_PARAM - One or more parameters are invalid (e.g., null pointer).
+ * @retval UT_KVP_STATUS_PARSING_ERROR - An error occurred while parsing the file contents.
+ * @retval UT_KVP_STATUS_INVALID_INSTANCE - The provided `pInstance` is not a valid KVP instance.
  */
 ut_kvp_status_t ut_kvp_open(ut_kvp_instance_t *pInstance, char* fileName);
 
-/**
- * @brief close kvp file previously read and free the memory
- *
- * @param pInstance[in] - Handle to the instance
+/**!
+ * @brief Closes a previously opened KVP profile and frees its memory.
+ * 
+ * @param[in] pInstance - Handle to the instance to close.
  */
 void ut_kvp_close(ut_kvp_instance_t *pInstance);
 
-/**
- * @brief Get a bool key value pair from a passed configuration
+/**!
+ * @brief Gets a boolean value from the KVP profile.
  * 
- * @param pInstance[in] - Handle to the instance
- * @param pszKey[in] - Zero Terminated String Key
- *
- * @return true 
- * @return false 
+ * @param[in] pInstance - Handle to the KVP instance.
+ * @param[in] pszKey - Null-terminated string representing the key to search for.
+ * 
+ * @returns `true` if the key is found and its value is "true", `false` otherwise.
+ * 
+ * @note This function will return false if the key is not found or if the value is not a valid boolean.
  */
 bool ut_kvp_getBoolField(ut_kvp_instance_t *pInstance, const char *pszKey);
 
-/**
- * @brief Get a uint8_t field from a key value pair
- *  This function may assert if a field is not convertible type uint8_t
+/**!
+ * @brief Gets a uint8_t value from the KVP profile.
  * 
- * @param pInstance[in] - Handle to the instance
- * @param pszKey[in] - Zero Terminated String Key
- *
- * @returns uint8_t - int result on success, 0 on error, ERROR logging will be output
+ * @param[in] pInstance - Handle to the KVP instance.
+ * @param[in] pszKey - Null-terminated string representing the key to search for.
+ * 
+ * @returns The `uint8_t` value on success, or 0 on error (check logs for details).
  */
-uint8_t ut_kvp_getUInt8Field( ut_kvp_instance_t *pInstance, const char *pszKey );
+uint8_t ut_kvp_getUInt8Field(ut_kvp_instance_t *pInstance, const char *pszKey);
 
-/**
- * @brief Get a uint16_t field from a key value pair
- *  This function may assert if a field is not convertible type uint16_t
+/**!
+ * @brief Gets a uint16_t value from the KVP profile.
  * 
- * @param pInstance[in] - Handle to the instance
- * @param pszKey[in] - Zero Terminated String Key
- *
- * @returns uint16_t - int result on success, 0 on error, ERROR logging will be output
+ * @param[in] pInstance - Handle to the KVP instance.
+ * @param[in] pszKey - Null-terminated string representing the key to search for.
+ * 
+ * @returns The `uint16_t` value on success, or 0 on error (check logs for details).
  */
-uint16_t ut_kvp_getUInt16Field( ut_kvp_instance_t *pInstance, const char *pszKey );
+uint16_t ut_kvp_getUInt16Field(ut_kvp_instance_t *pInstance, const char *pszKey);
 
-/**
- * @brief Get a uint32_t field from a key value pair
- *  This function may assert if a field is not convertible type uint32_t
+/**!
+ * @brief Gets a uint32_t value from the KVP profile.
  * 
- * @param pInstance[in] - Handle to the instance
- * @param pszKey[in] - Zero Terminated String Key
- *
- * @returns uint32_t - int result on success, 0 on error, ERROR logging will be output
+ * @param[in] pInstance - Handle to the KVP instance.
+ * @param[in] pszKey - Null-terminated string representing the key to search for.
+ * 
+ * @returns The `uint32_t` value on success, or 0 on error (check logs for details).
  */
 uint32_t ut_kvp_getUInt32Field(ut_kvp_instance_t *pInstance, const char *pszKey);
 
-/**
- * @brief Get a uint64_t field from a key value pair
- *  This function may assert if a field is not convertible type uint32_t
+/**!
+ * @brief Gets a uint64_t value from the KVP profile.
  * 
- * @param pInstance[in] - Handle to the instance
- * @param pszKey[in] - Zero Terminated String Key
- *
- * @returns uint64_t - int result on success, 0 on error, ERROR logging will be output
+ * @param[in] pInstance - Handle to the KVP instance.
+ * @param[in] pszKey - Null-terminated string representing the key to search for.
+ * 
+ * @returns The `uint64_t` value on success, or 0 on error (check logs for details).
  */
 uint64_t ut_kvp_getUInt64Field(ut_kvp_instance_t *pInstance, const char *pszKey);
 
-/**
- * @brief Get a key value pair from the passed string configuration
+/**!
+ * @brief Retrieves a string value from the KVP profile.
+ * 
+ * The caller owns the memory passed into `pszReturnedString`, which is filled out by this function. 
+ * The `uStringSize` should include space for the null-terminator.
  *
- * @param pInstance[in] - Handle to the instance
- * @param pszKey[in] - Zero Terminated String Key
- * @param psValue[out] - Caller must pass const char pointer which will be populated with the result
+ * @param[in] pInstance - Handle to the KVP instance.
+ * @param[in] pszKey - Key of the string value to retrieve (null-terminated string).
+ * @param[out] pszReturnedString - Pre-allocated buffer to store the retrieved string.
+ * @param[in] uStringSize - Size of the `pszReturnedString` buffer (including space for the null-terminator).
  *
- * @return const char*  - Returned string value on success, NULL on error, ERROR logging will be output
+ * @returns Status of the operation (`ut_kvp_status_t`):
+ * @retval UT_KVP_STATUS_SUCCESS - String value was found and successfully copied to `pszReturnedString`.
+ * @retval UT_KVP_STATUS_INVALID_PARAM - An invalid parameter was passed (e.g. invalid buffer size).
+ * @retval UT_KVP_STATUS_PARSING_ERROR - An error occurred while parsing the KVP data.
+ * @retval UT_KVP_STATUS_NO_DATA - The KVP instance does not contain any data.
+ * @retval UT_KVP_STATUS_KEY_NOT_FOUND - The specified key (`pszKey`) was not found in the KVP data.
+ * @retval UT_KVP_STATUS_NULL_PARAM - A null parameter was passed.
+ * @retval UT_KVP_STATUS_INVALID_INSTANCE - An invalid KVP instance handle was passed.
  */
-const char* ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *pszKey, const char *psValue );
+ut_kvp_status_t ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *pszKey, char *pszReturnedString, uint32_t uStringSize ); 
 
 /* TODO:
-* ut_kvp_getInt8Field
-* ut_kvp_getInt16Field
-* ut_kvp_getInt32Field
-* ut_kvp_getInt64Field
-*/
-
+ * - Implement functions for getting signed integer values (`ut_kvp_getInt8Field`, `ut_kvp_getInt16Field`, `ut_kvp_getInt32Field`, `ut_kvp_getInt64Field`).
+ */
 #endif /* __UT_KVP_H__ */

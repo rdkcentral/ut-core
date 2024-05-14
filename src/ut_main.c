@@ -28,7 +28,7 @@
 
 #include <ut.h>
 #include <ut_log.h>
-#include <ut_main.h>
+#include <ut_kvp_profile.h>
 #include "ut_internal.h"
 
 
@@ -40,7 +40,6 @@ extern UT_status_t startup_system( void );
 
 /* Global variables */
 optionFlags_t gOptions;  /*!< Control flags */
-ut_kvp_instance_t *gPlatformProfileInstance;
 
 /* Function prototypes */
 
@@ -106,11 +105,7 @@ static bool decodeOptions( int argc, char **argv )
                 break;
             case 'p':
                 TEST_INFO(("Using Profile[%s]\n", optarg));
-                if ( gPlatformProfileInstance == NULL )
-                {
-                    gPlatformProfileInstance = ut_kvp_createInstance();
-                }
-                status = ut_kvp_open(gPlatformProfileInstance, optarg);
+                status = ut_kvp_profile_open(optarg);
                 if ( status != UT_KVP_STATUS_SUCCESS )
                 {
                     UT_LOG_ERROR("Failed to Load [%s]", optarg);
@@ -150,7 +145,7 @@ static bool decodeOptions( int argc, char **argv )
  * @retval UT_STATUS_OK - Success
  * @retval UT_STATUS_FAILURE - failure in decoding switches, or starting up the system
  */
-UT_status_t UT_init(int argc, char** argv) 
+UT_status_t UT_init(int argc, char** argv)
 {
     /* Decode the options */
     if ( decodeOptions( argc, argv ) == false )
@@ -168,21 +163,5 @@ UT_status_t UT_init(int argc, char** argv)
 
 void UT_exit( void )
 {
-    ut_kvp_instance_t *pInstance = ut_getPlatformProfile();
-
-    if ( pInstance != NULL )
-    {
-        ut_kvp_destroyInstance(pInstance);
-    }
-}
-
-/* External functions */
-ut_kvp_instance_t *ut_getPlatformProfile(void)
-{
-    if (gPlatformProfileInstance == NULL)
-    {
-        TEST_INFO(("\nKVP Profile instance not created\n"));
-        return NULL;
-    }
-    return gPlatformProfileInstance;
+    ut_kvp_profile_close();
 }
