@@ -38,7 +38,7 @@ static UT_test_suite_t *gpAssertSuite3 = NULL;
 
 void test_ut_kvp_profile_uint8(void)
 {
-    uint32_t checkField = 0xdeadbeef;
+    uint8_t checkField = 0xde;
     UT_LOG_STEP( "test_ut_kvp_profile_uint8 - start" );
     UT_ASSERT_KVP_EQUAL_PROFILE_UINT8( checkField, "decodeTest/checkUint8IsDeDec" );
     UT_ASSERT_KVP_EQUAL_PROFILE_UINT8( checkField, "decodeTest/checkUint8IsDeHex" );
@@ -47,7 +47,7 @@ void test_ut_kvp_profile_uint8(void)
 
 void test_ut_kvp_profile_uint16(void)
 {
-    uint32_t checkField = 0xdeadbeef;
+    uint16_t checkField = 0xdead;
     UT_LOG_STEP( "test_ut_kvp_profile_uint16 - start" );
     UT_ASSERT_KVP_EQUAL_PROFILE_UINT16( checkField, "decodeTest/checkUint16IsDeadDec" );
     UT_ASSERT_KVP_EQUAL_PROFILE_UINT16( checkField, "decodeTest/checkUint16IsDeadHex" );
