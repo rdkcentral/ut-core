@@ -53,8 +53,6 @@ typedef struct
     bool        help;
 }optionFlags_t;
 
-extern optionFlags_t gOptions;  /*!< Control flags */
-
 #define TEST_INFO(x) printf x;
 
 #endif  /*  __UT_INTERNAL_H  */

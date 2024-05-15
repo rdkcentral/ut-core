@@ -39,11 +39,10 @@
 
 /** Pointer to the currently running suite. */
 static int gRegisterFailed;     /*!< Global Registration failed counter */
+static TestMode_t  gTestMode;
 
 static int internalInit( void );
 static int internalClean( void );
-
-#define UT_LOG_DEFAULT_PATH "/tmp/"
 
 /**
  * @brief Startup the system
@@ -67,22 +66,21 @@ UT_status_t startup_system( void )
 }
 
 /**
- * @brief sets the log file path for xmls and log files
+ * @brief sets the test mode from ut_main
  * 
  */
-void UT_set_path(char *path)
+void UT_set_test_mode(TestMode_t  mode)
 {
-    const char *logFilename;
-    size_t length;
+    gTestMode = mode;
+}
 
-    UT_log_setLogFilePath( path );
-
-    logFilename = UT_log_getLogFilename();
-    assert( logFilename != NULL );
-
-    length = strlen(logFilename);
-    length -= strlen(".log");
-    strncpy( gOptions.filenameRoot, logFilename, length );
+/**
+ * @brief gets the test mode
+ *
+ */
+static TestMode_t get_test_mode( void )
+{
+    return gTestMode;
 }
 
 /**
@@ -108,14 +106,8 @@ UT_status_t UT_run_tests( void )
         return UT_STATUS_OK;
     }
 
-    if(gOptions.filenameRoot[0] == '\0')  //Check for empty array
-    {
-        UT_set_path(UT_LOG_DEFAULT_PATH);
-    }
-    UT_set_output_filename(gOptions.filenameRoot);
-
     UT_LOG( UT_LOG_ASCII_GREEN"---- start of test run ----"UT_LOG_ASCII_NC );
-    switch( gOptions.testMode )
+    switch( get_test_mode() )
     {
         case UT_MODE_BASIC:
         {

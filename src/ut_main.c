@@ -37,10 +37,14 @@
 
 /* Global External Functions */
 extern UT_status_t startup_system( void );
-extern void UT_set_path(char *path);
+extern void UT_set_results_output_filename(const char* szFilenameRoot);
+extern void UT_set_test_mode(TestMode_t  mode);
 
 /* Global variables */
-optionFlags_t gOptions;  /*!< Control flags */
+static optionFlags_t gOptions;  /*!< Control flags, should not be exposed outside of this file */
+
+#define UT_LOG_DEFAULT_PATH "/tmp/"
+
 
 /* Function prototypes */
 
@@ -65,7 +69,11 @@ static bool decodeOptions( int argc, char **argv )
     /* Console mode is always enabled we don't need a switch for that */
     gOptions.testMode = UT_MODE_CONSOLE;
 
-    while((opt = getopt(argc, argv, "cabhf:l:tp:")) != -1)
+    /* Set the filepath always by default to /tmp/ */
+    UT_log_setLogFilePath(UT_LOG_DEFAULT_PATH); /* Use Macro */
+    UT_set_results_output_filename( UT_log_getLogFilename() );
+
+    while ((opt = getopt(argc, argv, "cabhf:l:tp:")) != -1)
     {
         switch(opt)
         {
@@ -84,7 +92,8 @@ static bool decodeOptions( int argc, char **argv )
                 break;
             case 'l':
                 TEST_INFO(("Setting Log Path [%s]\n", optarg));
-                UT_set_path(optarg);
+                UT_log_setLogFilePath(optarg);
+                UT_set_results_output_filename( UT_log_getLogFilename() );
                 break;
             case 'p':
                 TEST_INFO(("Using Profile[%s]\n", optarg));
@@ -114,6 +123,7 @@ static bool decodeOptions( int argc, char **argv )
         TEST_INFO(("unknown arguments: %s\n", argv[optind]));
     }
 
+    UT_set_test_mode(gOptions.testMode);
     return true;
 }
 

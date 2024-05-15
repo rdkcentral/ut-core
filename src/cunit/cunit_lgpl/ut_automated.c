@@ -113,7 +113,7 @@ void UT_automated_run_tests(void)
 
   /* if a filename root hasn't been set, use the default one */
   if (0 == strlen(f_szTestResultFileName)) {
-    UT_set_output_filename(f_szDefaultFileRoot);
+    UT_set_results_output_filename(f_szDefaultFileRoot);
   }
 
   if (CUE_SUCCESS != initialize_result_file(f_szTestResultFileName)) {
@@ -138,7 +138,7 @@ void UT_automated_run_tests(void)
 }
 
 /*------------------------------------------------------------------------*/
-void UT_set_output_filename(const char* szFilenameRoot)
+void UT_set_results_output_filename(const char* szFilenameRoot)
 {
   const char* szListEnding = "-Listing.xml";
   const char* szResultEnding = "-Results.xml";
@@ -174,7 +174,7 @@ CU_ErrorCode UT_list_tests_to_file()
 {
   /* if a filename root hasn't been set, use the default one */
   if (0 == strlen(f_szTestListFileName)) {
-    UT_set_output_filename(f_szDefaultFileRoot);
+    UT_set_results_output_filename(f_szDefaultFileRoot);
   }
 
   return UT_automated_list_all_tests(CU_get_registry(), f_szTestListFileName);

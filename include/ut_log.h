@@ -60,7 +60,12 @@
 
 /**!
  * @brief Sets the path for the active log file.
- * @param inputFilePath - Path to the log file.
+ *
+ * Internally it caculates the correct logging filename to be used for the testing
+ *
+ * @see UT_log_getLogFilename() to retrieve the active log filename including path
+ *
+ * @param inputFilePath - Path to the log file
  */
 void UT_log_setLogFilePath(char *inputFilePath);
 
