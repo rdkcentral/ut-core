@@ -43,6 +43,8 @@ static int gRegisterFailed;     /*!< Global Registration failed counter */
 static int internalInit( void );
 static int internalClean( void );
 
+#define UT_LOG_DEFAULT_PATH "/tmp/"
+
 /**
  * @brief Startup the system
  * 
@@ -62,6 +64,25 @@ UT_status_t startup_system( void )
         return UT_STATUS_FAILURE;
     }
     return UT_STATUS_OK;
+}
+
+/**
+ * @brief sets the log file path for xmls and log files
+ * 
+ */
+void UT_set_path(char *path)
+{
+    const char *logFilename;
+    size_t length;
+
+    UT_log_setLogFilePath( path );
+
+    logFilename = UT_log_getLogFilename();
+    assert( logFilename != NULL );
+
+    length = strlen(logFilename);
+    length -= strlen(".log");
+    strncpy( gOptions.filenameRoot, logFilename, length );
 }
 
 /**
@@ -87,6 +108,10 @@ UT_status_t UT_run_tests( void )
         return UT_STATUS_OK;
     }
 
+    if(gOptions.filenameRoot[0] == '\0')  //Check for empty array
+    {
+        UT_set_path(UT_LOG_DEFAULT_PATH);
+    }
     UT_set_output_filename(gOptions.filenameRoot);
 
     UT_LOG( UT_LOG_ASCII_GREEN"---- start of test run ----"UT_LOG_ASCII_NC );
