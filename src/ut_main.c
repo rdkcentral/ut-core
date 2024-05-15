@@ -28,7 +28,9 @@
 
 #include <ut.h>
 #include <ut_log.h>
+#include <ut_kvp_profile.h>
 #include "ut_internal.h"
+
 
 #define DEFAULT_FILENAME "ut_test"
 
@@ -47,8 +49,9 @@ static void usage( void )
     TEST_INFO(( "-a - Automated Mode\n" ));
     TEST_INFO(( "-b - Basic Mode\n" ));
     TEST_INFO(( "-f - <filename> - set the output filename for automated mode\n" ));
-    TEST_INFO(( "-l - List all tests run to a file\n" ));
-    TEST_INFO(( "-p - Set the log Path\n" ));
+    TEST_INFO(( "-t - List all tests run to a file\n" ));
+    TEST_INFO(( "-l - Set the log Path\n" ));
+    TEST_INFO(( "-p - <filename> - set the profile Path\n" ));
     TEST_INFO(( "-h - Help\n" ));
 }
 
@@ -57,9 +60,11 @@ static bool decodeOptions( int argc, char **argv )
     int opt;
     const char *logFilename;
     size_t length;
+    ut_kvp_status_t status;
 
     memset(&gOptions,0,sizeof(gOptions));
 
+    /* Console mode is always enabled we don't need a switch for that */
     gOptions.testMode = UT_MODE_CONSOLE;
 
     /* Set the default path to ./ and then take the filename back and use that for automated mode */
@@ -72,14 +77,10 @@ static bool decodeOptions( int argc, char **argv )
     length -= strlen(".log");
     strncpy( gOptions.filenameRoot, logFilename, length );
 
-    while((opt = getopt(argc, argv, "cabhf:lp:")) != -1)
+    while((opt = getopt(argc, argv, "cabhf:l:tp:")) != -1)
     {
         switch(opt)
         {
-            case 'c':
-                TEST_INFO(("Console Mode\n"));
-                gOptions.testMode = UT_MODE_CONSOLE;
-                break;
             case 'b':
                 TEST_INFO(("Basic Mode\n"));
                 gOptions.testMode = UT_MODE_BASIC;
@@ -88,7 +89,7 @@ static bool decodeOptions( int argc, char **argv )
                 TEST_INFO(("Automated Mode\n"));
                 gOptions.testMode = UT_MODE_AUTOMATED;
                 break;
-            case 'l':
+            case 't':
                 TEST_INFO(("Automated Mode: List Tests to File\n"));
                 gOptions.testMode = UT_MODE_AUTOMATED;
                 gOptions.listTest = true;
@@ -98,10 +99,19 @@ static bool decodeOptions( int argc, char **argv )
                 gOptions.testMode = UT_MODE_AUTOMATED;
                 strncpy(gOptions.filenameRoot,optarg,UT_MAX_FILENAME_STRING_SIZE);
                 break;
-            case 'p':
+            case 'l':
                 TEST_INFO(("Setting Log Path [%s]\n", optarg));
                 UT_log_setLogFilePath(optarg);
                 break;
+            case 'p':
+                TEST_INFO(("Using Profile[%s]\n", optarg));
+                status = ut_kvp_profile_open(optarg);
+                if ( status != UT_KVP_STATUS_SUCCESS )
+                {
+                    UT_LOG_ERROR("Failed to Load [%s]", optarg);
+                }
+                break;
+
             case 'h':
                 TEST_INFO(("Help\n"));
                 usage();
@@ -135,7 +145,7 @@ static bool decodeOptions( int argc, char **argv )
  * @retval UT_STATUS_OK - Success
  * @retval UT_STATUS_FAILURE - failure in decoding switches, or starting up the system
  */
-UT_status_t UT_init(int argc, char** argv) 
+UT_status_t UT_init(int argc, char** argv)
 {
     /* Decode the options */
     if ( decodeOptions( argc, argv ) == false )
@@ -151,3 +161,7 @@ UT_status_t UT_init(int argc, char** argv)
     return UT_STATUS_OK;
 }
 
+void UT_exit( void )
+{
+    ut_kvp_profile_close();
+}

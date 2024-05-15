@@ -24,7 +24,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
-$(info $(shell echo ${GREEN}TARGET_EXEC [$(TARGET_EXEC)]${NC}))
+$(info $(shell echo -e ${GREEN}TARGET_EXEC [$(TARGET_EXEC)]${NC}))
 
 UT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 export PATH := $(shell pwd)/toolchain:$(PATH)
@@ -48,9 +48,21 @@ SRC_DIRS += $(CUNIT_SRC_DIRS)/Framework
 #SRC_DIRS += $(CUNIT_SRC_DIRS)/Win
 #SRC_DIRS += $(CUNIT_SRC_DIRS)/Test
 
+# Enable libyaml Requirements
+LIBFYAML_DIR = ${UT_DIR}/framework/libfyaml-master
+ASPRINTF_DIR = ${UT_DIR}/framework/asprintf/asprintf.c-master/
+SRC_DIRS += $(LIBFYAML_DIR)/src/lib
+SRC_DIRS += $(LIBFYAML_DIR)/src/thread
+SRC_DIRS += $(LIBFYAML_DIR)/src/util
+SRC_DIRS += $(LIBFYAML_DIR)/src/xxhash
+SRC_DIRS += $(ASPRINTF_DIR)
+INC_DIRS += $(LIBFYAML_DIR)/include
+INC_DIRS += $(ASPRINTF_DIR)
+
 # LIBWEBSOCKETS Requirements
 LIBWEBSOCKETS_DIR = $(UT_DIR)/framework/libwebsockets-4.3.3
 INC_DIRS += $(LIBWEBSOCKETS_DIR)/build/include
+export LD_LIBRARY_PATH = $(LIBWEBSOCKETS_DIR)/build/lib
 
 INC_DIRS += $(UT_DIR)/include
 INC_DIRS += $(UT_DIR)/src
@@ -75,7 +87,7 @@ CUNIT_VARIANT=i686-pc-linux-gnu
 CC := gcc -ggdb -o0 -Wall
 endif
 
-XLDFLAGS += -Wl,-rpath, $(YLDFLAGS) $(LDFLAGS)
+XLDFLAGS += -Wl,-rpath, $(YLDFLAGS) $(LDFLAGS) -pthread  -lpthread
 
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 
@@ -90,7 +102,8 @@ $(info VERSION [$(VERSION)])
 
 # Final conversions
 DEPS += $(OBJS:.o=.d)
-XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\" -L$(LIBWEBSOCKETS_DIR)/build/lib -lwebsockets
+
+XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\" -L$(LIBWEBSOCKETS_DIR)/build/lib -lwebsockets -Wl,-rpath=$(LIBWEBSOCKETS_DIR)/build/lib
 
 # Library Path
 VPATH += $(UT_DIR)
@@ -132,6 +145,10 @@ clean:
 	@$(RM) -rf $(BUILD_DIR)
 	@echo -e ${GREEN}Clean Completed${NC}
 
+cleanall: clean 
+	@echo -e ${GREEN}Performing Clean on frameworks [$(UT_DIR)/framework]${NC}
+	@${RM} -rf $(UT_DIR)/framework
+
 list:
 	@echo 
 	@echo CC:$(CC)
@@ -143,12 +160,14 @@ list:
 	@echo OBJS:$(OBJS)
 	@echo 
 	@echo SRCS:$(SRCS)
-	@echo 
+	@echo
 	@echo UT_DIR:$(UT_DIR)
 	@echo 
 	@echo TOP_DIR:$(TOP_DIR)
 	@echo 
 	@echo BUILD_DIR:$(BUILD_DIR)
+	@echo
+	@echo LIBFYAML_DIR:$(LIBFYAML_DIR)
 	@echo
 	@echo
 	@echo CFLAGS:$(CFLAGS)
@@ -171,7 +190,7 @@ list:
 	@echo
 	@echo CONFIGURE_FLAGS:$(CONFIGURE_FLAGS)
 	@echo
-	@echo PKG_CONFIG_PATH:$(PKG_CONFIG_PATH)
+	@echo LD_LIBRARY_PATH:$(LD_LIBRARY_PATH)
 	@echo
 
 -include $(DEPS)
