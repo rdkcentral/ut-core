@@ -25,7 +25,8 @@
     "string": "c",
     "assert.h": "c",
     "ut.h": "c",
-    "cunit.h": "c"
+    "cunit.h": "c",
+    "ut_log.h": "c"
   },
   "C_Cpp_Runner.msvcBatchPath": "",
   "C_Cpp_Runner.cCompilerPath": "gcc",

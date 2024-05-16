@@ -51,7 +51,6 @@ extern void UT_console_run_tests( void );
 extern void UT_automated_run_tests(void);
 
 extern void UT_list_tests(CU_pSuite pSuite);
-void UT_set_results_output_filename(const char* szFilenameRoot);
 
 extern CU_ErrorCode UT_automated_list_all_tests(CU_pTestRegistry pRegistry, const char* szFilename);
 extern CU_ErrorCode UT_list_tests_to_file();

@@ -17,12 +17,16 @@
  * limitations under the License.
 */
 
-/** @brief UT Internal shared header
- * 
+/**
+ * @file ut_internal.h
+ * @brief Internal header file for the Unit Testing (UT) framework.
+ *
+ * This header defines common types, enums, and function prototypes used internally by the UT framework.
  */
 
 /** @addtogroup UT
- * @{
+ *  Unit Testing Framework
+ *  @{
  */
 
 #ifndef __UT_INTERNAL_H
@@ -30,30 +34,45 @@
 
 #include <string.h>
 
-#define UT_MAX_FILENAME_STRING_SIZE (256)
+#define UT_MAX_FILENAME_STRING_SIZE (32)
 
 /**
- * @brief Testing Modes
- * 
+ * @brief Enumerates the different testing modes supported by the UT framework.
  */
 typedef enum
 {
-    UT_MODE_BASIC=0,    /*!< Basic Mode, run all tests and output results */
-    UT_MODE_AUTOMATED,  /*!< Automated only mode, no output but generate xUnit xml output*/
-    UT_MODE_CONSOLE     /*!< Requires console, input from terminal */
-}TestMode_t;
+    UT_MODE_BASIC=0,    /**< Basic Mode: Runs all tests and outputs results to the console. */
+    UT_MODE_AUTOMATED,  /**< Automated Mode: Runs tests without console output, generates xUnit XML report. */
+    UT_MODE_CONSOLE     /**< Console Mode: Runs tests and interacts with the user through the console. */
+} TestMode_t;
 
+/**
+ * @brief Structure to hold configuration options and flags for the UT framework.
+ */
 typedef struct
 {
-    /* option switches */
-    TestMode_t  testMode;
-    bool        listTest;
-    char        filenameRoot[UT_MAX_FILENAME_STRING_SIZE];
-    char        filename[UT_MAX_FILENAME_STRING_SIZE];
-    bool        help;
-}optionFlags_t;
+    TestMode_t  testMode; /**< The selected testing mode. */
+    bool        listTest; /**< Flag to indicate whether to list available tests. */
+    char        filenameRoot[UT_MAX_FILENAME_STRING_SIZE]; /**< Base filename for test results. */
+    char        filename[UT_MAX_FILENAME_STRING_SIZE];  /**< Full filename for test results. */
+    bool        help; /**< Flag to indicate whether to display help information. */
+} optionFlags_t;
 
-#define TEST_INFO(x) printf x;
+#define TEST_INFO(x) printf x; // Consider replacing with a more robust logging mechanism
+
+/**
+ * @brief Sets the output file name for the test summary results.
+ *
+ * @param szFilenameRoot The base filename (including path) for the results file.
+ */
+extern void UT_set_results_output_filename(const char* szFilenameRoot);
+
+/**
+ * @brief Sets the testing mode for the UT framework.
+ *
+ * @param mode The desired testing mode.
+ */
+extern void UT_set_test_mode(TestMode_t mode);
 
 #endif  /*  __UT_INTERNAL_H  */
-/** @} */
+/** @} */ // End of UT group

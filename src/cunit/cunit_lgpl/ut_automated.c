@@ -103,6 +103,40 @@ static void automated_suite_cleanup_failure_message_handler(const CU_pSuite pSui
 /*=================================================================
  *  Public Interface functions
  *=================================================================*/
+
+void UT_set_results_output_filename(const char* szFilenameRoot)
+{
+  const char* szListEnding = "-Listing.xml";
+  const char* szResultEnding = "-Results.xml";
+
+  /* Construct the name for the listing file */
+  if (NULL != szFilenameRoot) {
+    strncpy(f_szTestListFileName, szFilenameRoot, MAX_FILENAME_LENGTH - strlen(szListEnding) - 1);
+  }
+  else {
+    strncpy(f_szTestListFileName, f_szDefaultFileRoot, MAX_FILENAME_LENGTH - strlen(szListEnding) - 1);
+  }
+
+  f_szTestListFileName[MAX_FILENAME_LENGTH - strlen(szListEnding) - 1] = '\0';
+  strcat(f_szTestListFileName, szListEnding);
+
+  /* Construct the name for the result file */
+  if (NULL != szFilenameRoot) {
+    strncpy(f_szTestResultFileName, szFilenameRoot, MAX_FILENAME_LENGTH - strlen(szResultEnding) - 1);
+  }
+  else {
+    strncpy(f_szTestResultFileName, f_szDefaultFileRoot, MAX_FILENAME_LENGTH - strlen(szResultEnding) - 1);
+  }
+
+  f_szTestResultFileName[MAX_FILENAME_LENGTH - strlen(szResultEnding) - 1] = '\0';
+
+  fprintf(stdout, "Listing Filename:[%s]\n", f_szTestListFileName );
+  fprintf(stdout, "Results Filename:[%s]\n", f_szTestResultFileName );
+  strcat(f_szTestResultFileName, szResultEnding);
+}
+
+/*------------------------------------------------------------------------*/
+
 void UT_automated_run_tests(void)
 {
   assert(NULL != CU_get_registry());
@@ -136,39 +170,6 @@ void UT_automated_run_tests(void)
     }
   }
 }
-
-/*------------------------------------------------------------------------*/
-void UT_set_results_output_filename(const char* szFilenameRoot)
-{
-  const char* szListEnding = "-Listing.xml";
-  const char* szResultEnding = "-Results.xml";
-
-  /* Construct the name for the listing file */
-  if (NULL != szFilenameRoot) {
-    strncpy(f_szTestListFileName, szFilenameRoot, MAX_FILENAME_LENGTH - strlen(szListEnding) - 1);
-  }
-  else {
-    strncpy(f_szTestListFileName, f_szDefaultFileRoot, MAX_FILENAME_LENGTH - strlen(szListEnding) - 1);
-  }
-
-  f_szTestListFileName[MAX_FILENAME_LENGTH - strlen(szListEnding) - 1] = '\0';
-  strcat(f_szTestListFileName, szListEnding);
-
-  /* Construct the name for the result file */
-  if (NULL != szFilenameRoot) {
-    strncpy(f_szTestResultFileName, szFilenameRoot, MAX_FILENAME_LENGTH - strlen(szResultEnding) - 1);
-  }
-  else {
-    strncpy(f_szTestResultFileName, f_szDefaultFileRoot, MAX_FILENAME_LENGTH - strlen(szResultEnding) - 1);
-  }
-
-  f_szTestResultFileName[MAX_FILENAME_LENGTH - strlen(szResultEnding) - 1] = '\0';
-
-  fprintf(stdout, "Listing Filename:[%s]\n", f_szTestListFileName );
-  fprintf(stdout, "Results Filename:[%s]\n", f_szTestResultFileName );
-  strcat(f_szTestResultFileName, szResultEnding);
-}
-
 /*------------------------------------------------------------------------*/
 CU_ErrorCode UT_list_tests_to_file()
 {

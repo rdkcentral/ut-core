@@ -30,6 +30,7 @@
 #include <ut_log.h>
 #include <ut_kvp_profile.h>
 #include "ut_internal.h"
+#include "ut_cunit_internal.h"
 
 
 #define DEFAULT_FILENAME "ut_test"
@@ -37,8 +38,6 @@
 
 /* Global External Functions */
 extern UT_status_t startup_system( void );
-extern void UT_set_results_output_filename(const char* szFilenameRoot);
-extern void UT_set_test_mode(TestMode_t  mode);
 
 /* Global variables */
 static optionFlags_t gOptions;  /*!< Control flags, should not be exposed outside of this file */
