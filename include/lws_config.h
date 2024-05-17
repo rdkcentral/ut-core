@@ -1,15 +1,10 @@
 /* lws_config.h  Generated from lws_config.h.in  */
 
-#if 0
 #ifndef NDEBUG
 	#ifndef _DEBUG
 		#define _DEBUG
 	#endif
 #endif
-#endif
-#define NDEBUG
-#undef _DEBUG
-# define assert(expr)		(__ASSERT_VOID_CAST (0))
 
 #define LWS_INSTALL_DATADIR "/usr/local/share"
 #define LWS_INSTALL_LIBDIR "/usr/local/lib"

@@ -1,15 +1,10 @@
 /* lws_config_private.h.in. Private compilation options. */
 
-#if 0
 #ifndef NDEBUG
 	#ifndef _DEBUG
 		#define _DEBUG
 	#endif
 #endif
-#endif
-#define NDEBUG
-#undef _DEBUG
-# define assert(expr)		(__ASSERT_VOID_CAST (0))
 /* #undef LWIP_PROVIDE_ERRNO */
 
 /* Define to 1 to use CyaSSL as a replacement for OpenSSL. 
