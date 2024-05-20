@@ -28,7 +28,7 @@ pushd ${MY_DIR} > /dev/null
 FRAMEWORK_DIR=${MY_DIR}/framework
 LIBYAML_DIR=${FRAMEWORK_DIR}/libfyaml-master
 ASPRINTF_DIR=${FRAMEWORK_DIR}/asprintf
-LIBWEBSOCKETS_DIR="${FRAMEWORK_DIR}/libwebsockets-4.3.3"
+WSSERVER_DIR=${FRAMEWORK_DIR}/wsServer
 
 # Clone CUnit
 if [ -d "${FRAMEWORK_DIR}/CUnit-2.1-3" ]; then
@@ -76,12 +76,13 @@ else
 fi
 
 pushd ${FRAMEWORK_DIR} > /dev/null
-if [ -d "${LIBWEBSOCKETS_DIR}" ]; then
-    echo "Framework libyaml already exists"
+if [ -d "${WSSERVER_DIR}" ]; then
+    echo "Framework wsserver already exists"
 else
     pushd ${MY_DIR}/framework > /dev/null
-    echo "Clone libwebsockets in ${LIBWEBSOCKETS_DIR}"
-    wget https://github.com/warmcat/libwebsockets/archive/refs/tags/v4.3.3.zip --no-check-certificate
-    unzip v4.3.3.zip
+    echo "Clone wsServer in ${WSSERVER_DIR}}"
+    wget https://github.com/Theldus/wsServer/archive/refs/heads/master.zip -P wsServer/. --no-check-certificate
+    cd wsServer
+    unzip master.zip
 fi
 popd > /dev/null # ${FRAMEWORK_DIR}

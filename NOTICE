@@ -23,8 +23,8 @@ It also uses asprintf.c (https://github.com/jwerle/asprintf.c) which is:
 Copyright (c) 2014 Little Star Media, Inc.
 Licensed under the MIT License
 
-This repository make use of the libwebsockets framework, which is licensed under the MIT License,
-https://libwebsockets.org/git/libwebsockets/tree/LICENSE
+This repository make use of the wsServer framework, which is licensed under the GPL-3.0 License,
+https://github.com/Theldus/wsServer?tab=GPL-3.0-1-ov-file
 
 templates directory
 The license files in the "template" directory or directories are intended as templates, and that the actual repository is licensed according to the licensing information at top level.

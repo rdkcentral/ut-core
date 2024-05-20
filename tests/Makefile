@@ -26,7 +26,7 @@ INC_DIRS := $(ROOT_DIR)/include
 INC_DIRS += $(ROOT_DIR)/../include
 
 # Switch on Linux & disable asserts for the testing suites
-CFLAGS = -DNDEBUG
+CFLAGS += -DNDEBUG
 TARGET_EXEC = ut-test
 
 TARGET = linux

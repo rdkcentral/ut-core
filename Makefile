@@ -59,91 +59,10 @@ SRC_DIRS += $(ASPRINTF_DIR)
 INC_DIRS += $(LIBFYAML_DIR)/include
 INC_DIRS += $(ASPRINTF_DIR)
 
-# LIBWEBSOCKETS Requirements
-LIBWEBSOCKETS_DIR = $(UT_DIR)/framework/libwebsockets-4.3.3
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/plat/unix/unix-fds.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/plat/unix/unix-pipe.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/plat/unix/unix-misc.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/plat/unix/unix-init.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/plat/unix/unix-caps.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/plat/unix/unix-file.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/plat/unix/unix-sockets.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/plat/unix/unix-service.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core-net/output.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core-net/wsi.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core-net/vhost.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core-net/pollfd.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core-net/wsi-timeout.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core-net/close.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core-net/route.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core-net/client
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core-net/dummy-callback.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core-net/sorted-usec-list.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core-net/state.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core-net/service.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core-net/network.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core-net/adopt.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core/buflist.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core/logs.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core/alloc.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core/context.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core/lws_dll2.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core/vfs.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core/libwebsockets.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/tls/openssl/openssl-ssl.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/tls/openssl/openssl-session.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/tls/openssl/openssl-tls.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/tls/openssl/openssl-x509.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/tls/openssl/openssl-server.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/tls/openssl/openssl-client.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/tls/tls-server.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/tls/tls-client.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/tls/tls.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/tls/tls-sessions.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/tls/tls-network.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/h2/ops-h2.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/h2/http2.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/h2/hpack.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/http/parsers.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/http/server/server.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/http/client/client-http.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/http/header.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/http/date.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/http/cookie.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/h1/ops-h1.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/raw-skt/ops-raw-skt.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/raw-file/ops-raw-file.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/pipe/ops-pipe.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/ws/ops-ws.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/ws/client-ws.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/ws/server-ws.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/ws/client-parser-ws.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/netlink/ops-netlink.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/listen/ops-listen.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/misc/base64-decode.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/misc/cache-ttl/file.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/misc/cache-ttl/lws-cache-ttl.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/misc/cache-ttl/heap.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/system/system.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/system/smd/smd.c
-SRC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/event-libs/poll/poll.c
-
-INC_DIRS += $(LIBWEBSOCKETS_DIR)/include
-INC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core-net
-INC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/core
-INC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/plat/unix
-INC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/tls
-INC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/tls/openssl
-INC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/event-libs
-INC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/system/smd
-INC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/system/metrics
-INC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles
-INC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/http
-INC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/h1
-INC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/h2
-INC_DIRS += $(LIBWEBSOCKETS_DIR)/lib/roles/ws
-
-CFLAGS = -DLWS_SHA1_USE_OPENSSL_NAME=1
+# WSSERVER Requirements
+WSSERVER_DIR = ${UT_DIR}/framework/wsServer/wsServer-master
+SRC_DIRS += $(WSSERVER_DIR)/src
+INC_DIRS += $(WSSERVER_DIR)/include
 
 INC_DIRS += $(UT_DIR)/include
 INC_DIRS += $(UT_DIR)/src
@@ -168,7 +87,6 @@ CUNIT_VARIANT=i686-pc-linux-gnu
 CC := gcc -ggdb -o0 -Wall
 endif
 
-XLDFLAGS += -lssl -lcrypto
 XLDFLAGS += -Wl,-rpath, $(YLDFLAGS) $(LDFLAGS) -pthread  -lpthread
 
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
