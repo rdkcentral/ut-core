@@ -83,11 +83,5 @@ else
     echo "Clone libwebsockets in ${LIBWEBSOCKETS_DIR}"
     wget https://github.com/warmcat/libwebsockets/archive/refs/tags/v4.3.3.zip --no-check-certificate
     unzip v4.3.3.zip
-    cd ${LIBWEBSOCKETS_DIR}
-    mkdir build
-    cd build
-    cmake ..
-    make
-    make install DESTDIR=.
 fi
 popd > /dev/null # ${FRAMEWORK_DIR}
