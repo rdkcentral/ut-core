@@ -39,6 +39,7 @@
 
 /** Pointer to the currently running suite. */
 static int gRegisterFailed;     /*!< Global Registration failed counter */
+static TestMode_t  gTestMode;
 
 static int internalInit( void );
 static int internalClean( void );
@@ -65,6 +66,24 @@ UT_status_t startup_system( void )
 }
 
 /**
+ * @brief sets the test mode from ut_main
+ * 
+ */
+void UT_set_test_mode(TestMode_t  mode)
+{
+    gTestMode = mode;
+}
+
+/**
+ * @brief gets the test mode
+ *
+ */
+static TestMode_t get_test_mode( void )
+{
+    return gTestMode;
+}
+
+/**
  * @brief run the registered tests as required
  * 
  * For the moment this function will currently output the cunit
@@ -87,10 +106,8 @@ UT_status_t UT_run_tests( void )
         return UT_STATUS_OK;
     }
 
-    UT_set_output_filename(gOptions.filenameRoot);
-
     UT_LOG( UT_LOG_ASCII_GREEN"---- start of test run ----"UT_LOG_ASCII_NC );
-    switch( gOptions.testMode )
+    switch( get_test_mode() )
     {
         case UT_MODE_BASIC:
         {
