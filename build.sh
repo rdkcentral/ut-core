@@ -28,7 +28,7 @@ pushd ${MY_DIR} > /dev/null
 FRAMEWORK_DIR=${MY_DIR}/framework
 LIBYAML_DIR=${FRAMEWORK_DIR}/libfyaml-master
 ASPRINTF_DIR=${FRAMEWORK_DIR}/asprintf
-WSSERVER_DIR=${FRAMEWORK_DIR}/wsServer
+LIBWEBSOCKETS_DIR=${FRAMEWORK_DIR}/libwebsockets-4.3.3
 
 # Clone CUnit
 if [ -d "${FRAMEWORK_DIR}/CUnit-2.1-3" ]; then
@@ -76,13 +76,19 @@ else
 fi
 
 pushd ${FRAMEWORK_DIR} > /dev/null
-if [ -d "${WSSERVER_DIR}" ]; then
-    echo "Framework wsserver already exists"
+if [ -d "${LIBWEBSOCKETS_DIR}" ]; then
+    echo "Framework libyaml already exists"
 else
     pushd ${MY_DIR}/framework > /dev/null
-    echo "Clone wsServer in ${WSSERVER_DIR}}"
-    wget https://github.com/Theldus/wsServer/archive/refs/heads/master.zip -P wsServer/. --no-check-certificate
-    cd wsServer
-    unzip master.zip
+    echo "Clone libwebsockets in ${LIBWEBSOCKETS_DIR}"
+    wget https://github.com/warmcat/libwebsockets/archive/refs/tags/v4.3.3.zip --no-check-certificate
+    unzip v4.3.3.zip
+    cd ${LIBWEBSOCKETS_DIR}
+    mkdir build
+    cd build
+    cmake .. -DLWS_WITH_SSL=OFF -DLWS_WITH_ZIP_FOPS=OFF -DLWS_WITH_ZLIB=OFF -DLWS_WITHOUT_BUILTIN_GETIFADDRS=ON \
+    -DLWS_WITHOUT_CLIENT=ON -DLWS_WITHOUT_EXTENSIONS=ON -DLWS_WITHOUT_TESTAPPS=ON -DLWS_WITH_SHARED=OFF \
+    -DLWS_WITHOUT_TEST_SERVER=ON -DLWS_WITHOUT_TEST_SERVER_EXTPOLL=ON -DLWS_WITH_MINIMAL_EXAMPLES=ON -DLWS_WITHOUT_DAEMONIZE=ON
+    make
 fi
 popd > /dev/null # ${FRAMEWORK_DIR}

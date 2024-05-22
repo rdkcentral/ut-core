@@ -27,7 +27,8 @@
     "private-lib-core.h": "c",
     "private-network.h": "c",
     "ut_log.h": "c",
-    "ut_kvp.h": "c"
+    "ut_kvp.h": "c",
+    "fio.h": "c"
   },
   "C_Cpp_Runner.msvcBatchPath": "",
   "C_Cpp_Runner.cCompilerPath": "gcc",

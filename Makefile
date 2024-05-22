@@ -59,10 +59,11 @@ SRC_DIRS += $(ASPRINTF_DIR)
 INC_DIRS += $(LIBFYAML_DIR)/include
 INC_DIRS += $(ASPRINTF_DIR)
 
-# WSSERVER Requirements
-WSSERVER_DIR = ${UT_DIR}/framework/wsServer/wsServer-master
-SRC_DIRS += $(WSSERVER_DIR)/src
-INC_DIRS += $(WSSERVER_DIR)/include
+# LIBWEBSOCKETS Requirements
+LIBWEBSOCKETS_DIR = $(UT_DIR)/framework/libwebsockets-4.3.3
+INC_DIRS += $(LIBWEBSOCKETS_DIR)/include
+INC_DIRS += $(LIBWEBSOCKETS_DIR)/build
+XLDFLAGS += -L $(LIBWEBSOCKETS_DIR)/build/lib -l:libwebsockets.a
 
 INC_DIRS += $(UT_DIR)/include
 INC_DIRS += $(UT_DIR)/src
