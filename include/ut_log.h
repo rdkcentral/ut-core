@@ -21,7 +21,7 @@
 #define UT_LOG_H
 
 /* System Includes */
-#include <stdarg.h> 
+#include <stdarg.h>
 
 #define UT_LOG_MAX_LINE_SIZE (255) /**!< Max string size displayed by `UT_LOG`. */
 #define UT_LOG_MAX_PATH      (260) /**!< Default maximum path length. */
@@ -60,7 +60,12 @@
 
 /**!
  * @brief Sets the path for the active log file.
- * @param inputFilePath - Path to the log file.
+ *
+ * Internally it caculates the correct logging filename to be used for the testing
+ *
+ * @see UT_log_getLogFilename() to retrieve the active log filename including path
+ *
+ * @param inputFilePath - Path to the log file
  */
 void UT_log_setLogFilePath(char *inputFilePath);
 

@@ -9,7 +9,7 @@
       "externalConsole": false,
       "cwd": "${workspaceFolder}/tests/bin/",
       "program": "${workspaceFolder}/tests/bin/ut-test",
-      "args": [ "-b", "-p", "${workspaceFolder}/tests/bin/assets/test_kvp.yaml" ],
+      "args": [ "-a", "-l", "${workspaceFolder}/tests/logs/", "-p", "${workspaceFolder}/tests/bin/assets/test_kvp.yaml" ],
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
