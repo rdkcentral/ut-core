@@ -48,7 +48,7 @@ if [ -d "${UT_CONTROL_LIB_DIR}" ]; then
 else
     pushd ${FRAMEWORK_DIR} > /dev/null
     echo "Clone ut_control_library in ${UT_CONTROL_LIB_DIR}"
-    git clone https://github.com/kanjoe24/ut-control-library.git
+    git clone https://github.com/kanjoe24/ut-control-library.git -b feature/gh20-control-plane-part2-librarycreation
 
     popd > /dev/null
 fi

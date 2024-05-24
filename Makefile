@@ -33,7 +33,6 @@ BUILD_DIR ?= $(TOP_DIR)/obj
 BIN_DIR ?= $(TOP_DIR)/bin
 XCFLAGS := $(KCFLAGS)
 
-ifneq ($(BUILD_LIBS), yes)
 # Enable CUnit Requirements
 XCFLAGS += -DUT_CUNIT
 CUNIT_DIR +=  $(UT_DIR)/framework/CUnit-2.1-3/CUnit
@@ -54,7 +53,7 @@ INC_DIRS += $(UT_DIR)/src
 
 SRC_DIRS += $(UT_DIR)/src
 XLDFLAGS += -L $(UT_DIR)/framework/ut-control-library/lib -lutcontrollibrary
-endif
+export LD_LIBRARY_PATH=$(UT_DIR)/framework/ut-control-library/lib
 
 MKDIR_P ?= @mkdir -p
 
@@ -96,17 +95,6 @@ XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\"
 # Library Path
 VPATH += $(UT_DIR)
 VPATH += $(TOP_DIR)
-
-lib : static_lib dynamic_lib
-# Rule to create the shared library
-dynamic_lib: ${OBJS}
-	@echo -e ${GREEN}Building dyanamic lib [${YELLOW}$(LIB_DIR)/$(TARGET_DYNAMIC_LIB)${GREEN}]${NC}
-	@$(CC) $(CFLAGS) -o $(LIB_DIR)/$(TARGET_DYNAMIC_LIB) $^ $(LDFLAGS)
-
-static_lib: $(OBJS)
-	@echo -e ${GREEN}Building static lib [${YELLOW}$(LIB_DIR)/$(TARGET_STATIC_LIB)${GREEN}]${NC}
-	@$(AR) rcs $(LIB_DIR)/$(TARGET_STATIC_LIB) $^ 
-
 
 # Make the final test binary
 test: $(OBJS)
