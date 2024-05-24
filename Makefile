@@ -33,6 +33,7 @@ BUILD_DIR ?= $(TOP_DIR)/obj
 BIN_DIR ?= $(TOP_DIR)/bin
 XCFLAGS := $(KCFLAGS)
 
+ifneq ($(BUILD_LIBS), yes)
 # Enable CUnit Requirements
 XCFLAGS += -DUT_CUNIT
 CUNIT_DIR +=  $(UT_DIR)/framework/CUnit-2.1-3/CUnit
@@ -48,27 +49,12 @@ SRC_DIRS += $(CUNIT_SRC_DIRS)/Framework
 #SRC_DIRS += $(CUNIT_SRC_DIRS)/Win
 #SRC_DIRS += $(CUNIT_SRC_DIRS)/Test
 
-# Enable libyaml Requirements
-LIBFYAML_DIR = ${UT_DIR}/framework/libfyaml-master
-ASPRINTF_DIR = ${UT_DIR}/framework/asprintf/asprintf.c-master/
-SRC_DIRS += $(LIBFYAML_DIR)/src/lib
-SRC_DIRS += $(LIBFYAML_DIR)/src/thread
-SRC_DIRS += $(LIBFYAML_DIR)/src/util
-SRC_DIRS += $(LIBFYAML_DIR)/src/xxhash
-SRC_DIRS += $(ASPRINTF_DIR)
-INC_DIRS += $(LIBFYAML_DIR)/include
-INC_DIRS += $(ASPRINTF_DIR)
-
-# LIBWEBSOCKETS Requirements
-LIBWEBSOCKETS_DIR = $(UT_DIR)/framework/libwebsockets-4.3.3
-INC_DIRS += $(LIBWEBSOCKETS_DIR)/include
-INC_DIRS += $(LIBWEBSOCKETS_DIR)/build
-XLDFLAGS += -L $(LIBWEBSOCKETS_DIR)/build/lib -l:libwebsockets.a
-
 INC_DIRS += $(UT_DIR)/include
 INC_DIRS += $(UT_DIR)/src
 
 SRC_DIRS += $(UT_DIR)/src
+XLDFLAGS += -L $(UT_DIR)/framework/ut-control-library/lib -lutcontrollibrary
+endif
 
 MKDIR_P ?= @mkdir -p
 
@@ -86,6 +72,7 @@ endif
 ifeq ($(TARGET),linux)
 CUNIT_VARIANT=i686-pc-linux-gnu
 CC := gcc -ggdb -o0 -Wall
+AR := ar
 endif
 
 XLDFLAGS += -Wl,-rpath, $(YLDFLAGS) $(LDFLAGS) -pthread  -lpthread
@@ -110,6 +97,17 @@ XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\"
 VPATH += $(UT_DIR)
 VPATH += $(TOP_DIR)
 
+lib : static_lib dynamic_lib
+# Rule to create the shared library
+dynamic_lib: ${OBJS}
+	@echo -e ${GREEN}Building dyanamic lib [${YELLOW}$(LIB_DIR)/$(TARGET_DYNAMIC_LIB)${GREEN}]${NC}
+	@$(CC) $(CFLAGS) -o $(LIB_DIR)/$(TARGET_DYNAMIC_LIB) $^ $(LDFLAGS)
+
+static_lib: $(OBJS)
+	@echo -e ${GREEN}Building static lib [${YELLOW}$(LIB_DIR)/$(TARGET_STATIC_LIB)${GREEN}]${NC}
+	@$(AR) rcs $(LIB_DIR)/$(TARGET_STATIC_LIB) $^ 
+
+
 # Make the final test binary
 test: $(OBJS)
 	@echo -e ${GREEN}Linking $@ $(BUILD_DIR)/$(TARGET_EXEC)${NC}
@@ -126,7 +124,7 @@ $(BUILD_DIR)/%.o: %.c
 	@$(MKDIR_P) $(dir $@)
 	@$(CC) $(XCFLAGS) -c $< -o $@
 
-.PHONY: clean list arm linux framework
+.PHONY: clean list arm linux framework lib
 all: framework linux
 
 # Ensure the framework is built

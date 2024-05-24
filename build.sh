@@ -26,9 +26,7 @@ MY_DIR="$(dirname $SCRIPT_EXEC)"
 pushd ${MY_DIR} > /dev/null
 
 FRAMEWORK_DIR=${MY_DIR}/framework
-LIBYAML_DIR=${FRAMEWORK_DIR}/libfyaml-master
-ASPRINTF_DIR=${FRAMEWORK_DIR}/asprintf
-LIBWEBSOCKETS_DIR=${FRAMEWORK_DIR}/libwebsockets-4.3.3
+UT_CONTROL_LIB_DIR=${FRAMEWORK_DIR}/ut-control-library
 
 # Clone CUnit
 if [ -d "${FRAMEWORK_DIR}/CUnit-2.1-3" ]; then
@@ -45,50 +43,17 @@ else
     echo "Patching Complete"
 fi
 
-if [ -d "${LIBYAML_DIR}" ]; then
+if [ -d "${UT_CONTROL_LIB_DIR}" ]; then
     echo "Framework libyaml already exists"
 else
     pushd ${FRAMEWORK_DIR} > /dev/null
-    echo "Clone libfyaml in ${LIBYAML_DIR}"
-    wget https://github.com/pantoniou/libfyaml/archive/refs/heads/master.zip --no-check-certificate
-    unzip master.zip
+    echo "Clone ut_control_library in ${UT_CONTROL_LIB_DIR}"
+    git clone https://github.com/kanjoe24/ut-control-library.git
 
-    echo "Patching Framework [${PWD}]"
-    cp ../src/libyaml/patches/CorrectWarningsAndBuildIssuesInLibYaml.patch  .
-    patch -i CorrectWarningsAndBuildIssuesInLibYaml.patch -p0
-    echo "Patching Complete"
-
-#    ./bootstrap.sh
-#    ./configure --prefix=${LIBYAML_DIR}
-#    make
     popd > /dev/null
 fi
-
-pushd ${FRAMEWORK_DIR} > /dev/null
-if [ -d "${ASPRINTF_DIR}" ]; then
-    echo "Framework libyaml already exists"
-else
-    echo "Clone asprintf in ${ASPRINTF_DIR}"
-    wget https://github.com/jwerle/asprintf.c/archive/refs/heads/master.zip -P asprintf/. --no-check-certificate
-    cd asprintf
-    unzip master.zip
-    rm asprintf.c-master/test.c
-fi
-
-pushd ${FRAMEWORK_DIR} > /dev/null
-if [ -d "${LIBWEBSOCKETS_DIR}" ]; then
-    echo "Framework libyaml already exists"
-else
-    pushd ${MY_DIR}/framework > /dev/null
-    echo "Clone libwebsockets in ${LIBWEBSOCKETS_DIR}"
-    wget https://github.com/warmcat/libwebsockets/archive/refs/tags/v4.3.3.zip --no-check-certificate
-    unzip v4.3.3.zip
-    cd ${LIBWEBSOCKETS_DIR}
-    mkdir build
-    cd build
-    cmake .. -DLWS_WITH_SSL=OFF -DLWS_WITH_ZIP_FOPS=OFF -DLWS_WITH_ZLIB=OFF -DLWS_WITHOUT_BUILTIN_GETIFADDRS=ON \
-    -DLWS_WITHOUT_CLIENT=ON -DLWS_WITHOUT_EXTENSIONS=ON -DLWS_WITHOUT_TESTAPPS=ON -DLWS_WITH_SHARED=OFF \
-    -DLWS_WITHOUT_TEST_SERVER=ON -DLWS_WITHOUT_TEST_SERVER_EXTPOLL=ON -DLWS_WITH_MINIMAL_EXAMPLES=ON -DLWS_WITHOUT_DAEMONIZE=ON
-    make
-fi
 popd > /dev/null # ${FRAMEWORK_DIR}
+
+#clone the external libraries
+cd framework/ut-control-library
+./install.sh
