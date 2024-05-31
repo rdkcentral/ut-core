@@ -47,13 +47,16 @@ if [ -d "${UT_CONTROL_LIB_DIR}" ]; then
     echo "Framework libyaml already exists"
 else
     pushd ${FRAMEWORK_DIR} > /dev/null
-    echo "Clone ut_control_library in ${UT_CONTROL_LIB_DIR}"
-    git clone https://github.com/kanjoe24/ut-control-library.git -b feature/gh20-control-plane-part2-librarycreation
-
-    popd > /dev/null
+    if [ "$1" != "test_lib" ]; then
+        echo "Clone ut_control_library in ${UT_CONTROL_LIB_DIR}"
+        #TODO: change the git url to correct one
+        git clone https://github.com/rdkcentral/ut-control.git -b feature/gh20-control-plane-part2-librarycreation
+        #clone the external libraries
+        cd ut-control
+        ./install.sh
+    else
+        echo "$1 requested, hence ut-control is not required to be cloned"
+    fi
 fi
-popd > /dev/null # ${FRAMEWORK_DIR}
 
-#clone the external libraries
-cd framework/ut-control-library
-./install.sh
+popd > /dev/null # ${FRAMEWORK_DIR}
