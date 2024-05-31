@@ -39,9 +39,13 @@ static UT_test_suite_t *gpKVPSuite = NULL;
 static UT_test_suite_t *gpKVPSuite2 = NULL;
 static UT_test_suite_t *gpKVPSuite3 = NULL;
 static UT_test_suite_t *gpKVPSuite4 = NULL;
+static UT_test_suite_t *gpKVPSuite5 = NULL;
+static UT_test_suite_t *gpKVPSuite6 = NULL;
 
 static int test_ut_kvp_createGlobalYAMLInstance(void);
 static int test_ut_kvp_createGlobalJSONInstance(void);
+static int test_ut_kvp_createGlobalYAMLInstanceForMallocedData(void);
+static int test_ut_kvp_createGlobalJSONInstanceForMallocedData(void);
 static int test_ut_kvp_freeGlobalInstance(void);
 
 void test_ut_kvp_testCreateDestroy(void)
@@ -71,7 +75,7 @@ void test_ut_kvp_open( void )
 
     /* Negative Test */
     UT_LOG_STEP("ut_kvp_open( NULL, NULL )");
-    status = ut_kvp_open( NULL, NULL );
+    status = ut_kvp_open( NULL, NULL, false);
     UT_ASSERT( status == UT_KVP_STATUS_INVALID_INSTANCE );
 
     /* Positive Test */
@@ -85,26 +89,146 @@ void test_ut_kvp_open( void )
 
     /* Negative Read Test, NULL PARAM */
     UT_LOG_STEP("ut_kvp_open( pInstance, NULL ) - Negative");
-    status = ut_kvp_open( pInstance, NULL );
+    status = ut_kvp_open( pInstance, NULL, false );
     UT_ASSERT( status == UT_KVP_STATUS_INVALID_PARAM );
 
     /* Filename doesn't exist */
     UT_LOG_STEP("ut_kvp_open( pInstance, %s - filename doesn't exist ) - Negative", KVP_VALID_TEST_NO_FILE);
-    status = ut_kvp_open( pInstance, KVP_VALID_TEST_NO_FILE );
+    status = ut_kvp_open( pInstance, KVP_VALID_TEST_NO_FILE, false );
     UT_ASSERT( status == UT_KVP_STATUS_FILE_OPEN_ERROR );
 
     /* Zero length file, that the library should reject because it can't parse it at all */
     UT_LOG_STEP("ut_kvp_open( pInstance, %s - zero length file ) - Negative", KVP_VALID_TEST_ZERO_LENGTH_YAML_FILE);
-    status = ut_kvp_open( pInstance, KVP_VALID_TEST_ZERO_LENGTH_YAML_FILE );
+    status = ut_kvp_open( pInstance, KVP_VALID_TEST_ZERO_LENGTH_YAML_FILE, false );
     UT_ASSERT( status == UT_KVP_STATUS_PARSING_ERROR );
 
     /* Positive Tests */
     UT_LOG_STEP("ut_kvp_open( pInstance,  KVP_VALID_TEST_YAML_FILE ) - Positive");
-    status = ut_kvp_open( pInstance, KVP_VALID_TEST_YAML_FILE );
+    status = ut_kvp_open( pInstance, KVP_VALID_TEST_YAML_FILE, false );
     UT_ASSERT( status == UT_KVP_STATUS_SUCCESS );
 
     UT_LOG_STEP("ut_kvp_open( pInstance, %s ) - Postive", KVP_VALID_TEST_NOT_VALID_YAML_FORMATTED_FILE);
-    status = ut_kvp_open( pInstance, KVP_VALID_TEST_NOT_VALID_YAML_FORMATTED_FILE );
+    status = ut_kvp_open( pInstance, KVP_VALID_TEST_NOT_VALID_YAML_FORMATTED_FILE, false );
+    UT_ASSERT( status == UT_KVP_STATUS_SUCCESS );
+
+    /* Test Destroy causes close this should work fine */
+    UT_LOG_STEP("ut_kvp_destroyInstance(1) - Positive");
+    ut_kvp_destroyInstance( pInstance );
+    UT_LOG_STEP("ut_kvp_destroyInstance(2) - Positive");
+    ut_kvp_destroyInstance( pInstance );
+
+    /* Calling close after destroy should have no effect */
+    UT_LOG_STEP("ut_kvp_close(1) - Positive");
+    ut_kvp_close(pInstance);
+    UT_LOG_STEP("ut_kvp_close(2) - Positive");
+    ut_kvp_close(pInstance);
+
+    /* Re-check close is actually ok by walking through and auto running */
+    UT_LOG_STEP("ut_kvp_close(3) - Positive");
+    pInstance = ut_kvp_createInstance();
+    UT_ASSERT( pInstance != NULL );
+
+    UT_LOG_STEP("ut_kvp_close(3) - Positive");
+    ut_kvp_close(pInstance);
+    UT_LOG_STEP("ut_kvp_close(4) - Positive");
+    ut_kvp_close(pInstance);
+}
+
+char* read_file(const char* filename) {
+    FILE* file = fopen(filename, "rb");
+    if (!file) {
+        UT_LOG_ERROR("fopen");
+        return NULL;
+    }
+
+    // Seek to the end to determine the file size
+    if (fseek(file, 0, SEEK_END) != 0) {
+        UT_LOG_ERROR("fseek");
+        fclose(file);
+        return NULL;
+    }
+
+    long length = ftell(file);
+    if (length < 0) {
+        UT_LOG_ERROR("ftell");
+        fclose(file);
+        return NULL;
+    }
+    rewind(file);
+
+    // Allocate memory for the file contents
+    char* buffer = malloc(length + 1);
+    if (!buffer) {
+        UT_LOG_ERROR("malloc");
+        fclose(file);
+        return NULL;
+    }
+
+    // Read the file into the buffer
+    if (fread(buffer, 1, length, file) != length) {
+        UT_LOG_ERROR("fread");
+        free(buffer);
+        fclose(file);
+        return NULL;
+    }
+
+    // Null-terminate the buffer
+    buffer[length] = '\0';
+
+    fclose(file);
+    return buffer;
+}
+
+void test_ut_kvp_open_malloced( void )
+{
+    ut_kvp_instance_t *pInstance = NULL;
+    ut_kvp_status_t status;
+
+    /* Negative Test */
+    UT_LOG_STEP("ut_kvp_open( NULL, NULL )");
+    status = ut_kvp_open( NULL, NULL, true);
+    UT_ASSERT( status == UT_KVP_STATUS_INVALID_INSTANCE );
+
+    /* Positive Test */
+    UT_LOG_STEP("ut_kvp_createInstance");
+    pInstance = ut_kvp_createInstance();
+    UT_ASSERT( pInstance != NULL );
+
+    /* Negative Test*/
+    UT_LOG_STEP("ut_kvp_close( pInstance ) - Not been opened");
+    ut_kvp_close(pInstance);
+
+    /* Negative Read Test, NULL PARAM */
+    UT_LOG_STEP("ut_kvp_open( pInstance, NULL ) - Negative");
+    status = ut_kvp_open( pInstance, NULL, true );
+    UT_ASSERT( status == UT_KVP_STATUS_INVALID_PARAM );
+
+    /* data doesn't exist */
+    UT_LOG_STEP("ut_kvp_open( pInstance, %s - filename doesn't exist ) - Negative", KVP_VALID_TEST_NO_FILE);
+    const char *kvp_str = "  ";
+    char* kvp_buffer = strdup(kvp_str);
+    if (!kvp_buffer) {
+        UT_LOG_ERROR("strdup");
+    }
+    status = ut_kvp_open( pInstance, kvp_buffer, true );
+    UT_ASSERT( status == UT_KVP_STATUS_PARSING_ERROR );
+
+    /* Zero length file, that the library should reject because it can't parse it at all */
+    UT_LOG_STEP("ut_kvp_open( pInstance, %s - zero length file ) - Negative", KVP_VALID_TEST_ZERO_LENGTH_YAML_FILE);
+    status = ut_kvp_open( pInstance, read_file(KVP_VALID_TEST_ZERO_LENGTH_YAML_FILE), true );
+    UT_ASSERT( status == UT_KVP_STATUS_PARSING_ERROR );
+
+    /* Positive Tests */
+    UT_LOG_STEP("ut_kvp_open( pInstance,  KVP_VALID_TEST_YAML_FILE ) - Positive");
+    status = ut_kvp_open( pInstance, read_file(KVP_VALID_TEST_YAML_FILE), true );
+    UT_ASSERT( status == UT_KVP_STATUS_SUCCESS );
+
+    UT_LOG_STEP("ut_kvp_open( pInstance, %s ) - Postive", KVP_VALID_TEST_NOT_VALID_YAML_FORMATTED_FILE);
+    status = ut_kvp_open( pInstance, read_file(KVP_VALID_TEST_NOT_VALID_YAML_FORMATTED_FILE), true );
+    UT_ASSERT( status == UT_KVP_STATUS_SUCCESS );
+
+    UT_LOG_STEP("ut_kvp_open( pInstance, %s ) - Postive", KVP_VALID_TEST_JSON_FILE);
+    status = ut_kvp_open( pInstance, read_file(KVP_VALID_TEST_JSON_FILE), true );
     UT_ASSERT( status == UT_KVP_STATUS_SUCCESS );
 
     /* Test Destroy causes close this should work fine */
@@ -324,7 +448,7 @@ static int test_ut_kvp_createGlobalYAMLInstance( void )
         return -1;
     }
 
-    status = ut_kvp_open( gpMainTestInstance, KVP_VALID_TEST_YAML_FILE );
+    status = ut_kvp_open( gpMainTestInstance, KVP_VALID_TEST_YAML_FILE, false );
     assert( status == UT_KVP_STATUS_SUCCESS );
     status = status;
 
@@ -349,7 +473,57 @@ static int test_ut_kvp_createGlobalJSONInstance( void )
         return -1;
     }
 
-    status = ut_kvp_open( gpMainTestInstance, KVP_VALID_TEST_JSON_FILE );
+    status = ut_kvp_open( gpMainTestInstance, KVP_VALID_TEST_JSON_FILE, false );
+    assert( status == UT_KVP_STATUS_SUCCESS );
+    status = status;
+
+    if ( status != UT_KVP_STATUS_SUCCESS )
+    {
+        UT_LOG_ERROR("ut_kvp_open() - Read Failure");
+        return -1;
+    }
+
+    return 0;
+}
+
+static int test_ut_kvp_createGlobalYAMLInstanceForMallocedData( void )
+{
+    ut_kvp_status_t status;
+
+    gpMainTestInstance = ut_kvp_createInstance();
+    if ( gpMainTestInstance == NULL )
+    {
+        assert( gpMainTestInstance != NULL );
+        UT_LOG_ERROR("ut_kvp_open() - Read Failure");
+        return -1;
+    }
+
+    status = ut_kvp_open( gpMainTestInstance, read_file(KVP_VALID_TEST_YAML_FILE), true );
+    assert( status == UT_KVP_STATUS_SUCCESS );
+    status = status;
+
+    if ( status != UT_KVP_STATUS_SUCCESS )
+    {
+        UT_LOG_ERROR("ut_kvp_open() - Read Failure");
+        return -1;
+    }
+
+    return 0;
+}
+
+static int test_ut_kvp_createGlobalJSONInstanceForMallocedData( void )
+{
+    ut_kvp_status_t status;
+
+    gpMainTestInstance = ut_kvp_createInstance();
+    if ( gpMainTestInstance == NULL )
+    {
+        assert( gpMainTestInstance != NULL );
+        UT_LOG_ERROR("ut_kvp_open() - Read Failure");
+        return -1;
+    }
+
+    status = ut_kvp_open( gpMainTestInstance, read_file(KVP_VALID_TEST_JSON_FILE), true );
     assert( status == UT_KVP_STATUS_SUCCESS );
     status = status;
 
@@ -376,6 +550,7 @@ void register_kvp_functions( void )
 
     UT_add_test(gpKVPSuite, "kvp create / destroy", test_ut_kvp_testCreateDestroy);
     UT_add_test(gpKVPSuite, "kvp read", test_ut_kvp_open);
+    UT_add_test(gpKVPSuite, "kvp read with malloced data", test_ut_kvp_open_malloced);
 
     gpKVPSuite2 = UT_add_suite("ut-kvp - test main functions YAML Decoder ", test_ut_kvp_createGlobalYAMLInstance, test_ut_kvp_freeGlobalInstance);
     assert(gpKVPSuite2 != NULL);
@@ -404,5 +579,25 @@ void register_kvp_functions( void )
 
     UT_add_test(gpKVPSuite4, "kvp read negative", test_ut_kvp_get_field_without_open);
 
+    /* Perform the same parsing on malloc'd data*/
+    gpKVPSuite5 = UT_add_suite("ut-kvp - test main functions YAML Decoder with malloc'd data", test_ut_kvp_createGlobalYAMLInstanceForMallocedData, test_ut_kvp_freeGlobalInstance);
+    assert(gpKVPSuite5 != NULL);
 
+    UT_add_test(gpKVPSuite5, "kvp uint8", test_ut_kvp_uint8);
+    UT_add_test(gpKVPSuite5, "kvp uint16", test_ut_kvp_uint16);
+    UT_add_test(gpKVPSuite5, "kvp bool", test_ut_kvp_bool);
+    UT_add_test(gpKVPSuite5, "kvp string", test_ut_kvp_string);
+    UT_add_test(gpKVPSuite5, "kvp uint32", test_ut_kvp_uint32);
+    UT_add_test(gpKVPSuite5, "kvp uint64", test_ut_kvp_uint64);
+
+    /* Perform the same parsing tests but use a json file instead */
+    gpKVPSuite6 = UT_add_suite("ut-kvp - test main functions JSON Decoder with malloc'd data", test_ut_kvp_createGlobalJSONInstanceForMallocedData, test_ut_kvp_freeGlobalInstance);
+    assert(gpKVPSuite6 != NULL);
+
+    UT_add_test(gpKVPSuite6, "kvp string", test_ut_kvp_string);
+    UT_add_test(gpKVPSuite6, "kvp uint8", test_ut_kvp_uint8);
+    UT_add_test(gpKVPSuite6, "kvp uint16", test_ut_kvp_uint16);
+    UT_add_test(gpKVPSuite6, "kvp bool", test_ut_kvp_bool);
+    UT_add_test(gpKVPSuite6, "kvp uint32", test_ut_kvp_uint32);
+    UT_add_test(gpKVPSuite6, "kvp uint64", test_ut_kvp_uint64);
 }
