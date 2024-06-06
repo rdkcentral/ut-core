@@ -42,6 +42,7 @@ void test_ut_kvp_profile_uint8(void)
     UT_LOG_STEP( "test_ut_kvp_profile_uint8 - start" );
     UT_ASSERT_KVP_EQUAL_PROFILE_UINT8( checkField, "decodeTest/checkUint8IsDeDec" );
     UT_ASSERT_KVP_EQUAL_PROFILE_UINT8( checkField, "decodeTest/checkUint8IsDeHex" );
+     UT_ASSERT_KVP_EQUAL_PROFILE_UINT8( checkField, "decodeTest.checkUint8IsDeHex" );
     UT_LOG_STEP( "test_ut_kvp_profile_uint8 - end" );
 }
 
@@ -51,6 +52,7 @@ void test_ut_kvp_profile_uint16(void)
     UT_LOG_STEP( "test_ut_kvp_profile_uint16 - start" );
     UT_ASSERT_KVP_EQUAL_PROFILE_UINT16( checkField, "decodeTest/checkUint16IsDeadDec" );
     UT_ASSERT_KVP_EQUAL_PROFILE_UINT16( checkField, "decodeTest/checkUint16IsDeadHex" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_UINT16( checkField, "decodeTest.checkUint16IsDeadHex" );
     UT_LOG_STEP( "test_ut_kvp_profile_uint16 - end" );
 }
 
@@ -60,6 +62,7 @@ void test_ut_kvp_profile_uint32(void)
     UT_LOG_STEP( "test_ut_kvp_profile_uint32 - start" );
     UT_ASSERT_KVP_EQUAL_PROFILE_UINT32( checkField, "decodeTest/checkUint32IsDeadBeefDec" );
     UT_ASSERT_KVP_EQUAL_PROFILE_UINT32( checkField, "decodeTest/checkUint32IsDeadBeefHex" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_UINT32( checkField, "decodeTest.checkUint32IsDeadBeefHex" );
     UT_LOG_STEP( "test_ut_kvp_profile_uint32 - end" );
 }
 
@@ -67,8 +70,9 @@ void test_ut_kvp_profile_uint64(void)
 {
     uint64_t checkField = 0xdeadbeefdeadbeef;
     UT_LOG_STEP( "test_ut_kvp_profile_uint64" );
-    UT_ASSERT_EQUAL_KVP_PROFILE_UINT64( checkField, "decodeTest/checkUint64IsDeadBeefDec" );
-    UT_ASSERT_EQUAL_KVP_PROFILE_UINT64( checkField, "decodeTest/checkUint64IsDeadBeefHex" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_UINT64( checkField, "decodeTest/checkUint64IsDeadBeefDec" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_UINT64( checkField, "decodeTest/checkUint64IsDeadBeefHex" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_UINT64( checkField, "decodeTest.checkUint64IsDeadBeefHex" );
     UT_LOG_STEP( "test_ut_kvp_profile_uint64 - end" );
 }
 
@@ -76,15 +80,17 @@ void test_ut_kvp_profile_string(void)
 {
     const char *checkField = "the beef is dead";
     UT_LOG_STEP( "test_ut_kvp_profile_string" );
-    UT_ASSERT_EQUAL_KVP_PROFILE_STRING( checkField, "decodeTest/checkStringDeadBeef");
+    UT_ASSERT_KVP_EQUAL_PROFILE_STRING( checkField, "decodeTest/checkStringDeadBeef");
+    UT_ASSERT_KVP_EQUAL_PROFILE_STRING( checkField, "decodeTest.checkStringDeadBeef");
     UT_LOG_STEP( "test_ut_kvp_profile_string - end" );
 }
 
 void test_ut_kvp_profile_bool(void)
 {
     UT_LOG_STEP( "test_ut_kvp_profile_bool" );
-    UT_ASSERT_EQUAL_KVP_PROFILE_BOOL( false, "decodeTest/checkBoolFalse" );
-    UT_ASSERT_EQUAL_KVP_PROFILE_BOOL( true, "decodeTest/checkBoolTRUE" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_BOOL( false, "decodeTest/checkBoolFalse" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_BOOL( true, "decodeTest/checkBoolTRUE" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_BOOL( true, "decodeTest.checkBoolTRUE" );
     UT_LOG_STEP( "test_ut_kvp_profile_bool - end" );
 }
 

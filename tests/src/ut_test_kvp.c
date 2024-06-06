@@ -163,6 +163,12 @@ void test_ut_kvp_uint16(void)
     result = ut_kvp_getUInt16Field( gpMainTestInstance, "decodeTest/checkUint16IsDeadDec" );
     UT_ASSERT( result == checkField );
 
+    result = ut_kvp_getUInt16Field( gpMainTestInstance, "decodeTest.checkUint16IsDeadHex" );
+    UT_ASSERT( result == checkField );
+
+    result = ut_kvp_getUInt16Field( gpMainTestInstance, "decodeTest.checkUint16IsDeadDec" );
+    UT_ASSERT( result == checkField );
+
     /* Negative Tests */
     result = ut_kvp_getUInt16Field( gpMainTestInstance, "thisShouldNotWork/checkUint64IsDeadBeefHex" );
     UT_ASSERT( result == 0 );
@@ -184,6 +190,12 @@ void test_ut_kvp_uint32(void)
     result = ut_kvp_getUInt32Field( gpMainTestInstance, "decodeTest/checkUint32IsDeadBeefDec" );
     UT_ASSERT( result == checkField );
 
+    result = ut_kvp_getUInt32Field( gpMainTestInstance, "decodeTest.checkUint32IsDeadBeefHex" );
+    UT_ASSERT( result == checkField );
+
+    result = ut_kvp_getUInt32Field( gpMainTestInstance, "decodeTest.checkUint32IsDeadBeefDec" );
+    UT_ASSERT( result == checkField );
+
     /* Negative Tests */
     result = ut_kvp_getUInt32Field( gpMainTestInstance, "thisShouldNotWork/checkUint64IsDeadBeefHex" );
     UT_ASSERT( result == 0 );
@@ -203,6 +215,12 @@ void test_ut_kvp_uint64(void)
     UT_ASSERT( result == checkField );
 
     result = ut_kvp_getUInt64Field( gpMainTestInstance, "decodeTest/checkUint64IsDeadBeefDec" );
+    UT_ASSERT( result == checkField );
+
+    result = ut_kvp_getUInt64Field( gpMainTestInstance, "decodeTest.checkUint64IsDeadBeefHex" );
+    UT_ASSERT( result == checkField );
+
+    result = ut_kvp_getUInt64Field( gpMainTestInstance, "decodeTest.checkUint64IsDeadBeefDec" );
     UT_ASSERT( result == checkField );
 
     /* Negative Tests */
@@ -295,6 +313,18 @@ void test_ut_kvp_string(void)
     UT_ASSERT(status == UT_KVP_STATUS_SUCCESS );
     UT_ASSERT_STRING_EQUAL(result_kvp, "the beef is also dead" );
     UT_LOG( "checkStringDeadBeef2[%s]", result_kvp );
+
+    UT_LOG_STEP("ut_kvp_getStringField() - Check String with Quotes for UT_KVP_STATUS_SUCCESS");
+    status = ut_kvp_getStringField(gpMainTestInstance, "decodeTest.checkStringDeadBeef", result_kvp, UT_KVP_MAX_ELEMENT_SIZE);
+    UT_ASSERT(status == UT_KVP_STATUS_SUCCESS );
+    UT_ASSERT_STRING_EQUAL(result_kvp, checkField);
+    UT_LOG( "checkStringDeadBeef[%s]", result_kvp );
+
+    UT_LOG_STEP("ut_kvp_getStringField() - Check String with Quotes for UT_KVP_STATUS_SUCCESS");
+    status = ut_kvp_getStringField(gpMainTestInstance, "decodeTest.checkStringDeadBeef2", result_kvp, UT_KVP_MAX_ELEMENT_SIZE);
+    UT_ASSERT(status == UT_KVP_STATUS_SUCCESS );
+    UT_ASSERT_STRING_EQUAL(result_kvp, "the beef is also dead" );
+    UT_LOG( "checkStringDeadBeef2[%s]", result_kvp );
 }
 
 void test_ut_kvp_get_field_without_open( void )
@@ -344,6 +374,12 @@ void test_ut_kvp_bool(void)
     UT_ASSERT( result == true );
 
     result = ut_kvp_getBoolField( gpMainTestInstance, "decodeTest/checkBoolFalse" );
+    UT_ASSERT( result == false );
+
+    result = ut_kvp_getBoolField( gpMainTestInstance, "decodeTest.checkBoolTRuE" );
+    UT_ASSERT( result == true );
+
+    result = ut_kvp_getBoolField( gpMainTestInstance, "decodeTest.checkBoolFalse" );
     UT_ASSERT( result == false );
 }
 
