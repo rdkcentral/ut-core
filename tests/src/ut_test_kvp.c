@@ -471,6 +471,7 @@ void register_kvp_functions( void )
     UT_add_test(gpKVPSuite3, "kvp bool", test_ut_kvp_bool);
     UT_add_test(gpKVPSuite3, "kvp uint32", test_ut_kvp_uint32);
     UT_add_test(gpKVPSuite3, "kvp uint64", test_ut_kvp_uint64);
+    UT_add_test(gpKVPSuite3, "kvp list", test_ut_kvp_list);
 
 
     gpKVPSuite4 = UT_add_suite("ut-kvp - test main functions Test without Open ", NULL, NULL);

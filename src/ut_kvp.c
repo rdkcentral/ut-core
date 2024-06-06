@@ -135,8 +135,8 @@ void ut_kvp_close(ut_kvp_instance_t *pInstance)
 static ut_kvp_status_t ut_kvp_getField(ut_kvp_instance_t *pInstance, const char *pszKey, char *pzResult)
 {
     ut_kvp_instance_internal_t *pInternal = validateInstance(pInstance);
-    char zEntry[UT_KVP_MAX_ELEMENT_SIZE];
-    char zKey[UT_KVP_MAX_ELEMENT_SIZE/2] = {0};
+    char zEntry[UT_KVP_MAX_ELEMENT_SIZE * 2];
+    char zKey[UT_KVP_MAX_ELEMENT_SIZE] = {0};
     char *str = "%s";
     int fy_result;
 
@@ -169,7 +169,7 @@ static ut_kvp_status_t ut_kvp_getField(ut_kvp_instance_t *pInstance, const char 
 
     convert_dot_to_slash(pszKey, zKey);
 
-    snprintf( zEntry, UT_KVP_MAX_ELEMENT_SIZE, "%s %s", zKey, str );
+    snprintf( zEntry, (UT_KVP_MAX_ELEMENT_SIZE * 2), "%s %s", zKey, str );
     fy_result = fy_document_scanf(pInternal->fy_handle, zEntry, pzResult);
     if ( fy_result <= 0 )
     {
@@ -326,7 +326,7 @@ ut_kvp_status_t ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char 
     struct fy_node *node = NULL;
     struct fy_node *root = NULL;
     const char *pString = NULL;
-    char zKey[UT_KVP_MAX_ELEMENT_SIZE/2] = {0};
+    char zKey[UT_KVP_MAX_ELEMENT_SIZE] = {0};
 
     ut_kvp_instance_internal_t *pInternal = validateInstance(pInstance);
 
@@ -398,7 +398,7 @@ uint32_t ut_kvp_getSequenceCount( ut_kvp_instance_t *pInstance, const char *pszK
     struct fy_node *node = NULL;
     struct fy_node *root = NULL;
     uint32_t count;
-    char zKey[UT_KVP_MAX_ELEMENT_SIZE/2] = {0};
+    char zKey[UT_KVP_MAX_ELEMENT_SIZE] = {0};
 
     ut_kvp_instance_internal_t *pInternal = validateInstance(pInstance);
 
@@ -496,7 +496,7 @@ static void convert_dot_to_slash(const char *key, char *output)
 {
     if(strchr(key, '.'))
     {
-        for (int i = 0; key[i] != '\0'; i++)
+        for (int i = 0; i <= UT_KVP_MAX_ELEMENT_SIZE; i++)
         {
             char key_val = key[i];
             if (key_val == '.')
