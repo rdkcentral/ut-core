@@ -155,8 +155,16 @@ uint64_t ut_kvp_getUInt64Field(ut_kvp_instance_t *pInstance, const char *pszKey)
  * @retval UT_KVP_STATUS_NULL_PARAM - A null parameter was passed.
  * @retval UT_KVP_STATUS_INVALID_INSTANCE - An invalid KVP instance handle was passed.
  */
-ut_kvp_status_t ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *pszKey, char *pszReturnedString, uint32_t uStringSize ); 
+ut_kvp_status_t ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *pszKey, char *pszReturnedString, uint32_t uStringSize );
 
+/**!
+ * @brief Gets count of the number of sequences in a given node
+ *
+ * @param[in] pInstance - Handle to the KVP instance.
+ * @param[in] pszKey - Null-terminated string representing the key to search for.
+ *
+ * @returns The `int` value on success, or 0 on error (check logs for details).
+ */
 int ut_kvp_getSequenceCount( ut_kvp_instance_t *pInstance, const char *pszKey);
 
 /* TODO:

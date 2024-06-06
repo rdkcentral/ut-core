@@ -446,7 +446,7 @@ int ut_kvp_getSequenceCount( ut_kvp_instance_t *pInstance, const char *pszKey)
     }
     count = fy_node_sequence_item_count(node);
 
-    if(count == -1)
+    if (count == -1)
     {
         UT_LOG_ERROR("fy_node_sequence_item_count() returned error\n ");
         return 0;

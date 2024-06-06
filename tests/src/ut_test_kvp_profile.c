@@ -42,7 +42,7 @@ void test_ut_kvp_profile_uint8(void)
     UT_LOG_STEP( "test_ut_kvp_profile_uint8 - start" );
     UT_ASSERT_KVP_EQUAL_PROFILE_UINT8( checkField, "decodeTest/checkUint8IsDeDec" );
     UT_ASSERT_KVP_EQUAL_PROFILE_UINT8( checkField, "decodeTest/checkUint8IsDeHex" );
-     UT_ASSERT_KVP_EQUAL_PROFILE_UINT8( checkField, "decodeTest.checkUint8IsDeHex" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_UINT8( checkField, "decodeTest.checkUint8IsDeHex" );
     UT_LOG_STEP( "test_ut_kvp_profile_uint8 - end" );
 }
 
