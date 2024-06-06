@@ -210,6 +210,42 @@ void test_ut_kvp_uint64(void)
     UT_ASSERT( result == 0 );
 }
 
+void test_ut_kvp_list(void)
+{
+    ut_kvp_status_t status;
+    char result_kvp[UT_KVP_MAX_ELEMENT_SIZE]={0xff};
+    uint32_t result;
+    int count;
+
+    count = ut_kvp_getSequenceCount(gpMainTestInstance, "decodeTest/checkStringList");
+    UT_ASSERT( count == 3 );
+
+    status = ut_kvp_getStringField(gpMainTestInstance, "decodeTest/checkStringList/0", result_kvp, UT_KVP_MAX_ELEMENT_SIZE);
+    UT_ASSERT(status == UT_KVP_STATUS_SUCCESS );
+    UT_ASSERT_STRING_EQUAL(result_kvp, "stringA" );
+
+    status = ut_kvp_getStringField(gpMainTestInstance, "decodeTest/checkStringList/1", result_kvp, UT_KVP_MAX_ELEMENT_SIZE);
+    UT_ASSERT(status == UT_KVP_STATUS_SUCCESS );
+    UT_ASSERT_STRING_EQUAL(result_kvp, "stringB" );
+
+    status = ut_kvp_getStringField(gpMainTestInstance, "decodeTest/checkStringList/2", result_kvp, UT_KVP_MAX_ELEMENT_SIZE);
+    UT_ASSERT(status == UT_KVP_STATUS_SUCCESS );
+    UT_ASSERT_STRING_EQUAL(result_kvp, "stringC" );
+
+    /* Positive Tests */
+    count = ut_kvp_getSequenceCount( gpMainTestInstance, "decodeTest/checkUint32List" );
+    UT_ASSERT( count == 3 );
+
+    result = ut_kvp_getUInt32Field( gpMainTestInstance, "decodeTest/checkUint32List/0" );
+    UT_ASSERT( result == 720 );
+
+    result = ut_kvp_getUInt32Field( gpMainTestInstance, "decodeTest/checkUint32List/1" );
+    UT_ASSERT( result == 800 );
+
+    result = ut_kvp_getUInt32Field( gpMainTestInstance, "decodeTest/checkUint32List/2" );
+    UT_ASSERT( result == 1080 );
+}
+
 void test_ut_kvp_string(void)
 {
     const char *checkField = "the beef is dead";
@@ -386,6 +422,7 @@ void register_kvp_functions( void )
     UT_add_test(gpKVPSuite2, "kvp string", test_ut_kvp_string);
     UT_add_test(gpKVPSuite2, "kvp uint32", test_ut_kvp_uint32);
     UT_add_test(gpKVPSuite2, "kvp uint64", test_ut_kvp_uint64);
+    UT_add_test(gpKVPSuite2, "kvp list", test_ut_kvp_list);
 
     /* Perform the same parsing tests but use a json file instead */
     gpKVPSuite3 = UT_add_suite("ut-kvp - test main functions JSON Decoder ", test_ut_kvp_createGlobalJSONInstance, test_ut_kvp_freeGlobalInstance);
@@ -398,6 +435,7 @@ void register_kvp_functions( void )
     UT_add_test(gpKVPSuite3, "kvp bool", test_ut_kvp_bool);
     UT_add_test(gpKVPSuite3, "kvp uint32", test_ut_kvp_uint32);
     UT_add_test(gpKVPSuite3, "kvp uint64", test_ut_kvp_uint64);
+
 
     gpKVPSuite4 = UT_add_suite("ut-kvp - test main functions Test without Open ", NULL, NULL);
     assert(gpKVPSuite4 != NULL);

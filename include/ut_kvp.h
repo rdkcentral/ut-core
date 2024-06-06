@@ -157,6 +157,8 @@ uint64_t ut_kvp_getUInt64Field(ut_kvp_instance_t *pInstance, const char *pszKey)
  */
 ut_kvp_status_t ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *pszKey, char *pszReturnedString, uint32_t uStringSize ); 
 
+int ut_kvp_getSequenceCount( ut_kvp_instance_t *pInstance, const char *pszKey);
+
 /* TODO:
  * - Implement functions for getting signed integer values (`ut_kvp_getInt8Field`, `ut_kvp_getInt16Field`, `ut_kvp_getInt32Field`, `ut_kvp_getInt64Field`).
  */

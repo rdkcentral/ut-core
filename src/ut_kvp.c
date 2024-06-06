@@ -386,6 +386,65 @@ ut_kvp_status_t ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char 
     return UT_KVP_STATUS_SUCCESS;
 }
 
+int ut_kvp_getSequenceCount( ut_kvp_instance_t *pInstance, const char *pszKey)
+{
+    struct fy_node *node = NULL;
+    struct fy_node *root = NULL;
+    int count;
+
+    ut_kvp_instance_internal_t *pInternal = validateInstance(pInstance);
+
+    if (pInternal == NULL)
+    {
+        assert(pInternal != NULL);
+        return 0;
+    }
+
+    if (pszKey == NULL)
+    {
+        assert(pszKey != NULL);
+        UT_LOG_ERROR("Invalid Param - pszKey");
+        return 0;
+    }
+
+    if ( pInternal->fy_handle == NULL )
+    {
+        assert(pInternal->fy_handle != NULL);
+        UT_LOG_ERROR("No Data File open");
+        return 0;
+    }
+    // Get the root node
+    root = fy_document_root(pInternal->fy_handle);
+    if ( root == NULL )
+    {
+        assert( root != NULL );
+        UT_LOG_ERROR("Empty document");
+        return 0;
+    }
+
+    // Find the node corresponding to the key
+    node = fy_node_by_path(root, pszKey, -1, FYNWF_DONT_FOLLOW);
+    if ( node == NULL )
+    {
+        assert( node != NULL );
+        UT_LOG_ERROR("node not found: UT_KVP_STATUS_KEY_NOT_FOUND");
+        return 0;
+    }
+
+    if (!fy_node_is_sequence(node)) {
+        UT_LOG_ERROR("node is not a sequence");
+    }
+    count = fy_node_sequence_item_count(node);
+
+    if(count == -1)
+    {
+        UT_LOG_ERROR("fy_node_sequence_item_count() returned error\n ");
+        return 0;
+    }
+
+    return count;
+}
+
 /** Static Functions */
 static ut_kvp_instance_internal_t *validateInstance(ut_kvp_instance_t *pInstance)
 {
