@@ -80,5 +80,8 @@ extern ut_kvp_instance_t *ut_kvp_profile_getInstance(void);
         } \
     }
 
-
+/* For backward compatibility, will be deprecated soon*/
+#define UT_ASSERT_EQUAL_KVP_PROFILE_BOOL UT_ASSERT_KVP_EQUAL_PROFILE_BOOL
+#define UT_ASSERT_EQUAL_KVP_PROFILE_UINT64 UT_ASSERT_KVP_EQUAL_PROFILE_UINT64
+#define UT_ASSERT_EQUAL_KVP_PROFILE_STRING UT_ASSERT_KVP_EQUAL_PROFILE_STRING
 #endif /* __UT_KVP_PROFILE_H__ */

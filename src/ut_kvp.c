@@ -393,11 +393,11 @@ ut_kvp_status_t ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char 
     return UT_KVP_STATUS_SUCCESS;
 }
 
-int ut_kvp_getSequenceCount( ut_kvp_instance_t *pInstance, const char *pszKey)
+uint32_t ut_kvp_getSequenceCount( ut_kvp_instance_t *pInstance, const char *pszKey)
 {
     struct fy_node *node = NULL;
     struct fy_node *root = NULL;
-    int count;
+    uint32_t count;
     char zKey[UT_KVP_MAX_ELEMENT_SIZE/2] = {0};
 
     ut_kvp_instance_internal_t *pInternal = validateInstance(pInstance);
