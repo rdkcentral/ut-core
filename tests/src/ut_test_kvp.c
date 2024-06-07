@@ -235,7 +235,7 @@ void test_ut_kvp_list(void)
     uint32_t result;
     int count;
 
-    count = ut_kvp_getSequenceCount(gpMainTestInstance, "decodeTest/checkStringList");
+    count = ut_kvp_getListCount(gpMainTestInstance, "decodeTest/checkStringList");
     UT_ASSERT( count == 3 );
 
     status = ut_kvp_getStringField(gpMainTestInstance, "decodeTest/checkStringList/0", result_kvp, UT_KVP_MAX_ELEMENT_SIZE);
@@ -251,7 +251,7 @@ void test_ut_kvp_list(void)
     UT_ASSERT_STRING_EQUAL(result_kvp, "stringC" );
 
     /* Positive Tests */
-    count = ut_kvp_getSequenceCount( gpMainTestInstance, "decodeTest/checkUint32List" );
+    count = ut_kvp_getListCount( gpMainTestInstance, "decodeTest/checkUint32List" );
     UT_ASSERT( count == 3 );
 
     result = ut_kvp_getUInt32Field( gpMainTestInstance, "decodeTest/checkUint32List/0" );
