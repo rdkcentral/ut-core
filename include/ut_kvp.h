@@ -155,7 +155,17 @@ uint64_t ut_kvp_getUInt64Field(ut_kvp_instance_t *pInstance, const char *pszKey)
  * @retval UT_KVP_STATUS_NULL_PARAM - A null parameter was passed.
  * @retval UT_KVP_STATUS_INVALID_INSTANCE - An invalid KVP instance handle was passed.
  */
-ut_kvp_status_t ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *pszKey, char *pszReturnedString, uint32_t uStringSize ); 
+ut_kvp_status_t ut_kvp_getStringField( ut_kvp_instance_t *pInstance, const char *pszKey, char *pszReturnedString, uint32_t uStringSize );
+
+/**!
+ * @brief Gets count of the number of entries in a list
+ *
+ * @param[in] pInstance - Handle to the KVP instance.
+ * @param[in] pszKey - Null-terminated string representing the key to search for.
+ *
+ * @returns The `uint32_t` value on success, or 0 on error (check logs for details).
+ */
+uint32_t ut_kvp_getListCount( ut_kvp_instance_t *pInstance, const char *pszKey);
 
 /* TODO:
  * - Implement functions for getting signed integer values (`ut_kvp_getInt8Field`, `ut_kvp_getInt16Field`, `ut_kvp_getInt32Field`, `ut_kvp_getInt64Field`).
