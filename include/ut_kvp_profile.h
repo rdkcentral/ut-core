@@ -49,22 +49,22 @@ extern void ut_kvp_profile_close(void);
 extern ut_kvp_instance_t *ut_kvp_profile_getInstance(void);
 
 /**! Asserts that a boolean KVP field matches the expected value. */
-#define UT_ASSERT_EQUAL_KVP_PROFILE_BOOL(checkValue, key) UT_ASSERT_EQUAL(ut_kvp_getBoolField(ut_kvp_profile_getInstance(), key), checkValue); 
+#define UT_ASSERT_KVP_EQUAL_PROFILE_BOOL(checkValue, key) UT_ASSERT_EQUAL(ut_kvp_getBoolField(ut_kvp_profile_getInstance(), key), checkValue);
 
 /**! Asserts that a UINT8 KVP field matches the expected value. */
-#define UT_ASSERT_KVP_EQUAL_PROFILE_UINT8(checkValue, key) UT_ASSERT_EQUAL(ut_kvp_getUInt8Field(ut_kvp_profile_getInstance(), key), checkValue); 
+#define UT_ASSERT_KVP_EQUAL_PROFILE_UINT8(checkValue, key) UT_ASSERT_EQUAL(ut_kvp_getUInt8Field(ut_kvp_profile_getInstance(), key), checkValue);
 
 /**! Asserts that a UINT16 KVP field matches the expected value. */
-#define UT_ASSERT_KVP_EQUAL_PROFILE_UINT16(checkValue, key) UT_ASSERT_EQUAL(ut_kvp_getUInt16Field(ut_kvp_profile_getInstance(), key), checkValue); 
+#define UT_ASSERT_KVP_EQUAL_PROFILE_UINT16(checkValue, key) UT_ASSERT_EQUAL(ut_kvp_getUInt16Field(ut_kvp_profile_getInstance(), key), checkValue);
 
 /**! Asserts that a UINT32 KVP field matches the expected value. */
-#define UT_ASSERT_KVP_EQUAL_PROFILE_UINT32(checkValue, key) UT_ASSERT_EQUAL(ut_kvp_getUInt32Field(ut_kvp_profile_getInstance(), key), checkValue); 
+#define UT_ASSERT_KVP_EQUAL_PROFILE_UINT32(checkValue, key) UT_ASSERT_EQUAL(ut_kvp_getUInt32Field(ut_kvp_profile_getInstance(), key), checkValue);
 
 /**! Asserts that a UINT64 KVP field matches the expected value. */
-#define UT_ASSERT_EQUAL_KVP_PROFILE_UINT64(checkValue, key) UT_ASSERT_EQUAL(ut_kvp_getUInt64Field(ut_kvp_profile_getInstance(), key), checkValue); 
+#define UT_ASSERT_KVP_EQUAL_PROFILE_UINT64(checkValue, key) UT_ASSERT_EQUAL(ut_kvp_getUInt64Field(ut_kvp_profile_getInstance(), key), checkValue);
 
 /**! Asserts that a string KVP field matches the expected value. */
-#define UT_ASSERT_EQUAL_KVP_PROFILE_STRING(checkValue, key) \
+#define UT_ASSERT_KVP_EQUAL_PROFILE_STRING(checkValue, key) \
     { \
         char result_kvp[UT_KVP_MAX_ELEMENT_SIZE]={0}; \
         ut_kvp_status_t status; \
@@ -80,5 +80,9 @@ extern ut_kvp_instance_t *ut_kvp_profile_getInstance(void);
         } \
     }
 
+/* TODO: Deprecated functions will be removed in future revisions */
+#define UT_ASSERT_EQUAL_KVP_PROFILE_BOOL UT_ASSERT_KVP_EQUAL_PROFILE_BOOL
+#define UT_ASSERT_EQUAL_KVP_PROFILE_UINT64 UT_ASSERT_KVP_EQUAL_PROFILE_UINT64
+#define UT_ASSERT_EQUAL_KVP_PROFILE_STRING UT_ASSERT_KVP_EQUAL_PROFILE_STRING
 
 #endif /* __UT_KVP_PROFILE_H__ */
