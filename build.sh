@@ -47,7 +47,7 @@ if [ -d "${UT_CONTROL_LIB_DIR}" ]; then
     echo "Framework libyaml already exists"
 else
     pushd ${FRAMEWORK_DIR} > /dev/null
-    if [ "$1" != "test_lib" ]; then
+    if [ "$1" != "no_ut_control" ]; then
         echo "Clone ut_control in ${UT_CONTROL_LIB_DIR}"
         #TODO: change the git url to correct one
         git clone https://github.com/rdkcentral/ut-control.git -b feature/gh20-control-plane-part2-librarycreation
