@@ -69,6 +69,9 @@ rebuild: clean build
 framework:
 	make -C ../ framework TARGET=linux
 
+test:
+	make -C ../ test TARGET=linux
+
 list:
 	@echo ${GREEN}List [$@]${NC}
 	@echo INC_DIRS: ${INC_DIRS}

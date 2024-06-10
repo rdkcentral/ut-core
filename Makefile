@@ -31,6 +31,7 @@ export PATH := $(shell pwd)/toolchain:$(PATH)
 TOP_DIR ?= $(UT_DIR)
 BUILD_DIR ?= $(TOP_DIR)/obj
 BIN_DIR ?= $(TOP_DIR)/bin
+LIB_DIR ?= $(TOP_DIR)/lib
 XCFLAGS := $(KCFLAGS)
 
 # Enable CUnit Requirements
@@ -52,8 +53,8 @@ INC_DIRS += $(UT_DIR)/include
 INC_DIRS += $(UT_DIR)/src
 
 SRC_DIRS += $(UT_DIR)/src
-XLDFLAGS += -L $(UT_DIR)/framework/ut-control-library/lib -lutcontrollibrary
-export LD_LIBRARY_PATH=$(UT_DIR)/framework/ut-control-library/lib
+XLDFLAGS += -L $(UT_DIR)/framework/ut-control/lib -lutcontrollibrary
+export LD_LIBRARY_PATH=$(UT_DIR)/framework/ut-control/lib
 
 MKDIR_P ?= @mkdir -p
 
@@ -112,14 +113,21 @@ $(BUILD_DIR)/%.o: %.c
 	@$(MKDIR_P) $(dir $@)
 	@$(CC) $(XCFLAGS) -c $< -o $@
 
-.PHONY: clean list arm linux framework lib
-all: framework linux
+.PHONY: clean list arm linux framework lib control-lib
+all: framework linux control-lib
 
 # Ensure the framework is built
 framework: $(eval SHELL:=/usr/bin/env bash)
 	@echo -e ${GREEN}"Ensure framework is present"${NC}
 	${SHELL} -c ${UT_DIR}/build.sh
 	@echo -e ${GREEN}Completed${NC}
+	make control-lib
+
+control-lib:
+	make -C ${UT_DIR}/framework/ut-control lib TARGET=linux
+	@$(MKDIR_P) $(LIB_DIR)
+	@cp ${UT_DIR}/framework/ut-control/lib/libutcontrollibrary.* $(LIB_DIR)
+
 
 arm:
 	make TARGET=arm

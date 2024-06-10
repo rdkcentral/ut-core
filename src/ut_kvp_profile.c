@@ -32,7 +32,7 @@ ut_kvp_status_t ut_kvp_profile_open(char *fileName)
         assert(gKVP_Instance != NULL);
     }
 
-    result = ut_kvp_open(gKVP_Instance, fileName, false);
+    result = ut_kvp_open(gKVP_Instance, fileName);
     assert( result == UT_KVP_STATUS_SUCCESS );
 
     return result;
