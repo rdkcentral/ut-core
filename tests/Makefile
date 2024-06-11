@@ -51,7 +51,7 @@ NC='\033[0m'
 
 .PHONY: clean list build all
 
-build: framework control-lib test
+build: framework test
 	@echo -e ${GREEN}Build [$@] ${NC}
 	@make -C ../ test TARGET=linux
 	@echo -e ${GREEN}Copy Assets to [${BIN_DIR}/assets] ${NC}

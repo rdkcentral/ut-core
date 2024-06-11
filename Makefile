@@ -124,7 +124,7 @@ $(BUILD_DIR)/%.o: %.c
 	@$(MKDIR_P) $(dir $@)
 	@$(CC) $(XCFLAGS) -c $< -o $@
 
-.PHONY: clean list arm linux framework lib control-lib
+.PHONY: clean list arm linux framework lib
 
 arm:
 	make TARGET=arm
