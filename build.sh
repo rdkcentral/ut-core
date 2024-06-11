@@ -23,11 +23,11 @@ set -e # error out if required
 SCRIPT_EXEC="$(realpath $0)"
 MY_DIR="$(dirname $SCRIPT_EXEC)"
 
-pushd ${MY_DIR} > /dev/null
 
 FRAMEWORK_DIR=${MY_DIR}/framework
-UT_CONTROL_LIB_DIR=${FRAMEWORK_DIR}/ut-control-library
+UT_CONTROL_LIB_DIR=${FRAMEWORK_DIR}/ut-control
 
+pushd ${MY_DIR} > /dev/null
 # Clone CUnit
 if [ -d "${FRAMEWORK_DIR}/CUnit-2.1-3" ]; then
     echo "Framework CUnit already exists"
@@ -42,11 +42,12 @@ else
     patch -u CUnit-2.1-3/CUnit/Sources/Framework/TestRun.c -i CorrectBuildWarningsInCunit.patch
     echo "Patching Complete"
 fi
+popd > /dev/null # ${MY_DIR}
 
+pushd ${FRAMEWORK_DIR} > /dev/null
 if [ -d "${UT_CONTROL_LIB_DIR}" ]; then
-    echo "Framework libyaml already exists"
+    echo "Framework ut-control already exists"
 else
-    pushd ${FRAMEWORK_DIR} > /dev/null
     if [ "$1" != "no_ut_control" ]; then
         echo "Clone ut_control in ${UT_CONTROL_LIB_DIR}"
         #TODO: change the git url to correct one
@@ -59,5 +60,4 @@ else
         echo "$1 requested, hence ut-control is not required to be cloned"
     fi
 fi
-
 popd > /dev/null # ${FRAMEWORK_DIR}

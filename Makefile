@@ -53,8 +53,7 @@ INC_DIRS += $(UT_DIR)/include
 INC_DIRS += $(UT_DIR)/src
 
 SRC_DIRS += $(UT_DIR)/src
-XLDFLAGS += -L $(UT_DIR)/framework/ut-control/lib -lutcontrollibrary
-export LD_LIBRARY_PATH=$(UT_DIR)/framework/ut-control/lib
+XLDFLAGS += -L $(UT_DIR)/framework/ut-control/lib -lut_control
 
 MKDIR_P ?= @mkdir -p
 
@@ -97,6 +96,18 @@ XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\"
 VPATH += $(UT_DIR)
 VPATH += $(TOP_DIR)
 
+
+# Ensure the framework is built
+framework: $(eval SHELL:=/usr/bin/env bash)
+	@echo -e ${GREEN}"Ensure framework is present"${NC}
+	${SHELL} -c ${UT_DIR}/build.sh
+	@echo -e ${GREEN}Completed${NC}
+	cd ${UT_DIR}/framework/ut-control/ && $(MAKE) lib TARGET=linux
+	@$(MKDIR_P) $(LIB_DIR)
+	@cp ${UT_DIR}/framework/ut-control/lib/libut_control.* $(LIB_DIR)
+
+all: framework linux
+
 # Make the final test binary
 test: $(OBJS)
 	@echo -e ${GREEN}Linking $@ $(BUILD_DIR)/$(TARGET_EXEC)${NC}
@@ -114,20 +125,6 @@ $(BUILD_DIR)/%.o: %.c
 	@$(CC) $(XCFLAGS) -c $< -o $@
 
 .PHONY: clean list arm linux framework lib control-lib
-all: framework linux control-lib
-
-# Ensure the framework is built
-framework: $(eval SHELL:=/usr/bin/env bash)
-	@echo -e ${GREEN}"Ensure framework is present"${NC}
-	${SHELL} -c ${UT_DIR}/build.sh
-	@echo -e ${GREEN}Completed${NC}
-	make control-lib
-
-control-lib:
-	make -C ${UT_DIR}/framework/ut-control lib TARGET=linux
-	@$(MKDIR_P) $(LIB_DIR)
-	@cp ${UT_DIR}/framework/ut-control/lib/libutcontrollibrary.* $(LIB_DIR)
-
 
 arm:
 	make TARGET=arm
@@ -138,6 +135,7 @@ linux: framework
 clean:
 	@echo -e ${GREEN}Performing Clean${NC}
 	@$(RM) -rf $(BUILD_DIR)
+	@$(RM) -rf $(LIB_DIR)
 	@echo -e ${GREEN}Clean Completed${NC}
 
 cleanall: clean 
