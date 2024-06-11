@@ -54,7 +54,7 @@ else
         git clone https://github.com/rdkcentral/ut-control.git -b feature/gh20-control-plane-part2-librarycreation
         #clone the external libraries
         cd ut-control
-        ./install.sh
+        ./configure.sh
         #make lib
     else
         echo "$1 requested, hence ut-control is not required to be cloned"
