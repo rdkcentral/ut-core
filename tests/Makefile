@@ -30,6 +30,7 @@ CFLAGS += -DNDEBUG
 TARGET_EXEC = ut-test
 
 TARGET = linux
+BUILD = test
 
 $(info TARGET [$(TARGET)])
 
@@ -45,13 +46,14 @@ export TARGET
 export TARGET_EXEC
 export CFLAGS
 export LDFLAGS
+export BUILD
 
 GREEN='\033[0;32m'
 NC='\033[0m'
 
 .PHONY: clean list build all
 
-build: framework test
+build: framework
 	@echo -e ${GREEN}Build [$@] ${NC}
 	@make -C ../ test TARGET=linux
 	@echo -e ${GREEN}Copy Assets to [${BIN_DIR}/assets] ${NC}
@@ -62,15 +64,12 @@ build: framework test
 run: build
 	@echo -e ${GREEN}Running [$@]${NC}
 	@mkdir -p ./tests/logs
-	@bash -c "cd ./bin;./ut-test -bp ./../logs"
+	@bash -c "cd ./bin;./ut-test -a -p ./assets/test_kvp.yaml -l $(ROOT_DIR)/logs/"
 
 rebuild: clean build
 
 framework:
 	make -C ../ framework TARGET=linux
-
-test:
-	make -C ../ test TARGET=linux
 
 list:
 	@echo ${GREEN}List [$@]${NC}
@@ -82,6 +81,7 @@ list:
 
 clean:
 	@echo ${GREEN}Clean [$@]${NC}
+	@$(RM) -rf ${BIN_DIR}/assets
 	@make -C ../ clean TARGET=linux
 
 cleanall:

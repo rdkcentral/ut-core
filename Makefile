@@ -102,7 +102,9 @@ framework: $(eval SHELL:=/usr/bin/env bash)
 	@echo -e ${GREEN}"Ensure framework is present"${NC}
 	${SHELL} -c ${UT_DIR}/build.sh
 	@echo -e ${GREEN}Completed${NC}
+ifneq ($(BUILD),test)
 	cd ${UT_DIR}/framework/ut-control/ && $(MAKE) lib TARGET=linux
+endif
 	@$(MKDIR_P) $(LIB_DIR)
 	@cp ${UT_DIR}/framework/ut-control/lib/libut_control.* $(LIB_DIR)
 

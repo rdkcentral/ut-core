@@ -16,6 +16,16 @@
     "checkBoolFaLse":  "FaLSE",
     "checkBoolTRUE":  "TRUE",
     "checkBooltrue":  true,
-    "checkBoolTRuE":  "TRuE"
+    "checkBoolTRuE":  "TRuE",
+    "checkStringList": [
+      "stringA",
+      "stringB",
+      "stringC"
+    ],
+    "checkUint32List": [
+      720,
+      800,
+      1080
+    ]
   }
 }

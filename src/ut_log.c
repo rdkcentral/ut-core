@@ -25,6 +25,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <time.h>
+#include <libgen.h>
 
 #define UT_MAX_TIME_STRING (20)
 
@@ -32,6 +33,7 @@
 #define UT_LOG_DEFAULT_PATH "/tmp/"  // Move to "./" in the future, when 
 static char gLogFileName[UT_LOG_MAX_PATH] = {0};    /*!< Path + Filename of the currently active log file*/
 static bool gLogInit = false;
+static char* UT_stripColorCode(char *in_string);
 
 void UT_log_setLogFilePath(char *inputFilePath)
 {
@@ -138,7 +140,7 @@ void UT_logPrefix(const char *file, int line, const char *prefix, const char * f
     tmp = localtime(&now);
     strftime(time_now, sizeof(time_now), "%Y-%m-%d-%X", tmp);
 #if 1
-    snprintf( singleLineBuffer, UT_LOG_MAX_LINE_SIZE, "\n%s, %*s, %s,%6d : ", time_now, 16, prefix, file, line );
+    snprintf( singleLineBuffer, UT_LOG_MAX_LINE_SIZE, "\n%s, %*s, %s,%6d : ", time_now, 16, prefix, basename((char *)file), line );
 #else
     file=file;  /* unused */
     snprintf( singleLineBuffer, UT_LOG_MAX_LINE_SIZE, "\n%s, %s, %6d : ", time_now, prefix, line );
@@ -153,6 +155,32 @@ void UT_logPrefix(const char *file, int line, const char *prefix, const char * f
     printf( "%s", singleLineBuffer );
 
     /* Print the data to the stream */
-    fprintf( fp, "%s", singleLineBuffer );
+    fprintf( fp, "%s", UT_stripColorCode(singleLineBuffer));
     fclose(fp);
+}
+
+static char* UT_stripColorCode(char *in_string)
+{
+    int i = 0, j = 0;
+    while (in_string[i])
+    {
+        if (in_string[i] == '\033')
+        {
+            while (in_string[i] != 'm' && in_string[i])
+            {
+                i++;
+            }
+            if (in_string[i] == '\0')
+            {
+                break;
+            }
+            i++;
+        }
+        else
+        {
+            in_string[j++] = in_string[i++];
+        }
+    }
+    in_string[j] = '\0';
+    return in_string;
 }

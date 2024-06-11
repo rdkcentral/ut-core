@@ -103,42 +103,8 @@ static void automated_suite_cleanup_failure_message_handler(const CU_pSuite pSui
 /*=================================================================
  *  Public Interface functions
  *=================================================================*/
-void UT_automated_run_tests(void)
-{
-  assert(NULL != CU_get_registry());
 
-  /* Ensure output makes it to screen at the moment of a SIGSEGV. */
-  setvbuf(stdout, NULL, _IONBF, 0);
-  setvbuf(stderr, NULL, _IONBF, 0);
-
-  /* if a filename root hasn't been set, use the default one */
-  if (0 == strlen(f_szTestResultFileName)) {
-    UT_set_output_filename(f_szDefaultFileRoot);
-  }
-
-  if (CUE_SUCCESS != initialize_result_file(f_szTestResultFileName)) {
-    fprintf(stderr, "\n%s", _("ERROR - Failed to create/initialize the result file."));
-  }
-  else {
-    /* set up the message handlers for writing xml output */
-    CU_set_test_start_handler(automated_test_start_message_handler);
-    CU_set_test_complete_handler(automated_test_complete_message_handler);
-    CU_set_all_test_complete_handler(automated_all_tests_complete_message_handler);
-    CU_set_suite_init_failure_handler(automated_suite_init_failure_message_handler);
-    CU_set_suite_cleanup_failure_handler(automated_suite_cleanup_failure_message_handler);
-
-    f_bWriting_CUNIT_RUN_SUITE = CU_FALSE;
-
-    automated_run_all_tests(NULL);
-
-    if (CUE_SUCCESS != uninitialize_result_file()) {
-      fprintf(stderr, "\n%s", _("ERROR - Failed to close/uninitialize the result files."));
-    }
-  }
-}
-
-/*------------------------------------------------------------------------*/
-void UT_set_output_filename(const char* szFilenameRoot)
+void UT_set_results_output_filename(const char* szFilenameRoot)
 {
   const char* szListEnding = "-Listing.xml";
   const char* szResultEnding = "-Results.xml";
@@ -170,11 +136,46 @@ void UT_set_output_filename(const char* szFilenameRoot)
 }
 
 /*------------------------------------------------------------------------*/
+
+void UT_automated_run_tests(void)
+{
+  assert(NULL != CU_get_registry());
+
+  /* Ensure output makes it to screen at the moment of a SIGSEGV. */
+  setvbuf(stdout, NULL, _IONBF, 0);
+  setvbuf(stderr, NULL, _IONBF, 0);
+
+  /* if a filename root hasn't been set, use the default one */
+  if (0 == strlen(f_szTestResultFileName)) {
+    UT_set_results_output_filename(f_szDefaultFileRoot);
+  }
+
+  if (CUE_SUCCESS != initialize_result_file(f_szTestResultFileName)) {
+    fprintf(stderr, "\n%s", _("ERROR - Failed to create/initialize the result file."));
+  }
+  else {
+    /* set up the message handlers for writing xml output */
+    CU_set_test_start_handler(automated_test_start_message_handler);
+    CU_set_test_complete_handler(automated_test_complete_message_handler);
+    CU_set_all_test_complete_handler(automated_all_tests_complete_message_handler);
+    CU_set_suite_init_failure_handler(automated_suite_init_failure_message_handler);
+    CU_set_suite_cleanup_failure_handler(automated_suite_cleanup_failure_message_handler);
+
+    f_bWriting_CUNIT_RUN_SUITE = CU_FALSE;
+
+    automated_run_all_tests(NULL);
+
+    if (CUE_SUCCESS != uninitialize_result_file()) {
+      fprintf(stderr, "\n%s", _("ERROR - Failed to close/uninitialize the result files."));
+    }
+  }
+}
+/*------------------------------------------------------------------------*/
 CU_ErrorCode UT_list_tests_to_file()
 {
   /* if a filename root hasn't been set, use the default one */
   if (0 == strlen(f_szTestListFileName)) {
-    UT_set_output_filename(f_szDefaultFileRoot);
+    UT_set_results_output_filename(f_szDefaultFileRoot);
   }
 
   return UT_automated_list_all_tests(CU_get_registry(), f_szTestListFileName);
