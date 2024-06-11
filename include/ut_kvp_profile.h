@@ -63,6 +63,9 @@ extern ut_kvp_instance_t *ut_kvp_profile_getInstance(void);
 /**! Asserts that a UINT64 KVP field matches the expected value. */
 #define UT_ASSERT_KVP_EQUAL_PROFILE_UINT64(checkValue, key) UT_ASSERT_EQUAL(ut_kvp_getUInt64Field(ut_kvp_profile_getInstance(), key), checkValue);
 
+/**! Asserts that a KVP list field matches the expected value. */
+#define UT_ASSERT_KVP_EQUAL_PROFILE_LIST_COUNT(checkValue, key) UT_ASSERT_EQUAL(ut_kvp_getListCount(ut_kvp_profile_getInstance(), key), checkValue);
+
 /**! Asserts that a string KVP field matches the expected value. */
 #define UT_ASSERT_KVP_EQUAL_PROFILE_STRING(checkValue, key) \
     { \

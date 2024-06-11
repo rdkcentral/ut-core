@@ -41,7 +41,6 @@ int main(int argc, char** argv)
     register_kvp_functions();
     register_kvp_profile_testing_functions();
     UT_run_tests();
-    //ut_control_panel();
 
     return 0;
 }

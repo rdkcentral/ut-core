@@ -94,6 +94,14 @@ void test_ut_kvp_profile_bool(void)
     UT_LOG_STEP( "test_ut_kvp_profile_bool - end" );
 }
 
+void test_ut_kvp_profile_list_count(void)
+{
+    UT_LOG_STEP( "test_ut_kvp_profile_list_count" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_LIST_COUNT( 3, "decodeTest/checkStringList" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_LIST_COUNT( 3, "decodeTest.checkStringList" );
+    UT_LOG_STEP( "test_ut_kvp_profile_list_count - end" );
+}
+
 void test_ut_kvp_profile_open( void )
 {
     UT_LOG_STEP( "test_ut_kvp_profile_open - start" );
@@ -166,6 +174,7 @@ void register_kvp_profile_testing_functions(void)
     UT_add_test(gpAssertSuite2, "kvp profile uint64", test_ut_kvp_profile_uint64);
     UT_add_test(gpAssertSuite2, "kvp profile string", test_ut_kvp_profile_string);
     UT_add_test(gpAssertSuite2, "kvp profile bool", test_ut_kvp_profile_bool);
+    UT_add_test(gpAssertSuite2, "kvp profile list count", test_ut_kvp_profile_list_count);
 
     gpAssertSuite3 = UT_add_suite("ut-kvp - assert testing json ", test_ut_kvp_profile_init_json, test_ut_kvp_profile_cleanup);
     assert(gpAssertSuite3 != NULL);
@@ -176,5 +185,6 @@ void register_kvp_profile_testing_functions(void)
     UT_add_test(gpAssertSuite3, "kvp profile uint64", test_ut_kvp_profile_uint64);
     UT_add_test(gpAssertSuite3, "kvp profile string", test_ut_kvp_profile_string);
     UT_add_test(gpAssertSuite3, "kvp profile bool", test_ut_kvp_profile_bool);
+    UT_add_test(gpAssertSuite3, "kvp profile list count", test_ut_kvp_profile_list_count);
     
 }
