@@ -77,14 +77,18 @@ if [ -d "${UT_CONTROL_LIB_DIR}" ]; then
     check_next_revision
     #make test
 else
-    echo "Cloning Unit Test Core System"
-    git clone ${TEST_REPO} ut-control
-    check_next_revision
-    cd ./ut-control
-    git checkout ${UT_CONTROL_PROJECT_VERSION}
-    ./configure.sh
-    make lib
-    #cd ..
-    #./${0} $@
+    if [ "$1" != "no_ut_control" ]; then
+        echo "Cloning Unit Test Core System"
+        git clone ${TEST_REPO} ut-control
+        check_next_revision
+        cd ./ut-control
+        git checkout ${UT_CONTROL_PROJECT_VERSION}
+        ./configure.sh
+        #make lib
+        #cd ..
+        #./${0} $@
+    else
+        echo "$1 requested, hence ut-control is not required to be cloned"
+    fi
 fi
 popd > /dev/null # ${FRAMEWORK_DIR}
