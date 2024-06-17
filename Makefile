@@ -50,6 +50,7 @@ SRC_DIRS += $(CUNIT_SRC_DIRS)/Framework
 #SRC_DIRS += $(CUNIT_SRC_DIRS)/Test
 
 INC_DIRS += $(UT_DIR)/include
+INC_DIRS += $(UT_DIR)/framework/ut-control/include
 INC_DIRS += $(UT_DIR)/src
 
 SRC_DIRS += $(UT_DIR)/src
@@ -100,7 +101,7 @@ VPATH += $(TOP_DIR)
 # Ensure the framework is built
 framework: $(eval SHELL:=/usr/bin/env bash)
 	@echo -e ${GREEN}"Ensure framework is present"${NC}
-	${SHELL} -c ${UT_DIR}/build.sh
+	${UT_DIR}/build.sh
 	@echo -e ${GREEN}Completed${NC}
 ifneq ($(BUILD),test)
 	cd ${UT_DIR}/framework/ut-control/ && $(MAKE) lib TARGET=linux
@@ -137,12 +138,11 @@ linux: framework
 clean:
 	@echo -e ${GREEN}Performing Clean${NC}
 	@$(RM) -rf $(BUILD_DIR)
-	@$(RM) -rf $(LIB_DIR)
 	@echo -e ${GREEN}Clean Completed${NC}
 
 cleanall: clean 
 	@echo -e ${GREEN}Performing Clean on frameworks [$(UT_DIR)/framework]${NC}
-	@${RM} -rf $(UT_DIR)/framework
+	@$(RM) -rf $(UT_DIR)/framework
 
 list:
 	@echo 
@@ -186,6 +186,8 @@ list:
 	@echo CONFIGURE_FLAGS:$(CONFIGURE_FLAGS)
 	@echo
 	@echo LD_LIBRARY_PATH:$(LD_LIBRARY_PATH)
+	@echo
+	@echo BUILD:$(BUILD)
 	@echo
 
 -include $(DEPS)

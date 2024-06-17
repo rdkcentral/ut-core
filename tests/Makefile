@@ -59,6 +59,8 @@ build: framework
 	@echo -e ${GREEN}Copy Assets to [${BIN_DIR}/assets] ${NC}
 	@mkdir -p ${BIN_DIR}/assets
 	@cp ./src/assets/* ${BIN_DIR}/assets
+	@cp ./src/*.sh ${BIN_DIR}/.
+	@cp ./../lib/* ${BIN_DIR}/.
 	@echo -e ${GREEN}Build Complete${NC}
 
 run: build
@@ -77,6 +79,7 @@ list:
 	@echo SRC_DIRS: ${SRC_DIRS}
 	@echo CFLAGS: ${CFLAGS}
 	@echo LDFLAGS: ${LDFLAGS}
+	@echo BUILD: ${BUILD}
 	@make -C ../ list TARGET=linux
 
 clean:
