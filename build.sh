@@ -78,7 +78,7 @@ if [ -d "${UT_CONTROL_LIB_DIR}" ]; then
     #make test
 else
     if [ "$1" != "no_ut_control" ]; then
-        echo "Cloning Unit Test Core System"
+        echo "Clone ut_control in ${UT_CONTROL_LIB_DIR}"
         git clone ${TEST_REPO} ut-control
         check_next_revision
         cd ./ut-control

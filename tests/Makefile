@@ -30,7 +30,6 @@ CFLAGS += -DNDEBUG
 TARGET_EXEC = ut-test
 
 TARGET = linux
-BUILD = test
 
 $(info TARGET [$(TARGET)])
 
@@ -46,7 +45,6 @@ export TARGET
 export TARGET_EXEC
 export CFLAGS
 export LDFLAGS
-export BUILD
 
 GREEN='\033[0;32m'
 NC='\033[0m'
@@ -79,7 +77,6 @@ list:
 	@echo SRC_DIRS: ${SRC_DIRS}
 	@echo CFLAGS: ${CFLAGS}
 	@echo LDFLAGS: ${LDFLAGS}
-	@echo BUILD: ${BUILD}
 	@make -C ../ list TARGET=linux
 
 clean:
