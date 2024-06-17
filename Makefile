@@ -103,9 +103,9 @@ framework: $(eval SHELL:=/usr/bin/env bash)
 	@echo -e ${GREEN}"Ensure framework is present"${NC}
 	${UT_DIR}/build.sh
 	@echo -e ${GREEN}Completed${NC}
-ifneq ($(BUILD),test)
-	cd ${UT_DIR}/framework/ut-control/ && $(MAKE) lib TARGET=linux
-endif
+	@if [ ! -d "${UT_DIR}/framework/ut-control/lib" ]; then \
+		make -C ${UT_DIR}/framework/ut-control lib; \
+	fi
 	@$(MKDIR_P) $(LIB_DIR)
 	@cp ${UT_DIR}/framework/ut-control/lib/libut_control.* $(LIB_DIR)
 
@@ -127,7 +127,7 @@ $(BUILD_DIR)/%.o: %.c
 	@$(MKDIR_P) $(dir $@)
 	@$(CC) $(XCFLAGS) -c $< -o $@
 
-.PHONY: clean list arm linux framework lib
+.PHONY: clean list arm linux framework
 
 arm:
 	make TARGET=arm
