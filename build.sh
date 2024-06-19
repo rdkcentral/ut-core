@@ -23,7 +23,6 @@ set -e # error out if required
 SCRIPT_EXEC="$(realpath $0)"
 MY_DIR="$(dirname $SCRIPT_EXEC)"
 
-
 FRAMEWORK_DIR=${MY_DIR}/framework
 UT_CONTROL_LIB_DIR=${FRAMEWORK_DIR}/ut-control
 
@@ -55,9 +54,9 @@ UT_CONTROL_PROJECT_CURRENT_VERSION="1.0.0"  # Fixed version
 TEST_REPO=git@github.com:rdkcentral/ut-control.git
 
 # This function checks the latest version of UT core and recommends an upgrade if reuqired
-function check_next_revision()
+function check_ut_control_revision()
 {
-    pushd ./ut-control
+    pushd ${UT_CONTROL_LIB_DIR} > /dev/null
     # Set default UT_CONTROL_PROJECT_VERSION to next revision, if it's set then we don't need to tell you again
     if [ -v ${UT_CONTROL_PROJECT_VERSION} ]; then
         UT_CONTROL_PROJECT_VERSION=$(git tag | grep ${UT_CONTROL_PROJECT_CURRENT_VERSION} | sort -r | head -n1)
@@ -75,13 +74,13 @@ pushd ${FRAMEWORK_DIR} > /dev/null
 if [ -d "${UT_CONTROL_LIB_DIR}" ]; then
     echo "Framework ut-control already exists"
     # ut-control exists so run the makefile from ut
-    check_next_revision
+    check_ut_control_revision
     #make test
 else
     if [ "$1" != "no_ut_control" ]; then
         echo "Clone ut_control in ${UT_CONTROL_LIB_DIR}"
         git clone ${TEST_REPO} ut-control
-        check_next_revision
+        check_ut_control_revision
         cd ./ut-control
         git checkout ${UT_CONTROL_PROJECT_VERSION}
         ./configure.sh
@@ -93,3 +92,4 @@ else
     fi
 fi
 popd > /dev/null # ${FRAMEWORK_DIR}
+

@@ -17,44 +17,43 @@
 # * limitations under the License.
 # *
 
-TARGET_EXEC ?= hal_test
+TARGET_EXEC = hal_test
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
-$(info $(shell echo -e ${GREEN}TARGET_EXEC [$(TARGET_EXEC)]${NC}))
+$(info $(shell echo ${GREEN}TARGET_EXEC [$(TARGET_EXEC)]${NC}))
 
-UT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+UT_CORE_DIR :=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 export PATH := $(shell pwd)/toolchain:$(PATH)
-TOP_DIR ?= $(UT_DIR)
+
+# Moveable Directories based on the caller makefile
+TOP_DIR ?= $(UT_CORE_DIR)
 BUILD_DIR ?= $(TOP_DIR)/obj
 BIN_DIR ?= $(TOP_DIR)/bin
 LIB_DIR ?= $(TOP_DIR)/lib
+
+# Non-Moveable Directories
+FRAMEWORK_DIR = $(UT_CORE_DIR)/framework
+UT_CONTROL = $(FRAMEWORK_DIR)/ut-control
+
 XCFLAGS := $(KCFLAGS)
-UT_CONTROL ?= $(UT_DIR)/framework/ut-control
 
 # Enable CUnit Requirements
 XCFLAGS += -DUT_CUNIT
-CUNIT_DIR +=  $(UT_DIR)/framework/CUnit-2.1-3/CUnit
-#CUNIT_SRC_DIRS +=  $(UT_DIR)/src/cunit
+CUNIT_DIR +=  $(FRAMEWORK_DIR)/CUnit-2.1-3/CUnit
 CUNIT_SRC_DIRS += $(CUNIT_DIR)/Sources
 INC_DIRS += $(CUNIT_DIR)/Headers
-#SRC_DIRS += $(CUNIT_SRC_DIRS)/Automated
-#SRC_DIRS += $(CUNIT_SRC_DIRS)/Basic
-#SRC_DIRS += $(CUNIT_SRC_DIRS)/Console
 SRC_DIRS += $(CUNIT_SRC_DIRS)/Framework
-#SRC_DIRS += $(CUNIT_SRC_DIRS)/Curses
-#SRC_DIRS += $(CUNIT_SRC_DIRS)/wxWidget
-#SRC_DIRS += $(CUNIT_SRC_DIRS)/Win
-#SRC_DIRS += $(CUNIT_SRC_DIRS)/Test
 
-INC_DIRS += $(UT_DIR)/include
+INC_DIRS += $(UT_CORE_DIR)/include
 INC_DIRS += $(UT_CONTROL)/include
-INC_DIRS += $(UT_DIR)/src
+INC_DIRS += $(UT_CORE_DIR)/src
 
-SRC_DIRS += $(UT_DIR)/src
+SRC_DIRS += $(UT_CORE_DIR)/src
+
 XLDFLAGS += -L $(UT_CONTROL)/lib -lut_control
 
 MKDIR_P ?= @mkdir -p
@@ -66,7 +65,7 @@ ifeq ($(TARGET),arm)
 CUNIT_VARIANT=arm-rdk-linux-gnueabi
 #CC := arm-rdk-linux-gnueabi-gcc -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -mabi=aapcs-linux -mno-thumb-interwork -ffixed-r8 -fomit-frame-pointer 
 # CFLAGS will be overriden by Caller as required
-INC_DIRS += $(UT_DIR)/sysroot/usr/include
+INC_DIRS += $(UT_CORE_DIR)/sysroot/usr/include
 endif
 
 # Defaults for target linux
@@ -94,20 +93,19 @@ DEPS += $(OBJS:.o=.d)
 XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\"
 
 # Library Path
-VPATH += $(UT_DIR)
+VPATH += $(UT_CORE_DIR)
 VPATH += $(TOP_DIR)
 
-
 # Ensure the framework is built
-framework:
-	@echo -e ${GREEN}"Ensure framework is present"${NC}
-	${UT_DIR}/build.sh
+framework: test
+	@echo ${GREEN}"Ensure ut-core frameworks are present"${NC}
+	@${UT_CORE_DIR}/build.sh
 	@echo -e ${GREEN}Completed${NC}
+	@echo ${GREEN}"Entering ut-control"${NC}
 	@${MAKE} -C $(UT_CONTROL)
-	@$(MKDIR_P) $(LIB_DIR)
-	@cp $(UT_CONTROL)/lib/libut_control.* $(LIB_DIR)
-
-all: framework linux
+	@$(MKDIR_P) ${LIB_DIR}
+	@cp $(UT_CONTROL)/lib/libut_control.* ${LIB_DIR}
+	@echo ${GREEN}ut-control LIB Coped to [${LIB_DIR}]${NC}
 
 # Make the final test binary
 test: $(OBJS)
@@ -121,11 +119,11 @@ endif
 
 # Make any c source
 $(BUILD_DIR)/%.o: %.c
-	@echo -e ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
+	@echo ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
 	@$(MKDIR_P) $(dir $@)
 	@$(CC) $(XCFLAGS) -c $< -o $@
 
-.PHONY: clean list arm linux framework
+.PHONY: clean list arm linux framework test
 
 arm:
 	make TARGET=arm
@@ -139,10 +137,11 @@ clean:
 	@echo -e ${GREEN}Clean Completed${NC}
 
 cleanall: clean 
-	@echo -e ${GREEN}Performing Clean on frameworks [$(UT_DIR)/framework]${NC}
-	@$(RM) -rf $(UT_DIR)/framework
+	@echo ${GREEN}Performing Clean on frameworks [$(UT_CORE_DIR)/framework]${NC}
+	@$(RM) -rf $(UT_CORE_DIR)/framework
 
 list:
+	@echo --------- ut_core ----------------
 	@echo 
 	@echo CC:$(CC)
 	@echo 
@@ -154,14 +153,11 @@ list:
 	@echo 
 	@echo SRCS:$(SRCS)
 	@echo
-	@echo UT_DIR:$(UT_DIR)
+	@echo UT_CORE_DIR:$(UT_CORE_DIR)
 	@echo 
 	@echo TOP_DIR:$(TOP_DIR)
 	@echo 
 	@echo BUILD_DIR:$(BUILD_DIR)
-	@echo
-	@echo LIBFYAML_DIR:$(LIBFYAML_DIR)
-	@echo
 	@echo
 	@echo CFLAGS:$(CFLAGS)
 	@echo
@@ -181,9 +177,7 @@ list:
 	@echo
 	@echo DEPS:$(DEPS)
 	@echo
-	@echo CONFIGURE_FLAGS:$(CONFIGURE_FLAGS)
-	@echo
-	@echo LD_LIBRARY_PATH:$(LD_LIBRARY_PATH)
-	@echo
+	@echo --------- ut_control ----------------
+	@${MAKE} -C $(UT_CONTROL) list
 
 -include $(DEPS)
