@@ -96,9 +96,14 @@ XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\"
 VPATH += $(UT_CORE_DIR)
 VPATH += $(TOP_DIR)
 
-.PHONY: clean list arm linux framework test
+.PHONY: clean list arm linux framework test createdirs
 
-all: framework test
+all: createdirs framework test
+
+createdirs:
+	echo "Directories [${BIN_DIR}] [${LIB_DIR}]"
+	@$(MKDIR_P) $(BIN_DIR)
+	@$(MKDIR_P) ${LIB_DIR}
 
 # Ensure the framework is built
 framework:
@@ -107,16 +112,15 @@ framework:
 	@echo -e ${GREEN}Completed${NC}
 	@echo ${GREEN}"Entering ut-control"${NC}
 	@${MAKE} -C $(UT_CONTROL)
-	@$(MKDIR_P) ${LIB_DIR}
-	@cp $(UT_CONTROL)/lib/libut_control.* ${BIN_DIR}
+	@cp $(UT_CONTROL)/lib/libut_control.* ${LIB_DIR}
+	@cp $(UT_CONTROL)/lib/libut_control.* ${BIN_DIR}/
 	@echo ${GREEN}ut-control LIB Coped to [${BIN_DIR}]${NC}
 
 # Make the final test binary
 test: $(OBJS)
 	@echo -e ${GREEN}Linking $@ $(BUILD_DIR)/$(TARGET_EXEC)${NC}
 	@$(CC) $(OBJS) -o $(BUILD_DIR)/$(TARGET_EXEC) $(XLDFLAGS) $(KCFLAGS) $(XCFLAGS)
-	@$(MKDIR_P) $(BIN_DIR)
-	@cp $(BUILD_DIR)/$(TARGET_EXEC) $(BIN_DIR)
+	@cp $(BUILD_DIR)/$(TARGET_EXEC) $(BIN_DIR)/
 ifneq ("$(wildcard $(HAL_LIB_DIR)/*.so)","")
 	cp $(HAL_LIB_DIR)/*.so* $(BIN_DIR)
 endif

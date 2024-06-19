@@ -51,20 +51,21 @@ NC='\033[0m'
 
 .PHONY: clean list build all
 
+all: framework build 
+
 build:
 	@echo -e ${GREEN}Build [$@] ${NC}
 	@make -C ../ test TARGET=linux
-	@echo -e ${GREEN}Copy Assets to [${BIN_DIR}/assets] ${NC}
+	@echo ${GREEN}Copy Assets to [${BIN_DIR}/assets] ${NC}
 	@mkdir -p ${BIN_DIR}/assets
-	@cp ./src/assets/* ${BIN_DIR}/assets
-	@cp ./src/*.sh ${BIN_DIR}/.
-	@cp ./../lib/* ${BIN_DIR}/.
+	@cp ${ROOT_DIR}/src/assets/* ${BIN_DIR}/assets
+	@cp ${ROOT_DIR}/src/*.sh ${BIN_DIR}/.
 	@echo -e ${GREEN}Build Complete${NC}
 
 run: build
 	@echo -e ${GREEN}Running [$@]${NC}
-	@mkdir -p ./tests/logs
-	@bash -c "cd ./bin;./ut-test -a -p ./assets/test_kvp.yaml -l $(ROOT_DIR)/logs/"
+	@mkdir -p ${ROOT_DIR}/logs
+	@bash -c "cd ${ROOT_DIR}/bin; ./ut-test -a -p ./assets/test_kvp.yaml -l ${ROOT_DIR}/logs/"
 
 rebuild: clean build
 
@@ -81,7 +82,7 @@ list:
 
 clean:
 	@echo ${GREEN}Clean [$@]${NC}
-	@$(RM) -rf ${BIN_DIR}/assets
+	@$(RM) -rf ${BIN_DIR}
 	@make -C ../ clean TARGET=linux
 
 cleanall:
