@@ -96,16 +96,20 @@ XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\"
 VPATH += $(UT_CORE_DIR)
 VPATH += $(TOP_DIR)
 
+.PHONY: clean list arm linux framework test
+
+all: framework test
+
 # Ensure the framework is built
-framework: test
+framework:
 	@echo ${GREEN}"Ensure ut-core frameworks are present"${NC}
 	@${UT_CORE_DIR}/build.sh
 	@echo -e ${GREEN}Completed${NC}
 	@echo ${GREEN}"Entering ut-control"${NC}
 	@${MAKE} -C $(UT_CONTROL)
 	@$(MKDIR_P) ${LIB_DIR}
-	@cp $(UT_CONTROL)/lib/libut_control.* ${LIB_DIR}
-	@echo ${GREEN}ut-control LIB Coped to [${LIB_DIR}]${NC}
+	@cp $(UT_CONTROL)/lib/libut_control.* ${BIN_DIR}
+	@echo ${GREEN}ut-control LIB Coped to [${BIN_DIR}]${NC}
 
 # Make the final test binary
 test: $(OBJS)
@@ -122,8 +126,6 @@ $(BUILD_DIR)/%.o: %.c
 	@echo ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
 	@$(MKDIR_P) $(dir $@)
 	@$(CC) $(XCFLAGS) -c $< -o $@
-
-.PHONY: clean list arm linux framework test
 
 arm:
 	make TARGET=arm

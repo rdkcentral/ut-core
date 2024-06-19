@@ -19,7 +19,7 @@
 # * limitations under the License.
 # *
 
-set -e # error out if required
+#set -e # error out if required
 SCRIPT_EXEC="$(realpath $0)"
 MY_DIR="$(dirname $SCRIPT_EXEC)"
 
@@ -48,7 +48,7 @@ popd > /dev/null # ${MY_DIR}
 # Therefore in that case it warns you but doesnt' chnage to that version, which could cause your tests to break.
 # Change this to upgrade your ut-control Major versions. Non ABI Changes 1.x.x are supported, between major revisions
 
-UT_CONTROL_PROJECT_CURRENT_VERSION="1.0.0"  # Fixed version
+UT_CONTROL_PROJECT_VERSION="1.0.0"  # Fixed version
 
 # Clone the Unit Test Requirements
 TEST_REPO=git@github.com:rdkcentral/ut-control.git
@@ -66,6 +66,7 @@ function check_ut_control_revision()
             echo -e ${RED}--- New Version of ut-control released [${UT_NEXT_VERSION}] consider upgrading ---${NC}
         fi
     fi
+    echo -e ${YELLOW}ut-control version selected:[${UT_CONTROL_PROJECT_VERSION}]${NC}
     popd > /dev/null
 }
 
