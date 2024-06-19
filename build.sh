@@ -48,7 +48,7 @@ popd > /dev/null # ${MY_DIR}
 # When the major version changes in the ut-control, what that signals is that the testings will have to be upgraded to support that version
 # Therefore in that case it warns you but doesnt' chnage to that version, which could cause your tests to break.
 # Change this to upgrade your ut-control Major versions. Non ABI Changes 1.x.x are supported, between major revisions
-UT_CONTROL_PROJECT_MAJOR_VERSION="1."
+UT_CONTROL_PROJECT_CURRENT_VERSION="1.0.0"
 
 # Clone the Unit Test Requirements
 TEST_REPO=git@github.com:rdkcentral/ut-control.git
@@ -59,7 +59,7 @@ function check_next_revision()
     pushd ./ut-control
     # Set default UT_CONTROL_PROJECT_VERSION to next revision, if it's set then we don't need to tell you again
     if [ -v ${UT_CONTROL_PROJECT_VERSION} ]; then
-        UT_CONTROL_PROJECT_VERSION=$(git tag | grep ${UT_CONTROL_PROJECT_MAJOR_VERSION} | sort -r | head -n1)
+        UT_CONTROL_PROJECT_VERSION=$(git tag | grep ${UT_CONTROL_PROJECT_CURRENT_VERSION} | sort -r | head -n1)
         UT_NEXT_VERSION=$(git tag | sort -r | head -n1)
         echo -e ${YELLOW}ut-control version selected:[${UT_CONTROL_PROJECT_VERSION}]${NC}
         if [ "${UT_NEXT_VERSION}" != "${UT_CONTROL_PROJECT_VERSION}" ]; then

@@ -33,6 +33,7 @@ BUILD_DIR ?= $(TOP_DIR)/obj
 BIN_DIR ?= $(TOP_DIR)/bin
 LIB_DIR ?= $(TOP_DIR)/lib
 XCFLAGS := $(KCFLAGS)
+UT_CONTROL ?= $(UT_DIR)/framework/ut-control
 
 # Enable CUnit Requirements
 XCFLAGS += -DUT_CUNIT
@@ -50,11 +51,11 @@ SRC_DIRS += $(CUNIT_SRC_DIRS)/Framework
 #SRC_DIRS += $(CUNIT_SRC_DIRS)/Test
 
 INC_DIRS += $(UT_DIR)/include
-INC_DIRS += $(UT_DIR)/framework/ut-control/include
+INC_DIRS += $(UT_CONTROL)/include
 INC_DIRS += $(UT_DIR)/src
 
 SRC_DIRS += $(UT_DIR)/src
-XLDFLAGS += -L $(UT_DIR)/framework/ut-control/lib -lut_control
+XLDFLAGS += -L $(UT_CONTROL)/lib -lut_control
 
 MKDIR_P ?= @mkdir -p
 
@@ -72,7 +73,6 @@ endif
 ifeq ($(TARGET),linux)
 CUNIT_VARIANT=i686-pc-linux-gnu
 CC := gcc -ggdb -o0 -Wall
-AR := ar
 endif
 
 XLDFLAGS += -Wl,-rpath, $(YLDFLAGS) $(LDFLAGS) -pthread  -lpthread
@@ -99,15 +99,13 @@ VPATH += $(TOP_DIR)
 
 
 # Ensure the framework is built
-framework: $(eval SHELL:=/usr/bin/env bash)
+framework:
 	@echo -e ${GREEN}"Ensure framework is present"${NC}
 	${UT_DIR}/build.sh
 	@echo -e ${GREEN}Completed${NC}
-	@if [ ! -d "${UT_DIR}/framework/ut-control/lib" ]; then \
-		make -C ${UT_DIR}/framework/ut-control lib; \
-	fi
+	@${MAKE} -C $(UT_CONTROL)
 	@$(MKDIR_P) $(LIB_DIR)
-	@cp ${UT_DIR}/framework/ut-control/lib/libut_control.* $(LIB_DIR)
+	@cp $(UT_CONTROL)/lib/libut_control.* $(LIB_DIR)
 
 all: framework linux
 
