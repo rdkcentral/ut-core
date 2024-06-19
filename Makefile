@@ -17,14 +17,14 @@
 # * limitations under the License.
 # *
 
-TARGET_EXEC = hal_test
+TARGET_EXEC ?= hal_test
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
-$(info $(shell echo ${GREEN}TARGET_EXEC [$(TARGET_EXEC)]${NC}))
+$(info $(shell echo -e ${GREEN}TARGET_EXEC [$(TARGET_EXEC)]${NC}))
 
 UT_CORE_DIR :=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 export PATH := $(shell pwd)/toolchain:$(PATH)
@@ -98,23 +98,20 @@ VPATH += $(TOP_DIR)
 
 .PHONY: clean list arm linux framework test createdirs
 
-all: createdirs framework test
-
-createdirs:
-	echo "Directories [${BIN_DIR}] [${LIB_DIR}]"
-	@$(MKDIR_P) $(BIN_DIR)
-	@$(MKDIR_P) ${LIB_DIR}
+all: framework test
 
 # Ensure the framework is built
 framework:
-	@echo ${GREEN}"Ensure ut-core frameworks are present"${NC}
+	@echo -e ${GREEN}"Ensure ut-core frameworks are present"${NC}
 	@${UT_CORE_DIR}/build.sh
 	@echo -e ${GREEN}Completed${NC}
-	@echo ${GREEN}"Entering ut-control"${NC}
+	@echo -e ${GREEN}"Entering ut-control"${NC}
 	@${MAKE} -C $(UT_CONTROL)
+	@$(MKDIR_P) $(BIN_DIR)
+	@$(MKDIR_P) ${LIB_DIR}
 	@cp $(UT_CONTROL)/lib/libut_control.* ${LIB_DIR}
-	@cp $(UT_CONTROL)/lib/libut_control.* ${BIN_DIR}/
-	@echo ${GREEN}ut-control LIB Coped to [${BIN_DIR}]${NC}
+	@cp $(UT_CONTROL)/lib/libut_control.* ${BIN_DIR}
+	@echo -e ${GREEN}ut-control LIB Coped to [${BIN_DIR}]${NC}
 
 # Make the final test binary
 test: $(OBJS)
@@ -127,7 +124,7 @@ endif
 
 # Make any c source
 $(BUILD_DIR)/%.o: %.c
-	@echo ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
+	@echo -e ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
 	@$(MKDIR_P) $(dir $@)
 	@$(CC) $(XCFLAGS) -c $< -o $@
 
