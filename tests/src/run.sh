@@ -24,7 +24,10 @@ SCRIPT_EXEC="$(realpath $0)"
 MY_DIR="$(dirname $SCRIPT_EXEC)"
 
 cd "$(dirname "$0")"
+mkdir -p ./logs
 
 export LD_LIBRARY_PATH=/usr/lib:/lib:/home/root:${MY_DIR}
 
-./ut-test $@
+./ut-test -l ./logs -p ./assets/test_kvp.yaml $@
+
+
