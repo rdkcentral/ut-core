@@ -101,26 +101,28 @@ VPATH += $(TOP_DIR)
 all: framework test
 
 # Ensure the framework is built
-framework:
+framework: createdirs
 	@echo -e ${GREEN}"Ensure ut-core frameworks are present"${NC}
 	@${UT_CORE_DIR}/build.sh
 	@echo -e ${GREEN}Completed${NC}
 	@echo -e ${GREEN}"Entering ut-control"${NC}
 	@${MAKE} -C $(UT_CONTROL)
-	@$(MKDIR_P) $(BIN_DIR)
-	@$(MKDIR_P) ${LIB_DIR}
 	@cp $(UT_CONTROL)/lib/libut_control.* ${LIB_DIR}
 	@cp $(UT_CONTROL)/lib/libut_control.* ${BIN_DIR}
 	@echo -e ${GREEN}ut-control LIB Coped to [${BIN_DIR}]${NC}
 
 # Make the final test binary
-test: $(OBJS)
+test: $(OBJS) createdirs
 	@echo -e ${GREEN}Linking $@ $(BUILD_DIR)/$(TARGET_EXEC)${NC}
 	@$(CC) $(OBJS) -o $(BUILD_DIR)/$(TARGET_EXEC) $(XLDFLAGS) $(KCFLAGS) $(XCFLAGS)
 	@cp $(BUILD_DIR)/$(TARGET_EXEC) $(BIN_DIR)/
 ifneq ("$(wildcard $(HAL_LIB_DIR)/*.so)","")
 	cp $(HAL_LIB_DIR)/*.so* $(BIN_DIR)
 endif
+
+createdirs:
+	@$(MKDIR_P) ${BIN_DIR}
+	@$(MKDIR_P) ${LIB_DIR}
 
 # Make any c source
 $(BUILD_DIR)/%.o: %.c
