@@ -38,6 +38,7 @@ LIB_DIR ?= $(TOP_DIR)/lib
 # Non-Moveable Directories
 FRAMEWORK_DIR = $(UT_CORE_DIR)/framework
 UT_CONTROL = $(FRAMEWORK_DIR)/ut-control
+LIBWEBSOCKET_LIB_DIR = $(UT_CONTROL)/framework/libwebsockets-4.3.3/build/lib
 
 XCFLAGS := $(KCFLAGS)
 
@@ -54,7 +55,7 @@ INC_DIRS += $(UT_CORE_DIR)/src
 
 SRC_DIRS += $(UT_CORE_DIR)/src
 
-XLDFLAGS += -L $(UT_CONTROL)/lib -lut_control
+XLDFLAGS += -L $(UT_CONTROL)/lib -lut_control -Wl,-rpath-link,$(LIBWEBSOCKET_LIB_DIR)
 
 MKDIR_P ?= @mkdir -p
 
@@ -103,10 +104,12 @@ all: framework test
 # Ensure the framework is built
 framework: createdirs
 	@echo -e ${GREEN}"Ensure ut-core frameworks are present"${NC}
-	@${UT_CORE_DIR}/build.sh
+	@${UT_CORE_DIR}/build.sh TARGET=$(TARGET)
 	@echo -e ${GREEN}Completed${NC}
-	@echo -e ${GREEN}"Entering ut-control"${NC}
-	@${MAKE} -C $(UT_CONTROL)
+	@cp $(LIBWEBSOCKET_LIB_DIR)/libwebsocke*.* ${LIB_DIR}
+	@cp $(LIBWEBSOCKET_LIB_DIR)/libwebsocke*.* ${BIN_DIR}
+	@echo -e ${GREEN}"Entering ut-control [TARGET=${TARGET}]"${NC}
+	@${MAKE} -C $(UT_CONTROL) TARGET=${TARGET}
 	@cp $(UT_CONTROL)/lib/libut_control.* ${LIB_DIR}
 	@cp $(UT_CONTROL)/lib/libut_control.* ${BIN_DIR}
 	@echo -e ${GREEN}ut-control LIB Coped to [${BIN_DIR}]${NC}
@@ -142,7 +145,7 @@ clean:
 	@echo -e ${GREEN}Clean Completed${NC}
 
 cleanall: clean 
-	@echo ${GREEN}Performing Clean on frameworks [$(UT_CORE_DIR)/framework]${NC}
+	@echo -e ${GREEN}Performing Clean on frameworks [$(UT_CORE_DIR)/framework]${NC}
 	@$(RM) -rf $(UT_CORE_DIR)/framework
 
 list:

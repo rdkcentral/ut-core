@@ -29,8 +29,6 @@ INC_DIRS += $(ROOT_DIR)/../include
 CFLAGS += -DNDEBUG
 TARGET_EXEC = ut-test
 
-TARGET = linux
-
 $(info TARGET [$(TARGET)])
 
 .PHONY: clean list all
@@ -55,7 +53,7 @@ all: framework build
 
 build:
 	@echo -e ${GREEN}Build [$@] ${NC}
-	@make -C ../ test TARGET=linux
+	@make -C ../ test TARGET=$(TARGET)
 	@echo -e ${GREEN}Copy Assets to [${BIN_DIR}/assets] ${NC}
 	@mkdir -p ${BIN_DIR}/assets
 	@cp ${ROOT_DIR}/src/assets/* ${BIN_DIR}/assets
@@ -70,7 +68,7 @@ run: build
 rebuild: clean build
 
 framework:
-	make -C ../ framework TARGET=linux
+	make -C ../ framework TARGET=$(TARGET)
 
 list:
 	@echo ${GREEN}List [$@]${NC}
@@ -78,13 +76,13 @@ list:
 	@echo SRC_DIRS: ${SRC_DIRS}
 	@echo CFLAGS: ${CFLAGS}
 	@echo LDFLAGS: ${LDFLAGS}
-	@make -C ../ list TARGET=linux
+	@make -C ../ list TARGET=$(TARGET)
 
 clean:
 	@echo ${GREEN}Clean [$@]${NC}
 	@$(RM) -rf ${BIN_DIR}
-	@make -C ../ clean TARGET=linux
+	@make -C ../ clean TARGET=$(TARGET)
 
 cleanall:
 	@echo ${GREEN}Clean [$@]${NC}
-	@make -C ../ cleanall TARGET=linux
+	@make -C ../ cleanall TARGET=$(TARGET)
