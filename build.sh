@@ -19,16 +19,14 @@
 # * limitations under the License.
 # *
 
-set -e # error out if required
+#set -e # error out if required
 SCRIPT_EXEC="$(realpath $0)"
 MY_DIR="$(dirname $SCRIPT_EXEC)"
 
-pushd ${MY_DIR} > /dev/null
-
 FRAMEWORK_DIR=${MY_DIR}/framework
-LIBYAML_DIR=${FRAMEWORK_DIR}/libfyaml-master
-ASPRINTF_DIR=${FRAMEWORK_DIR}/asprintf
+UT_CONTROL_LIB_DIR=${FRAMEWORK_DIR}/ut-control
 
+pushd ${MY_DIR} > /dev/null
 # Clone CUnit
 if [ -d "${FRAMEWORK_DIR}/CUnit-2.1-3" ]; then
     echo "Framework CUnit already exists"
@@ -43,36 +41,56 @@ else
     patch -u CUnit-2.1-3/CUnit/Sources/Framework/TestRun.c -i CorrectBuildWarningsInCunit.patch
     echo "Patching Complete"
 fi
+popd > /dev/null # ${MY_DIR}
 
-if [ -d "${LIBYAML_DIR}" ]; then
-    echo "Framework libyaml already exists"
-else
-    pushd ${FRAMEWORK_DIR} > /dev/null
-    echo "Clone libfyaml in ${LIBYAML_DIR}"
-    wget https://github.com/pantoniou/libfyaml/archive/refs/heads/master.zip --no-check-certificate
-    unzip master.zip
+# The purpose of this script is on a clean environement, is to give you the latest binary compatible version for testing
+# When the major version changes in the ut-control, what that signals is that the testings will have to be upgraded to support that version
+# Therefore in that case it warns you but doesnt' chnage to that version, which could cause your tests to break.
+# Change this to upgrade your ut-control Major versions. Non ABI Changes 1.x.x are supported, between major revisions
 
-    echo "Patching Framework [${PWD}]"
-    cp ../src/libyaml/patches/CorrectWarningsAndBuildIssuesInLibYaml.patch  .
-    patch -i CorrectWarningsAndBuildIssuesInLibYaml.patch -p0
-    echo "Patching Complete"
+UT_CONTROL_PROJECT_VERSION="1.1.0"  # Fixed version
 
-#    ./bootstrap.sh
-#    ./configure --prefix=${LIBYAML_DIR}
-#    make
+# Clone the Unit Test Requirements
+TEST_REPO=git@github.com:rdkcentral/ut-control.git
+
+# This function checks the latest version of UT core and recommends an upgrade if reuqired
+function check_ut_control_revision()
+{
+    pushd ${UT_CONTROL_LIB_DIR} > /dev/null
+    # Set default UT_CONTROL_PROJECT_VERSION to next revision, if it's set then we don't need to tell you again
+    if [ -v ${UT_CONTROL_PROJECT_VERSION} ]; then
+        UT_CONTROL_PROJECT_VERSION=$(git tag | grep ${UT_CONTROL_PROJECT_CURRENT_VERSION} | sort -r | head -n1)
+        UT_NEXT_VERSION=$(git tag | sort -r | head -n1)
+        echo -e ${YELLOW}ut-control version selected:[${UT_CONTROL_PROJECT_VERSION}]${NC}
+        if [ "${UT_NEXT_VERSION}" != "${UT_CONTROL_PROJECT_VERSION}" ]; then
+            echo -e ${RED}--- New Version of ut-control released [${UT_NEXT_VERSION}] consider upgrading ---${NC}
+        fi
+    fi
+    echo -e ${YELLOW}ut-control version selected:[${UT_CONTROL_PROJECT_VERSION}]${NC}
     popd > /dev/null
-fi
+}
 
+# Check if the common document configuration is present, if not clone it
 pushd ${FRAMEWORK_DIR} > /dev/null
-if [ -d "${ASPRINTF_DIR}" ]; then
-    echo "Framework libyaml already exists"
+if [ -d "${UT_CONTROL_LIB_DIR}" ]; then
+    echo "Framework ut-control already exists"
+    # ut-control exists so run the makefile from ut
+    check_ut_control_revision
+    #make test
 else
-    echo "Clone asprintf in ${ASPRINTF_DIR}"
-    wget https://github.com/jwerle/asprintf.c/archive/refs/heads/master.zip -P asprintf/. --no-check-certificate
-    cd asprintf
-    unzip master.zip
-    rm asprintf.c-master/test.c
+    if [ "$1" != "no_ut_control" ]; then
+        echo "Clone ut_control in ${UT_CONTROL_LIB_DIR}"
+        git clone ${TEST_REPO} ut-control
+        check_ut_control_revision
+        cd ./ut-control
+        git checkout ${UT_CONTROL_PROJECT_VERSION}
+        ./configure.sh
+        #make lib
+        #cd ..
+        #./${0} $@
+    else
+        echo "$1 requested, hence ut-control is not required to be cloned"
+    fi
 fi
 popd > /dev/null # ${FRAMEWORK_DIR}
 
-popd > /dev/null

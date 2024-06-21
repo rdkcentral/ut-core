@@ -26,43 +26,36 @@ NC='\033[0m'
 
 $(info $(shell echo -e ${GREEN}TARGET_EXEC [$(TARGET_EXEC)]${NC}))
 
-UT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+UT_CORE_DIR :=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 export PATH := $(shell pwd)/toolchain:$(PATH)
-TOP_DIR ?= $(UT_DIR)
+
+# Moveable Directories based on the caller makefile
+TOP_DIR ?= $(UT_CORE_DIR)
 BUILD_DIR ?= $(TOP_DIR)/obj
 BIN_DIR ?= $(TOP_DIR)/bin
+LIB_DIR ?= $(TOP_DIR)/lib
+
+# Non-Moveable Directories
+FRAMEWORK_DIR = $(UT_CORE_DIR)/framework
+UT_CONTROL = $(FRAMEWORK_DIR)/ut-control
+LIBWEBSOCKET_LIB_DIR = $(UT_CONTROL)/framework/libwebsockets-4.3.3/build/lib
+
 XCFLAGS := $(KCFLAGS)
 
 # Enable CUnit Requirements
 XCFLAGS += -DUT_CUNIT
-CUNIT_DIR +=  $(UT_DIR)/framework/CUnit-2.1-3/CUnit
-#CUNIT_SRC_DIRS +=  $(UT_DIR)/src/cunit
+CUNIT_DIR +=  $(FRAMEWORK_DIR)/CUnit-2.1-3/CUnit
 CUNIT_SRC_DIRS += $(CUNIT_DIR)/Sources
 INC_DIRS += $(CUNIT_DIR)/Headers
-#SRC_DIRS += $(CUNIT_SRC_DIRS)/Automated
-#SRC_DIRS += $(CUNIT_SRC_DIRS)/Basic
-#SRC_DIRS += $(CUNIT_SRC_DIRS)/Console
 SRC_DIRS += $(CUNIT_SRC_DIRS)/Framework
-#SRC_DIRS += $(CUNIT_SRC_DIRS)/Curses
-#SRC_DIRS += $(CUNIT_SRC_DIRS)/wxWidget
-#SRC_DIRS += $(CUNIT_SRC_DIRS)/Win
-#SRC_DIRS += $(CUNIT_SRC_DIRS)/Test
 
-# Enable libyaml Requirements
-LIBFYAML_DIR = ${UT_DIR}/framework/libfyaml-master
-ASPRINTF_DIR = ${UT_DIR}/framework/asprintf/asprintf.c-master/
-SRC_DIRS += $(LIBFYAML_DIR)/src/lib
-SRC_DIRS += $(LIBFYAML_DIR)/src/thread
-SRC_DIRS += $(LIBFYAML_DIR)/src/util
-SRC_DIRS += $(LIBFYAML_DIR)/src/xxhash
-SRC_DIRS += $(ASPRINTF_DIR)
-INC_DIRS += $(LIBFYAML_DIR)/include
-INC_DIRS += $(ASPRINTF_DIR)
+INC_DIRS += $(UT_CORE_DIR)/include
+INC_DIRS += $(UT_CONTROL)/include
+INC_DIRS += $(UT_CORE_DIR)/src
 
-INC_DIRS += $(UT_DIR)/include
-INC_DIRS += $(UT_DIR)/src
+SRC_DIRS += $(UT_CORE_DIR)/src
 
-SRC_DIRS += $(UT_DIR)/src
+XLDFLAGS += -L $(UT_CONTROL)/lib -lut_control -Wl,-rpath-link,$(LIBWEBSOCKET_LIB_DIR)
 
 MKDIR_P ?= @mkdir -p
 
@@ -73,7 +66,7 @@ ifeq ($(TARGET),arm)
 CUNIT_VARIANT=arm-rdk-linux-gnueabi
 #CC := arm-rdk-linux-gnueabi-gcc -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -mabi=aapcs-linux -mno-thumb-interwork -ffixed-r8 -fomit-frame-pointer 
 # CFLAGS will be overriden by Caller as required
-INC_DIRS += $(UT_DIR)/sysroot/usr/include
+INC_DIRS += $(UT_CORE_DIR)/sysroot/usr/include
 endif
 
 # Defaults for target linux
@@ -101,33 +94,44 @@ DEPS += $(OBJS:.o=.d)
 XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\"
 
 # Library Path
-VPATH += $(UT_DIR)
+VPATH += $(UT_CORE_DIR)
 VPATH += $(TOP_DIR)
 
+.PHONY: clean list arm linux framework test createdirs
+
+all: framework test
+
+# Ensure the framework is built
+framework: createdirs
+	@echo -e ${GREEN}"Ensure ut-core frameworks are present"${NC}
+	@${UT_CORE_DIR}/build.sh TARGET=$(TARGET)
+	@echo -e ${GREEN}Completed${NC}
+	@cp $(LIBWEBSOCKET_LIB_DIR)/libwebsocke*.* ${LIB_DIR}
+	@cp $(LIBWEBSOCKET_LIB_DIR)/libwebsocke*.* ${BIN_DIR}
+	@echo -e ${GREEN}"Entering ut-control [TARGET=${TARGET}]"${NC}
+	@${MAKE} -C $(UT_CONTROL) TARGET=${TARGET}
+	@cp $(UT_CONTROL)/lib/libut_control.* ${LIB_DIR}
+	@cp $(UT_CONTROL)/lib/libut_control.* ${BIN_DIR}
+	@echo -e ${GREEN}ut-control LIB Coped to [${BIN_DIR}]${NC}
+
 # Make the final test binary
-test: $(OBJS)
+test: $(OBJS) createdirs
 	@echo -e ${GREEN}Linking $@ $(BUILD_DIR)/$(TARGET_EXEC)${NC}
 	@$(CC) $(OBJS) -o $(BUILD_DIR)/$(TARGET_EXEC) $(XLDFLAGS) $(KCFLAGS) $(XCFLAGS)
-	@$(MKDIR_P) $(BIN_DIR)
-	@cp $(BUILD_DIR)/$(TARGET_EXEC) $(BIN_DIR)
+	@cp $(BUILD_DIR)/$(TARGET_EXEC) $(BIN_DIR)/
 ifneq ("$(wildcard $(HAL_LIB_DIR)/*.so)","")
 	cp $(HAL_LIB_DIR)/*.so* $(BIN_DIR)
 endif
+
+createdirs:
+	@$(MKDIR_P) ${BIN_DIR}
+	@$(MKDIR_P) ${LIB_DIR}
 
 # Make any c source
 $(BUILD_DIR)/%.o: %.c
 	@echo -e ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
 	@$(MKDIR_P) $(dir $@)
 	@$(CC) $(XCFLAGS) -c $< -o $@
-
-.PHONY: clean list arm linux framework
-all: framework linux
-
-# Ensure the framework is built
-framework: $(eval SHELL:=/usr/bin/env bash)
-	@echo -e ${GREEN}"Ensure framework is present"${NC}
-	${SHELL} -c ${UT_DIR}/build.sh
-	@echo -e ${GREEN}Completed${NC}
 
 arm:
 	make TARGET=arm
@@ -141,10 +145,11 @@ clean:
 	@echo -e ${GREEN}Clean Completed${NC}
 
 cleanall: clean 
-	@echo -e ${GREEN}Performing Clean on frameworks [$(UT_DIR)/framework]${NC}
-	@${RM} -rf $(UT_DIR)/framework
+	@echo -e ${GREEN}Performing Clean on frameworks [$(UT_CORE_DIR)/framework]${NC}
+	@$(RM) -rf $(UT_CORE_DIR)/framework
 
 list:
+	@echo --------- ut_core ----------------
 	@echo 
 	@echo CC:$(CC)
 	@echo 
@@ -156,14 +161,11 @@ list:
 	@echo 
 	@echo SRCS:$(SRCS)
 	@echo
-	@echo UT_DIR:$(UT_DIR)
+	@echo UT_CORE_DIR:$(UT_CORE_DIR)
 	@echo 
 	@echo TOP_DIR:$(TOP_DIR)
 	@echo 
 	@echo BUILD_DIR:$(BUILD_DIR)
-	@echo
-	@echo LIBFYAML_DIR:$(LIBFYAML_DIR)
-	@echo
 	@echo
 	@echo CFLAGS:$(CFLAGS)
 	@echo
@@ -183,7 +185,7 @@ list:
 	@echo
 	@echo DEPS:$(DEPS)
 	@echo
-	@echo CONFIGURE_FLAGS:$(CONFIGURE_FLAGS)
-	@echo
+	@echo --------- ut_control ----------------
+	@${MAKE} -C $(UT_CONTROL) list
 
 -include $(DEPS)

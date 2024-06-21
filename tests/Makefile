@@ -26,10 +26,8 @@ INC_DIRS := $(ROOT_DIR)/include
 INC_DIRS += $(ROOT_DIR)/../include
 
 # Switch on Linux & disable asserts for the testing suites
-CFLAGS = -DNDEBUG
+CFLAGS += -DNDEBUG
 TARGET_EXEC = ut-test
-
-TARGET = linux
 
 $(info TARGET [$(TARGET)])
 
@@ -51,23 +49,26 @@ NC='\033[0m'
 
 .PHONY: clean list build all
 
-build: framework
+all: framework build 
+
+build:
 	@echo -e ${GREEN}Build [$@] ${NC}
-	@make -C ../ test TARGET=linux
+	@make -C ../ test TARGET=$(TARGET)
 	@echo -e ${GREEN}Copy Assets to [${BIN_DIR}/assets] ${NC}
 	@mkdir -p ${BIN_DIR}/assets
-	@cp ./src/assets/* ${BIN_DIR}/assets
+	@cp ${ROOT_DIR}/src/assets/* ${BIN_DIR}/assets
+	@cp ${ROOT_DIR}/src/*.sh ${BIN_DIR}/.
 	@echo -e ${GREEN}Build Complete${NC}
 
 run: build
 	@echo -e ${GREEN}Running [$@]${NC}
-	@mkdir -p ./tests/logs
-	@bash -c "cd ./bin;./ut-test -a -p ./assets/test_kvp.yaml -l $(ROOT_DIR)/logs/"
+	@mkdir -p ${ROOT_DIR}/logs
+	@bash -c "cd ${ROOT_DIR}/bin; ./ut-test -a -p ./assets/test_kvp.yaml -l ${ROOT_DIR}/logs/"
 
 rebuild: clean build
 
 framework:
-	make -C ../ framework TARGET=linux
+	make -C ../ framework TARGET=$(TARGET)
 
 list:
 	@echo ${GREEN}List [$@]${NC}
@@ -75,12 +76,13 @@ list:
 	@echo SRC_DIRS: ${SRC_DIRS}
 	@echo CFLAGS: ${CFLAGS}
 	@echo LDFLAGS: ${LDFLAGS}
-	@make -C ../ list TARGET=linux
+	@make -C ../ list TARGET=$(TARGET)
 
 clean:
 	@echo ${GREEN}Clean [$@]${NC}
-	@make -C ../ clean TARGET=linux
+	@$(RM) -rf ${BIN_DIR}
+	@make -C ../ clean TARGET=$(TARGET)
 
 cleanall:
 	@echo ${GREEN}Clean [$@]${NC}
-	@make -C ../ cleanall TARGET=linux
+	@make -C ../ cleanall TARGET=$(TARGET)
