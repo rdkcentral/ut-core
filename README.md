@@ -1,7 +1,8 @@
 # Unit Testing - Hal Testing Suite
 
-| Date   | Comment | Document Version |
+| Date (DD/MM/YY)  | Comment | Document Version |
 |--------|---------|---------|
+| 19/06/24 | Extended LD_LIBRARY_PATH | 2.0.1|
 | 02/01/24 | Added Release Notes | 2.0.0|
 | 06/10/23 | Initial release| 1.2.0|
 | 23/02/23 | Reviewed & Updated| 1.1.0|
@@ -200,8 +201,11 @@ Log into the target.
 
 Assuming the files that are copied are in the `/home/root` directory, then the following export is required.
 
+- `ut_control` sub-library, located in the `framework` directory, is required for running the target binary. `LD_LIBRARY_PATH` must be set to include it"
+- All external library dependencies are copied into the `ut/bin` directory
+
 ```bash
-export LD_LIBRARY_PATH=/usr/lib:/lib:/home/root
+export LD_LIBRARY_PATH=/usr/lib:/lib:/home/root:./
 ```
 
 or use the `run.sh`, which is in the same directory
