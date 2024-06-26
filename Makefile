@@ -147,6 +147,7 @@ clean:
 cleanall: clean 
 	@echo -e ${GREEN}Performing Clean on frameworks [$(UT_CORE_DIR)/framework]${NC}
 	@$(RM) -rf $(UT_CORE_DIR)/framework
+	@$(RM) -rf $(BIN_DIR)
 
 list:
 	@echo --------- ut_core ----------------
