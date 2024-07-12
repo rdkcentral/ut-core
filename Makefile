@@ -39,6 +39,8 @@ LIB_DIR ?= $(TOP_DIR)/lib
 FRAMEWORK_DIR = $(UT_CORE_DIR)/framework
 UT_CONTROL = $(FRAMEWORK_DIR)/ut-control
 LIBWEBSOCKET_LIB_DIR = $(UT_CONTROL)/framework/libwebsockets-4.3.3/build/lib
+CURL_LIB_DIR = $(UT_CONTROL)/framework/curl/curl-8.8.0/build/lib
+OPENSSL_LIB_DIR = $(UT_CONTROL)/framework/openssl/openssl-OpenSSL_1_1_1w/build/lib/
 
 XCFLAGS := $(KCFLAGS)
 
@@ -55,7 +57,7 @@ INC_DIRS += $(UT_CORE_DIR)/src
 
 SRC_DIRS += $(UT_CORE_DIR)/src
 
-XLDFLAGS += -L $(UT_CONTROL)/lib -lut_control -Wl,-rpath-link,$(LIBWEBSOCKET_LIB_DIR)
+XLDFLAGS += -L $(UT_CONTROL)/lib -lut_control -Wl,-rpath-link,$(LIBWEBSOCKET_LIB_DIR):$(CURL_LIB_DIR):$(OPENSSL_LIB_DIR)
 
 MKDIR_P ?= @mkdir -p
 
