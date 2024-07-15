@@ -180,6 +180,37 @@ UT_test_suite_t *UT_add_suite(const char *pTitle, UT_InitialiseFunction_t pInitF
     return (UT_test_suite_t *)pSuite;
 }
 
+UT_test_suite_t *UT_add_suite_withGroupID( const char *pTitle, UT_InitialiseFunction_t pInitFunction, UT_CleanupFunction_t pCleanupFunction,  UT_groupID_t groupId )
+{
+    CU_pSuite pSuite;
+
+    if ( pInitFunction == NULL )
+    {
+        pInitFunction = &internalInit;
+    }
+
+    if ( pCleanupFunction == NULL )
+    {
+        pCleanupFunction = &internalClean;
+    }
+
+    if ( pTitle == NULL )
+    {
+        gRegisterFailed++;
+        return NULL;
+    }
+
+    pSuite = CU_add_suite(pTitle, (CU_InitializeFunc)pInitFunction, (CU_CleanupFunc)pCleanupFunction);
+
+    if ( pSuite == NULL )
+    {
+        gRegisterFailed++;
+    }
+
+    return (UT_test_suite_t *)pSuite;
+
+}
+
 UT_test_t *UT_add_test(UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunction_t pTestFunction)
 {
     CU_pTest pTest;

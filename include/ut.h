@@ -55,6 +55,14 @@ typedef enum
     UT_STATUS_FAILURE,    /**!< A general failure occurred. */
 } UT_status_t;
 
+typedef enum
+{
+    UT_BASIC_TESTS_L1 = 1, /*!<  Level 1 basic tests are expected to be in this group */
+    UT_ADVANCED_TESTS_L2,  /*!<  Level 2 advanced tests are expected to be in this group */
+    UT_MODULE_TESTS_L3,    /*!<  Level 3 Modle tests are expected to be in this group */
+    UT_MODULE_CONTROL      /*!<  Control functions (e.g. start module/ stop module ), will not be ran as a testing suite */
+} UT_groupID_t;
+
 /* 
 * TODO (Error Handling Enhancement):
 *   - Extend `UT_status_t` enum with more specific error codes for:
@@ -144,6 +152,17 @@ UT_status_t UT_run_tests( void );
 UT_test_suite_t *UT_add_suite(const char *pTitle, UT_InitialiseFunction_t pInitFunction, UT_CleanupFunction_t pCleanupFunction);
 
 /**!
+ * @brief Registers a test suite with the unit testing framework based on the group ID
+ *
+ * @param[in] pTitle - Name of the test suite.
+ * @param[in] pInitFunction - Optional initialization function for the suite (can be NULL).
+ * @param[in] pCleanupFunction - Optional cleanup function for the suite (can be NULL).
+ * @param[in] groupId - Group ID of the test from enum UT_groupID_t.
+ * @returns Handle to the created test suite, or NULL on error.
+ */
+UT_test_suite_t *UT_add_suite_withGroupID( const char *pTitle, UT_InitialiseFunction_t pInitFunction, UT_CleanupFunction_t pCleanupFunction,  UT_groupID_t groupId );
+
+/**!
  * @brief Adds a test case to a suite.
  *
  * @param[in] pSuite - Handle to the test suite to add the test case to.
@@ -152,6 +171,16 @@ UT_test_suite_t *UT_add_suite(const char *pTitle, UT_InitialiseFunction_t pInitF
  * @returns Handle to the added test case, or NULL on error.
  */
 UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunction_t pFunction);
+
+/**!
+ * @brief Adds a test case to a suite with group ID
+ *
+ * @param[in] pSuite - Handle to the test suite to add the test case to.
+ * @param[in] pTitle - Name of the test case.
+ * @param[in] pFunction - Function to be executed for this test case.
+ * @returns Handle to the added test case, or NULL on error.
+ */
+UT_test_t *UT_add_test_autoCaseID( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunction_t pFunction);
 
 /**!
  * @brief Retrieves the title of a test suite.
