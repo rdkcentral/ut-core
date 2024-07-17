@@ -37,21 +37,6 @@
 #include "ut_internal.h"
 #include "ut_cunit_internal.h"
 
-/* Structures and defines */
-
-#define MAX_GROUPS 100
-typedef struct
-{
-    CU_pSuite pSuite;
-    UT_groupID_t groupId;
-} UT_test_group_t;
-
-typedef struct
-{
-    UT_test_group_t *groups[MAX_GROUPS];
-    int count;
-} UT_group_list_t;
-
 UT_group_list_t group_list = {.count = 0};
 
 /** Pointer to the currently running suite. */

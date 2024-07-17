@@ -36,6 +36,18 @@
 
 #define UT_MAX_FILENAME_STRING_SIZE (32)
 #define MAX_OPTIONS 50
+#define MAX_GROUPS 100
+typedef struct
+{
+    CU_pSuite pSuite;
+    UT_groupID_t groupId;
+} UT_test_group_t;
+
+typedef struct
+{
+    UT_test_group_t *groups[MAX_GROUPS];
+    int count;
+} UT_group_list_t;
 
 /**
  * @brief Enumerates the different testing modes supported by the UT framework.
@@ -103,7 +115,7 @@ extern void UT_set_option_value(groupFlag_t* groupFlag);
  * @brief Deactivate all suites
  *
  */
-void UT_deactivate_suites();
+extern void UT_deactivate_suites();
 
 #endif  /*  __UT_INTERNAL_H  */
 /** @} */ // End of UT group
