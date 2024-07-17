@@ -119,7 +119,7 @@ UT_status_t UT_run_tests( void )
         }
         return UT_STATUS_OK;
     }
-    UT_deactivate_suites();
+    UT_deactivate_suites_with_group_ids();
 
     if(gGroupFlag.d_count)
     {
@@ -276,7 +276,7 @@ void UT_enable_disable_suites_with_groupIDs(bool flag, UT_groupID_t groupId)
     }
 }
 
-void UT_deactivate_suites()
+void UT_deactivate_suites_with_group_ids()
 {
     for (int i = 0; i < group_list.count; ++i)
     {

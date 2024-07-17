@@ -112,10 +112,10 @@ extern void UT_enable_disable_suites_with_groupIDs(bool flag, UT_groupID_t group
 extern void UT_set_option_value(groupFlag_t* groupFlag);
 
 /**
- * @brief Deactivate all suites
+ * @brief Deactivate all suites with group ids
  *
  */
-extern void UT_deactivate_suites();
+extern void UT_deactivate_suites_with_group_ids();
 
 #endif  /*  __UT_INTERNAL_H  */
 /** @} */ // End of UT group
