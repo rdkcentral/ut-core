@@ -60,7 +60,6 @@ static void usage( void )
 static bool decodeOptions( int argc, char **argv )
 {
     int opt;
-    int opt_index = 0;
     ut_kvp_status_t status;
 
     memset(&gOptions,0,sizeof(gOptions));

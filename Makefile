@@ -61,15 +61,18 @@ XLDFLAGS += -L $(UT_CONTROL)/lib -lut_control -Wl,-rpath-link,$(LIBWEBSOCKET_LIB
 
 MKDIR_P ?= @mkdir -p
 
-$(info TARGET [$(TARGET)])
-
 # defaults for target arm
 ifeq ($(TARGET),arm)
 CUNIT_VARIANT=arm-rdk-linux-gnueabi
 #CC := arm-rdk-linux-gnueabi-gcc -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -mabi=aapcs-linux -mno-thumb-interwork -ffixed-r8 -fomit-frame-pointer 
 # CFLAGS will be overriden by Caller as required
 INC_DIRS += $(UT_CORE_DIR)/sysroot/usr/include
+TARGET = arm
+else
+TARGET = linux
 endif
+
+$(info TARGET [$(TARGET)])
 
 # Defaults for target linux
 ifeq ($(TARGET),linux)

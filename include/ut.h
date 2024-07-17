@@ -177,16 +177,6 @@ UT_test_suite_t *UT_add_suite_withGroupID( const char *pTitle, UT_InitialiseFunc
 UT_test_t *UT_add_test( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunction_t pFunction);
 
 /**!
- * @brief Adds a test case to a suite with group ID
- *
- * @param[in] pSuite - Handle to the test suite to add the test case to.
- * @param[in] pTitle - Name of the test case.
- * @param[in] pFunction - Function to be executed for this test case.
- * @returns Handle to the added test case, or NULL on error.
- */
-UT_test_t *UT_add_test_autoCaseID( UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunction_t pFunction);
-
-/**!
  * @brief Retrieves the title of a test suite.
  *
  * @param pSuite - Pointer to the test suite.
