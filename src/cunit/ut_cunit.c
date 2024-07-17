@@ -37,12 +37,31 @@
 #include "ut_internal.h"
 #include "ut_cunit_internal.h"
 
+/* Structures and defines */
+
+#define MAX_GROUPS 100
+typedef struct
+{
+    CU_pSuite pSuite;
+    UT_groupID_t groupId;
+} UT_test_group_t;
+
+typedef struct
+{
+    UT_test_group_t *groups[MAX_GROUPS];
+    int count;
+} UT_group_list_t;
+
+UT_group_list_t group_list = {.count = 0};
+
 /** Pointer to the currently running suite. */
 static int gRegisterFailed;     /*!< Global Registration failed counter */
 static TestMode_t  gTestMode;
+static groupFlag_t gGroupFlag;
 
 static int internalInit( void );
 static int internalClean( void );
+static void cleanupGroups( void );
 
 /**
  * @brief Startup the system
@@ -83,6 +102,16 @@ static TestMode_t get_test_mode( void )
     return gTestMode;
 }
 
+void UT_set_option_value(groupFlag_t* groupFlag)
+{
+    memset(&gGroupFlag, 0, sizeof(gGroupFlag));
+    memcpy(&gGroupFlag.d_values, groupFlag->d_values, groupFlag->d_count * sizeof(int));
+    gGroupFlag.d_count = groupFlag->d_count;
+
+    memcpy(&gGroupFlag.e_values, groupFlag->e_values, groupFlag->e_count * sizeof(int));
+    gGroupFlag.e_count = groupFlag->e_count;
+}
+
 /**
  * @brief run the registered tests as required
  * 
@@ -104,6 +133,23 @@ UT_status_t UT_run_tests( void )
             return UT_STATUS_FAILURE;
         }
         return UT_STATUS_OK;
+    }
+    UT_deactivate_suites();
+
+    if(gGroupFlag.d_count)
+    {
+        for(int i = 0; i < gGroupFlag.d_count; i++)
+        {
+            UT_enable_disable_suites_with_groupIDs(false, gGroupFlag.d_values[i]);
+        }
+    }
+
+    if(gGroupFlag.e_count)
+    {
+        for (int i = 0; i < gGroupFlag.e_count; i++)
+        {
+            UT_enable_disable_suites_with_groupIDs(true, gGroupFlag.e_values[i]);
+        }
     }
 
     UT_LOG( UT_LOG_ASCII_GREEN"---- start of test run ----"UT_LOG_ASCII_NC );
@@ -131,6 +177,7 @@ UT_status_t UT_run_tests( void )
     }
 
     CU_cleanup_registry();
+    cleanupGroups();
     error = CU_get_error();
 
     /* #BUG: There's a bug here to be investigated, the suites are not counting as failed when tests fail.*/
@@ -176,7 +223,7 @@ UT_test_suite_t *UT_add_suite(const char *pTitle, UT_InitialiseFunction_t pInitF
     {
         gRegisterFailed++;
     }
-
+    UT_LOG( UT_LOG_ASCII_MAGENTA"[%s] will be deprecated soon. Please start using [UT_add_suite_withGroupID]\n"UT_LOG_ASCII_NC, __FUNCTION__);
     return (UT_test_suite_t *)pSuite;
 }
 
@@ -200,6 +247,12 @@ UT_test_suite_t *UT_add_suite_withGroupID( const char *pTitle, UT_InitialiseFunc
         return NULL;
     }
 
+    if (group_list.count >= MAX_GROUPS)
+    {
+        gRegisterFailed++;
+        return NULL;
+    }
+
     pSuite = CU_add_suite(pTitle, (CU_InitializeFunc)pInitFunction, (CU_CleanupFunc)pCleanupFunction);
 
     if ( pSuite == NULL )
@@ -207,8 +260,43 @@ UT_test_suite_t *UT_add_suite_withGroupID( const char *pTitle, UT_InitialiseFunc
         gRegisterFailed++;
     }
 
+    UT_test_group_t* newGroup = (UT_test_group_t*)malloc(sizeof(UT_test_group_t));
+    if (newGroup == NULL) {
+        gRegisterFailed++;
+        return NULL;
+    }
+
+    newGroup->pSuite = pSuite;
+    newGroup->groupId = groupId;
+
+    group_list.groups[group_list.count++]=newGroup;
+
     return (UT_test_suite_t *)pSuite;
 
+}
+
+void UT_enable_disable_suites_with_groupIDs(bool flag, UT_groupID_t groupId)
+{
+    if (groupId >= UT_TESTS_MAX)
+    {
+        return;
+    }
+
+    for (int i = 0; i < group_list.count; ++i)
+    {
+        if (group_list.groups[i]->groupId == groupId)
+        {
+            CU_set_suite_active(group_list.groups[i]->pSuite, (CU_BOOL)flag);
+        }
+    }
+}
+
+void UT_deactivate_suites()
+{
+    for (int i = 0; i < group_list.count; ++i)
+    {
+        CU_set_suite_active(group_list.groups[i]->pSuite, (CU_BOOL) false);
+    }
 }
 
 UT_test_t *UT_add_test(UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunction_t pTestFunction)
@@ -243,6 +331,15 @@ static int internalInit( void )
 static int internalClean( void )
 {
     return 0;
+}
+
+static void cleanupGroups( void )
+{
+    for (int i = 0; i < group_list.count; ++i)
+    {
+        free(group_list.groups[i]);
+    }
+    group_list.count = 0;
 }
 
 

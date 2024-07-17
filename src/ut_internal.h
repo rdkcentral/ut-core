@@ -35,6 +35,7 @@
 #include <string.h>
 
 #define UT_MAX_FILENAME_STRING_SIZE (32)
+#define MAX_OPTIONS 50
 
 /**
  * @brief Enumerates the different testing modes supported by the UT framework.
@@ -49,6 +50,14 @@ typedef enum
 /**
  * @brief Structure to hold configuration options and flags for the UT framework.
  */
+
+typedef struct {
+    int d_values[MAX_OPTIONS]; /**< Flag to hold value of optargs -d> */
+    int d_count;               /**< Flag to hold index of optargs -d> */
+    int e_values[MAX_OPTIONS]; /**< Flag to hold value of optargs -e> */
+    int e_count;               /**< Flag to hold index of optargs -e> */
+} groupFlag_t;
+
 typedef struct
 {
     TestMode_t  testMode; /**< The selected testing mode. */
@@ -56,6 +65,7 @@ typedef struct
     char        filenameRoot[UT_MAX_FILENAME_STRING_SIZE]; /**< Base filename for test results. */
     char        filename[UT_MAX_FILENAME_STRING_SIZE];  /**< Full filename for test results. */
     bool        help; /**< Flag to indicate whether to display help information. */
+    groupFlag_t groupFlag; /**< Group flag info> */
 } optionFlags_t;
 
 #define TEST_INFO(x) printf x; // Consider replacing with a more robust logging mechanism
@@ -73,6 +83,27 @@ extern void UT_set_results_output_filename(const char* szFilenameRoot);
  * @param mode The desired testing mode.
  */
 extern void UT_set_test_mode(TestMode_t mode);
+
+/**
+ * @brief Enables or disables suites based on group Ids
+ *
+ * @param flag flag to enable or disable suites
+ * @param groupID group ID to determine the suite which needs to be enabled or disabled
+ */
+extern void UT_enable_disable_suites_with_groupIDs(bool flag, UT_groupID_t groupId);
+
+/**
+ * @brief Sets the groupFlag_t structure values
+ *
+ * @param groupFlag flag with values from optarg
+ */
+extern void UT_set_option_value(groupFlag_t* groupFlag);
+
+/**
+ * @brief Deactivate all suites
+ *
+ */
+void UT_deactivate_suites();
 
 #endif  /*  __UT_INTERNAL_H  */
 /** @} */ // End of UT group

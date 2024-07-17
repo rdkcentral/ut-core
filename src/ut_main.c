@@ -44,7 +44,6 @@ static optionFlags_t gOptions;  /*!< Control flags, should not be exposed outsid
 
 #define UT_LOG_DEFAULT_PATH "/tmp/"
 
-
 /* Function prototypes */
 
 static void usage( void )
@@ -61,6 +60,7 @@ static void usage( void )
 static bool decodeOptions( int argc, char **argv )
 {
     int opt;
+    int opt_index = 0;
     ut_kvp_status_t status;
 
     memset(&gOptions,0,sizeof(gOptions));
@@ -72,7 +72,7 @@ static bool decodeOptions( int argc, char **argv )
     UT_log_setLogFilePath(UT_LOG_DEFAULT_PATH); /* Use Macro */
     UT_set_results_output_filename( UT_log_getLogFilename() );
 
-    while ((opt = getopt(argc, argv, "cabhf:l:tp:")) != -1)
+    while ((opt = getopt(argc, argv, "cabhf:l:tp:d:e:")) != -1)
     {
         switch(opt)
         {
@@ -93,6 +93,28 @@ static bool decodeOptions( int argc, char **argv )
                 TEST_INFO(("Setting Log Path [%s]\n", optarg));
                 UT_log_setLogFilePath(optarg);
                 UT_set_results_output_filename( UT_log_getLogFilename() );
+                break;
+            case 'd':
+                if (gOptions.groupFlag.d_count < MAX_OPTIONS)
+                {
+                    TEST_INFO(("Disable group id [%d]\n", atoi(optarg)));
+                    gOptions.groupFlag.d_values[gOptions.groupFlag.d_count++] = atoi(optarg);
+                }
+                else
+                {
+                    UT_LOG_ERROR("Too many -d options\n");
+                }
+                break;
+            case 'e':
+                if (gOptions.groupFlag.e_count < MAX_OPTIONS)
+                {
+                    TEST_INFO(("Enable group id [%d]\n", atoi(optarg)));
+                    gOptions.groupFlag.e_values[gOptions.groupFlag.e_count++] = atoi(optarg);
+                }
+                else
+                {
+                    UT_LOG_ERROR("Too many -d options\n");
+                }
                 break;
             case 'p':
                 TEST_INFO(("Using Profile[%s]\n", optarg));
@@ -123,6 +145,7 @@ static bool decodeOptions( int argc, char **argv )
     }
 
     UT_set_test_mode(gOptions.testMode);
+    UT_set_option_value(&gOptions.groupFlag);
     return true;
 }
 

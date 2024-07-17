@@ -57,10 +57,14 @@ typedef enum
 
 typedef enum
 {
-    UT_BASIC_TESTS_L1 = 1, /*!<  Level 1 basic tests are expected to be in this group */
-    UT_ADVANCED_TESTS_L2,  /*!<  Level 2 advanced tests are expected to be in this group */
-    UT_MODULE_TESTS_L3,    /*!<  Level 3 Modle tests are expected to be in this group */
-    UT_MODULE_CONTROL      /*!<  Control functions (e.g. start module/ stop module ), will not be ran as a testing suite */
+    UT_TESTS_L1 = 1,   /*!<  Level 1 basic tests are expected to be in this group */
+    UT_TESTS_L2,       /*!<  Level 2 advanced tests are expected to be in this group */
+    UT_TESTS_L3,       /*!<  Level 3 Module tests are expected to be in this group */
+    UT_TESTS_L4,       /*!<  Level 4 Module Control functions (e.g. start module/ stop module ), will not be ran as a testing suite */
+    UT_TESTS_HUMAN_L2, /*!<  Level 2 Suite Requires Human interaction */
+    UT_TESTS_HUMAN_L3, /*!<  Level 3 Suite Requires Human interaction */
+    UT_TESTS_HUMAN_L4, /*!<  Level 4 Suite Requires Human interaction */
+    UT_TESTS_MAX       /*!<  Out of range marker (not a valid status). */
 } UT_groupID_t;
 
 /* 

@@ -196,13 +196,13 @@ void test_ut_kvp_get_instance( void )
 
 void register_kvp_profile_testing_functions(void)
 {
-    gpAssertSuite1 = UT_add_suite("ut-kvp - assert open / close", NULL, NULL);
+    gpAssertSuite1 = UT_add_suite_withGroupID("ut-kvp - assert open / close", NULL, NULL, UT_TESTS_L1);
     assert(gpAssertSuite1 != NULL);
     UT_add_test(gpAssertSuite1, "kvp profile open()", test_ut_kvp_profile_open);
     UT_add_test(gpAssertSuite1, "kvp profile getInstance()", test_ut_kvp_get_instance);
     UT_add_test(gpAssertSuite1, "kvp profile close()", test_ut_kvp_profile_close);
 
-    gpAssertSuite2 = UT_add_suite("ut-kvp - assert testing yaml ", test_ut_kvp_profile_init_yaml, test_ut_kvp_profile_cleanup);
+    gpAssertSuite2 = UT_add_suite_withGroupID("ut-kvp - assert testing yaml ", test_ut_kvp_profile_init_yaml, test_ut_kvp_profile_cleanup, UT_TESTS_L2);
     assert(gpAssertSuite2 != NULL);
 
     UT_add_test(gpAssertSuite2, "kvp profile uint8", test_ut_kvp_profile_uint8);
