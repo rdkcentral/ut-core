@@ -64,7 +64,7 @@ typedef enum
     UT_TESTS_HUMAN_L2,   /*!<  Level 2 Suite Requires Human interaction */
     UT_TESTS_HUMAN_L3,   /*!<  Level 3 Suite Requires Human interaction */
     UT_TESTS_HUMAN_L4,   /*!<  Level 4 Suite Requires Human interaction */
-    UT_TESTS_VDEVICE_L3, /*!<  Level 3 Suite for setup specific test and cannot be run on real device */
+    UT_TESTS_VDEVICE, /*!<  Level 3 Suite for setup specific test and cannot be run on real device */
     UT_TESTS_UNKNOWN,    /*!<  For currently existing suites */
     UT_TESTS_MAX         /*!<  Out of range marker (not a valid status). */
 } UT_groupID_t;

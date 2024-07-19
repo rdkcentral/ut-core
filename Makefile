@@ -65,7 +65,6 @@ CUNIT_VARIANT=arm-rdk-linux-gnueabi
 # CFLAGS will be overriden by Caller as required
 INC_DIRS += $(UT_CORE_DIR)/sysroot/usr/include
 TARGET = arm
-XLDFLAGS += -ldl
 else
 TARGET = linux
 endif

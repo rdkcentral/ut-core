@@ -87,10 +87,10 @@ extern void UT_set_test_mode(TestMode_t mode);
 /**
  * @brief Enables or disables suites based on group Ids
  *
- * @param flag flag to enable or disable suites
  * @param groupID group ID to determine the suite which needs to be enabled or disabled
+ * @param enable_disable flag to enable or disable suites
  */
-extern void UT_toggle_suite_activation_based_on_groupID(bool flag, UT_groupID_t groupId);
+extern void UT_toggle_suite_activation_based_on_groupID(UT_groupID_t groupId, bool enable_disable);
 
 /**
  * @brief Manages the Suite activation/deactivation
@@ -103,9 +103,9 @@ extern void UT_Manage_Suite_Activation(int groupID, bool enable_disable);
 /**
  * @brief Toggle the status of suite depending on the input param
  *
- * @param flag flag to enable or disable suite
+ * @param enable_disable flag to enable or disable suite
  */
-extern void UT_toggle_all_suites(bool flag);
+extern void UT_toggle_all_suites(bool enable_disable);
 
 #endif  /*  __UT_INTERNAL_H  */
 /** @} */ // End of UT group

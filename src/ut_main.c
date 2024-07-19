@@ -51,8 +51,8 @@ static void usage( void )
     TEST_INFO(( "-c - Console Mode (Default)\n" ));
     TEST_INFO(( "-a - Automated Mode\n" ));
     TEST_INFO(( "-b - Basic Mode\n" ));
-    TEST_INFO(( "-d - Disable Group ID\n" ));
-    TEST_INFO(( "-e - Enable Group ID\n" ));
+    TEST_INFO(( "-d - Disable Group \n" ));
+    TEST_INFO(( "-e - Enable Group \n" ));
     TEST_INFO(( "-t - List all tests run to a file\n" ));
     TEST_INFO(( "-l - Set the log Path\n" ));
     TEST_INFO(( "-p - <profile_filename> - specify the profile to load YAML or JSON, also used by kvp_assert\n" ));
@@ -98,19 +98,19 @@ static bool decodeOptions( int argc, char **argv )
             case 'd':
                 if (atoi(optarg) >= UT_TESTS_MAX)
                 {
-                    TEST_INFO(("Invalid group id [%d]\n", atoi(optarg)));
+                    TEST_INFO(("Invalid group [%d]\n", atoi(optarg)));
                     break;
                 }
-                TEST_INFO(("Disable group id [%d]\n", atoi(optarg)));
+                TEST_INFO(("Disable group [%d]\n", atoi(optarg)));
                 UT_Manage_Suite_Activation(atoi(optarg), false);
                 break;
             case 'e':
                 if (atoi(optarg) >= UT_TESTS_MAX)
                 {
-                    TEST_INFO(("Invalid group id [%d]\n", atoi(optarg)));
+                    TEST_INFO(("Invalid group [%d]\n", atoi(optarg)));
                     break;
                 }
-                TEST_INFO(("Enable group id [%d]\n", atoi(optarg)));
+                TEST_INFO(("Enable group [%d]\n", atoi(optarg)));
                 UT_Manage_Suite_Activation(atoi(optarg), true);
                 break;
             case 'p':

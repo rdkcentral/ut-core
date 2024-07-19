@@ -140,7 +140,7 @@ UT_status_t UT_run_tests( void )
     {
         for(int i = 0; i < gGroupFlag.group_flag_count; i++)
         {
-            UT_toggle_suite_activation_based_on_groupID(gGroupFlag.switch_value[i], gGroupFlag.group_value[i]);
+            UT_toggle_suite_activation_based_on_groupID(gGroupFlag.group_value[i], gGroupFlag.switch_value[i]);
         }
     }
 
@@ -242,7 +242,7 @@ UT_test_suite_t *UT_add_suite_withGroupID( const char *pTitle, UT_InitialiseFunc
 
 }
 
-void UT_toggle_suite_activation_based_on_groupID(bool flag, UT_groupID_t groupId)
+void UT_toggle_suite_activation_based_on_groupID(UT_groupID_t groupId, bool enable_disable)
 {
     if (groupId >= UT_TESTS_MAX)
     {
@@ -253,16 +253,16 @@ void UT_toggle_suite_activation_based_on_groupID(bool flag, UT_groupID_t groupId
     {
         if (group_list.groups[i]->groupId == groupId)
         {
-            CU_set_suite_active(group_list.groups[i]->pSuite, (CU_BOOL)flag);
+            CU_set_suite_active(group_list.groups[i]->pSuite, (CU_BOOL)enable_disable);
         }
     }
 }
 
-void UT_toggle_all_suites(bool flag)
+void UT_toggle_all_suites(bool enable_disable)
 {
     for (int i = 0; i < group_list.count; ++i)
     {
-        CU_set_suite_active(group_list.groups[i]->pSuite, (CU_BOOL) flag);
+        CU_set_suite_active(group_list.groups[i]->pSuite, (CU_BOOL) enable_disable);
     }
 }
 
