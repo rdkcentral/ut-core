@@ -54,10 +54,9 @@ typedef enum
 
 typedef struct
 {
-    int disable_value[MAX_OPTIONS]; /**< Flag to hold value of optargs -d> */
-    int disable_count;              /**< Flag to hold index of optargs -d> */
-    int enable_value[MAX_OPTIONS];  /**< Flag to hold value of optargs -e> */
-    int enable_count;               /**< Flag to hold index of optargs -e> */
+    int group_value[MAX_OPTIONS];  /**< Flag to hold group value of optargs -d or -e> */
+    int switch_value[MAX_OPTIONS]; /**< Flag to hold enable/disable value of optargs -d or -e> */
+    int group_flag_count;          /**< Flag to hold index of optargs -d or -e> */
 } groupFlag_t;
 
 typedef struct

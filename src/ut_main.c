@@ -96,10 +96,20 @@ static bool decodeOptions( int argc, char **argv )
                 UT_set_results_output_filename( UT_log_getLogFilename() );
                 break;
             case 'd':
+                if (atoi(optarg) >= UT_TESTS_MAX)
+                {
+                    TEST_INFO(("Invalid group id [%d]\n", atoi(optarg)));
+                    break;
+                }
                 TEST_INFO(("Disable group id [%d]\n", atoi(optarg)));
                 UT_Manage_Suite_Activation(atoi(optarg), false);
                 break;
             case 'e':
+                if (atoi(optarg) >= UT_TESTS_MAX)
+                {
+                    TEST_INFO(("Invalid group id [%d]\n", atoi(optarg)));
+                    break;
+                }
                 TEST_INFO(("Enable group id [%d]\n", atoi(optarg)));
                 UT_Manage_Suite_Activation(atoi(optarg), true);
                 break;

@@ -101,18 +101,16 @@ static TestMode_t get_test_mode( void )
 
 void UT_Manage_Suite_Activation(int groupID, bool enable_disable)
 {
-    if (enable_disable == false && gGroupFlag.disable_count < MAX_OPTIONS)
-    {
-        gGroupFlag.disable_value[gGroupFlag.disable_count++] = groupID;
-    }
-    else if (enable_disable == true && gGroupFlag.enable_count < MAX_OPTIONS)
-    {
-        gGroupFlag.enable_value[gGroupFlag.enable_count++] = groupID;
-    }
-    else
+    if(gGroupFlag.group_flag_count > MAX_OPTIONS)
     {
         UT_LOG_ERROR("Too many -d or -e options\n");
+        return;
     }
+
+    int i = gGroupFlag.group_flag_count;
+    gGroupFlag.group_value[i] = groupID;
+    gGroupFlag.switch_value[i] = enable_disable;
+    gGroupFlag.group_flag_count++;
 }
 
 /**
@@ -138,21 +136,11 @@ UT_status_t UT_run_tests( void )
         return UT_STATUS_OK;
     }
 
-    if(gGroupFlag.disable_count)
+    if(gGroupFlag.group_flag_count)
     {
-        UT_toggle_all_suites(true);
-        for(int i = 0; i < gGroupFlag.disable_count; i++)
+        for(int i = 0; i < gGroupFlag.group_flag_count; i++)
         {
-            UT_toggle_suite_activation_based_on_groupID(false, gGroupFlag.disable_value[i]);
-        }
-    }
-
-    if(gGroupFlag.enable_count)
-    {
-        UT_toggle_all_suites(false);
-        for (int i = 0; i < gGroupFlag.enable_count; i++)
-        {
-            UT_toggle_suite_activation_based_on_groupID(true, gGroupFlag.enable_value[i]);
+            UT_toggle_suite_activation_based_on_groupID(gGroupFlag.switch_value[i], gGroupFlag.group_value[i]);
         }
     }
 
