@@ -38,9 +38,6 @@ LIB_DIR ?= $(TOP_DIR)/lib
 # Non-Moveable Directories
 FRAMEWORK_DIR = $(UT_CORE_DIR)/framework
 UT_CONTROL = $(FRAMEWORK_DIR)/ut-control
-LIBWEBSOCKET_LIB_DIR = $(UT_CONTROL)/framework/libwebsockets-4.3.3/build/lib
-CURL_LIB_DIR = $(UT_CONTROL)/framework/curl/curl-8.8.0/build/lib
-OPENSSL_LIB_DIR = $(UT_CONTROL)/framework/openssl/openssl-OpenSSL_1_1_1w/build/lib/
 
 XCFLAGS := $(KCFLAGS)
 
@@ -57,7 +54,7 @@ INC_DIRS += $(UT_CORE_DIR)/src
 
 SRC_DIRS += $(UT_CORE_DIR)/src
 
-XLDFLAGS += -L $(UT_CONTROL)/lib -lut_control -Wl,-rpath-link,$(LIBWEBSOCKET_LIB_DIR):$(CURL_LIB_DIR):$(OPENSSL_LIB_DIR)
+XLDFLAGS += -L $(UT_CONTROL)/lib -lut_control
 
 MKDIR_P ?= @mkdir -p
 
@@ -111,8 +108,6 @@ framework: createdirs
 	@echo -e ${GREEN}"Ensure ut-core frameworks are present"${NC}
 	@${UT_CORE_DIR}/build.sh TARGET=$(TARGET)
 	@echo -e ${GREEN}Completed${NC}
-	@cp $(LIBWEBSOCKET_LIB_DIR)/libwebsocke*.* ${LIB_DIR}
-	@cp $(LIBWEBSOCKET_LIB_DIR)/libwebsocke*.* ${BIN_DIR}
 	@echo -e ${GREEN}"Entering ut-control [TARGET=${TARGET}]"${NC}
 	@${MAKE} -C $(UT_CONTROL) TARGET=${TARGET}
 	@cp $(UT_CONTROL)/lib/libut_control.* ${LIB_DIR}

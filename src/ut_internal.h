@@ -37,17 +37,6 @@
 #define UT_MAX_FILENAME_STRING_SIZE (32)
 #define MAX_OPTIONS 50
 #define MAX_GROUPS 100
-typedef struct
-{
-    CU_pSuite pSuite;
-    UT_groupID_t groupId;
-} UT_test_group_t;
-
-typedef struct
-{
-    UT_test_group_t *groups[MAX_GROUPS];
-    int count;
-} UT_group_list_t;
 
 /**
  * @brief Enumerates the different testing modes supported by the UT framework.
@@ -63,11 +52,12 @@ typedef enum
  * @brief Structure to hold configuration options and flags for the UT framework.
  */
 
-typedef struct {
-    int d_values[MAX_OPTIONS]; /**< Flag to hold value of optargs -d> */
-    int d_count;               /**< Flag to hold index of optargs -d> */
-    int e_values[MAX_OPTIONS]; /**< Flag to hold value of optargs -e> */
-    int e_count;               /**< Flag to hold index of optargs -e> */
+typedef struct
+{
+    int disable_value[MAX_OPTIONS]; /**< Flag to hold value of optargs -d> */
+    int disable_count;              /**< Flag to hold index of optargs -d> */
+    int enable_value[MAX_OPTIONS];  /**< Flag to hold value of optargs -e> */
+    int enable_count;               /**< Flag to hold index of optargs -e> */
 } groupFlag_t;
 
 typedef struct
@@ -77,7 +67,6 @@ typedef struct
     char        filenameRoot[UT_MAX_FILENAME_STRING_SIZE]; /**< Base filename for test results. */
     char        filename[UT_MAX_FILENAME_STRING_SIZE];  /**< Full filename for test results. */
     bool        help; /**< Flag to indicate whether to display help information. */
-    groupFlag_t groupFlag; /**< Group flag info> */
 } optionFlags_t;
 
 #define TEST_INFO(x) printf x; // Consider replacing with a more robust logging mechanism
@@ -102,20 +91,22 @@ extern void UT_set_test_mode(TestMode_t mode);
  * @param flag flag to enable or disable suites
  * @param groupID group ID to determine the suite which needs to be enabled or disabled
  */
-extern void UT_enable_disable_suites_with_groupIDs(bool flag, UT_groupID_t groupId);
+extern void UT_toggle_suite_activation_based_on_groupID(bool flag, UT_groupID_t groupId);
 
 /**
- * @brief Sets the groupFlag_t structure values
+ * @brief Manages the Suite activation/deactivation
  *
- * @param groupFlag flag with values from optarg
+ * @param groupID group ID that needs to be activated or de-acativated
+ * @param enable_disable enable or disable value based on the optargs
  */
-extern void UT_set_option_value(groupFlag_t* groupFlag);
+extern void UT_Manage_Suite_Activation(int groupID, bool enable_disable);
 
 /**
- * @brief Deactivate all suites with group ids
+ * @brief Toggle the status of suite depending on the input param
  *
+ * @param flag flag to enable or disable suite
  */
-extern void UT_deactivate_suites_with_group_ids();
+extern void UT_toggle_all_suites(bool flag);
 
 #endif  /*  __UT_INTERNAL_H  */
 /** @} */ // End of UT group

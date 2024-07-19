@@ -37,6 +37,18 @@
 #include "ut_internal.h"
 #include "ut_cunit_internal.h"
 
+typedef struct
+{
+    CU_pSuite pSuite;
+    UT_groupID_t groupId;
+} UT_test_group_t;
+
+typedef struct
+{
+    UT_test_group_t *groups[MAX_GROUPS];
+    int count;
+} UT_group_list_t;
+
 UT_group_list_t group_list = {.count = 0};
 
 /** Pointer to the currently running suite. */
@@ -46,7 +58,7 @@ static groupFlag_t gGroupFlag;
 
 static int internalInit( void );
 static int internalClean( void );
-static void cleanupGroups( void );
+static void releaseGroups( void );
 
 /**
  * @brief Startup the system
@@ -87,14 +99,20 @@ static TestMode_t get_test_mode( void )
     return gTestMode;
 }
 
-void UT_set_option_value(groupFlag_t* groupFlag)
+void UT_Manage_Suite_Activation(int groupID, bool enable_disable)
 {
-    memset(&gGroupFlag, 0, sizeof(gGroupFlag));
-    memcpy(&gGroupFlag.d_values, groupFlag->d_values, groupFlag->d_count * sizeof(int));
-    gGroupFlag.d_count = groupFlag->d_count;
-
-    memcpy(&gGroupFlag.e_values, groupFlag->e_values, groupFlag->e_count * sizeof(int));
-    gGroupFlag.e_count = groupFlag->e_count;
+    if (enable_disable == false && gGroupFlag.disable_count < MAX_OPTIONS)
+    {
+        gGroupFlag.disable_value[gGroupFlag.disable_count++] = groupID;
+    }
+    else if (enable_disable == true && gGroupFlag.enable_count < MAX_OPTIONS)
+    {
+        gGroupFlag.enable_value[gGroupFlag.enable_count++] = groupID;
+    }
+    else
+    {
+        UT_LOG_ERROR("Too many -d or -e options\n");
+    }
 }
 
 /**
@@ -119,21 +137,22 @@ UT_status_t UT_run_tests( void )
         }
         return UT_STATUS_OK;
     }
-    UT_deactivate_suites_with_group_ids();
 
-    if(gGroupFlag.d_count)
+    if(gGroupFlag.disable_count)
     {
-        for(int i = 0; i < gGroupFlag.d_count; i++)
+        UT_toggle_all_suites(true);
+        for(int i = 0; i < gGroupFlag.disable_count; i++)
         {
-            UT_enable_disable_suites_with_groupIDs(false, gGroupFlag.d_values[i]);
+            UT_toggle_suite_activation_based_on_groupID(false, gGroupFlag.disable_value[i]);
         }
     }
 
-    if(gGroupFlag.e_count)
+    if(gGroupFlag.enable_count)
     {
-        for (int i = 0; i < gGroupFlag.e_count; i++)
+        UT_toggle_all_suites(false);
+        for (int i = 0; i < gGroupFlag.enable_count; i++)
         {
-            UT_enable_disable_suites_with_groupIDs(true, gGroupFlag.e_values[i]);
+            UT_toggle_suite_activation_based_on_groupID(true, gGroupFlag.enable_value[i]);
         }
     }
 
@@ -162,7 +181,7 @@ UT_status_t UT_run_tests( void )
     }
 
     CU_cleanup_registry();
-    cleanupGroups();
+    releaseGroups();
     error = CU_get_error();
 
     /* #BUG: There's a bug here to be investigated, the suites are not counting as failed when tests fail.*/
@@ -184,32 +203,7 @@ UT_status_t UT_run_tests( void )
 
 UT_test_suite_t *UT_add_suite(const char *pTitle, UT_InitialiseFunction_t pInitFunction, UT_CleanupFunction_t pCleanupFunction)
 {
-    CU_pSuite pSuite;
-
-    if ( pInitFunction == NULL )
-    {
-        pInitFunction = &internalInit;
-    }
-
-    if ( pCleanupFunction == NULL )
-    {
-        pCleanupFunction = &internalClean;
-    }
-
-    if ( pTitle == NULL )
-    {
-        gRegisterFailed++;
-        return NULL;
-    }
-
-    pSuite = CU_add_suite(pTitle, (CU_InitializeFunc)pInitFunction, (CU_CleanupFunc)pCleanupFunction);
-
-    if ( pSuite == NULL )
-    {
-        gRegisterFailed++;
-    }
-    UT_LOG( UT_LOG_ASCII_MAGENTA"[%s] will be deprecated soon. Please start using [UT_add_suite_withGroupID]\n"UT_LOG_ASCII_NC, __FUNCTION__);
-    return (UT_test_suite_t *)pSuite;
+    return UT_add_suite_withGroupID(pTitle, pInitFunction, pCleanupFunction, UT_TESTS_UNKNOWN);
 }
 
 UT_test_suite_t *UT_add_suite_withGroupID( const char *pTitle, UT_InitialiseFunction_t pInitFunction, UT_CleanupFunction_t pCleanupFunction,  UT_groupID_t groupId )
@@ -260,7 +254,7 @@ UT_test_suite_t *UT_add_suite_withGroupID( const char *pTitle, UT_InitialiseFunc
 
 }
 
-void UT_enable_disable_suites_with_groupIDs(bool flag, UT_groupID_t groupId)
+void UT_toggle_suite_activation_based_on_groupID(bool flag, UT_groupID_t groupId)
 {
     if (groupId >= UT_TESTS_MAX)
     {
@@ -276,11 +270,11 @@ void UT_enable_disable_suites_with_groupIDs(bool flag, UT_groupID_t groupId)
     }
 }
 
-void UT_deactivate_suites_with_group_ids()
+void UT_toggle_all_suites(bool flag)
 {
     for (int i = 0; i < group_list.count; ++i)
     {
-        CU_set_suite_active(group_list.groups[i]->pSuite, (CU_BOOL) false);
+        CU_set_suite_active(group_list.groups[i]->pSuite, (CU_BOOL) flag);
     }
 }
 
@@ -318,7 +312,7 @@ static int internalClean( void )
     return 0;
 }
 
-static void cleanupGroups( void )
+static void releaseGroups( void )
 {
     for (int i = 0; i < group_list.count; ++i)
     {
