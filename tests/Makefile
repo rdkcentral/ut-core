@@ -29,6 +29,10 @@ INC_DIRS += $(ROOT_DIR)/../include
 CFLAGS += -DNDEBUG
 TARGET_EXEC = ut-test
 
+ifneq ($(TARGET),arm)
+TARGET = linux
+endif
+
 $(info TARGET [$(TARGET)])
 
 .PHONY: clean list all

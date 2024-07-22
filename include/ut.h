@@ -55,6 +55,20 @@ typedef enum
     UT_STATUS_FAILURE,    /**!< A general failure occurred. */
 } UT_status_t;
 
+typedef enum
+{
+    UT_TESTS_L1 = 1,     /*!<  Level 1 basic tests are expected to be in this group */
+    UT_TESTS_L2,         /*!<  Level 2 advanced tests are expected to be in this group */
+    UT_TESTS_L3,         /*!<  Level 3 Module tests are expected to be in this group */
+    UT_TESTS_L4,         /*!<  Level 4 Module Control functions (e.g. start module/ stop module ), will not be ran as a testing suite */
+    UT_TESTS_HUMAN_L2,   /*!<  Level 2 Suite Requires Human interaction */
+    UT_TESTS_HUMAN_L3,   /*!<  Level 3 Suite Requires Human interaction */
+    UT_TESTS_HUMAN_L4,   /*!<  Level 4 Suite Requires Human interaction */
+    UT_TESTS_VDEVICE, /*!<  Level 3 Suite for setup specific test and cannot be run on real device */
+    UT_TESTS_UNKNOWN,    /*!<  For currently existing suites */
+    UT_TESTS_MAX         /*!<  Out of range marker (not a valid status). */
+} UT_groupID_t;
+
 /* 
 * TODO (Error Handling Enhancement):
 *   - Extend `UT_status_t` enum with more specific error codes for:
@@ -142,6 +156,17 @@ UT_status_t UT_run_tests( void );
  * @returns Handle to the created test suite, or NULL on error.
  */
 UT_test_suite_t *UT_add_suite(const char *pTitle, UT_InitialiseFunction_t pInitFunction, UT_CleanupFunction_t pCleanupFunction);
+
+/**!
+ * @brief Registers a test suite with the unit testing framework based on the group ID
+ *
+ * @param[in] pTitle - Name of the test suite.
+ * @param[in] pInitFunction - Optional initialization function for the suite (can be NULL).
+ * @param[in] pCleanupFunction - Optional cleanup function for the suite (can be NULL).
+ * @param[in] groupId - Group ID of the test from enum UT_groupID_t.
+ * @returns Handle to the created test suite, or NULL on error.
+ */
+UT_test_suite_t *UT_add_suite_withGroupID( const char *pTitle, UT_InitialiseFunction_t pInitFunction, UT_CleanupFunction_t pCleanupFunction,  UT_groupID_t groupId );
 
 /**!
  * @brief Adds a test case to a suite.

@@ -44,7 +44,6 @@ static optionFlags_t gOptions;  /*!< Control flags, should not be exposed outsid
 
 #define UT_LOG_DEFAULT_PATH "/tmp/"
 
-
 /* Function prototypes */
 
 static void usage( void )
@@ -52,9 +51,21 @@ static void usage( void )
     TEST_INFO(( "-c - Console Mode (Default)\n" ));
     TEST_INFO(( "-a - Automated Mode\n" ));
     TEST_INFO(( "-b - Basic Mode\n" ));
+    TEST_INFO(( "-d - <group id> - Disable Group \n" ));
+    TEST_INFO(( "-e - <group id> - Enable Group \n" ));
     TEST_INFO(( "-t - List all tests run to a file\n" ));
     TEST_INFO(( "-l - Set the log Path\n" ));
     TEST_INFO(( "-p - <profile_filename> - specify the profile to load YAML or JSON, also used by kvp_assert\n" ));
+    TEST_INFO(("- Group IDs are as below\n"));
+    TEST_INFO(("- Group 1  : Level 1 basic tests are expected to be in this group\n"));
+    TEST_INFO(("- Group 2  : Level 2 advanced tests are expected to be in this group\n"));
+    TEST_INFO(("- Group 3  : Level 3 Module tests are expected to be in this group\n"));
+    TEST_INFO(("- Group 4  : Level 4 Module Control functions (e.g. start module/ stop module), will not be ran as a testing suite\n"));
+    TEST_INFO(("- Group 5  : Level 2 Suite Requires Human interaction\n"));
+    TEST_INFO(("- Group 6  : Level 3 Suite Requires Human interaction\n"));
+    TEST_INFO(("- Group 7  : Level 4 Suite Requires Human interaction\n"));
+    TEST_INFO(("- Group 8  : Level 3 Suite for setup specific test and cannot be run on real device\n"));
+    TEST_INFO(("- Group 9  : For currently existing suites\n"));
     TEST_INFO(( "-h - Help\n" ));
 }
 
@@ -72,7 +83,7 @@ static bool decodeOptions( int argc, char **argv )
     UT_log_setLogFilePath(UT_LOG_DEFAULT_PATH); /* Use Macro */
     UT_set_results_output_filename( UT_log_getLogFilename() );
 
-    while ((opt = getopt(argc, argv, "cabhf:l:tp:")) != -1)
+    while ((opt = getopt(argc, argv, "cabhf:l:tp:d:e:")) != -1)
     {
         switch(opt)
         {
@@ -93,6 +104,24 @@ static bool decodeOptions( int argc, char **argv )
                 TEST_INFO(("Setting Log Path [%s]\n", optarg));
                 UT_log_setLogFilePath(optarg);
                 UT_set_results_output_filename( UT_log_getLogFilename() );
+                break;
+            case 'd':
+                if (atoi(optarg) >= UT_TESTS_MAX)
+                {
+                    TEST_INFO(("Invalid group [%d]\n", atoi(optarg)));
+                    break;
+                }
+                TEST_INFO(("Disable group [%d]\n", atoi(optarg)));
+                UT_Manage_Suite_Activation(atoi(optarg), false);
+                break;
+            case 'e':
+                if (atoi(optarg) >= UT_TESTS_MAX)
+                {
+                    TEST_INFO(("Invalid group [%d]\n", atoi(optarg)));
+                    break;
+                }
+                TEST_INFO(("Enable group [%d]\n", atoi(optarg)));
+                UT_Manage_Suite_Activation(atoi(optarg), true);
                 break;
             case 'p':
                 TEST_INFO(("Using Profile[%s]\n", optarg));

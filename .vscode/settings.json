@@ -57,6 +57,7 @@
   "C_Cpp_Runner.useLinkTimeOptimization": false,
   "C_Cpp_Runner.msvcSecureNoWarnings": false,
   "files.associations": {
-    "ut_kvp_profile.h": "c"
+    "ut_kvp_profile.h": "c",
+    "ut_internal.h": "c"
   }
 }
