@@ -35,6 +35,8 @@
 #include <string.h>
 
 #define UT_MAX_FILENAME_STRING_SIZE (32)
+#define MAX_OPTIONS 50
+#define MAX_GROUPS 100
 
 /**
  * @brief Enumerates the different testing modes supported by the UT framework.
@@ -49,6 +51,14 @@ typedef enum
 /**
  * @brief Structure to hold configuration options and flags for the UT framework.
  */
+
+typedef struct
+{
+    int group_value[MAX_OPTIONS];  /**< Flag to hold group value of optargs -d or -e> */
+    int switch_value[MAX_OPTIONS]; /**< Flag to hold enable/disable value of optargs -d or -e> */
+    int group_flag_count;          /**< Flag to hold index of optargs -d or -e> */
+} groupFlag_t;
+
 typedef struct
 {
     TestMode_t  testMode; /**< The selected testing mode. */
@@ -73,6 +83,29 @@ extern void UT_set_results_output_filename(const char* szFilenameRoot);
  * @param mode The desired testing mode.
  */
 extern void UT_set_test_mode(TestMode_t mode);
+
+/**
+ * @brief Enables or disables suites based on group Ids
+ *
+ * @param groupID group ID to determine the suite which needs to be enabled or disabled
+ * @param enable_disable flag to enable or disable suites
+ */
+extern void UT_toggle_suite_activation_based_on_groupID(UT_groupID_t groupId, bool enable_disable);
+
+/**
+ * @brief Manages the Suite activation/deactivation
+ *
+ * @param groupID group ID that needs to be activated or de-acativated
+ * @param enable_disable enable or disable value based on the optargs
+ */
+extern void UT_Manage_Suite_Activation(int groupID, bool enable_disable);
+
+/**
+ * @brief Toggle the status of suite depending on the input param
+ *
+ * @param enable_disable flag to enable or disable suite
+ */
+extern void UT_toggle_all_suites(bool enable_disable);
 
 #endif  /*  __UT_INTERNAL_H  */
 /** @} */ // End of UT group

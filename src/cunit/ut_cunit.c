@@ -37,12 +37,28 @@
 #include "ut_internal.h"
 #include "ut_cunit_internal.h"
 
+typedef struct
+{
+    CU_pSuite pSuite;
+    UT_groupID_t groupId;
+} UT_test_group_t;
+
+typedef struct
+{
+    UT_test_group_t *groups[MAX_GROUPS];
+    int count;
+} UT_group_list_t;
+
+UT_group_list_t group_list = {.count = 0};
+
 /** Pointer to the currently running suite. */
 static int gRegisterFailed;     /*!< Global Registration failed counter */
 static TestMode_t  gTestMode;
+static groupFlag_t gGroupFlag;
 
 static int internalInit( void );
 static int internalClean( void );
+static void releaseGroups( void );
 
 /**
  * @brief Startup the system
@@ -83,6 +99,20 @@ static TestMode_t get_test_mode( void )
     return gTestMode;
 }
 
+void UT_Manage_Suite_Activation(int groupID, bool enable_disable)
+{
+    if(gGroupFlag.group_flag_count > MAX_OPTIONS)
+    {
+        UT_LOG_ERROR("Too many -d or -e options\n");
+        return;
+    }
+
+    int i = gGroupFlag.group_flag_count;
+    gGroupFlag.group_value[i] = groupID;
+    gGroupFlag.switch_value[i] = enable_disable;
+    gGroupFlag.group_flag_count++;
+}
+
 /**
  * @brief run the registered tests as required
  * 
@@ -104,6 +134,14 @@ UT_status_t UT_run_tests( void )
             return UT_STATUS_FAILURE;
         }
         return UT_STATUS_OK;
+    }
+
+    if(gGroupFlag.group_flag_count)
+    {
+        for(int i = 0; i < gGroupFlag.group_flag_count; i++)
+        {
+            UT_toggle_suite_activation_based_on_groupID(gGroupFlag.group_value[i], gGroupFlag.switch_value[i]);
+        }
     }
 
     UT_LOG( UT_LOG_ASCII_GREEN"---- start of test run ----"UT_LOG_ASCII_NC );
@@ -131,6 +169,7 @@ UT_status_t UT_run_tests( void )
     }
 
     CU_cleanup_registry();
+    releaseGroups();
     error = CU_get_error();
 
     /* #BUG: There's a bug here to be investigated, the suites are not counting as failed when tests fail.*/
@@ -152,6 +191,11 @@ UT_status_t UT_run_tests( void )
 
 UT_test_suite_t *UT_add_suite(const char *pTitle, UT_InitialiseFunction_t pInitFunction, UT_CleanupFunction_t pCleanupFunction)
 {
+    return UT_add_suite_withGroupID(pTitle, pInitFunction, pCleanupFunction, UT_TESTS_UNKNOWN);
+}
+
+UT_test_suite_t *UT_add_suite_withGroupID( const char *pTitle, UT_InitialiseFunction_t pInitFunction, UT_CleanupFunction_t pCleanupFunction,  UT_groupID_t groupId )
+{
     CU_pSuite pSuite;
 
     if ( pInitFunction == NULL )
@@ -170,6 +214,12 @@ UT_test_suite_t *UT_add_suite(const char *pTitle, UT_InitialiseFunction_t pInitF
         return NULL;
     }
 
+    if (group_list.count >= MAX_GROUPS)
+    {
+        gRegisterFailed++;
+        return NULL;
+    }
+
     pSuite = CU_add_suite(pTitle, (CU_InitializeFunc)pInitFunction, (CU_CleanupFunc)pCleanupFunction);
 
     if ( pSuite == NULL )
@@ -177,7 +227,43 @@ UT_test_suite_t *UT_add_suite(const char *pTitle, UT_InitialiseFunction_t pInitF
         gRegisterFailed++;
     }
 
+    UT_test_group_t* newGroup = (UT_test_group_t*)malloc(sizeof(UT_test_group_t));
+    if (newGroup == NULL) {
+        gRegisterFailed++;
+        return NULL;
+    }
+
+    newGroup->pSuite = pSuite;
+    newGroup->groupId = groupId;
+
+    group_list.groups[group_list.count++]=newGroup;
+
     return (UT_test_suite_t *)pSuite;
+
+}
+
+void UT_toggle_suite_activation_based_on_groupID(UT_groupID_t groupId, bool enable_disable)
+{
+    if (groupId >= UT_TESTS_MAX)
+    {
+        return;
+    }
+
+    for (int i = 0; i < group_list.count; ++i)
+    {
+        if (group_list.groups[i]->groupId == groupId)
+        {
+            CU_set_suite_active(group_list.groups[i]->pSuite, (CU_BOOL)enable_disable);
+        }
+    }
+}
+
+void UT_toggle_all_suites(bool enable_disable)
+{
+    for (int i = 0; i < group_list.count; ++i)
+    {
+        CU_set_suite_active(group_list.groups[i]->pSuite, (CU_BOOL) enable_disable);
+    }
 }
 
 UT_test_t *UT_add_test(UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunction_t pTestFunction)
@@ -212,6 +298,15 @@ static int internalInit( void )
 static int internalClean( void )
 {
     return 0;
+}
+
+static void releaseGroups( void )
+{
+    for (int i = 0; i < group_list.count; ++i)
+    {
+        free(group_list.groups[i]);
+    }
+    group_list.count = 0;
 }
 
 
