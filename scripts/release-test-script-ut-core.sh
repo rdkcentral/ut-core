@@ -71,8 +71,8 @@ if [ -n "$ut_control_branch_name" ]; then
 fi
 
 # Execute make framework
-echo -e "${YELLOW}Running make framework...${NC}"
-make_output=$(make TARGET="$compiler_type" framework 2>&1)
+echo -e "${YELLOW}Running make framework...logs tee'd to $PWD/make_framework_log.txt${NC}"
+make_output=$(make TARGET="$compiler_type" framework 2>&1 | tee make_framework_log.txt)
 make_exit_code=$?
 
 if [ $make_exit_code -eq 0 ]; then
@@ -85,8 +85,8 @@ if [ -n "$ut_core_branch_name" ]; then
 fi
 
 # Execute make
-echo -e "${YELLOW}Running make...${NC}"
-make_output=$(make TARGET="$compiler_type" 2>&1)
+echo -e "${YELLOW}Running make...logs tee'd to $PWD/make_log.txt${NC}"
+make_output=$(make TARGET="$compiler_type" 2>&1 | tee make_log.txt)
 make_exit_code=$?
 
 if [ $make_exit_code -ne 0 ]; then
@@ -102,8 +102,8 @@ else
 fi
 
 # Execute make -C tests/
-echo -e "${YELLOW}Running make -C tests/...${NC}"
-make_output=$(make TARGET="$compiler_type" -C tests/ 2>&1)
+echo -e "${YELLOW}Running make -C tests/...logs tee'd to $PWD/make_test_log.txt ${NC}"
+make_output=$(make TARGET="$compiler_type" -C tests/ 2>&1 | tee make_test_log.txt)
 make_exit_code=$?
 
 if [ $make_exit_code -eq 0 ]; then
@@ -115,8 +115,8 @@ UT_CONTROL=framework/ut-control
 cd "$UT_CONTROL" || error_exit "Error: Failed to change directory to $UT_CONTROL "
 
 # Execute make in ut-control
-echo -e "${YELLOW}Running make in ut-control${NC}"
-make_output=$(make TARGET="$compiler_type" 2>&1)
+echo -e "${YELLOW}Running make in ut-control....logs tee'd to $PWD/ut-control-make_log.txt${NC}"
+make_output=$(make TARGET="$compiler_type" 2>&1 | tee ut-control-make_log.txt)
 make_exit_code=$?
 
 if [ $make_exit_code -eq 0 ]; then
@@ -124,8 +124,8 @@ if [ $make_exit_code -eq 0 ]; then
 fi
 
 # Execute make -C tests/ in ut-control
-echo -e "${YELLOW}Running make -C tests/ in ut-control ${NC}"
-make_output=$(make TARGET="$compiler_type" -C tests/ 2>&1)
+echo -e "${YELLOW}Running make -C tests/ in ut-control ... logs $PWD/ut-control-make_test_log.txt ${NC}"
+make_output=$(make TARGET="$compiler_type" -C tests/ 2>&1 | tee ut-control-make_test_log.txt)
 make_exit_code=$?
 
 if [ $make_exit_code -eq 0 ]; then
@@ -134,12 +134,13 @@ fi
 
 if [ $compiler_type = "linux" ]; then
     echo -e "${GREEN}All commands executed successfully for $compiler_type compiler ${NC}"
-    echo -e "${YELLOW}Follow below commands for arm compiler ${NC}"
+    echo -e "${YELLOW}Follow below commands for arm compiler on docker ${NC}"
     echo -e "${YELLOW}sc docker run rdk-dunfell /bin/bash ${NC}"
     echo -e "${YELLOW}cd /opt/toolchains/rdk-glibc-x86_64/ ${NC}"
     echo -e "${YELLOW}. environment-setup-armv7at2hf-neon-rdk-linux-gnueabi ${NC}"
     echo -e "${YELLOW}cd <folder with changes> ${NC}"
-    echo -e "${YELLOW}./release-script.sh -t <ut-control-branch to be tested> -p TARGET=arm ${NC}"
+    echo -e "${YELLOW}./release-test-script-ut-core.sh -t <ut-control-branch to be tested> -p TARGET=arm ${NC}"
+    echo -e "${YELLOW}or for your installed toolchain ${NC}"
 else
     echo -e "${GREEN}All commands executed successfully for $compiler_type compiler ${NC}"
 fi
