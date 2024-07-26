@@ -83,7 +83,8 @@ else
         git clone ${TEST_REPO} ut-control
         check_ut_control_revision
         cd ./ut-control
-        git checkout ${UT_CONTROL_PROJECT_VERSION}
+        #git checkout ${UT_CONTROL_PROJECT_VERSION}
+        git checkout feature/gh34-fix-linux-compilation-break
         ./configure.sh
         #make lib
         #cd ..
