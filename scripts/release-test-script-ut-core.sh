@@ -1,5 +1,8 @@
 #!/bin/bash
 
+SCRIPT_EXEC="$(realpath $0)"
+MY_DIR="$(dirname $SCRIPT_EXEC)"
+
 # ANSI color codes
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -8,17 +11,17 @@ NC='\033[0m' # No Color
 
 # Function to print usage
 usage() {
-    echo -e "${YELLOW}Usage: $0 -u <REPO_URL> -c <ut_core_branch_name> -t <ut_control_branch_name w/o feature> -p <compiler_type>${NC}"
+    echo -e "${YELLOW}Usage: $0 -u <REPO_URL> -c <ut_core_branch_name> -t <ut_control_branch_name w/o feature> -e <environment>${NC}"
     exit 1
 }
 
 # Parse command-line arguments
-while getopts "u:c:t:p:" opt; do
+while getopts "u:c:t:e:" opt; do
     case $opt in
         u) REPO_URL="$OPTARG" ;;
         c) ut_core_branch_name="$OPTARG" ;;
         t) ut_control_branch_name="$OPTARG" ;;
-        p) compiler_type="$OPTARG" ;;
+        e) environment="$OPTARG" ;;
         *) usage ;;
     esac
 done
@@ -29,38 +32,55 @@ error_exit() {
     exit 1
 }
 
-if [ -z "$ut_control_branch_name" ]; then
-    echo "ut_control_branch_name is empty"
-    usage
-    exit 1
-fi
+# if [ -z "$ut_control_branch_name" ]; then
+#     echo "ut_control_branch_name is empty"
+#     usage
+#     exit 1
+# fi
 
 if [ -z "$REPO_URL" ]; then
     REPO_URL=git@github.com:rdkcentral/ut-core.git
 fi
 
 # Set default compiler type if not provided
-if [ -z "$compiler_type" ]; then
-    compiler_type=linux
+
+if [ "$environment" == "ubuntu" ]; then
+    compiler_type="linux"
+    elif [ "$environment" == "VM-SYNC" ]; then
+    compiler_type="linux"
+    elif [ "$environment" == "dunfell" ]; then
+    compiler_type="arm"
 else
-    compiler_type=arm
+    echo "Unknown environment: $environment"
+    echo "Environments are : ubuntu, VM-SYNC, dunfell"
+    exit 1
 fi
 
+GLOBAL_RUN_ON_UBUNTU=${GLOBAL_RUN_ON_UBUNTU:-0}
+GLOBAL_RUN_ON_VM_SYNC=${GLOBAL_RUN_ON_VM_SYNC:-0}
+GLOBAL_RUN_ON_DUNFELL=${GLOBAL_RUN_ON_DUNFELL:-0}
+
+echo -e "GLOBAL_RUN_ON_UBUNTU: $GLOBAL_RUN_ON_UBUNTU"
+echo -e "GLOBAL_RUN_ON_VM_SYNC: $GLOBAL_RUN_ON_VM_SYNC"
+echo -e "GLOBAL_RUN_ON_DUNFELL: $GLOBAL_RUN_ON_DUNFELL"
+
 # Check if URL is provided
+REPO_NAME=$(basename "$REPO_URL" .git)
 if [ -z "$ut_core_branch_name" ]; then
     echo -e "${YELLOW}Cloning repository from $REPO_URL${NC}"
-    git clone "$REPO_URL" || error_exit "Error: Failed to clone repository."
+    git clone "$REPO_URL" $REPO_NAME-$environment|| error_exit "Error: Failed to clone repository."
 else
     # Clone the repository
     echo -e "${YELLOW}Cloning repository from $REPO_URL and branch $ut_core_branch_name${NC}"
-    git clone "$REPO_URL" -b "$ut_core_branch_name" || error_exit "Error: Failed to clone repository."
+    git clone "$REPO_URL" -b "$ut_core_branch_name" $REPO_NAME-$environment || error_exit "Error: Failed to clone repository."
     GIT_URL="    git clone ${REPO_URL} -b  ${ut_core_branch_name} ut-core"
     echo -e "${GREEN}GIT_URL = $GIT_URL${NC}"
 fi
 
 # Change to the repository directory
-REPO_NAME=$(basename "$REPO_URL" .git)
-cd "$REPO_NAME" || error_exit "Error: Failed to change directory to $REPO_NAME."
+echo -e "current path is : $PWD"
+cd "$REPO_NAME-$environment" || error_exit "Error: Failed to change directory to $REPO_NAME-$environment."
+UT_CORE_DIR=${MY_DIR}/$REPO_NAME-$environment
 
 # Edit ut-control branch if provided
 if [ -n "$ut_control_branch_name" ]; then
@@ -132,15 +152,153 @@ if [ $make_exit_code -eq 0 ]; then
     echo -e "${GREEN}Make -C tests/ command executed successfully.${NC}"
 fi
 
-if [ $compiler_type = "linux" ]; then
-    echo -e "${GREEN}All commands executed successfully for $compiler_type compiler ${NC}"
-    echo -e "${YELLOW}Follow below commands for arm compiler on docker ${NC}"
-    echo -e "${YELLOW}sc docker run rdk-dunfell /bin/bash ${NC}"
-    echo -e "${YELLOW}cd /opt/toolchains/rdk-glibc-x86_64/ ${NC}"
-    echo -e "${YELLOW}. environment-setup-armv7at2hf-neon-rdk-linux-gnueabi ${NC}"
-    echo -e "${YELLOW}cd <folder with changes> ${NC}"
-    echo -e "${YELLOW}./release-test-script-ut-core.sh -t <ut-control-branch to be tested> -p TARGET=arm ${NC}"
-    echo -e "${YELLOW}or for your installed toolchain ${NC}"
+pushd ${UT_CORE_DIR} > /dev/null
+echo -e "current path during test is : $PWD"
+echo -e "${RED}==========================================================${NC}"
+CURL_STATIC_LIB="framework/ut-control/framework/curl/curl-8.8.0/build/lib/libcurl.a"
+OPENSSL_STATIC_LIB="framework/ut-control/framework/openssl/openssl-OpenSSL_1_1_1w/build/lib/libssl.a"
+CMAKE_HOST_BIN="framework/ut-control/host-tools/CMake-3.30.0/build/bin/cmake"
+
+echo -e "${RED}RESULTS for ${environment} ${NC}"
+
+current_branch=$(git branch | grep '\*' | sed 's/* //')
+
+# Compare with the target branch name
+if [ "$current_branch" == "${ut_core_branch_name}" ]; then
+     echo -e "${GREEN}on the branch $ut_core_branch_name. PASS${NC}"
 else
-    echo -e "${GREEN}All commands executed successfully for $compiler_type compiler ${NC}"
+    error_exit "but, branch is not switched. FAIL"
+fi
+
+# Test for CURL
+if [ -f "$CURL_STATIC_LIB" ]; then
+    echo -e "${GREEN}$CURL_STATIC_LIB exists. PASS${NC}"
+else
+    echo -e "${RED}CURL static lib does not exist. FAIL ${NC}"
+fi
+
+# Test for Openssl
+if [ "$environment" == "ubuntu" ]; then
+    if [ ! -f "$OPENSSL_STATIC_LIB" ]; then
+        echo -e "${GREEN}Openssl static lib does not exist.PASS ${NC}"
+    else
+        echo -e "${RED}Openssl static lib does exist.FAIL ${NC}"
+    fi
+    elif [ "$environment" == "VM-SYNC" ]; then
+    if [ -f "$OPENSSL_STATIC_LIB" ]; then
+        echo -e "${GREEN}$OPENSSL_STATIC_LIB does exist.PASS ${NC}"
+    else
+        echo -e "${RED}Openssl static lib does not exist.FAIL ${NC}"
+    fi
+    elif [ "$environment" == "dunfell" ]; then
+    if [ -f "$OPENSSL_STATIC_LIB" ]; then
+        echo -e "${GREEN}$OPENSSL_STATIC_LIB does exist.PASS ${NC}"
+    else
+        echo -e "${RED}Openssl static lib does not exist.FAIL ${NC}"
+    fi
+fi
+
+# Test for CMAKE HOST Binary
+if [ "$environment" == "ubuntu" ]; then
+    GLOBAL_RUN_ON_UBUNTU=$((GLOBAL_RUN_ON_UBUNTU + 1))
+    if [ ! -f "$CMAKE_HOST_BIN" ]; then
+        echo -e "${GREEN}cmake host binary does not exist.PASS ${NC}"
+    else
+        echo -e "${RED}cmake host binary does exist.FAIL ${NC}"
+    fi
+    elif [ "$environment" == "VM-SYNC" ]; then
+    GLOBAL_RUN_ON_VM_SYNC=$((GLOBAL_RUN_ON_VM_SYNC + 1))
+    if [ -f "$CMAKE_HOST_BIN" ]; then
+        echo -e "${GREEN}$CMAKE_HOST_BIN does exist.PASS ${NC}"
+    else
+        echo -e "${RED}cmake host binary does not exist.FAIL ${NC}"
+    fi
+    elif [ "$environment" == "dunfell" ]; then
+    GLOBAL_RUN_ON_DUNFELL=$((GLOBAL_RUN_ON_DUNFELL + 1))
+    if [ ! -f "$CMAKE_HOST_BIN" ]; then
+        echo -e "${GREEN}cmake host binary does not exist.PASS ${NC}"
+    else
+        echo -e "${RED}cmake host binary does exist.FAIL ${NC}"
+    fi
+fi
+echo -e "${RED}==========================================================${NC}"
+popd > /dev/null
+
+if [ $GLOBAL_RUN_ON_UBUNTU -eq 0 ]; then
+    pushd ${MY_DIR} > /dev/null
+    echo -e "PATH=$PWD"
+    echo -e "GLOBAL_RUN_ON_UBUNTU: $GLOBAL_RUN_ON_UBUNTU"
+    echo -e "GLOBAL_RUN_ON_VM_SYNC: $GLOBAL_RUN_ON_VM_SYNC"
+    echo -e "GLOBAL_RUN_ON_DUNFELL: $GLOBAL_RUN_ON_DUNFELL"
+    export GLOBAL_RUN_ON_UBUNTU
+    export GLOBAL_RUN_ON_VM_SYNC
+    export GLOBAL_RUN_ON_DUNFELL
+    if [ -z "$ut_core_branch_name" ]; then
+        echo -e "${YELLOW}Executing: $0 -t $ut_control_branch_name -e ubuntu${NC}"
+        $0 -t $ut_control_branch_name -e ubuntu
+    elif [ -z "$ut_control_branch_name" ]; then
+        echo -e "${YELLOW}Executing: $0 -c $ut_core_branch_name -e ubuntu${NC}"
+        $0 -c $ut_core_branch_name -e ubuntu
+    else
+        echo -e "${YELLOW}Executing: $0 -c $ut_core_branch_name -t $ut_control_branch_name -e ubuntu${NC}"
+        $0 -c $ut_core_branch_name -t $ut_control_branch_name -e ubuntu
+    fi
+    popd > /dev/null
+    elif [ $GLOBAL_RUN_ON_DUNFELL -eq 0 ]; then
+    pushd ${MY_DIR} > /dev/null
+    echo -e "PATH=$PWD"
+    export GLOBAL_RUN_ON_UBUNTU
+    export GLOBAL_RUN_ON_VM_SYNC
+    export GLOBAL_RUN_ON_DUNFELL
+    echo -e "GLOBAL_RUN_ON_UBUNTU: $GLOBAL_RUN_ON_UBUNTU"
+    echo -e "GLOBAL_RUN_ON_VM_SYNC: $GLOBAL_RUN_ON_VM_SYNC"
+    echo -e "GLOBAL_RUN_ON_DUNFELL: $GLOBAL_RUN_ON_DUNFELL"
+    if [ -z "$ut_core_branch_name" ]; then
+        echo -e "${YELLOW}Executing: $0 -t $ut_control_branch_name -e dunfell${NC}"
+        /bin/bash -c "sc docker run rdk-dunfell 'cd /opt/toolchains/rdk-glibc-x86_64/; \
+        . environment-setup-armv7at2hf-neon-rdk-linux-gnueabi; env | grep CC; cd $PWD; \
+        export GLOBAL_RUN_ON_UBUNTU=$GLOBAL_RUN_ON_UBUNTU; export GLOBAL_RUN_ON_VM_SYNC=$GLOBAL_RUN_ON_VM_SYNC; \
+        export GLOBAL_RUN_ON_DUNFELL=$GLOBAL_RUN_ON_DUNFELL; $0 -t $ut_control_branch_name -e dunfell'"
+    elif [ -z "$ut_control_branch_name" ]; then
+        echo -e "${YELLOW}Executing: $0 -c $ut_core_branch_name -e dunfell${NC}"
+        /bin/bash -c "sc docker run rdk-dunfell 'cd /opt/toolchains/rdk-glibc-x86_64/; \
+        . environment-setup-armv7at2hf-neon-rdk-linux-gnueabi; env | grep CC; cd $PWD; \
+        export GLOBAL_RUN_ON_UBUNTU=$GLOBAL_RUN_ON_UBUNTU; export GLOBAL_RUN_ON_VM_SYNC=$GLOBAL_RUN_ON_VM_SYNC; \
+        export GLOBAL_RUN_ON_DUNFELL=$GLOBAL_RUN_ON_DUNFELL; $0 -c $ut_core_branch_name -e dunfell'"
+    else
+        echo -e "${YELLOW}Executing: $0 -c $ut_core_branch_name -t $ut_control_branch_name -e dunfell${NC}"
+        /bin/bash -c "sc docker run rdk-dunfell 'cd /opt/toolchains/rdk-glibc-x86_64/; \
+        . environment-setup-armv7at2hf-neon-rdk-linux-gnueabi; env | grep CC; cd $PWD; \
+        export GLOBAL_RUN_ON_UBUNTU=$GLOBAL_RUN_ON_UBUNTU; \
+        export GLOBAL_RUN_ON_VM_SYNC=$GLOBAL_RUN_ON_VM_SYNC; export GLOBAL_RUN_ON_DUNFELL=$GLOBAL_RUN_ON_DUNFELL;\
+        $0 -c $ut_core_branch_name -t $ut_control_branch_name -e dunfell'"
+    fi
+    popd > /dev/null
+    elif [ $GLOBAL_RUN_ON_VM_SYNC -eq 0 ]; then
+    pushd ${MY_DIR} > /dev/null
+    echo -e "PATH=$PWD"
+    echo -e "GLOBAL_RUN_ON_UBUNTU: $GLOBAL_RUN_ON_UBUNTU"
+    echo -e "GLOBAL_RUN_ON_VM_SYNC: $GLOBAL_RUN_ON_VM_SYNC"
+    echo -e "GLOBAL_RUN_ON_DUNFELL: $GLOBAL_RUN_ON_DUNFELL"
+    export GLOBAL_RUN_ON_UBUNTU
+    export GLOBAL_RUN_ON_VM_SYNC
+    export GLOBAL_RUN_ON_DUNFELL
+    if [ -z "$ut_core_branch_name" ]; then
+        echo -e "${YELLOW}Executing: $0 -t $ut_control_branch_name -e VM-SYNC${NC}"
+        /bin/bash -c "sc docker run --local vm-sync 'export GLOBAL_RUN_ON_UBUNTU=$GLOBAL_RUN_ON_UBUNTU; \
+        export GLOBAL_RUN_ON_VM_SYNC=$GLOBAL_RUN_ON_VM_SYNC; export GLOBAL_RUN_ON_DUNFELL=$GLOBAL_RUN_ON_DUNFELL; \
+        $0 -t $ut_control_branch_name -e VM-SYNC'"
+    elif [ -z "$ut_control_branch_name" ]; then
+        echo -e "${YELLOW}Executing: $0 -c $ut_core_branch_name -e VM-SYNC${NC}"
+        /bin/bash -c "sc docker run rdk-dunfell 'cd /opt/toolchains/rdk-glibc-x86_64/; \
+        . environment-setup-armv7at2hf-neon-rdk-linux-gnueabi; env | grep CC; cd $PWD; \
+        export GLOBAL_RUN_ON_UBUNTU=$GLOBAL_RUN_ON_UBUNTU; export GLOBAL_RUN_ON_VM_SYNC=$GLOBAL_RUN_ON_VM_SYNC; \
+        export GLOBAL_RUN_ON_DUNFELL=$GLOBAL_RUN_ON_DUNFELL; $0 -c $ut_core_branch_name -e VM-SYNC'"
+    else
+        echo -e "${YELLOW}Executing: $0 -c $ut_core_branch_name -t $ut_control_branch_name -e VM-SYNC${NC}"
+        /bin/bash -c "sc docker run --local vm-sync 'echo $PWD; export GLOBAL_RUN_ON_UBUNTU=$GLOBAL_RUN_ON_UBUNTU; \
+        export GLOBAL_RUN_ON_VM_SYNC=$GLOBAL_RUN_ON_VM_SYNC; export GLOBAL_RUN_ON_DUNFELL=$GLOBAL_RUN_ON_DUNFELL; \
+        $0 -c $ut_core_branch_name -t $ut_control_branch_name -e VM-SYNC'"
+    fi
+    popd > /dev/null
 fi
