@@ -48,7 +48,7 @@ popd > /dev/null # ${MY_DIR}
 # Therefore in that case it warns you but doesnt' chnage to that version, which could cause your tests to break.
 # Change this to upgrade your ut-control Major versions. Non ABI Changes 1.x.x are supported, between major revisions
 
-UT_CONTROL_PROJECT_VERSION="1.3.0"  # Fixed version
+UT_CONTROL_PROJECT_VERSION="1.4.0"  # Fixed version
 
 # Clone the Unit Test Requirements
 TEST_REPO=git@github.com:rdkcentral/ut-control.git
@@ -83,8 +83,7 @@ else
         git clone ${TEST_REPO} ut-control
         check_ut_control_revision
         cd ./ut-control
-        #git checkout ${UT_CONTROL_PROJECT_VERSION}
-        git checkout feature/gh34-fix-linux-compilation-break
+        git checkout ${UT_CONTROL_PROJECT_VERSION}
         ./configure.sh
         #make lib
         #cd ..
