@@ -96,7 +96,8 @@ if [ -d "${UT_CONTROL_LIB_DIR}" ]; then
     else
         echo "Third party library needs to be built for ${TARGET}"
         cd ./ut-control
-        git checkout ${UT_CONTROL_PROJECT_VERSION}
+        #git checkout ${UT_CONTROL_PROJECT_VERSION}
+        git checkout feature/gh38-separate-obj-dir-ut-control
         ./configure.sh TARGET=${TARGET}
         cd ../..
         make TARGET=${TARGET}
@@ -107,7 +108,8 @@ else
         git clone ${TEST_REPO} ut-control
         check_ut_control_revision
         cd ./ut-control
-        git checkout ${UT_CONTROL_PROJECT_VERSION}
+        #git checkout ${UT_CONTROL_PROJECT_VERSION}
+        git checkout feature/gh38-separate-obj-dir-ut-control
         ./configure.sh TARGET=${TARGET}
         cd ../..
         make TARGET=${TARGET}
