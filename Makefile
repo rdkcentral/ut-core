@@ -141,12 +141,12 @@ linux: framework
 	make TARGET=linux
 
 clean:
-	@echo -e ${GREEN}Performing Clean both TARGETS ${NC}
-	@$(RM) -rf $(BUILD_DIR)
+	@echo -e ${GREEN}Performing Clean for $(TARGET) ${NC}
+	@$(RM) -rf $(BUILD_DIR)/$(TARGET)
 	@echo -e ${GREEN}Clean Completed${NC}
 
 cleanall: clean 
-	@echo -e ${GREEN}Performing Clean on frameworks for both TARGETS [$(UT_CORE_DIR)/framework]${NC}
+	@echo -e ${GREEN}Performing Clean on frameworks [$(UT_CORE_DIR)/framework]${NC}
 	@$(RM) -rf $(UT_CORE_DIR)/framework
 	@$(RM) -rf $(BIN_DIR)/lib*.so*
 	@$(RM) -rf $(BIN_DIR)/lib*.a
