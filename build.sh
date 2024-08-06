@@ -19,17 +19,32 @@
 # * limitations under the License.
 # *
 
-#set -e # error out if required
+set -e # error out if required
 SCRIPT_EXEC="$(realpath $0)"
 MY_DIR="$(dirname $SCRIPT_EXEC)"
 
 FRAMEWORK_DIR=${MY_DIR}/framework
 UT_CONTROL_LIB_DIR=${FRAMEWORK_DIR}/ut-control
 
+# Check if the arguments contain 'TARGET=arm'
+if [[ "$*" == *"TARGET=arm"* ]]; then
+    TARGET=arm
+else
+    TARGET=linux
+fi
+
+CUNIT_OBJ_DIR=${MY_DIR}/obj/${TARGET}/framework/CUnit-2.1-3
+CURL_OBJ_DIR=${FRAMEWORK_DIR}/ut-control/framework/curl/curl-8.8.0/build-${TARGET}
+
 pushd ${MY_DIR} > /dev/null
 # Clone CUnit
 if [ -d "${FRAMEWORK_DIR}/CUnit-2.1-3" ]; then
     echo "Framework CUnit already exists"
+    if [ -d "${CUNIT_OBJ_DIR}" ]; then
+        echo "Compilation of ${TARGET} completed for CUNIT "
+    else
+        echo "Compilation of ${TARGET} is pending for CUNIT "
+    fi
 else
     echo "Clone Framework"
     wget https://sourceforge.net/projects/cunit/files/CUnit/2.1-3/CUnit-2.1-3.tar.bz2 --no-check-certificate -P framework/
@@ -76,7 +91,16 @@ if [ -d "${UT_CONTROL_LIB_DIR}" ]; then
     echo "Framework ut-control already exists"
     # ut-control exists so run the makefile from ut
     check_ut_control_revision
-    #make test
+    if [ -d "${CURL_OBJ_DIR}" ]; then
+        echo "Third party library is built for ${TARGET}"
+    else
+        echo "Third party library needs to be built for ${TARGET}"
+        cd ./ut-control
+        git checkout ${UT_CONTROL_PROJECT_VERSION}
+        ./configure.sh TARGET=${TARGET}
+        cd ../..
+        make TARGET=${TARGET}
+    fi
 else
     if [ "$1" != "no_ut_control" ]; then
         echo "Clone ut_control in ${UT_CONTROL_LIB_DIR}"
@@ -84,10 +108,10 @@ else
         check_ut_control_revision
         cd ./ut-control
         git checkout ${UT_CONTROL_PROJECT_VERSION}
-        ./configure.sh
-        #make lib
-        #cd ..
-        #./${0} $@
+        ./configure.sh TARGET=${TARGET}
+        cd ../..
+        make TARGET=${TARGET}
+        # ./${0} $@
     else
         echo "$1 requested, hence ut-control is not required to be cloned"
     fi
