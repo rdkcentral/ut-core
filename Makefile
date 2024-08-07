@@ -33,6 +33,7 @@ export PATH := $(shell pwd)/toolchain:$(PATH)
 TOP_DIR ?= $(UT_CORE_DIR)
 BUILD_DIR ?= $(TOP_DIR)/obj
 BIN_DIR ?= $(TOP_DIR)/bin
+LIB_DIR ?= $(TOP_DIR)/lib
 
 # Non-Moveable Directories
 FRAMEWORK_DIR = $(UT_CORE_DIR)/framework
@@ -68,7 +69,6 @@ else
 TARGET = linux
 endif
 OBJ_DIR = $(BUILD_DIR)/$(TARGET)
-LIB_DIR ?= $(TOP_DIR)/lib-$(TARGET)
 
 $(info TARGET [$(TARGET)])
 

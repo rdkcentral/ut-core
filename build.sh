@@ -99,8 +99,8 @@ if [ -d "${UT_CONTROL_LIB_DIR}" ]; then
         #git checkout ${UT_CONTROL_PROJECT_VERSION}
         git checkout feature/gh38-separate-obj-dir-ut-control
         ./configure.sh TARGET=${TARGET}
-        cd ../..
-        make TARGET=${TARGET}
+        # cd ../..
+        # make TARGET=${TARGET}
     fi
 else
     if [ "$1" != "no_ut_control" ]; then
@@ -111,8 +111,8 @@ else
         #git checkout ${UT_CONTROL_PROJECT_VERSION}
         git checkout feature/gh38-separate-obj-dir-ut-control
         ./configure.sh TARGET=${TARGET}
-        cd ../..
-        make TARGET=${TARGET}
+        # cd ../..
+        # make TARGET=${TARGET}
         # ./${0} $@
     else
         echo "$1 requested, hence ut-control is not required to be cloned"
