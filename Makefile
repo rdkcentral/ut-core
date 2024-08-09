@@ -80,10 +80,6 @@ endif
 
 XLDFLAGS += -Wl,-rpath, $(YLDFLAGS) $(LDFLAGS) -pthread  -lpthread
 
-SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
-
-OBJS := $(subst $(TOP_DIR),$(OBJ_DIR),$(SRCS:.c=.o))
-
 INC_DIRS += $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
@@ -100,9 +96,9 @@ XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\"
 VPATH += $(UT_CORE_DIR)
 VPATH += $(TOP_DIR)
 
-.PHONY: clean list arm linux framework test createdirs
+.PHONY: clean list arm linux framework test createdirs all
 
-all: framework test
+all: framework $(OBJS) test
 
 # Ensure the framework is built
 framework: createdirs
@@ -114,6 +110,12 @@ framework: createdirs
 	@cp $(UT_CONTROL)/lib-${TARGET}/libut_control.* ${LIB_DIR}
 	@cp $(UT_CONTROL)/lib-${TARGET}/libut_control.* ${BIN_DIR}
 	@echo -e ${GREEN}ut-control LIB Copied to [${BIN_DIR}]${NC}
+
+define find_objs
+	$(shell $(UT_CORE_DIR)/find_c_files.sh $(SRC_DIRS) | sed 's|$(TOP_DIR)|$(OBJ_DIR)|g' | sed 's|\.c$$|.o|g')
+endef
+
+OBJS := $(call find_objs)
 
 # Make the final test binary
 test: $(OBJS) createdirs
