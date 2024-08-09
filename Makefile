@@ -54,7 +54,7 @@ INC_DIRS += $(UT_CORE_DIR)/src
 
 SRC_DIRS += $(UT_CORE_DIR)/src
 
-XLDFLAGS += -L $(UT_CONTROL)/lib -lut_control
+XLDFLAGS += -L $(UT_CONTROL)/lib-$(TARGET) -lut_control
 
 MKDIR_P ?= @mkdir -p
 
@@ -68,6 +68,7 @@ TARGET = arm
 else
 TARGET = linux
 endif
+OBJ_DIR = $(BUILD_DIR)/$(TARGET)
 
 $(info TARGET [$(TARGET)])
 
@@ -78,10 +79,6 @@ CC := gcc -ggdb -o0 -Wall
 endif
 
 XLDFLAGS += -Wl,-rpath, $(YLDFLAGS) $(LDFLAGS) -pthread  -lpthread
-
-SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
-
-OBJS := $(subst $(TOP_DIR),$(BUILD_DIR),$(SRCS:.c=.o))
 
 INC_DIRS += $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
@@ -99,9 +96,9 @@ XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\"
 VPATH += $(UT_CORE_DIR)
 VPATH += $(TOP_DIR)
 
-.PHONY: clean list arm linux framework test createdirs
+.PHONY: clean list arm linux framework test createdirs all
 
-all: framework test
+all: framework $(OBJS) test
 
 # Ensure the framework is built
 framework: createdirs
@@ -110,9 +107,15 @@ framework: createdirs
 	@echo -e ${GREEN}Completed${NC}
 	@echo -e ${GREEN}"Entering ut-control [TARGET=${TARGET}]"${NC}
 	@${MAKE} -C $(UT_CONTROL) TARGET=${TARGET}
-	@cp $(UT_CONTROL)/lib/libut_control.* ${LIB_DIR}
-	@cp $(UT_CONTROL)/lib/libut_control.* ${BIN_DIR}
-	@echo -e ${GREEN}ut-control LIB Coped to [${BIN_DIR}]${NC}
+	@cp $(UT_CONTROL)/lib-${TARGET}/libut_control.* ${LIB_DIR}
+	@cp $(UT_CONTROL)/lib-${TARGET}/libut_control.* ${BIN_DIR}
+	@echo -e ${GREEN}ut-control LIB Copied to [${BIN_DIR}]${NC}
+
+define find_objs
+	$(shell $(UT_CORE_DIR)/find_c_files.sh $(SRC_DIRS) | sed 's|$(TOP_DIR)|$(OBJ_DIR)|g' | sed 's|\.c$$|.o|g')
+endef
+
+OBJS := $(call find_objs)
 
 # Make the final test binary
 test: $(OBJS) createdirs
@@ -128,7 +131,7 @@ createdirs:
 	@$(MKDIR_P) ${LIB_DIR}
 
 # Make any c source
-$(BUILD_DIR)/%.o: %.c
+$(OBJ_DIR)/%.o: %.c
 	@echo -e ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
 	@$(MKDIR_P) $(dir $@)
 	@$(CC) $(XCFLAGS) -c $< -o $@
@@ -140,8 +143,8 @@ linux: framework
 	make TARGET=linux
 
 clean:
-	@echo -e ${GREEN}Performing Clean${NC}
-	@$(RM) -rf $(BUILD_DIR)
+	@echo -e ${GREEN}Performing Clean for $(TARGET) ${NC}
+	@$(RM) -rf $(BUILD_DIR)/$(TARGET)
 	@echo -e ${GREEN}Clean Completed${NC}
 
 cleanall: clean 
