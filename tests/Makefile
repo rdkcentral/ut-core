@@ -53,7 +53,7 @@ NC='\033[0m'
 
 .PHONY: clean list build all
 
-all: framework build 
+all: build
 
 build:
 	@echo -e ${GREEN}Build [$@] ${NC}

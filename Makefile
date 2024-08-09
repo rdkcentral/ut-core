@@ -80,6 +80,13 @@ endif
 
 XLDFLAGS += -Wl,-rpath, $(YLDFLAGS) $(LDFLAGS) -pthread  -lpthread
 
+SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
+
+OBJS := $(subst $(TOP_DIR),$(OBJ_DIR),$(SRCS:.c=.o))
+
+# Remove duplicates using sort
+OBJS := $(sort $(OBJS))
+
 INC_DIRS += $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
@@ -98,30 +105,33 @@ VPATH += $(TOP_DIR)
 
 .PHONY: clean list arm linux framework test createdirs all
 
-all: framework $(OBJS) test
+all: framework $(OBJS)
+
+COMPLETION_MARKER := .download_and_build_done
 
 # Ensure the framework is built
-framework: createdirs
+framework: createdirs download_and_build
+	@echo "Framework target complete"
+	@make test
+
+download_and_build: $(COMPLETION_MARKER)
+
+$(COMPLETION_MARKER):
 	@echo -e ${GREEN}"Ensure ut-core frameworks are present"${NC}
 	@${UT_CORE_DIR}/build.sh TARGET=$(TARGET)
 	@echo -e ${GREEN}Completed${NC}
 	@echo -e ${GREEN}"Entering ut-control [TARGET=${TARGET}]"${NC}
 	@${MAKE} -C $(UT_CONTROL) TARGET=${TARGET}
-	@cp $(UT_CONTROL)/lib-${TARGET}/libut_control.* ${LIB_DIR}
-	@cp $(UT_CONTROL)/lib-${TARGET}/libut_control.* ${BIN_DIR}
-	@echo -e ${GREEN}ut-control LIB Copied to [${BIN_DIR}]${NC}
-
-define find_objs
-	$(shell $(UT_CORE_DIR)/find_c_files.sh $(SRC_DIRS) | sed 's|$(TOP_DIR)|$(OBJ_DIR)|g' | sed 's|\.c$$|.o|g')
-endef
-
-OBJS := $(call find_objs)
+	@touch $(COMPLETION_MARKER)
 
 # Make the final test binary
 test: $(OBJS) createdirs
 	@echo -e ${GREEN}Linking $@ $(BUILD_DIR)/$(TARGET_EXEC)${NC}
 	@$(CC) $(OBJS) -o $(BUILD_DIR)/$(TARGET_EXEC) $(XLDFLAGS) $(KCFLAGS) $(XCFLAGS)
 	@cp $(BUILD_DIR)/$(TARGET_EXEC) $(BIN_DIR)/
+	@cp $(UT_CONTROL)/lib-${TARGET}/libut_control.* ${LIB_DIR}
+	@cp $(UT_CONTROL)/lib-${TARGET}/libut_control.* ${BIN_DIR}
+	@echo -e ${GREEN}ut-control LIB Copied to [${BIN_DIR}]${NC}
 ifneq ("$(wildcard $(HAL_LIB_DIR)/*.so)","")
 	cp $(HAL_LIB_DIR)/*.so* $(BIN_DIR)
 endif
@@ -136,6 +146,7 @@ $(OBJ_DIR)/%.o: %.c
 	@$(MKDIR_P) $(dir $@)
 	@$(CC) $(XCFLAGS) -c $< -o $@
 
+
 arm:
 	make TARGET=arm
 
@@ -144,6 +155,7 @@ linux: framework
 
 clean:
 	@echo -e ${GREEN}Performing Clean for $(TARGET) ${NC}
+	@$(RM) -f $(COMPLETION_MARKER)
 	@$(RM) -rf $(BUILD_DIR)/$(TARGET)
 	@echo -e ${GREEN}Clean Completed${NC}
 
