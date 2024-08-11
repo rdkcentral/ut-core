@@ -18,7 +18,6 @@
 # *
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BIN_DIR := $(ROOT_DIR)/bin
-BUILD_DIR := $(ROOT_DIR)/obj
 #TOP_DIR := $(ROOT_DIR)
 
 SRC_DIRS = $(ROOT_DIR)/src
@@ -32,6 +31,7 @@ TARGET_EXEC = ut-test
 ifneq ($(TARGET),arm)
 TARGET = linux
 endif
+BUILD_DIR := $(ROOT_DIR)/build/${TARGET}/obj
 
 $(info TARGET [$(TARGET)])
 

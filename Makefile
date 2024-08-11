@@ -31,7 +31,6 @@ export PATH := $(shell pwd)/toolchain:$(PATH)
 
 # Moveable Directories based on the caller makefile
 TOP_DIR ?= $(UT_CORE_DIR)
-BUILD_DIR ?= $(TOP_DIR)/obj
 BIN_DIR ?= $(TOP_DIR)/bin
 LIB_DIR ?= $(TOP_DIR)/lib
 
@@ -54,7 +53,7 @@ INC_DIRS += $(UT_CORE_DIR)/src
 
 SRC_DIRS += $(UT_CORE_DIR)/src
 
-XLDFLAGS += -L $(UT_CONTROL)/lib-$(TARGET) -lut_control
+XLDFLAGS += -L $(UT_CONTROL)/lib/$(TARGET) -lut_control
 
 MKDIR_P ?= @mkdir -p
 
@@ -68,9 +67,10 @@ TARGET = arm
 else
 TARGET = linux
 endif
-OBJ_DIR = $(BUILD_DIR)/$(TARGET)
 
 $(info TARGET [$(TARGET)])
+BUILD_DIR ?= $(TOP_DIR)/build/$(TARGET)/obj
+$(info BUILD_DIR [$(BUILD_DIR)])
 
 # Defaults for target linux
 ifeq ($(TARGET),linux)
@@ -82,7 +82,7 @@ XLDFLAGS += -Wl,-rpath, $(YLDFLAGS) $(LDFLAGS) -pthread  -lpthread
 
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 
-OBJS := $(subst $(TOP_DIR),$(OBJ_DIR),$(SRCS:.c=.o))
+OBJS := $(subst $(TOP_DIR),$(BUILD_DIR),$(SRCS:.c=.o))
 
 # Remove duplicates using sort
 OBJS := $(sort $(OBJS))
@@ -129,8 +129,8 @@ test: $(OBJS) createdirs
 	@echo -e ${GREEN}Linking $@ $(BUILD_DIR)/$(TARGET_EXEC)${NC}
 	@$(CC) $(OBJS) -o $(BUILD_DIR)/$(TARGET_EXEC) $(XLDFLAGS) $(KCFLAGS) $(XCFLAGS)
 	@cp $(BUILD_DIR)/$(TARGET_EXEC) $(BIN_DIR)/
-	@cp $(UT_CONTROL)/lib-${TARGET}/libut_control.* ${LIB_DIR}
-	@cp $(UT_CONTROL)/lib-${TARGET}/libut_control.* ${BIN_DIR}
+	@cp $(UT_CONTROL)/lib/${TARGET}/libut_control.* ${LIB_DIR}
+	@cp $(UT_CONTROL)/lib/${TARGET}/libut_control.* ${BIN_DIR}
 	@echo -e ${GREEN}ut-control LIB Copied to [${BIN_DIR}]${NC}
 ifneq ("$(wildcard $(HAL_LIB_DIR)/*.so)","")
 	cp $(HAL_LIB_DIR)/*.so* $(BIN_DIR)
@@ -141,7 +141,7 @@ createdirs:
 	@$(MKDIR_P) ${LIB_DIR}
 
 # Make any c source
-$(OBJ_DIR)/%.o: %.c
+$(BUILD_DIR)/%.o: %.c
 	@echo -e ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
 	@$(MKDIR_P) $(dir $@)
 	@$(CC) $(XCFLAGS) -c $< -o $@
@@ -156,7 +156,7 @@ linux: framework
 clean:
 	@echo -e ${GREEN}Performing Clean for $(TARGET) ${NC}
 	@$(RM) -f $(COMPLETION_MARKER)
-	@$(RM) -rf $(BUILD_DIR)/$(TARGET)
+	@$(RM) -rf $(BUILD_DIR)
 	@echo -e ${GREEN}Clean Completed${NC}
 
 cleanall: clean 
