@@ -29,10 +29,25 @@ $(info $(shell echo -e ${GREEN}TARGET_EXEC [$(TARGET_EXEC)]${NC}))
 UT_CORE_DIR :=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 export PATH := $(shell pwd)/toolchain:$(PATH)
 
+# defaults for target arm
+ifeq ($(TARGET),arm)
+CUNIT_VARIANT=arm-rdk-linux-gnueabi
+#CC := arm-rdk-linux-gnueabi-gcc -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -mabi=aapcs-linux -mno-thumb-interwork -ffixed-r8 -fomit-frame-pointer
+# CFLAGS will be overriden by Caller as required
+INC_DIRS += $(UT_CORE_DIR)/sysroot/usr/include
+TARGET = arm
+else
+TARGET = linux
+endif
+export TARGET
+
+$(info TARGET [$(TARGET)])
+
 # Moveable Directories based on the caller makefile
 TOP_DIR ?= $(UT_CORE_DIR)
-BIN_DIR ?= $(TOP_DIR)/bin
-LIB_DIR ?= $(TOP_DIR)/lib
+BIN_DIR ?= $(TOP_DIR)/build/bin
+LIB_DIR ?= $(TOP_DIR)/build/${TARGET}/lib
+BUILD_DIR ?= $(TOP_DIR)/build/$(TARGET)/obj
 
 # Non-Moveable Directories
 FRAMEWORK_DIR = $(UT_CORE_DIR)/framework
@@ -53,24 +68,9 @@ INC_DIRS += $(UT_CORE_DIR)/src
 
 SRC_DIRS += $(UT_CORE_DIR)/src
 
-XLDFLAGS += -L $(UT_CONTROL)/lib/$(TARGET) -lut_control
+XLDFLAGS += -L $(UT_CONTROL)/build/$(TARGET)/lib -lut_control
 
 MKDIR_P ?= @mkdir -p
-
-# defaults for target arm
-ifeq ($(TARGET),arm)
-CUNIT_VARIANT=arm-rdk-linux-gnueabi
-#CC := arm-rdk-linux-gnueabi-gcc -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -mabi=aapcs-linux -mno-thumb-interwork -ffixed-r8 -fomit-frame-pointer 
-# CFLAGS will be overriden by Caller as required
-INC_DIRS += $(UT_CORE_DIR)/sysroot/usr/include
-TARGET = arm
-else
-TARGET = linux
-endif
-
-$(info TARGET [$(TARGET)])
-BUILD_DIR ?= $(TOP_DIR)/build/$(TARGET)/obj
-$(info BUILD_DIR [$(BUILD_DIR)])
 
 # Defaults for target linux
 ifeq ($(TARGET),linux)
@@ -107,31 +107,29 @@ VPATH += $(TOP_DIR)
 
 all: framework $(OBJS)
 
-COMPLETION_MARKER := .download_and_build_done
+FRAMEWORK_IS_BUILT_MARKER = .framework_is_built
 
 # Ensure the framework is built
 framework: createdirs download_and_build
-	@echo "Framework target complete"
+	@echo -e ${GREEN}Framework downloaded and built${NC}
 	@make test
+	@cp $(UT_CONTROL)/build/$(TARGET)/lib/libut_control.* ${LIB_DIR}
+	@cp $(UT_CONTROL)/build/$(TARGET)/lib/libut_control.* ${BIN_DIR}
+	@echo -e ${GREEN}ut-control LIB Copied to [${BIN_DIR}]${NC}
 
-download_and_build: $(COMPLETION_MARKER)
-
-$(COMPLETION_MARKER):
+download_and_build:
 	@echo -e ${GREEN}"Ensure ut-core frameworks are present"${NC}
 	@${UT_CORE_DIR}/build.sh TARGET=$(TARGET)
 	@echo -e ${GREEN}Completed${NC}
 	@echo -e ${GREEN}"Entering ut-control [TARGET=${TARGET}]"${NC}
 	@${MAKE} -C $(UT_CONTROL) TARGET=${TARGET}
-	@touch $(COMPLETION_MARKER)
+	@touch $(FRAMEWORK_IS_BUILT_MARKER)
 
 # Make the final test binary
 test: $(OBJS) createdirs
 	@echo -e ${GREEN}Linking $@ $(BUILD_DIR)/$(TARGET_EXEC)${NC}
 	@$(CC) $(OBJS) -o $(BUILD_DIR)/$(TARGET_EXEC) $(XLDFLAGS) $(KCFLAGS) $(XCFLAGS)
 	@cp $(BUILD_DIR)/$(TARGET_EXEC) $(BIN_DIR)/
-	@cp $(UT_CONTROL)/lib/${TARGET}/libut_control.* ${LIB_DIR}
-	@cp $(UT_CONTROL)/lib/${TARGET}/libut_control.* ${BIN_DIR}
-	@echo -e ${GREEN}ut-control LIB Copied to [${BIN_DIR}]${NC}
 ifneq ("$(wildcard $(HAL_LIB_DIR)/*.so)","")
 	cp $(HAL_LIB_DIR)/*.so* $(BIN_DIR)
 endif
@@ -155,7 +153,7 @@ linux: framework
 
 clean:
 	@echo -e ${GREEN}Performing Clean for $(TARGET) ${NC}
-	@$(RM) -f $(COMPLETION_MARKER)
+	@$(RM) -f $(FRAMEWORK_IS_BUILT_MARKER)
 	@$(RM) -rf $(BUILD_DIR)
 	@echo -e ${GREEN}Clean Completed${NC}
 

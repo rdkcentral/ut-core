@@ -17,7 +17,7 @@
 # * limitations under the License.
 # *
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
-BIN_DIR := $(ROOT_DIR)/bin
+BIN_DIR := $(ROOT_DIR)/build/bin
 #TOP_DIR := $(ROOT_DIR)
 
 SRC_DIRS = $(ROOT_DIR)/src
@@ -53,16 +53,11 @@ NC='\033[0m'
 
 .PHONY: clean list build all
 
-all: build
+all: framework
 
 build:
 	@echo -e ${GREEN}Build [$@] ${NC}
 	@make -C ../ test TARGET=$(TARGET)
-	@echo -e ${GREEN}Copy Assets to [${BIN_DIR}/assets] ${NC}
-	@mkdir -p ${BIN_DIR}/assets
-	@cp ${ROOT_DIR}/src/assets/* ${BIN_DIR}/assets
-	@cp ${ROOT_DIR}/src/*.sh ${BIN_DIR}/.
-	@echo -e ${GREEN}Build Complete${NC}
 
 run: build
 	@echo -e ${GREEN}Running [$@]${NC}
@@ -73,6 +68,11 @@ rebuild: clean build
 
 framework:
 	make -C ../ framework TARGET=$(TARGET)
+	@echo -e ${GREEN}Copy Assets to [${BIN_DIR}/assets] ${NC}
+	@mkdir -p ${BIN_DIR}/assets
+	@cp ${ROOT_DIR}/src/assets/* ${BIN_DIR}/assets
+	@cp ${ROOT_DIR}/src/*.sh ${BIN_DIR}/.
+	@echo -e ${GREEN}Build Complete${NC}
 
 list:
 	@echo ${GREEN}List [$@]${NC}
