@@ -53,11 +53,15 @@ NC='\033[0m'
 
 .PHONY: clean list build all
 
-all: framework
+all: framework build
 
 build:
 	@echo -e ${GREEN}Build [$@] ${NC}
-	@make -C ../ test TARGET=$(TARGET)
+	@echo -e ${GREEN}Copy Assets to [${BIN_DIR}/assets] ${NC}
+	@mkdir -p ${BIN_DIR}/assets
+	@cp ${ROOT_DIR}/src/assets/* ${BIN_DIR}/assets
+	@cp ${ROOT_DIR}/src/*.sh ${BIN_DIR}/.
+	@echo -e ${GREEN}Build Complete${NC}
 
 run: build
 	@echo -e ${GREEN}Running [$@]${NC}
@@ -68,11 +72,6 @@ rebuild: clean build
 
 framework:
 	make -C ../ framework TARGET=$(TARGET)
-	@echo -e ${GREEN}Copy Assets to [${BIN_DIR}/assets] ${NC}
-	@mkdir -p ${BIN_DIR}/assets
-	@cp ${ROOT_DIR}/src/assets/* ${BIN_DIR}/assets
-	@cp ${ROOT_DIR}/src/*.sh ${BIN_DIR}/.
-	@echo -e ${GREEN}Build Complete${NC}
 
 list:
 	@echo ${GREEN}List [$@]${NC}

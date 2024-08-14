@@ -26,24 +26,22 @@ MY_DIR="$(dirname $SCRIPT_EXEC)"
 FRAMEWORK_DIR=${MY_DIR}/framework
 UT_CONTROL_LIB_DIR=${FRAMEWORK_DIR}/ut-control
 
-# Check if the arguments contain 'TARGET=arm'
 if [[ "$*" == *"TARGET=arm"* ]]; then
-    TARGET=arm
+    TARGET="arm"
 else
-    TARGET=linux
+    TARGET="linux"
 fi
 echo "TARGET= [$TARGET] from [$0]"
 
-CUNIT_OBJ_DIR=${MY_DIR}/obj/${TARGET}/framework/CUnit-2.1-3
-CURL_OBJ_DIR=${FRAMEWORK_DIR}/ut-control/framework/curl/curl-8.8.0/build-${TARGET}
+THIRD_PARTY_LIB_DIR=${FRAMEWORK_DIR}/ut-control/build/${TARGET}
 
 pushd ${MY_DIR} > /dev/null
 # Clone CUnit
 if [ ! -d "${FRAMEWORK_DIR}/CUnit-2.1-3" ]; then
     echo "Clone Framework"
-    wget https://sourceforge.net/projects/cunit/files/CUnit/2.1-3/CUnit-2.1-3.tar.bz2 --no-check-certificate -P framework/
-    tar xvfj framework/CUnit-2.1-3.tar.bz2 -C ./framework/
-    cp framework/CUnit-2.1-3/CUnit/Headers/CUnit.h.in framework/CUnit-2.1-3/CUnit/Headers/CUnit.h
+    wget https://sourceforge.net/projects/cunit/files/CUnit/2.1-3/CUnit-2.1-3.tar.bz2 --no-check-certificate -P ${FRAMEWORK_DIR}
+    tar xvfj framework/CUnit-2.1-3.tar.bz2 -C ${FRAMEWORK_DIR}
+    cp ${FRAMEWORK_DIR}/CUnit-2.1-3/CUnit/Headers/CUnit.h.in ${FRAMEWORK_DIR}/CUnit-2.1-3/CUnit/Headers/CUnit.h
     echo "Patching Framework"
     cd ${FRAMEWORK_DIR}
     cp ../src/cunit/cunit_lgpl/patches/CorrectBuildWarningsInCunit.patch  .
@@ -93,10 +91,10 @@ if [ -d "${UT_CONTROL_LIB_DIR}" ]; then
     echo "Framework ut-control already exists"
     # ut-control exists so run the makefile from ut
     check_ut_control_revision
-    if [ -d "${CURL_OBJ_DIR}" ]; then
-        echo "Third party library is built for ${TARGET}"
+    if [ -d "${THIRD_PARTY_LIB_DIR}" ]; then
+        echo "Third party libraries are built for ${TARGET}"
     else
-        echo "Third party library needs to be built for ${TARGET}"
+        echo "Third party libraries needs to be built for ${TARGET}"
         configure_ut_control
     fi
 else

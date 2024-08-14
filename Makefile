@@ -84,7 +84,8 @@ SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 
 OBJS := $(subst $(TOP_DIR),$(BUILD_DIR),$(SRCS:.c=.o))
 
-# Remove duplicates using sort
+# Remove duplicates using Makefile sort
+# Duplicate obj are created as make is getting called recursively in framework
 OBJS := $(sort $(OBJS))
 
 INC_DIRS += $(shell find $(SRC_DIRS) -type d)
@@ -107,9 +108,8 @@ VPATH += $(TOP_DIR)
 
 all: framework $(OBJS)
 
-FRAMEWORK_IS_BUILT_MARKER = .framework_is_built
-
 # Ensure the framework is built
+# Recursive make is needed as few of the src files are not available during the first iteration
 framework: createdirs download_and_build
 	@echo -e ${GREEN}Framework downloaded and built${NC}
 	@make test
@@ -119,11 +119,10 @@ framework: createdirs download_and_build
 
 download_and_build:
 	@echo -e ${GREEN}"Ensure ut-core frameworks are present"${NC}
-	@${UT_CORE_DIR}/build.sh TARGET=$(TARGET)
+	@${UT_CORE_DIR}/build.sh
 	@echo -e ${GREEN}Completed${NC}
 	@echo -e ${GREEN}"Entering ut-control [TARGET=${TARGET}]"${NC}
 	@${MAKE} -C $(UT_CONTROL) TARGET=${TARGET}
-	@touch $(FRAMEWORK_IS_BUILT_MARKER)
 
 # Make the final test binary
 test: $(OBJS) createdirs
@@ -153,7 +152,6 @@ linux: framework
 
 clean:
 	@echo -e ${GREEN}Performing Clean for $(TARGET) ${NC}
-	@$(RM) -f $(FRAMEWORK_IS_BUILT_MARKER)
 	@$(RM) -rf $(BUILD_DIR)
 	@echo -e ${GREEN}Clean Completed${NC}
 
