@@ -24,7 +24,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
-$(info $(shell echo -e ${GREEN}TARGET_EXEC [$(TARGET_EXEC)]${NC}))
+$(info $(shell /bin/echo -e ${GREEN}TARGET_EXEC [$(TARGET_EXEC)]${NC}))
 
 UT_CORE_DIR :=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 export PATH := $(shell pwd)/toolchain:$(PATH)
@@ -109,24 +109,24 @@ VPATH += $(TOP_DIR)
 all: framework $(OBJS)
 
 # Ensure the framework is built
-# Recursive make is needed as few of the src files are not available during the first iteration
+# Recursive make is needed as src files are not available during the first iteration
 framework: createdirs download_and_build
-	@echo -e ${GREEN}Framework downloaded and built${NC}
+	@/bin/echo -e ${GREEN}Framework downloaded and built${NC}
 	@make test
 	@cp $(UT_CONTROL)/build/$(TARGET)/lib/libut_control.* ${LIB_DIR}
 	@cp $(UT_CONTROL)/build/$(TARGET)/lib/libut_control.* ${BIN_DIR}
-	@echo -e ${GREEN}ut-control LIB Copied to [${BIN_DIR}]${NC}
+	@/bin/echo -e ${GREEN}ut-control LIB Copied to [${BIN_DIR}]${NC}
 
 download_and_build:
-	@echo -e ${GREEN}"Ensure ut-core frameworks are present"${NC}
-	@${UT_CORE_DIR}/build.sh
-	@echo -e ${GREEN}Completed${NC}
-	@echo -e ${GREEN}"Entering ut-control [TARGET=${TARGET}]"${NC}
+	@/bin/echo -e ${GREEN}"Ensure ut-core frameworks are present"${NC}
+	@${UT_CORE_DIR}/build.sh TARGET=${TARGET}
+	@/bin/echo -e ${GREEN}Completed${NC}
+	@/bin/echo -e ${GREEN}"Entering ut-control [TARGET=${TARGET}]"${NC}
 	@${MAKE} -C $(UT_CONTROL) TARGET=${TARGET}
 
 # Make the final test binary
 test: $(OBJS) createdirs
-	@echo -e ${GREEN}Linking $@ $(BUILD_DIR)/$(TARGET_EXEC)${NC}
+	@/bin/echo -e ${GREEN}Linking $@ $(BUILD_DIR)/$(TARGET_EXEC)${NC}
 	@$(CC) $(OBJS) -o $(BUILD_DIR)/$(TARGET_EXEC) $(XLDFLAGS) $(KCFLAGS) $(XCFLAGS)
 	@cp $(BUILD_DIR)/$(TARGET_EXEC) $(BIN_DIR)/
 ifneq ("$(wildcard $(HAL_LIB_DIR)/*.so)","")
@@ -139,7 +139,7 @@ createdirs:
 
 # Make any c source
 $(BUILD_DIR)/%.o: %.c
-	@echo -e ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
+	@/bin/echo -e ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
 	@$(MKDIR_P) $(dir $@)
 	@$(CC) $(XCFLAGS) -c $< -o $@
 
@@ -151,55 +151,53 @@ linux: framework
 	make TARGET=linux
 
 clean:
-	@echo -e ${GREEN}Performing Clean for $(TARGET) ${NC}
+	@/bin/echo -e ${GREEN}Performing Clean for $(TARGET) ${NC}
 	@$(RM) -rf $(BUILD_DIR)
-	@echo -e ${GREEN}Clean Completed${NC}
+	@/bin/echo -e ${GREEN}Clean Completed${NC}
 
 cleanall: clean 
-	@echo -e ${GREEN}Performing Clean on frameworks [$(UT_CORE_DIR)/framework]${NC}
+	@/bin/echo -e ${GREEN}Performing Clean on frameworks [$(UT_CORE_DIR)/framework] and build [$(UT_CORE_DIR)/build]${NC}
 	@$(RM) -rf $(UT_CORE_DIR)/framework
-	@$(RM) -rf $(BIN_DIR)/lib*.so*
-	@$(RM) -rf $(BIN_DIR)/lib*.a
-	@$(RM) -rf $(BIN_DIR)/$(TARGET_EXEC)
+	@$(RM) -rf $(UT_CORE_DIR)/build/
 
 list:
-	@echo --------- ut_core ----------------
-	@echo 
-	@echo CC:$(CC)
-	@echo 
-	@echo BUILD_DIR:$(BUILD_DIR)
-	@echo 
-	@echo BIN_DIR:$(BIN_DIR)
-	@echo 
-	@echo OBJS:$(OBJS)
-	@echo 
-	@echo SRCS:$(SRCS)
-	@echo
-	@echo UT_CORE_DIR:$(UT_CORE_DIR)
-	@echo 
-	@echo TOP_DIR:$(TOP_DIR)
-	@echo 
-	@echo BUILD_DIR:$(BUILD_DIR)
-	@echo
-	@echo CFLAGS:$(CFLAGS)
-	@echo
-	@echo XCFLAGS:$(XCFLAGS)
-	@echo
-	@echo LDFLAGS:$(LDFLAGS)
-	@echo 
-	@echo YLDFLAGS:$(YLDFLAGS)
-	@echo 
-	@echo XLDFLAGS:$(XLDFLAGS)
-	@echo 
-	@echo SRC_DIRS:$(SRC_DIRS)
-	@echo 
-	@echo INC_DIRS:$(INC_DIRS)
-	@echo 
-	@echo INC_FLAGS:$(INC_FLAGS)
-	@echo
-	@echo DEPS:$(DEPS)
-	@echo
-	@echo --------- ut_control ----------------
+	@/bin/echo --------- ut_core ----------------
+	@/bin/echo
+	@/bin/echo CC:$(CC)
+	@/bin/echo
+	@/bin/echo BUILD_DIR:$(BUILD_DIR)
+	@/bin/echo
+	@/bin/echo BIN_DIR:$(BIN_DIR)
+	@/bin/echo
+	@/bin/echo OBJS:$(OBJS)
+	@/bin/echo
+	@/bin/echo SRCS:$(SRCS)
+	@/bin/echo
+	@/bin/echo UT_CORE_DIR:$(UT_CORE_DIR)
+	@/bin/echo
+	@/bin/echo TOP_DIR:$(TOP_DIR)
+	@/bin/echo
+	@/bin/echo BUILD_DIR:$(BUILD_DIR)
+	@/bin/echo
+	@/bin/echo CFLAGS:$(CFLAGS)
+	@/bin/echo
+	@/bin/echo XCFLAGS:$(XCFLAGS)
+	@/bin/echo
+	@/bin/echo LDFLAGS:$(LDFLAGS)
+	@/bin/echo
+	@/bin/echo YLDFLAGS:$(YLDFLAGS)
+	@/bin/echo
+	@/bin/echo XLDFLAGS:$(XLDFLAGS)
+	@/bin/echo
+	@/bin/echo SRC_DIRS:$(SRC_DIRS)
+	@/bin/echo
+	@/bin/echo INC_DIRS:$(INC_DIRS)
+	@/bin/echo
+	@/bin/echo INC_FLAGS:$(INC_FLAGS)
+	@/bin/echo
+	@/bin/echo DEPS:$(DEPS)
+	@/bin/echo
+	@/bin/echo --------- ut_control ----------------
 	@${MAKE} -C $(UT_CONTROL) list
 
 -include $(DEPS)
