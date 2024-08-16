@@ -82,9 +82,8 @@ pushd ${FRAMEWORK_DIR} > /dev/null
 
 configure_ut_control() {
     cd ./ut-control
-    #git checkout ${UT_CONTROL_PROJECT_VERSION}
-    git checkout feature/gh38-separate-obj-dir-ut-control
-    TARGET=${TARGET} ./configure.sh
+    git checkout ${UT_CONTROL_PROJECT_VERSION}
+    ./configure.sh ${TARGET}
 }
 
 if [ -d "${UT_CONTROL_LIB_DIR}" ]; then
