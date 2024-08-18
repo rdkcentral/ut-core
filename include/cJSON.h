@@ -68,7 +68,6 @@ then using the CJSON_API_VISIBILITY flag to "export" the same symbols the way CJ
 #define CJSON_PUBLIC(type)   __declspec(dllimport) type CJSON_STDCALL
 #endif
 #else /* !__WINDOWS__ */
-#warning CJson.h is deprecated and will be removed in ut-core 4.0.0. Please move to KVP.
 #define CJSON_CDECL
 #define CJSON_STDCALL
 
