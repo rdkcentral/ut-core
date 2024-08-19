@@ -23,17 +23,32 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
+ECHOE = /bin/echo -e
 
-$(info $(shell echo -e ${GREEN}TARGET_EXEC [$(TARGET_EXEC)]${NC}))
+$(info $(shell ${ECHOE} ${GREEN}TARGET_EXEC [$(TARGET_EXEC)]${NC}))
 
 UT_CORE_DIR :=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 export PATH := $(shell pwd)/toolchain:$(PATH)
 
+# defaults for target arm
+ifeq ($(TARGET),arm)
+CUNIT_VARIANT=arm-rdk-linux-gnueabi
+#CC := arm-rdk-linux-gnueabi-gcc -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -mabi=aapcs-linux -mno-thumb-interwork -ffixed-r8 -fomit-frame-pointer
+# CFLAGS will be overriden by Caller as required
+INC_DIRS += $(UT_CORE_DIR)/sysroot/usr/include
+TARGET = arm
+else
+TARGET = linux
+endif
+export TARGET
+
+$(info TARGET [$(TARGET)])
+
 # Moveable Directories based on the caller makefile
 TOP_DIR ?= $(UT_CORE_DIR)
-BUILD_DIR ?= $(TOP_DIR)/obj
-BIN_DIR ?= $(TOP_DIR)/bin
-LIB_DIR ?= $(TOP_DIR)/lib
+BIN_DIR ?= $(TOP_DIR)/build/bin
+LIB_DIR ?= $(TOP_DIR)/build/${TARGET}/lib
+BUILD_DIR ?= $(TOP_DIR)/build/$(TARGET)/obj
 
 # Non-Moveable Directories
 FRAMEWORK_DIR = $(UT_CORE_DIR)/framework
@@ -54,22 +69,9 @@ INC_DIRS += $(UT_CORE_DIR)/src
 
 SRC_DIRS += $(UT_CORE_DIR)/src
 
-XLDFLAGS += -L $(UT_CONTROL)/lib -lut_control
+XLDFLAGS += -L $(UT_CONTROL)/build/$(TARGET)/lib -lut_control
 
 MKDIR_P ?= @mkdir -p
-
-# defaults for target arm
-ifeq ($(TARGET),arm)
-CUNIT_VARIANT=arm-rdk-linux-gnueabi
-#CC := arm-rdk-linux-gnueabi-gcc -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -mabi=aapcs-linux -mno-thumb-interwork -ffixed-r8 -fomit-frame-pointer 
-# CFLAGS will be overriden by Caller as required
-INC_DIRS += $(UT_CORE_DIR)/sysroot/usr/include
-TARGET = arm
-else
-TARGET = linux
-endif
-
-$(info TARGET [$(TARGET)])
 
 # Defaults for target linux
 ifeq ($(TARGET),linux)
@@ -82,6 +84,10 @@ XLDFLAGS += -Wl,-rpath, $(YLDFLAGS) $(LDFLAGS) -pthread  -lpthread
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 
 OBJS := $(subst $(TOP_DIR),$(BUILD_DIR),$(SRCS:.c=.o))
+
+# Remove duplicates using Makefile sort
+# Duplicate obj are created as make is getting called recursively in framework
+OBJS := $(sort $(OBJS))
 
 INC_DIRS += $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
@@ -99,24 +105,29 @@ XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\"
 VPATH += $(UT_CORE_DIR)
 VPATH += $(TOP_DIR)
 
-.PHONY: clean list arm linux framework test createdirs
+.PHONY: clean list arm linux framework test createdirs all
 
-all: framework test
+all: framework $(OBJS)
 
 # Ensure the framework is built
-framework: createdirs
-	@echo -e ${GREEN}"Ensure ut-core frameworks are present"${NC}
-	@${UT_CORE_DIR}/build.sh TARGET=$(TARGET)
-	@echo -e ${GREEN}Completed${NC}
-	@echo -e ${GREEN}"Entering ut-control [TARGET=${TARGET}]"${NC}
+# Recursive make is needed as src files are not available during the first iteration
+framework: createdirs download_and_build
+	@${ECHOE} ${GREEN}Framework downloaded and built${NC}
+	@make test
+	@cp $(UT_CONTROL)/build/$(TARGET)/lib/libut_control.* ${LIB_DIR}
+	@cp $(UT_CONTROL)/build/$(TARGET)/lib/libut_control.* ${BIN_DIR}
+	@${ECHOE} ${GREEN}ut-control LIB Copied to [${BIN_DIR}]${NC}
+
+download_and_build:
+	@${ECHOE} ${GREEN}"Ensure ut-core frameworks are present"${NC}
+	@${UT_CORE_DIR}/build.sh TARGET=${TARGET}
+	@${ECHOE} ${GREEN}Completed${NC}
+	@${ECHOE} ${GREEN}"Entering ut-control [TARGET=${TARGET}]"${NC}
 	@${MAKE} -C $(UT_CONTROL) TARGET=${TARGET}
-	@cp $(UT_CONTROL)/lib/libut_control.* ${LIB_DIR}
-	@cp $(UT_CONTROL)/lib/libut_control.* ${BIN_DIR}
-	@echo -e ${GREEN}ut-control LIB Coped to [${BIN_DIR}]${NC}
 
 # Make the final test binary
 test: $(OBJS) createdirs
-	@echo -e ${GREEN}Linking $@ $(BUILD_DIR)/$(TARGET_EXEC)${NC}
+	@${ECHOE} ${GREEN}Linking $@ $(BUILD_DIR)/$(TARGET_EXEC)${NC}
 	@$(CC) $(OBJS) -o $(BUILD_DIR)/$(TARGET_EXEC) $(XLDFLAGS) $(KCFLAGS) $(XCFLAGS)
 	@cp $(BUILD_DIR)/$(TARGET_EXEC) $(BIN_DIR)/
 ifneq ("$(wildcard $(HAL_LIB_DIR)/*.so)","")
@@ -129,9 +140,10 @@ createdirs:
 
 # Make any c source
 $(BUILD_DIR)/%.o: %.c
-	@echo -e ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
+	@${ECHOE} ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
 	@$(MKDIR_P) $(dir $@)
 	@$(CC) $(XCFLAGS) -c $< -o $@
+
 
 arm:
 	make TARGET=arm
@@ -140,55 +152,53 @@ linux: framework
 	make TARGET=linux
 
 clean:
-	@echo -e ${GREEN}Performing Clean${NC}
+	@${ECHOE} ${GREEN}Performing Clean for $(TARGET) ${NC}
 	@$(RM) -rf $(BUILD_DIR)
-	@echo -e ${GREEN}Clean Completed${NC}
+	@${ECHOE} ${GREEN}Clean Completed${NC}
 
 cleanall: clean 
-	@echo -e ${GREEN}Performing Clean on frameworks [$(UT_CORE_DIR)/framework]${NC}
+	@${ECHOE} ${GREEN}Performing Clean on frameworks [$(UT_CORE_DIR)/framework] and build [$(UT_CORE_DIR)/build]${NC}
 	@$(RM) -rf $(UT_CORE_DIR)/framework
-	@$(RM) -rf $(BIN_DIR)/lib*.so*
-	@$(RM) -rf $(BIN_DIR)/lib*.a
-	@$(RM) -rf $(BIN_DIR)/$(TARGET_EXEC)
+	@$(RM) -rf $(UT_CORE_DIR)/build/
 
 list:
-	@echo --------- ut_core ----------------
-	@echo 
-	@echo CC:$(CC)
-	@echo 
-	@echo BUILD_DIR:$(BUILD_DIR)
-	@echo 
-	@echo BIN_DIR:$(BIN_DIR)
-	@echo 
-	@echo OBJS:$(OBJS)
-	@echo 
-	@echo SRCS:$(SRCS)
-	@echo
-	@echo UT_CORE_DIR:$(UT_CORE_DIR)
-	@echo 
-	@echo TOP_DIR:$(TOP_DIR)
-	@echo 
-	@echo BUILD_DIR:$(BUILD_DIR)
-	@echo
-	@echo CFLAGS:$(CFLAGS)
-	@echo
-	@echo XCFLAGS:$(XCFLAGS)
-	@echo
-	@echo LDFLAGS:$(LDFLAGS)
-	@echo 
-	@echo YLDFLAGS:$(YLDFLAGS)
-	@echo 
-	@echo XLDFLAGS:$(XLDFLAGS)
-	@echo 
-	@echo SRC_DIRS:$(SRC_DIRS)
-	@echo 
-	@echo INC_DIRS:$(INC_DIRS)
-	@echo 
-	@echo INC_FLAGS:$(INC_FLAGS)
-	@echo
-	@echo DEPS:$(DEPS)
-	@echo
-	@echo --------- ut_control ----------------
+	@${ECHOE} --------- ut_core ----------------
+	@${ECHOE}
+	@${ECHOE} CC:$(CC)
+	@${ECHOE}
+	@${ECHOE} BUILD_DIR:$(BUILD_DIR)
+	@${ECHOE}
+	@${ECHOE} BIN_DIR:$(BIN_DIR)
+	@${ECHOE}
+	@${ECHOE} OBJS:$(OBJS)
+	@${ECHOE}
+	@${ECHOE} SRCS:$(SRCS)
+	@${ECHOE}
+	@${ECHOE} UT_CORE_DIR:$(UT_CORE_DIR)
+	@${ECHOE}
+	@${ECHOE} TOP_DIR:$(TOP_DIR)
+	@${ECHOE}
+	@${ECHOE} BUILD_DIR:$(BUILD_DIR)
+	@${ECHOE}
+	@${ECHOE} CFLAGS:$(CFLAGS)
+	@${ECHOE}
+	@${ECHOE} XCFLAGS:$(XCFLAGS)
+	@${ECHOE}
+	@${ECHOE} LDFLAGS:$(LDFLAGS)
+	@${ECHOE}
+	@${ECHOE} YLDFLAGS:$(YLDFLAGS)
+	@${ECHOE}
+	@${ECHOE} XLDFLAGS:$(XLDFLAGS)
+	@${ECHOE}
+	@${ECHOE} SRC_DIRS:$(SRC_DIRS)
+	@${ECHOE}
+	@${ECHOE} INC_DIRS:$(INC_DIRS)
+	@${ECHOE}
+	@${ECHOE} INC_FLAGS:$(INC_FLAGS)
+	@${ECHOE}
+	@${ECHOE} DEPS:$(DEPS)
+	@${ECHOE}
+	@${ECHOE} --------- ut_control ----------------
 	@${MAKE} -C $(UT_CONTROL) list
 
 -include $(DEPS)
