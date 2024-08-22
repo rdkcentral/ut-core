@@ -26,18 +26,25 @@ MY_DIR="$(dirname $SCRIPT_EXEC)"
 FRAMEWORK_DIR=${MY_DIR}/framework
 UT_CONTROL_LIB_DIR=${FRAMEWORK_DIR}/ut-control
 
+if [[ "$*" == *"DGTEST=0"* || "$*" != *"DGTEST"* ]]; then
+    DGTEST="0"
+else
+    DGTEST="1"
+fi
+
 if [[ "$*" == *"TARGET=arm"* ]]; then
     TARGET="arm"
 else
     TARGET="linux"
 fi
 echo "TARGET= [$TARGET] from [$0]"
+echo "DGTEST= [$DGTEST] from [$0]"
 
 THIRD_PARTY_LIB_DIR=${FRAMEWORK_DIR}/ut-control/build/${TARGET}
 
 pushd ${MY_DIR} > /dev/null
 # Clone CUnit
-if [ ! -d "${FRAMEWORK_DIR}/CUnit-2.1-3" ]; then
+if [[ ! -d "${FRAMEWORK_DIR}/CUnit-2.1-3" && "${DGTEST}" == "0" ]]; then
     echo "Clone Framework"
     wget https://sourceforge.net/projects/cunit/files/CUnit/2.1-3/CUnit-2.1-3.tar.bz2 --no-check-certificate -P ${FRAMEWORK_DIR}
     tar xvfj framework/CUnit-2.1-3.tar.bz2 -C ${FRAMEWORK_DIR}
@@ -47,6 +54,8 @@ if [ ! -d "${FRAMEWORK_DIR}/CUnit-2.1-3" ]; then
     cp ../src/cunit/cunit_lgpl/patches/CorrectBuildWarningsInCunit.patch  .
     patch -u CUnit-2.1-3/CUnit/Sources/Framework/TestRun.c -i CorrectBuildWarningsInCunit.patch
     echo "Patching Complete"
+else
+    mkdir -p ${FRAMEWORK_DIR}
 fi
 popd > /dev/null # ${MY_DIR}
 
@@ -107,3 +116,21 @@ else
     fi
 fi
 popd > /dev/null # ${FRAMEWORK_DIR}
+
+pushd ${MY_DIR} > /dev/null
+#Clone GTEST
+if [[ ! -d "${FRAMEWORK_DIR}/googletest-1.15.2" && "${DGTEST}" == "1" ]]; then
+    wget https://github.com/google/googletest/archive/refs/tags/v1.15.2.zip --no-check-certificate -P ${FRAMEWORK_DIR}
+    cd ${FRAMEWORK_DIR}/
+    unzip v1.15.2.zip
+    cd googletest-1.15.2/
+    mkdir build
+    cd build
+    if command -v cmake &> /dev/null; then
+        cmake ..
+    else
+        ${UT_CONTROL_LIB_DIR}/host-tools/CMake-3.30.0/build/bin/cmake ..
+    fi
+    make
+fi
+popd > /dev/null # ${MY_DIR}

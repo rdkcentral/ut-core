@@ -17,8 +17,6 @@
 # * limitations under the License.
 # *
 
-TARGET_EXEC ?= hal_test
-
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
@@ -56,18 +54,36 @@ UT_CONTROL = $(FRAMEWORK_DIR)/ut-control
 
 XCFLAGS := $(KCFLAGS)
 
+ifneq ($(DGTEST),1)
+TARGET_EXEC ?= hal_test
+
 # Enable CUnit Requirements
 XCFLAGS += -DUT_CUNIT
 CUNIT_DIR +=  $(FRAMEWORK_DIR)/CUnit-2.1-3/CUnit
 CUNIT_SRC_DIRS += $(CUNIT_DIR)/Sources
 INC_DIRS += $(CUNIT_DIR)/Headers
 SRC_DIRS += $(CUNIT_SRC_DIRS)/Framework
+SRC_DIRS += $(UT_CORE_DIR)/src
+
+DGTEST = 0
+$(Backend selected is not GTEST [$(DGTEST)])
+else
+TARGET_EXEC ?= hal_gtest
+
+SRC_DIRS += $(UT_CORE_DIR)/src
+EXCLUDE_DIRS := $(SRCDIR)/cunit
+GTEST_SRC = $(FRAMEWORK_DIR)/googletest-1.15.2
+INC_DIRS += ${GTEST_SRC}/googletest/include/
+DGTEST = 1
+$(Backend selected is GTEST [$(DGTEST)])
+
+endif
 
 INC_DIRS += $(UT_CORE_DIR)/include
 INC_DIRS += $(UT_CONTROL)/include
 INC_DIRS += $(UT_CORE_DIR)/src
 
-SRC_DIRS += $(UT_CORE_DIR)/src
+
 
 XLDFLAGS += -L $(UT_CONTROL)/build/$(TARGET)/lib -lut_control
 
@@ -77,17 +93,30 @@ MKDIR_P ?= @mkdir -p
 ifeq ($(TARGET),linux)
 CUNIT_VARIANT=i686-pc-linux-gnu
 CC := gcc -ggdb -o0 -Wall
+CXX := g++ -ggdb -o0 -Wall
 endif
 
 XLDFLAGS += -Wl,-rpath, $(YLDFLAGS) $(LDFLAGS) -pthread  -lpthread
 
-SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
+ifeq ($(DGTEST),0)
+SRCS := $(shell find $(SRC_DIRS) -name *.c -or -name *.s)
 
 OBJS := $(subst $(TOP_DIR),$(BUILD_DIR),$(SRCS:.c=.o))
+else
+# Find all source files and header files excluding specific directories
+SRCS := $(shell find $(SRC_DIRS) -type f \( -name '*.cpp' -o -name '*.c' \) | grep -v "$(EXCLUDE_DIRS)")
+OBJS = $(SRCS:.c=.o) $(SRCS:.cpp=.o)
+# Prefix the object files with the build directory
+OBJS := $(patsubst $(TOP_DIR)/%, $(BUILD_DIR)/%, $(OBJS))
+XLDFLAGS += -L$(FRAMEWORK_DIR)/googletest-1.15.2/build/lib/ -lgtest -lgtest_main -lut_control
+endif
 
 # Remove duplicates using Makefile sort
 # Duplicate obj are created as make is getting called recursively in framework
-OBJS := $(sort $(OBJS))
+OBJS := $(filter %.o, $(sort $(OBJS)))
+
+$(info SRCS [$(SRCS)])
+$(info OBJS [$(OBJS)])
 
 INC_DIRS += $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
@@ -100,6 +129,7 @@ $(info VERSION [$(VERSION)])
 DEPS += $(OBJS:.o=.d)
 
 XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\"
+CXXFLAGS += $(INC_FLAGS)
 
 # Library Path
 VPATH += $(UT_CORE_DIR)
@@ -113,14 +143,14 @@ all: framework $(OBJS)
 # Recursive make is needed as src files are not available during the first iteration
 framework: createdirs download_and_build
 	@${ECHOE} ${GREEN}Framework downloaded and built${NC}
-	@make test
+	@make test DGTEST=${DGTEST}
 	@cp $(UT_CONTROL)/build/$(TARGET)/lib/libut_control.* ${LIB_DIR}
 	@cp $(UT_CONTROL)/build/$(TARGET)/lib/libut_control.* ${BIN_DIR}
 	@${ECHOE} ${GREEN}ut-control LIB Copied to [${BIN_DIR}]${NC}
 
 download_and_build:
 	@${ECHOE} ${GREEN}"Ensure ut-core frameworks are present"${NC}
-	@${UT_CORE_DIR}/build.sh TARGET=${TARGET}
+	@${UT_CORE_DIR}/build.sh TARGET=${TARGET} DGTEST=${DGTEST}
 	@${ECHOE} ${GREEN}Completed${NC}
 	@${ECHOE} ${GREEN}"Entering ut-control [TARGET=${TARGET}]"${NC}
 	@${MAKE} -C $(UT_CONTROL) TARGET=${TARGET}
@@ -128,7 +158,11 @@ download_and_build:
 # Make the final test binary
 test: $(OBJS) createdirs
 	@${ECHOE} ${GREEN}Linking $@ $(BUILD_DIR)/$(TARGET_EXEC)${NC}
-	@$(CC) $(OBJS) -o $(BUILD_DIR)/$(TARGET_EXEC) $(XLDFLAGS) $(KCFLAGS) $(XCFLAGS)
+ifeq ($(DGTEST),0)
+	$(CC) $(OBJS) -o $(BUILD_DIR)/$(TARGET_EXEC) $(XLDFLAGS) $(KCFLAGS) $(XCFLAGS)
+else
+	$(CXX) $(OBJS) -o $(BUILD_DIR)/$(TARGET_EXEC) $(CXXFLAGS) $(XLDFLAGS) $(LIBS)
+endif
 	@cp $(BUILD_DIR)/$(TARGET_EXEC) $(BIN_DIR)/
 ifneq ("$(wildcard $(HAL_LIB_DIR)/*.so)","")
 	cp $(HAL_LIB_DIR)/*.so* $(BIN_DIR)
@@ -142,7 +176,30 @@ createdirs:
 $(BUILD_DIR)/%.o: %.c
 	@${ECHOE} ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
 	@$(MKDIR_P) $(dir $@)
+ifeq ($(DGTEST),0)
 	@$(CC) $(XCFLAGS) -c $< -o $@
+else
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+endif
+
+$(BUILD_DIR)/%.o: %.cpp
+	@${ECHOE} ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
+	@$(MKDIR_P) $(dir $@)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/%.o: $(SRC_DIRS)/%.c
+	@${ECHOE} ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
+	@$(MKDIR_P) $(dir $@)
+ifeq ($(DGTEST),0)
+	$(CC) $(XCFLAGS) -c $< -o $@
+else
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+endif
+
+$(BUILD_DIR)/%.o: $(SRC_DIRS)/%.cpp
+	@${ECHOE} ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
+	@$(MKDIR_P) $(dir $@)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 
 arm:
