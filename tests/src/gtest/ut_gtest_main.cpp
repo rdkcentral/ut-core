@@ -6,7 +6,6 @@
 // Test fixture for UTKVPProfileWrapper
 class UTKVPProfileWrapperTest : public ::testing::Test {
 protected:
-    // You can define setUp() and TearDown() if necessary
     void SetUp() override {
         // Code here will be run before each test
     }
@@ -19,7 +18,6 @@ protected:
 // Example Test Case 1: Test if the profile opens successfully
 TEST_F(UTKVPProfileWrapperTest, OpenProfileSuccess) {
     try {
-        // Assuming there's a valid file called "test_profile.kvp"
         UTKVPProfileWrapper profile(KVP_VALID_TEST_ASSERT_YAML_FILE);
         EXPECT_NE(profile.getInstance(), nullptr);  // Ensure instance is not null
     } catch (const std::exception &e) {

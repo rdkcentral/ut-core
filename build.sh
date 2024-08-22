@@ -41,6 +41,7 @@ echo "TARGET= [$TARGET] from [$0]"
 echo "DGTEST= [$DGTEST] from [$0]"
 
 THIRD_PARTY_LIB_DIR=${FRAMEWORK_DIR}/ut-control/build/${TARGET}
+GTEST_DIR=${FRAMEWORK_DIR}/gtest/${TARGET}
 
 pushd ${MY_DIR} > /dev/null
 # Clone CUnit
@@ -119,9 +120,9 @@ popd > /dev/null # ${FRAMEWORK_DIR}
 
 pushd ${MY_DIR} > /dev/null
 #Clone GTEST
-if [[ ! -d "${FRAMEWORK_DIR}/googletest-1.15.2" && "${DGTEST}" == "1" ]]; then
-    wget https://github.com/google/googletest/archive/refs/tags/v1.15.2.zip --no-check-certificate -P ${FRAMEWORK_DIR}
-    cd ${FRAMEWORK_DIR}/
+if [[ ! -d "${GTEST_DIR}/googletest-1.15.2" && "${DGTEST}" == "1" ]]; then
+    wget https://github.com/google/googletest/archive/refs/tags/v1.15.2.zip --no-check-certificate -P ${GTEST_DIR}
+    cd ${GTEST_DIR}/
     unzip v1.15.2.zip
     cd googletest-1.15.2/
     mkdir build

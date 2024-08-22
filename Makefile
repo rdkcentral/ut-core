@@ -25,9 +25,6 @@ NC='\033[0m'
 ECHOE = /bin/echo -e
 MKDIR_P ?= @mkdir -p
 
-# Initial output
-$(info $(shell ${ECHOE} ${GREEN}TARGET_EXEC [$(TARGET_EXEC)]${NC}))
-
 # Directories and PATH setup
 UT_CORE_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 export PATH := $(UT_CORE_DIR)/toolchain:$(PATH)
@@ -44,7 +41,6 @@ else
 CUNIT_VARIANT = i686-pc-linux-gnu
 endif
 export TARGET
-$(info TARGET [$(TARGET)])
 
 # Moveable Directories based on the caller makefile
 TOP_DIR ?= $(UT_CORE_DIR)
@@ -63,7 +59,12 @@ INC_DIRS += $(UT_CORE_DIR)/include $(UT_CONTROL)/include $(UT_CORE_DIR)/src
 # Set up compiler and source directories based on DGTEST
 ifneq ($(DGTEST),1)
 TARGET_EXEC ?= hal_test
+ifneq ($(TARGET),arm)
 COMPILER = gcc
+else
+COMPILER = $(CC)
+endif
+DGTEST = 0
 
 # Enable CUnit Requirements
 XCFLAGS += -DUT_CUNIT
@@ -72,18 +73,29 @@ INC_DIRS += $(CUNIT_DIR)/Headers $(UT_CORE_DIR)/src/cunit
 SRC_DIRS += $(CUNIT_DIR)/Sources/Framework $(UT_CORE_DIR)/src
 else
 TARGET_EXEC ?= hal_gtest
+ifneq ($(TARGET),arm)
 COMPILER = g++
+else
+COMPILER = $(CXX)
+endif
+DGTEST = 1
 SRC_DIRS += $(UT_CORE_DIR)/src
 EXCLUDE_DIRS = $(SRCDIR)/cunit
-GTEST_SRC = $(FRAMEWORK_DIR)/googletest-1.15.2
-INC_DIRS += $(GTEST_SRC)/googletest/include
+GTEST_SRC = $(FRAMEWORK_DIR)/gtest/$(TARGET)/googletest-1.15.2
+INC_DIRS += $(GTEST_SRC)/googletest/include $(UT_CORE_DIR)/src/gtest
 endif
+
+# Initial output
+$(info $(shell ${ECHOE} ${GREEN}TARGET_EXEC [$(TARGET_EXEC)]${NC}))
+$(info TARGET [$(TARGET)])
+$(info COMPILER [$(COMPILER)])
+$(info $(shell ${ECHOE} ${GREEN}DGTEST [$(DGTEST)]${NC}))
 
 # Linking flags
 ifneq ($(DGTEST),0)
-XLDFLAGS += -L$(GTEST_SRC)/build/lib/ -L $(UT_CONTROL)/build/$(TARGET)/lib -lgtest -lgtest_main -lut_control
+XLDFLAGS += -L$(GTEST_SRC)/build/lib/ -L $(UT_CONTROL)/build/$(TARGET)/lib -lgtest -lgtest_main -lut_control -lpthread
 else
-XLDFLAGS += -L $(UT_CONTROL)/build/$(TARGET)/lib -lut_control -Wl,-rpath,$(YLDFLAGS) $(LDFLAGS) -pthread -lpthread
+XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -lut_control -Wl,-rpath, -pthread -lpthread
 endif
 
 # Source files and objects
