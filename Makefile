@@ -57,7 +57,7 @@ XCFLAGS := $(KCFLAGS)
 INC_DIRS += $(UT_CORE_DIR)/include $(UT_CONTROL)/include $(UT_CORE_DIR)/src
 
 # Set up compiler and source directories based on DGTEST
-ifneq ($(DGTEST),1)
+ifneq ($(DGTEST),1) # CUNIT case
 TARGET_EXEC ?= hal_test
 ifneq ($(TARGET),arm)
 COMPILER = gcc
@@ -71,7 +71,7 @@ XCFLAGS += -DUT_CUNIT
 CUNIT_DIR = $(FRAMEWORK_DIR)/CUnit-2.1-3/CUnit
 INC_DIRS += $(CUNIT_DIR)/Headers $(UT_CORE_DIR)/src/cunit
 SRC_DIRS += $(CUNIT_DIR)/Sources/Framework $(UT_CORE_DIR)/src
-else
+else # GTEST case
 TARGET_EXEC ?= hal_gtest
 ifneq ($(TARGET),arm)
 COMPILER = g++
@@ -83,6 +83,7 @@ SRC_DIRS += $(UT_CORE_DIR)/src
 EXCLUDE_DIRS = $(SRCDIR)/cunit
 GTEST_SRC = $(FRAMEWORK_DIR)/gtest/$(TARGET)/googletest-1.15.2
 INC_DIRS += $(GTEST_SRC)/googletest/include $(UT_CORE_DIR)/src/gtest
+GTEST_LIB_DIR = $(UT_CORE_DIR)/build/$(TARGET)/gtest/lib/
 endif
 
 # Initial output
@@ -92,23 +93,22 @@ $(info COMPILER [$(COMPILER)])
 $(info $(shell ${ECHOE} ${GREEN}DGTEST [$(DGTEST)]${NC}))
 
 # Linking flags
-ifneq ($(DGTEST),0)
-XLDFLAGS += -L$(GTEST_SRC)/build/lib/ -L $(UT_CONTROL)/build/$(TARGET)/lib -lgtest -lgtest_main -lut_control -lpthread
-else
+ifneq ($(DGTEST),0) # GTEST case
+XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -L$(GTEST_LIB_DIR) -lgtest_main -lgtest -lut_control -lpthread
+else # CUNIT case
 XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -lut_control -Wl,-rpath, -pthread -lpthread
 endif
 
 # Source files and objects
-ifeq ($(DGTEST),0)
+ifeq ($(DGTEST),0) # CUNIT case
 SRCS := $(shell find $(SRC_DIRS) -name *.c -or -name *.s)
 OBJS := $(subst $(TOP_DIR),$(BUILD_DIR),$(SRCS:.c=.o))
-else
+else # GTEST case
 # Find all source files and header files excluding specific directories
 SRCS := $(shell find $(SRC_DIRS) -type f \( -name '*.cpp' -o -name '*.c' \) | grep -v "$(EXCLUDE_DIRS)")
 OBJS = $(SRCS:.c=.o) $(SRCS:.cpp=.o)
 # Prefix the object files with the build directory
 OBJS := $(patsubst $(TOP_DIR)/%, $(BUILD_DIR)/%, $(OBJS))
-XLDFLAGS += -L$(FRAMEWORK_DIR)/googletest-1.15.2/build/lib/ -lgtest -lgtest_main -lut_control
 endif
 
 OBJS := $(filter %.o, $(sort $(OBJS)))

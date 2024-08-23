@@ -42,6 +42,7 @@ echo "DGTEST= [$DGTEST] from [$0]"
 
 THIRD_PARTY_LIB_DIR=${FRAMEWORK_DIR}/ut-control/build/${TARGET}
 GTEST_DIR=${FRAMEWORK_DIR}/gtest/${TARGET}
+GTEST_LIB_DIR=${MY_DIR}/build/${TARGET}/gtest
 
 pushd ${MY_DIR} > /dev/null
 # Clone CUnit
@@ -92,7 +93,8 @@ pushd ${FRAMEWORK_DIR} > /dev/null
 
 configure_ut_control() {
     cd ./ut-control
-    git checkout ${UT_CONTROL_PROJECT_VERSION}
+    #git checkout ${UT_CONTROL_PROJECT_VERSION}
+    git checkout feature/gh44-ut-control-cpp-support
     ./configure.sh ${TARGET}
 }
 
@@ -125,12 +127,12 @@ if [[ ! -d "${GTEST_DIR}/googletest-1.15.2" && "${DGTEST}" == "1" ]]; then
     cd ${GTEST_DIR}/
     unzip v1.15.2.zip
     cd googletest-1.15.2/
-    mkdir build
-    cd build
+    mkdir -p ${GTEST_LIB_DIR}
+    cd ${GTEST_LIB_DIR}
     if command -v cmake &> /dev/null; then
-        cmake ..
+        cmake ${GTEST_DIR}/googletest-1.15.2/
     else
-        ${UT_CONTROL_LIB_DIR}/host-tools/CMake-3.30.0/build/bin/cmake ..
+        ${UT_CONTROL_LIB_DIR}/host-tools/CMake-3.30.0/build/bin/cmake ${GTEST_DIR}/googletest-1.15.2/
     fi
     make
 fi
