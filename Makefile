@@ -58,60 +58,39 @@ INC_DIRS += $(UT_CORE_DIR)/include $(UT_CONTROL)/include $(UT_CORE_DIR)/src
 
 # Set up compiler and source directories based on DGTEST
 ifneq ($(DGTEST),1) # CUNIT case
-TARGET_EXEC ?= hal_test
-ifneq ($(TARGET),arm)
-COMPILER = gcc
-else
-COMPILER = $(CC)
-endif
-DGTEST = 0
+  TARGET_EXEC ?= hal_test
+  COMPILER := $(if $(filter arm,$(TARGET)),$(CC),gcc)
+  DGTEST = 0
 
-# Enable CUnit Requirements
-XCFLAGS += -DUT_CUNIT
-CUNIT_DIR = $(FRAMEWORK_DIR)/CUnit-2.1-3/CUnit
-INC_DIRS += $(CUNIT_DIR)/Headers $(UT_CORE_DIR)/src/cunit
-SRC_DIRS += $(CUNIT_DIR)/Sources/Framework $(UT_CORE_DIR)/src
+  # Enable CUnit Requirements
+  XCFLAGS += -DUT_CUNIT
+  CUNIT_DIR = $(FRAMEWORK_DIR)/CUnit-2.1-3/CUnit
+  INC_DIRS += $(CUNIT_DIR)/Headers $(UT_CORE_DIR)/src/cunit
+  SRC_DIRS += $(CUNIT_DIR)/Sources/Framework $(UT_CORE_DIR)/src
+  XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -lut_control -Wl,-rpath, -pthread -lpthread
+
+  # Source files
+  SRCS := $(shell find $(SRC_DIRS) -name *.c -or -name *.s)
 else # GTEST case
-TARGET_EXEC ?= hal_gtest
-ifneq ($(TARGET),arm)
-COMPILER = g++
-else
-COMPILER = $(CXX)
-endif
-DGTEST = 1
-SRC_DIRS += $(UT_CORE_DIR)/src
-EXCLUDE_DIRS = $(SRCDIR)/cunit
-GTEST_SRC = $(FRAMEWORK_DIR)/gtest/$(TARGET)/googletest-1.15.2
-INC_DIRS += $(GTEST_SRC)/googletest/include $(UT_CORE_DIR)/src/gtest
-GTEST_LIB_DIR = $(UT_CORE_DIR)/build/$(TARGET)/gtest/lib/
-endif
+  TARGET_EXEC ?= hal_gtest
+  COMPILER := $(if $(filter arm,$(TARGET)),$(CXX),g++)
+  DGTEST = 1
 
-# Initial output
-$(info $(shell ${ECHOE} ${GREEN}TARGET_EXEC [$(TARGET_EXEC)]${NC}))
-$(info TARGET [$(TARGET)])
-$(info COMPILER [$(COMPILER)])
-$(info $(shell ${ECHOE} ${GREEN}DGTEST [$(DGTEST)]${NC}))
+  SRC_DIRS += $(UT_CORE_DIR)/src
+  EXCLUDE_DIRS = $(SRCDIR)/cunit
+  GTEST_SRC = $(FRAMEWORK_DIR)/gtest/$(TARGET)/googletest-1.15.2
+  INC_DIRS += $(GTEST_SRC)/googletest/include $(UT_CORE_DIR)/src/gtest
+  GTEST_LIB_DIR = $(UT_CORE_DIR)/build/$(TARGET)/gtest/lib/
+  XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -L$(GTEST_LIB_DIR) -lgtest_main -lgtest -lut_control -lpthread
 
-# Linking flags
-ifneq ($(DGTEST),0) # GTEST case
-XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -L$(GTEST_LIB_DIR) -lgtest_main -lgtest -lut_control -lpthread
-else # CUNIT case
-XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -lut_control -Wl,-rpath, -pthread -lpthread
+  # Source files
+  SRCS := $(shell find $(SRC_DIRS) -type f \( -name '*.cpp' -o -name '*.c' \) | grep -v "$(EXCLUDE_DIRS)")
 endif
 
-# Source files and objects
-ifeq ($(DGTEST),0) # CUNIT case
-SRCS := $(shell find $(SRC_DIRS) -name *.c -or -name *.s)
-OBJS := $(subst $(TOP_DIR),$(BUILD_DIR),$(SRCS:.c=.o))
-else # GTEST case
-# Find all source files and header files excluding specific directories
-SRCS := $(shell find $(SRC_DIRS) -type f \( -name '*.cpp' -o -name '*.c' \) | grep -v "$(EXCLUDE_DIRS)")
+# Common object file setup
 OBJS = $(SRCS:.c=.o) $(SRCS:.cpp=.o)
-# Prefix the object files with the build directory
-OBJS := $(patsubst $(TOP_DIR)/%, $(BUILD_DIR)/%, $(OBJS))
-endif
-
-OBJS := $(filter %.o, $(sort $(OBJS)))
+OBJS := $(patsubst $(TOP_DIR)/%, $(BUILD_DIR)/%, $(OBJS)) # Prefix the object files with the build directory using pattern substitution
+OBJS := $(filter %.o, $(sort $(OBJS))) # Filter and sort the object files and remove duplicates
 
 # Dependency files
 DEPS := $(OBJS:.o=.d)
@@ -122,7 +101,11 @@ VERSION := $(shell git describe --tags | head -n1)
 XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\"
 CXXFLAGS += $(INC_FLAGS)
 
-VPATH += $(UT_CORE_DIR) $(TOP_DIR)
+# Initial output
+$(info $(shell ${ECHOE} ${GREEN}TARGET_EXEC [$(TARGET_EXEC)]${NC}))
+$(info TARGET [$(TARGET)])
+$(info COMPILER [$(COMPILER)])
+$(info $(shell ${ECHOE} ${GREEN}DGTEST [$(DGTEST)]${NC}))
 
 # Default target
 .PHONY: clean cleanall list framework test createdirs all
@@ -167,6 +150,12 @@ $(BUILD_DIR)/%.o: %.cpp
 	@${ECHOE} ${GREEN}Building [${YELLOW}$<${GREEN}]${NC}
 	@$(MKDIR_P) $(dir $@)
 	@$(COMPILER) $(CXXFLAGS) -c $< -o $@
+
+arm:
+	make TARGET=arm
+
+linux: framework
+	make TARGET=linux
 
 # Clean targets
 clean:

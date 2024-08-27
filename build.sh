@@ -120,6 +120,12 @@ else
 fi
 popd > /dev/null # ${FRAMEWORK_DIR}
 
+
+CMAKE_BIN=${UT_CONTROL_LIB_DIR}/host-tools/CMake-3.30.0/build/bin/cmake
+if [ ! -f "$CMAKE_BIN" ]; then
+    CMAKE_BIN=$CMAKE_VAR
+fi
+
 pushd ${MY_DIR} > /dev/null
 #Clone GTEST
 if [[ ! -d "${GTEST_DIR}/googletest-1.15.2" && "${DGTEST}" == "1" ]]; then
@@ -132,7 +138,7 @@ if [[ ! -d "${GTEST_DIR}/googletest-1.15.2" && "${DGTEST}" == "1" ]]; then
     if command -v cmake &> /dev/null; then
         cmake ${GTEST_DIR}/googletest-1.15.2/
     else
-        ${UT_CONTROL_LIB_DIR}/host-tools/CMake-3.30.0/build/bin/cmake ${GTEST_DIR}/googletest-1.15.2/
+        ${CMAKE_BIN} ${GTEST_DIR}/googletest-1.15.2/
     fi
     make
 fi
