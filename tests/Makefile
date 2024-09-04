@@ -20,19 +20,18 @@ ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BIN_DIR := $(ROOT_DIR)/build/bin
 #TOP_DIR := $(ROOT_DIR)
 ECHOE = /bin/echo -e
+TARGET_EXEC = ut-test
 
 # Switch on Linux & disable asserts for the testing suites
 CFLAGS += -DNDEBUG
-ifneq ($(DGTEST),1)
-TARGET_EXEC = ut-test
-DGTEST = 0
-SRC_DIRS = $(ROOT_DIR)/src/cunit
+ifneq ($(VARIANT),CPP)
+VARIANT = C
+SRC_DIRS = $(ROOT_DIR)/src/c_source
 INC_DIRS := $(ROOT_DIR)/include
 INC_DIRS += $(ROOT_DIR)/../include
 else
-TARGET_EXEC = ut-gtest
-DGTEST = 1
-SRC_DIRS = $(ROOT_DIR)/src/gtest
+VARIANT = CPP
+SRC_DIRS = $(ROOT_DIR)/src/cpp_source
 endif
 
 ifneq ($(TARGET),arm)
@@ -64,7 +63,7 @@ all: framework
 
 build:
 	@${ECHOE} ${GREEN}Build [$@] ${NC}
-	@make -C ../ test TARGET=$(TARGET) DGTEST=${DGTEST}
+	@make -C ../ test TARGET=$(TARGET) VARIANT=${VARIANT}
 
 run: build
 	@${ECHOE} ${GREEN}Running [$@]${NC}
@@ -74,7 +73,7 @@ run: build
 rebuild: clean build
 
 framework:
-	make -C ../ framework TARGET=$(TARGET) DGTEST=${DGTEST}
+	make -C ../ framework TARGET=$(TARGET) VARIANT=${VARIANT}
 	@${ECHOE} ${GREEN}Copy Assets to [${BIN_DIR}/assets] ${NC}
 	@mkdir -p ${BIN_DIR}/assets
 	@cp ${ROOT_DIR}/src/assets/* ${BIN_DIR}/assets
@@ -87,13 +86,13 @@ list:
 	@${ECHOE} SRC_DIRS: ${SRC_DIRS}
 	@${ECHOE} CFLAGS: ${CFLAGS}
 	@${ECHOE} LDFLAGS: ${LDFLAGS}
-	@make -C ../ list TARGET=$(TARGET) DGTEST=${DGTEST}
+	@make -C ../ list TARGET=$(TARGET) VARIANT=${VARIANT}
 
 clean:
 	@${ECHOE} ${GREEN}Clean [$@]${NC}
 	@$(RM) -rf ${BIN_DIR}
-	@make -C ../ clean TARGET=$(TARGET) DGTEST=${DGTEST}
+	@make -C ../ clean TARGET=$(TARGET) VARIANT=${VARIANT}
 
 cleanall:
 	@${ECHOE} ${GREEN}Clean [$@]${NC}
-	@make -C ../ cleanall TARGET=$(TARGET) DGTEST=${DGTEST}
+	@make -C ../ cleanall TARGET=$(TARGET) VARIANT=${VARIANT}

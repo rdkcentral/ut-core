@@ -26,10 +26,10 @@ MY_DIR="$(dirname $SCRIPT_EXEC)"
 FRAMEWORK_DIR=${MY_DIR}/framework
 UT_CONTROL_LIB_DIR=${FRAMEWORK_DIR}/ut-control
 
-if [[ "$*" == *"DGTEST=0"* || "$*" != *"DGTEST"* ]]; then
-    DGTEST="0"
+if [[ "$*" == *"VARIANT=CPP"* ]]; then
+    VARIANT="CPP"
 else
-    DGTEST="1"
+    VARIANT="C"
 fi
 
 if [[ "$*" == *"TARGET=arm"* ]]; then
@@ -38,7 +38,7 @@ else
     TARGET="linux"
 fi
 echo "TARGET= [$TARGET] from [$0]"
-echo "DGTEST= [$DGTEST] from [$0]"
+echo "VARIANT= [$VARIANT] from [$0]"
 
 THIRD_PARTY_LIB_DIR=${FRAMEWORK_DIR}/ut-control/build/${TARGET}
 GTEST_DIR=${FRAMEWORK_DIR}/gtest/${TARGET}
@@ -46,14 +46,14 @@ GTEST_LIB_DIR=${MY_DIR}/build/${TARGET}/gtest
 
 pushd ${MY_DIR} > /dev/null
 # Clone CUnit
-if [[ ! -d "${FRAMEWORK_DIR}/CUnit-2.1-3" && "${DGTEST}" == "0" ]]; then
+if [[ ! -d "${FRAMEWORK_DIR}/CUnit-2.1-3" && "${VARIANT}" == "C" ]]; then
     echo "Clone Framework"
     wget https://sourceforge.net/projects/cunit/files/CUnit/2.1-3/CUnit-2.1-3.tar.bz2 --no-check-certificate -P ${FRAMEWORK_DIR}
     tar xvfj framework/CUnit-2.1-3.tar.bz2 -C ${FRAMEWORK_DIR}
     cp ${FRAMEWORK_DIR}/CUnit-2.1-3/CUnit/Headers/CUnit.h.in ${FRAMEWORK_DIR}/CUnit-2.1-3/CUnit/Headers/CUnit.h
     echo "Patching Framework"
     cd ${FRAMEWORK_DIR}
-    cp ../src/cunit/cunit_lgpl/patches/CorrectBuildWarningsInCunit.patch  .
+    cp ../src/c_source/cunit_lgpl/patches/CorrectBuildWarningsInCunit.patch  .
     patch -u CUnit-2.1-3/CUnit/Sources/Framework/TestRun.c -i CorrectBuildWarningsInCunit.patch
     echo "Patching Complete"
 else
@@ -128,7 +128,7 @@ fi
 
 pushd ${MY_DIR} > /dev/null
 #Clone GTEST
-if [[ ! -d "${GTEST_DIR}/googletest-1.15.2" && "${DGTEST}" == "1" ]]; then
+if [[ ! -d "${GTEST_DIR}/googletest-1.15.2" && "${VARIANT}" == "CPP" ]]; then
     wget https://github.com/google/googletest/archive/refs/tags/v1.15.2.zip --no-check-certificate -P ${GTEST_DIR}
     cd ${GTEST_DIR}/
     unzip v1.15.2.zip

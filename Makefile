@@ -31,15 +31,6 @@ export PATH := $(UT_CORE_DIR)/toolchain:$(PATH)
 
 # Set target based on TARGET variable
 TARGET := $(if $(TARGET),$(TARGET),linux)
-
-ifeq ($(TARGET),arm)
-CUNIT_VARIANT = arm-rdk-linux-gnueabi
-#CC := arm-rdk-linux-gnueabi-gcc -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -mabi=aapcs-linux -mno-thumb-interwork -ffixed-r8 -fomit-frame-pointer
-# CFLAGS will be overriden by Caller as required
-INC_DIRS += $(UT_CORE_DIR)/sysroot/usr/include
-else
-CUNIT_VARIANT = i686-pc-linux-gnu
-endif
 export TARGET
 
 # Moveable Directories based on the caller makefile
@@ -55,36 +46,44 @@ UT_CONTROL = $(FRAMEWORK_DIR)/ut-control
 # Flags
 XCFLAGS := $(KCFLAGS)
 INC_DIRS += $(UT_CORE_DIR)/include $(UT_CONTROL)/include $(UT_CORE_DIR)/src
+TARGET_EXEC ?= hal_test
 
-# Set up compiler and source directories based on DGTEST
-ifneq ($(DGTEST),1) # CUNIT case
-  TARGET_EXEC ?= hal_test
-  COMPILER := $(if $(filter arm,$(TARGET)),$(CC),gcc)
-  DGTEST = 0
+# Set up compiler and source directories based on VARIANT
+ifneq ($(VARIANT),CPP) # CUNIT case
+  VARIANT = C
 
   # Enable CUnit Requirements
   XCFLAGS += -DUT_CUNIT
   CUNIT_DIR = $(FRAMEWORK_DIR)/CUnit-2.1-3/CUnit
-  INC_DIRS += $(CUNIT_DIR)/Headers $(UT_CORE_DIR)/src/cunit
+  INC_DIRS += $(CUNIT_DIR)/Headers $(UT_CORE_DIR)/src/c_source
   SRC_DIRS += $(CUNIT_DIR)/Sources/Framework $(UT_CORE_DIR)/src
   XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -lut_control -Wl,-rpath, -pthread -lpthread
 
   # Source files
   SRCS := $(shell find $(SRC_DIRS) -name *.c -or -name *.s)
 else # GTEST case
-  TARGET_EXEC ?= hal_gtest
-  COMPILER := $(if $(filter arm,$(TARGET)),$(CXX),g++)
-  DGTEST = 1
+  VARIANT = CPP
 
   SRC_DIRS += $(UT_CORE_DIR)/src
-  EXCLUDE_DIRS = $(SRCDIR)/cunit
+  EXCLUDE_DIRS = $(SRCDIR)/c_source
   GTEST_SRC = $(FRAMEWORK_DIR)/gtest/$(TARGET)/googletest-1.15.2
-  INC_DIRS += $(GTEST_SRC)/googletest/include $(UT_CORE_DIR)/src/gtest
+  INC_DIRS += $(GTEST_SRC)/googletest/include $(UT_CORE_DIR)/src/cpp_source $(UT_CORE_DIR)/src
   GTEST_LIB_DIR = $(UT_CORE_DIR)/build/$(TARGET)/gtest/lib/
   XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -L$(GTEST_LIB_DIR) -lgtest_main -lgtest -lut_control -lpthread
 
   # Source files
   SRCS := $(shell find $(SRC_DIRS) -type f \( -name '*.cpp' -o -name '*.c' \) | grep -v "$(EXCLUDE_DIRS)")
+endif
+
+ifeq ($(TARGET),arm)
+CUNIT_VARIANT = arm-rdk-linux-gnueabi
+COMPILER := $(if $(filter CPP,$(VARIANT)),$(CXX),$(CC))
+#CC := arm-rdk-linux-gnueabi-gcc -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -mabi=aapcs-linux -mno-thumb-interwork -ffixed-r8 -fomit-frame-pointer
+# CFLAGS will be overriden by Caller as required
+INC_DIRS += $(UT_CORE_DIR)/sysroot/usr/include
+else
+CUNIT_VARIANT = i686-pc-linux-gnu
+COMPILER := $(if $(filter CPP,$(VARIANT)),g++ -ggdb -o0 -Wall, gcc -ggdb -o0 -Wall)
 endif
 
 # Common object file setup
@@ -105,7 +104,7 @@ CXXFLAGS += $(INC_FLAGS)
 $(info $(shell ${ECHOE} ${GREEN}TARGET_EXEC [$(TARGET_EXEC)]${NC}))
 $(info TARGET [$(TARGET)])
 $(info COMPILER [$(COMPILER)])
-$(info $(shell ${ECHOE} ${GREEN}DGTEST [$(DGTEST)]${NC}))
+$(info $(shell ${ECHOE} ${GREEN}VARIANT [$(VARIANT)]${NC}))
 
 # Default target
 .PHONY: clean cleanall list framework test createdirs all
@@ -116,13 +115,13 @@ all: framework $(OBJS)
 # Recursive make is needed as src files are not available during the first iteration
 framework: createdirs download_and_build
 	@${ECHOE} ${GREEN}Framework downloaded and built${NC}
-	@make test DGTEST=${DGTEST}
+	@make test VARIANT=${VARIANT}
 	@cp -r $(UT_CONTROL)/build/$(TARGET)/lib/libut_control.* $(LIB_DIR) $(BIN_DIR)
 	@${ECHOE} ${GREEN}ut-control LIB Copied to [${BIN_DIR}]${NC}
 
 download_and_build:
 	@${ECHOE} ${GREEN}Ensure ut-core frameworks are present${NC}
-	@${UT_CORE_DIR}/build.sh TARGET=${TARGET} DGTEST=${DGTEST}
+	@${UT_CORE_DIR}/build.sh TARGET=${TARGET} VARIANT=${VARIANT}
 	@${ECHOE} ${GREEN}Completed${NC}
 	@${ECHOE} ${GREEN}Entering ut-control [TARGET=${TARGET}]${NC}
 	@${MAKE} -C $(UT_CONTROL) TARGET=${TARGET}

@@ -58,6 +58,7 @@
   "C_Cpp_Runner.msvcSecureNoWarnings": false,
   "files.associations": {
     "ut_kvp_profile.h": "c",
-    "ut_internal.h": "c"
+    "ut_internal.h": "c",
+    "ut.h": "c"
   }
 }
