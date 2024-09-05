@@ -106,6 +106,9 @@ $(info TARGET [$(TARGET)])
 $(info COMPILER [$(COMPILER)])
 $(info $(shell ${ECHOE} ${GREEN}VARIANT [$(VARIANT)]${NC}))
 
+# Search for prerequisites (like .c, .cpp, or .h files) in specified directories when those files are not in the current directory.
+VPATH += $(UT_CORE_DIR) $(TOP_DIR)
+
 # Default target
 .PHONY: clean cleanall list framework test createdirs all
 
