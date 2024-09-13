@@ -26,6 +26,7 @@
 
 static UT_test_suite_t * gpLogSuite = NULL;
 static UT_test_suite_t * gpAssertSuite = NULL;
+static UT_test_suite_t * gpAssertSuite1 = NULL;
 
 int ut_init_function( void )
 {
@@ -100,6 +101,26 @@ void test_ut_assert( void )
     UT_LOG_ERROR("### This line should never be seen\n");
 }
 
+static bool returnBool(int num)
+{
+    UT_LOG("Inside [%s]", __func__);
+    return num != 0;
+}
+
+void test_ut_assert_for_arg_function( void )
+{
+    UT_LOG_STEP( "1: is expected to pass" );
+    UT_ASSERT( returnBool(1)==returnBool(1) );
+
+    UT_LOG_STEP( "2: is expected to fail but not fatal:" );
+    UT_ASSERT( returnBool(1)==returnBool(0) );   /* This line should assert */
+
+    UT_LOG_STEP( "3: is expected to assert & FATAL:" );
+    UT_ASSERT_FATAL( returnBool(1)==returnBool(0) );   /* This line should assert */
+
+    UT_LOG_ERROR("### This line should never be seen\n");
+}
+
 void test_ut_assert_pass( void )
 {
     UT_LOG_STEP( "1: Test UT_PASS");
@@ -135,6 +156,36 @@ void test_ut_assert_ptr_NULL()
     UT_LOG_ERROR("### This line should never be seen\n");
 }
 
+// Function that returns a pointer to a static integer
+static int *returnPointer(int value)
+{
+    UT_LOG("Inside [%s]", __func__);
+    static int num; // Static variable to persist beyond function scope
+    num = value;
+    return &num; // Return the address of the static variable
+}
+
+// Function that returns a NULL pointer
+static int *returnNullPointer()
+{
+    UT_LOG("Inside [%s]", __func__);
+    return NULL;
+}
+
+void test_ut_assert_ptr_NULL_for_arg_function()
+{
+    UT_LOG_STEP( "1: UT_ASSERT_PTR_NULL (returnNullPointer() == NULL ) : no assertest_ut_logging_too_long_stringt");
+    UT_ASSERT_PTR_NULL( returnNullPointer() );
+
+    UT_LOG_STEP( "2: UT_ASSERT_PTR_NULL (returnPointer() == <address of static var> ) - This step should assert");
+    UT_ASSERT_PTR_NULL( returnPointer(45) );   /* Should Fail, but not fatal */
+
+    UT_LOG_STEP( "3: UT_ASSERT_PTR_NULL_FATAL (returnPointer() == <address of static var> ) - This step should assert & FATAL");
+    UT_ASSERT_PTR_NULL_FATAL( returnPointer(46) );   /* Should Fail, but not fatal */
+
+    UT_LOG_ERROR("### This line should never be seen\n");
+}
+
 void test_ut_assert_ptr_equal()
 {
     int *pTR1 = (int *)1;
@@ -149,6 +200,29 @@ void test_ut_assert_ptr_equal()
 
     UT_LOG_STEP( "3: UT_ASSERT_PTR_EQUAL (pTR != pTR3 ) - this step should assert & FATAL");
     UT_ASSERT_PTR_EQUAL_FATAL( pTR1, pTR3 );   /* Should Fail */
+
+    UT_LOG_ERROR("### This line should never be seen\n");
+}
+
+static int *returnPointer1(int value)
+{
+    UT_LOG("Inside [%s]", __func__);
+    static int num1; // Static variable to persist beyond function scope
+    num1 = value;
+    return &num1; // Return the address of the static variable
+}
+
+void test_ut_assert_ptr_equal_for_arg_function()
+{
+
+    UT_LOG_STEP( "1: UT_ASSERT_PTR_EQUAL (returnPointer1(1) == returnPointer1(2) ) : no assert");
+    UT_ASSERT_PTR_EQUAL( returnPointer1(1), returnPointer1(2) );
+
+    UT_LOG_STEP( "2: UT_ASSERT_PTR_EQUAL (returnPointer1(2) != returnPointer(3) ) - this step should assert");
+    UT_ASSERT_PTR_EQUAL( returnPointer1(2), returnPointer(3) );   /* Should Fail */
+
+    UT_LOG_STEP( "3: UT_ASSERT_PTR_EQUAL (returnPointer1(2) != returnPointer(3) ) - this step should assert & FATAL");
+    UT_ASSERT_PTR_EQUAL_FATAL( returnPointer1(2), returnPointer(3) );   /* Should Fail */
 
     UT_LOG_ERROR("### This line should never be seen\n");
 }
@@ -171,6 +245,21 @@ void test_ut_assert_ptr_NOT_equal()
     UT_LOG_ERROR("### This line should never be seen\n");
 }
 
+void test_ut_assert_ptr_NOT_equal_for_arg_function()
+{
+
+    UT_LOG_STEP( "1: UT_ASSERT_PTR_NOT_EQUAL (returnPointer1(1) != returnPointer(1) ) : no assert");
+    UT_ASSERT_PTR_NOT_EQUAL( returnPointer1(1), returnPointer(1) );
+
+    UT_LOG_STEP( "2: UT_ASSERT_PTR_NOT_EQUAL (returnPointer1(1) == returnPointer1(2) ) - This step should assert");
+    UT_ASSERT_PTR_NOT_EQUAL( returnPointer1(1), returnPointer1(2) );   /* Should Fail */
+
+    UT_LOG_STEP( "2: UT_ASSERT_PTR_NOT_EQUAL (returnPointer1(1) == returnPointer1(2)) - This step should assert & FATAL");
+    UT_ASSERT_PTR_NOT_EQUAL_FATAL( returnPointer1(1), returnPointer1(2) );   /* Should Fail */
+
+    UT_LOG_ERROR("### This line should never be seen\n");
+}
+
 void test_ut_assert_ptr_NOT_NULL()
 {
     int *pTR = (int*) 1;
@@ -183,6 +272,20 @@ void test_ut_assert_ptr_NOT_NULL()
 
     UT_LOG_STEP( "3: UT_ASSERT_PTR_NOT_NULL (pTR == NULL ) : this step should assert & FATAL");
     UT_ASSERT_PTR_NOT_NULL_FATAL( NULL );   /* Should Fail */
+
+    UT_LOG_ERROR("### This line should never be seen\n");
+}
+
+void test_ut_assert_ptr_NOT_NULL_for_arg_function()
+{
+    UT_LOG_STEP( "1: UT_ASSERT_PTR_NOT_NULL (returnPointer1(1) = <some address> ) : no assert");
+    UT_ASSERT_PTR_NOT_NULL( returnPointer1(1) );
+
+    UT_LOG_STEP( "2: UT_ASSERT_PTR_NOT_NULL (returnNullPointer() == NULL ) : this step should assert");
+    UT_ASSERT_PTR_NOT_NULL( returnNullPointer() );   /* Should Fail */
+
+    UT_LOG_STEP( "3: UT_ASSERT_PTR_NOT_NULL (returnNullPointer() == NULL ) : this step should assert & FATAL");
+    UT_ASSERT_PTR_NOT_NULL_FATAL( returnNullPointer() );   /* Should Fail */
 
     UT_LOG_ERROR("### This line should never be seen\n");
 }
@@ -201,6 +304,20 @@ void test_ut_assert_TRUE()
     UT_LOG_ERROR("### This line should never be seen\n");
 }
 
+void test_ut_assert_TRUE_for_arg_function()
+{
+    UT_LOG_STEP( "1: UT_ASSERT_TRUE ( returnBool(1)==returnBool(2) ) : No Assert ");
+    UT_ASSERT_TRUE( returnBool(1)==returnBool(2) );
+
+    UT_LOG_STEP( "2: UT_ASSERT_TRUE ( returnBool(1)!=returnBool(2) ) : this step should assert");
+    UT_ASSERT_TRUE( returnBool(1)!=returnBool(2) ); /* Should Fail */
+
+    UT_LOG_STEP( "3: UT_ASSERT_TRUE ( returnBool(1)!=returnBool(2) ) : this step should assert & FATAL");
+    UT_ASSERT_TRUE_FATAL( returnBool(1)!=returnBool(2) ); /* Should Fail */
+
+    UT_LOG_ERROR("### This line should never be seen\n");
+}
+
 void test_ut_assert_FALSE()
 {
     UT_LOG_STEP( "1: UT_ASSERT_FALSE ( true==false ) : No Assert ");
@@ -211,6 +328,20 @@ void test_ut_assert_FALSE()
 
     UT_LOG_STEP( "2: UT_ASSERT_FALSE ( true!=false ) : this step should assert & FATAL"); 
     UT_ASSERT_FALSE_FATAL( true!=false ); /* Should fail */
+
+    UT_LOG_ERROR("### This line should never be seen\n");
+}
+
+void test_ut_assert_FALSE_for_arg_function()
+{
+    UT_LOG_STEP( "1: UT_ASSERT_FALSE ( returnBool(1)==returnBool(0) ) : No Assert ");
+    UT_ASSERT_FALSE( returnBool(1)==returnBool(0) );
+
+    UT_LOG_STEP( "2: UT_ASSERT_FALSE ( returnBool(1)!=returnBool(0) ) : this step should assert");
+    UT_ASSERT_FALSE( returnBool(1)!=returnBool(0) ); /* Should fail */
+
+    UT_LOG_STEP( "2: UT_ASSERT_FALSE ( returnBool(1)!=returnBool(0) ) : this step should assert & FATAL");
+    UT_ASSERT_FALSE_FATAL( returnBool(1)!=returnBool(0) ); /* Should fail */
 
     UT_LOG_ERROR("### This line should never be seen\n");
 }
@@ -229,6 +360,20 @@ void test_ut_assert_EQUAL( void )
     UT_LOG_ERROR("### This line should never be seen\n");
 }
 
+void test_ut_assert_EQUAL_for_arg_function( void )
+{
+    UT_LOG_STEP( "1: UT_ASSERT_EQUAL ( returnBool(1), returnBool(2) ) : PASS");
+    UT_ASSERT_EQUAL( returnBool(1), returnBool(2) );
+
+    UT_LOG_STEP( "2: UT_ASSERT_EQUAL ( returnBool(1), returnBool(0) ) : : this step should assert " );
+    UT_ASSERT_EQUAL( returnBool(1), returnBool(0) );  /* Should FAIL */
+
+    UT_LOG_STEP( "3: UT_ASSERT_EQUAL ( returnBool(1), returnBool(0) ) : : this step should assert & FATAL" );
+    UT_ASSERT_EQUAL_FATAL( returnBool(1), returnBool(0) );  /* Should FAIL */
+
+    UT_LOG_ERROR("### This line should never be seen\n");
+}
+
 void test_ut_assert_STRING_EQUAL( void )
 {
     UT_LOG_STEP( "1: UT_ASSERT_STRING_EQUAL ( bob, bob ) : No Assert ");
@@ -243,6 +388,32 @@ void test_ut_assert_STRING_EQUAL( void )
     UT_LOG_ERROR("### This line should never be seen\n");
 }
 
+static const char *returnString()
+{
+    UT_LOG("Inside [%s]", __func__);
+    return "bob";
+}
+
+static const char *returnString1()
+{
+    UT_LOG("Inside [%s]", __func__);
+    return "fred";
+}
+
+void test_ut_assert_STRING_EQUAL_for_arg_function( void )
+{
+    UT_LOG_STEP( "1: UT_ASSERT_STRING_EQUAL ( returnString(), returnString() ) : No Assert ");
+    UT_ASSERT_STRING_EQUAL( returnString(), returnString() );
+
+    UT_LOG_STEP( "2: UT_ASSERT_STRING_EQUAL ( returnString(), returnString1() ) : : this step should assert");
+    UT_ASSERT_STRING_EQUAL( returnString(), returnString1() ); /* Should FAil */
+
+    UT_LOG_STEP( "3: UT_ASSERT_STRING_EQUAL ( returnString(), returnString1() ) : : this step should assert & FATAL");
+    UT_ASSERT_STRING_EQUAL_FATAL( returnString(), returnString1() ); /* Should FAil */
+
+    UT_LOG_ERROR("### This line should never be seen\n");
+}
+
 void test_ut_assert_STRING_NOT_EQUAL( void )
 {
     UT_LOG_STEP( "1: UT_ASSERT_STRING_NOT_EQUAL ( bob, fred ) : no assert");
@@ -253,6 +424,20 @@ void test_ut_assert_STRING_NOT_EQUAL( void )
 
     UT_LOG_STEP( "3: UT_ASSERT_STRING_NOT_EQUAL ( bob, bob ) : this step should assert & FATAL"); 
     UT_ASSERT_STRING_NOT_EQUAL_FATAL( "bob", "bob" ); /* Should FAIL */
+
+    UT_LOG_ERROR("### This line should never be seen\n");
+}
+
+void test_ut_assert_STRING_NOT_EQUAL_for_arg_function( void )
+{
+    UT_LOG_STEP( "1: UT_ASSERT_STRING_NOT_EQUAL ( returnString(), returnString1() ) : no assert");
+    UT_ASSERT_STRING_NOT_EQUAL( returnString(), returnString1() );
+
+    UT_LOG_STEP( "2: UT_ASSERT_STRING_NOT_EQUAL ( returnString(), returnString() ) : this step should assert");
+    UT_ASSERT_STRING_NOT_EQUAL( returnString(), returnString() ); /* Should FAIL */
+
+    UT_LOG_STEP( "3: UT_ASSERT_STRING_NOT_EQUAL ( returnString(), returnString() ) : this step should assert & FATAL");
+    UT_ASSERT_STRING_NOT_EQUAL_FATAL( returnString(), returnString() ); /* Should FAIL */
 
     UT_LOG_ERROR("### This line should never be seen\n");
 }
@@ -273,6 +458,22 @@ void test_ut_assert_msg( void )
     UT_LOG_ERROR("### This line should never be seen\n");
 }
 
+void test_ut_assert_msg_for_arg_function( void )
+{
+    UT_LOG_STEP( "1: is expected not to assert" );
+    UT_ASSERT_MSG( returnBool(1)==returnBool(1), "should not assert");
+
+    UT_LOG( "This test should cause 2 assert checks, so a test pass, it will quit the test early" );
+
+    UT_LOG_STEP( "2: is expected to fail" );
+    UT_ASSERT_MSG( returnBool(0)==returnBool(1), "Step 2 : Asserted Correctly if you see this message :");   /* This line should assert */
+
+    UT_LOG_STEP( "3: is expected to fail" );
+    UT_ASSERT_MSG_FATAL( returnBool(0)==returnBool(1), "Step 2 : Asserted Correctly if you see this message :");   /* This line should assert & FATAL*/
+
+    UT_LOG_ERROR("### This line should never be seen\n");
+}
+
 void test_ut_assert_msg_true( void )
 {
     UT_LOG_STEP( "1: is expected not to assert" );
@@ -285,6 +486,22 @@ void test_ut_assert_msg_true( void )
 
     UT_LOG_STEP( "3: is expected to fail" );
     UT_ASSERT_TRUE_MSG_FATAL( false==true, "Step 3 : Asserted Correctly if you see this message :");   /* This line should assert & FATAL*/
+
+    UT_LOG_ERROR("### This line SHOULD never be seen\n");
+}
+
+void test_ut_assert_msg_true_for_arg_function( void )
+{
+    UT_LOG_STEP( "1: is expected not to assert" );
+    UT_ASSERT_TRUE_MSG( returnBool(1)==returnBool(1), "should not assert");
+
+    UT_LOG( "This test should cause 2 assert checks, so a test pass, it will quit the test early" );
+
+    UT_LOG_STEP( "2: is expected to fail" );
+    UT_ASSERT_TRUE_MSG( returnBool(0)==returnBool(1), "Step 2 : Asserted Correctly if you see this message :");   /* This line should assert */
+
+    UT_LOG_STEP( "3: is expected to fail" );
+    UT_ASSERT_TRUE_MSG_FATAL( returnBool(0)==returnBool(1), "Step 3 : Asserted Correctly if you see this message :");   /* This line should assert & FATAL*/
 
     UT_LOG_ERROR("### This line SHOULD never be seen\n");
 }
@@ -305,10 +522,34 @@ void test_ut_assert_msg_false( void )
     UT_LOG_ERROR("### This line SHOULD never be seen\n");
 }
 
+void test_ut_assert_msg_false_for_arg_function( void )
+{
+    UT_LOG_STEP( "1: is expected not to assert" );
+    UT_ASSERT_FALSE_MSG( returnBool(1)==returnBool(0), "should not assert");
+
+    UT_LOG( "This test should cause 2 assert checks, so a test pass, it will quit the test early" );
+
+    UT_LOG_STEP( "2: is expected to fail" );
+    UT_ASSERT_FALSE_MSG( returnBool(1)==returnBool(1), "Step 2 : Asserted Correctly if you see this message :");   /* This line should assert */
+
+    UT_LOG_STEP( "3: is expected to fail" );
+    UT_ASSERT_FALSE_MSG_FATAL( returnBool(1)==returnBool(1), "Step 3 : Asserted Correctly if you see this message :");   /* This line should assert & FATAL */
+
+    UT_LOG_ERROR("### This line SHOULD never be seen\n");
+}
+
 void test_ut_assert_log( void )
 {
     UT_ASSERT_LOG( true==true, "Step 1: ASSERT_LOG : should log and NOT fail :");
     UT_ASSERT_LOG( true==false, "Step 2: ASSERT_LOG : should log and NOT fail :");   /* This line should assert */
+
+    UT_LOG_INFO("+++ This line SHOULD be seen\n");
+}
+
+void test_ut_assert_log_for_arg_function( void )
+{
+    UT_ASSERT_LOG( returnBool(1)==returnBool(1), "Step 1: ASSERT_LOG : should log and NOT fail :");
+    UT_ASSERT_LOG( returnBool(1)==returnBool(0), "Step 2: ASSERT_LOG : should log and NOT fail :");   /* This line should assert */
 
     UT_LOG_INFO("+++ This line SHOULD be seen\n");
 }
@@ -345,5 +586,22 @@ void register_assert_functions(void)
     UT_add_test( gpAssertSuite, "UT_ASSERT_TRUE_MSG", test_ut_assert_msg_true);
     UT_add_test( gpAssertSuite, "UT_ASSERT_FALSE_MSG", test_ut_assert_msg_false);
     UT_add_test( gpAssertSuite, "UT_ASSERT Log", test_ut_assert_log);
+
+    gpAssertSuite1 = UT_add_suite("ut-core-assert-tests-with_function_args", ut_init_function, ut_clean_function);
+    assert(gpAssertSuite1 != NULL);
+    UT_add_test( gpAssertSuite1, "UT_ASSERT ptr_NULL with function as args", test_ut_assert_ptr_NULL_for_arg_function);
+    UT_add_test( gpAssertSuite1, "UT_ASSERT ptr_equal with function as args", test_ut_assert_ptr_equal_for_arg_function);
+    UT_add_test( gpAssertSuite1, "UT_ASSERT with function as args", test_ut_assert_for_arg_function);
+    UT_add_test( gpAssertSuite1, "UT_ASSERT ptr_NOT_equal with function as args", test_ut_assert_ptr_NOT_equal_for_arg_function);
+    UT_add_test( gpAssertSuite1, "UT_ASSERT ptr_NOT_NULL with function as args", test_ut_assert_ptr_NOT_NULL_for_arg_function);
+    UT_add_test( gpAssertSuite1, "UT_ASSERT TRUE with function as args", test_ut_assert_TRUE_for_arg_function);
+    UT_add_test( gpAssertSuite1, "UT_ASSERT FALSE with function as args", test_ut_assert_FALSE_for_arg_function);
+    UT_add_test( gpAssertSuite1, "UT_ASSERT EQUAL with function as args", test_ut_assert_EQUAL_for_arg_function);
+    UT_add_test( gpAssertSuite1, "UT_ASSERT STRING_EQUAL with function as args", test_ut_assert_STRING_EQUAL_for_arg_function);
+    UT_add_test( gpAssertSuite1, "UT_ASSERT STRING_NOT_EQUAL with function as args", test_ut_assert_STRING_NOT_EQUAL_for_arg_function);
+    UT_add_test( gpAssertSuite1, "UT_ASSERT MSG with function as args", test_ut_assert_msg_for_arg_function);
+    UT_add_test( gpAssertSuite1, "UT_ASSERT MSG_TRUE with function as args", test_ut_assert_msg_true_for_arg_function);
+    UT_add_test( gpAssertSuite1, "UT_ASSERT MSG_FALSE with function as args", test_ut_assert_msg_false_for_arg_function);
+    UT_add_test( gpAssertSuite1, "UT_ASSERT LOG with function as args", test_ut_assert_log_for_arg_function);
 }
 
