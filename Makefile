@@ -75,6 +75,8 @@ else # GTEST case
   SRCS := $(shell find $(SRC_DIRS) -type f \( -name '*.cpp' -o -name '*.c' \) | grep -v "$(EXCLUDE_DIRS)")
 endif
 
+VARIANT_FILE := .variant
+
 ifeq ($(TARGET),arm)
 COMPILER := $(if $(filter CPP,$(VARIANT)),$(CXX),$(CC))
 #CC := arm-rdk-linux-gnueabi-gcc -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -mabi=aapcs-linux -mno-thumb-interwork -ffixed-r8 -fomit-frame-pointer
@@ -114,7 +116,7 @@ all: framework $(OBJS)
 
 # Build framework
 # Recursive make is needed as src files are not available during the first iteration
-framework: createdirs download_and_build
+framework: checkvariantchange createdirs download_and_build
 	@${ECHOE} ${GREEN}Framework downloaded and built${NC}
 	@make test VARIANT=${VARIANT}
 	@cp -r $(UT_CONTROL)/build/$(TARGET)/lib/libut_control.* $(LIB_DIR) $(BIN_DIR)
@@ -138,6 +140,7 @@ endif
 
 # Create necessary directories
 createdirs:
+	@echo "$(VARIANT)" > $(VARIANT_FILE)
 	@$(MKDIR_P) ${BIN_DIR} ${LIB_DIR}
 
 # Compilation rules
@@ -151,6 +154,19 @@ $(BUILD_DIR)/%.o: %.cpp
 	@$(MKDIR_P) $(dir $@)
 	@$(COMPILER) $(CXXFLAGS) -c $< -o $@
 
+# Rule to check if the VARIANT has changed
+checkvariantchange:
+	@if [ -f "$(VARIANT_FILE)" ]; then \
+		PREVIOUS_VARIANT=$$(cat $(VARIANT_FILE)); \
+		if [ "$$PREVIOUS_VARIANT" != "$(VARIANT)" ]; then \
+			${ECHOE} ${RED}********************************************${NC}; \
+			${ECHOE} ${RED}Error: VARIANT has changed from $$PREVIOUS_VARIANT to $(VARIANT)${NC}; \
+			${ECHOE} ${RED}Please clean the build and try again.${NC}; \
+			${ECHOE} ${RED}********************************************${NC}; \
+			exit 1; \
+		fi \
+	fi
+
 arm:
 	make TARGET=arm
 
@@ -161,6 +177,7 @@ linux: framework
 clean:
 	@${ECHOE} ${GREEN}Performing Clean for $(TARGET) ${NC}
 	@$(RM) -rf $(BUILD_DIR)
+	@$(RM) -rf $(VARIANT_FILE)
 	@${ECHOE} ${GREEN}Clean Completed${NC}
 
 cleanall: clean

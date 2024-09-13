@@ -43,19 +43,6 @@ echo "VARIANT= [$VARIANT] from [$0]"
 THIRD_PARTY_LIB_DIR=${FRAMEWORK_DIR}/ut-control/build/${TARGET}
 GTEST_DIR=${FRAMEWORK_DIR}/gtest/${TARGET}
 GTEST_LIB_DIR=${MY_DIR}/build/${TARGET}/cpp_libs
-if [ "$VARIANT" == "CPP" ]; then
-    COMPILE_TIME_MARKER=${MY_DIR}/build/${TARGET}/obj/src/c_source/ut_cunit.o
-else
-    COMPILE_TIME_MARKER=${MY_DIR}/build/${TARGET}/obj/hal_test
-fi
-
-# Check if the file exists
-if [ -f "$COMPILE_TIME_MARKER" ]; then
-    echo "********************************************"
-    echo "Please compile again after cleaning ut-core"
-    echo "********************************************"
-    exit 1
-fi
 
 pushd ${MY_DIR} > /dev/null
 # Clone CUnit
