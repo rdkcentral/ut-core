@@ -42,6 +42,7 @@ fi
 if [ -z "$REPO_URL" ]; then
     REPO_URL=git@github.com:rdkcentral/ut-core.git
 fi
+REPO_NAME=$(basename "$REPO_URL" .git)
 
 # # Set compiler type based on the environment passed
 # case "$environment" in
@@ -89,12 +90,12 @@ run_make_with_logs() {
         echo -e "Make command failed. Check the logs in make_log.txt"
     fi
 
-    echo -e "${YELLOW}Running make for GTEST...logs redirected to $PWD/make_gtest_log.txt${NC}"
-    make TARGET="$architecture_type" DGTEST=1 > make_gtest_log.txt 2>&1
+    echo -e "${YELLOW}Running make for CPP...logs redirected to $PWD/make_cpp_log.txt${NC}"
+    make clean; make TARGET="$architecture_type" VARIANT=CPP > make_cpp_log.txt 2>&1
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}Make command executed successfully.${NC}"
     else
-        echo -e "Make command failed. Check the logs in make_gtest_log.txt"
+        echo -e "Make command failed. Check the logs in make_cpp_log.txt"
     fi
 
     # Execute make -C tests/ and redirect the log to a file
@@ -106,12 +107,12 @@ run_make_with_logs() {
         echo -e "Make -C tests/ command failed. Check the logs in make_test_log.txt"
     fi
 
-    echo -e "${YELLOW}Running make -C tests/ got GTEST...logs redirected to $PWD/make_gtest_log.txt${NC}"
-    make TARGET="$architecture_type" -C tests/ DGTEST=1 > make_gtest_log.txt 2>&1
+    echo -e "${YELLOW}Running make -C tests/ for CPP...logs redirected to $PWD/make_cpp_log.txt${NC}"
+    make -C tests/ clean;make TARGET="$architecture_type" -C tests/ VARIANT=CPP > make_cpp_log.txt 2>&1
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}Make -C tests/ command executed successfully.${NC}"
     else
-        echo -e "Make -C tests/ command failed. Check the logs in make_gtest_log.txt"
+        echo -e "Make -C tests/ command failed. Check the logs in make_cpp_log.txt"
     fi
 }
 
@@ -126,8 +127,8 @@ run_checks() {
     CURL_STATIC_LIB="framework/ut-control/build/${architecture_type}/curl/lib/libcurl.a"
     OPENSSL_STATIC_LIB="framework/ut-control/build/${architecture_type}/openssl/lib/libssl.a"
     CMAKE_HOST_BIN="framework/ut-control/host-tools/CMake-3.30.0/build/bin/cmake"
-    GTEST_STATIC_LIB="build/${architecture_type}/gtest/lib/libgtest.a"
-    GTEST_MAIN_STATIC_LIB="build/${architecture_type}/gtest/lib/libgtest_main.a"
+    GTEST_STATIC_LIB="build/${architecture_type}/cpp_libs/lib/libgtest.a"
+    GTEST_MAIN_STATIC_LIB="build/${architecture_type}/cpp_libs/lib/libgtest_main.a"
 
     echo -e "${RED}RESULTS for ${environment} ${NC}"
 
@@ -219,6 +220,37 @@ run_checks() {
     echo -e "${RED}==========================================================${NC}"
 }
 
+print_results() {
+    pushd ${MY_DIR} > /dev/null
+    
+    #Results for ubuntu
+    PLAT_DIR="${REPO_NAME}-ubuntu"
+    pushd ${PLAT_DIR} > /dev/null
+    run_checks "ubuntu" "linux" "$UT_CORE_BRANCH_NAME"
+    popd > /dev/null
+    
+    #Results for VM_SYNC
+    PLAT_DIR="${REPO_NAME}-VM-SYNC"
+    pushd ${PLAT_DIR} > /dev/null
+    run_checks "VM-SYNC" "linux" $UT_CORE_BRANCH_NAME
+    popd > /dev/null
+    
+    #Results for dunfell-arm
+    PLAT_DIR="${REPO_NAME}-dunfell_arm"
+    pushd ${PLAT_DIR} > /dev/null
+    run_checks "dunfell_arm" "arm" $UT_CORE_BRANCH_NAME
+    popd > /dev/null
+    
+    #Results for dunfell-linux
+    PLAT_DIR="${REPO_NAME}-dunfell_linux"
+    pushd ${PLAT_DIR} > /dev/null
+    run_checks "dunfell_linux" "linux" $UT_CORE_BRANCH_NAME
+    popd > /dev/null
+    
+    popd > /dev/null
+    
+}
+
 # Environment-specific setups and execution
 export -f run_make_with_logs
 export -f run_checks
@@ -262,8 +294,9 @@ run_on_vm_sync_linux() {
 }
 
 # Run tests in different environments
-( run_on_ubuntu_linux ) &
-( run_on_dunfell_linux ) &
-wait
-run_on_vm_sync_linux
-run_on_dunfell_arm
+#( run_on_ubuntu_linux ) &
+#( run_on_dunfell_linux ) &
+#wait
+#run_on_vm_sync_linux
+#run_on_dunfell_arm
+print_results
