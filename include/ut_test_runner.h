@@ -24,29 +24,37 @@
 #include <functional>
 #include <string>
 
-class UTTestRunner {
+class UTTestRunner
+{
 public:
-    explicit UTTestRunner(int &argc, char **argv) {
+    explicit UTTestRunner(int &argc, char **argv)
+    {
         ::testing::InitGoogleTest(&argc, argv);
     }
 
-    void setTestFilter(const std::string &filter) {
+    void setTestFilter(const std::string &filter)
+    {
         ::testing::GTEST_FLAG(filter) = filter;
     }
 
-    void setGTestFlag(const std::string &flagName, const std::string &value) {
-        if (flagName == "filter") {
+    void setGTestFlag(const std::string &flagName, const std::string &value)
+    {
+        if (flagName == "filter")
+        {
             setTestFilter(value);
         }
         // Add more flags as needed
     }
 
-    int runTests() const {
+    int runTests() const
+    {
         return RUN_ALL_TESTS();
     }
 
-    int runTestsWithCustomSetup(std::function<void()> setup = nullptr) const {
-        if (setup) {
+    int runTestsWithCustomSetup(std::function<void()> setup = nullptr) const
+    {
+        if (setup)
+        {
             setup();
         }
         return RUN_ALL_TESTS();

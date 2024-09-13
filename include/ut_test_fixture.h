@@ -23,21 +23,26 @@
 #include <gtest/gtest.h>
 
 // UT test fixture class for setting up common test resources
-class UTTestFixture : public ::testing::Test {
+class UTTestFixture : public ::testing::Test
+{
 protected:
-    UTTestFixture() {
+    UTTestFixture()
+    {
         // Initialization code if needed
     }
 
-    ~UTTestFixture() override {
+    ~UTTestFixture() override
+    {
         // Cleanup code if needed
     }
 
-    void SetUp() override {
+    void SetUp() override
+    {
         // Code to initialize resources before each test
     }
 
-    void TearDown() override {
+    void TearDown() override
+    {
         // Code to clean up resources after each test
     }
 };

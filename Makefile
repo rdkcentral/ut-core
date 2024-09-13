@@ -68,21 +68,19 @@ else # GTEST case
   EXCLUDE_DIRS = $(SRCDIR)/c_source
   GTEST_SRC = $(FRAMEWORK_DIR)/gtest/$(TARGET)/googletest-1.15.2
   INC_DIRS += $(GTEST_SRC)/googletest/include $(UT_CORE_DIR)/src/cpp_source $(UT_CORE_DIR)/src
-  GTEST_LIB_DIR = $(UT_CORE_DIR)/build/$(TARGET)/gtest/lib/
-  XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -L$(GTEST_LIB_DIR) -lgtest_main -lgtest -lut_control -lpthread
+  TEST_LIB_DIR = $(UT_CORE_DIR)/build/$(TARGET)/cpp_libs/lib/
+  XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -L$(TEST_LIB_DIR) -lgtest_main -lgtest -lut_control -lpthread
 
   # Source files
   SRCS := $(shell find $(SRC_DIRS) -type f \( -name '*.cpp' -o -name '*.c' \) | grep -v "$(EXCLUDE_DIRS)")
 endif
 
 ifeq ($(TARGET),arm)
-CUNIT_VARIANT = arm-rdk-linux-gnueabi
 COMPILER := $(if $(filter CPP,$(VARIANT)),$(CXX),$(CC))
 #CC := arm-rdk-linux-gnueabi-gcc -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -mabi=aapcs-linux -mno-thumb-interwork -ffixed-r8 -fomit-frame-pointer
 # CFLAGS will be overriden by Caller as required
 INC_DIRS += $(UT_CORE_DIR)/sysroot/usr/include
 else
-CUNIT_VARIANT = i686-pc-linux-gnu
 COMPILER := $(if $(filter CPP,$(VARIANT)),g++ -ggdb -o0 -Wall, gcc -ggdb -o0 -Wall)
 endif
 

@@ -80,9 +80,6 @@ static bool decodeOptions( int argc, char **argv )
     int opt;
     int option_index = 0;
     ut_kvp_status_t status;
-#ifndef UT_CUNIT
-    char *gtest_output = NULL;
-#endif
 
     memset(&gOptions,0,sizeof(gOptions));
 
@@ -100,6 +97,7 @@ static bool decodeOptions( int argc, char **argv )
     UT_log_setLogFilePath(UT_LOG_DEFAULT_PATH); /* Use Macro */
     UT_set_results_output_filename( UT_log_getLogFilename() );
 #else
+    /* Set the filepath always by default to /tmp/ */
     UT_log_setLogFilePath((char* )UT_LOG_DEFAULT_PATH);
 #endif
 
@@ -125,9 +123,7 @@ static bool decodeOptions( int argc, char **argv )
                 UT_log_setLogFilePath(optarg);
 #ifdef UT_CUNIT
                 UT_set_results_output_filename( UT_log_getLogFilename() );
-#endif
                 break;
-#ifdef UT_CUNIT
             case 'd':
                 if (atoi(optarg) >= UT_TESTS_MAX)
                 {
@@ -145,8 +141,8 @@ static bool decodeOptions( int argc, char **argv )
                 }
                 TEST_INFO(("Enable group [%d]\n", atoi(optarg)));
                 UT_Manage_Suite_Activation(atoi(optarg), true);
-                break;
 #endif
+                break;
             case 'p':
                 TEST_INFO(("Using Profile[%s]\n", optarg));
                 status = ut_kvp_profile_open(optarg);
@@ -160,16 +156,6 @@ static bool decodeOptions( int argc, char **argv )
                 TEST_INFO(("Help\n"));
                 usage();
                 exit(0);
-                break;
-            case 0:
-                // Check if the long option matched --gtest_output
-                if (strcmp("gtest_output", long_options[option_index].name) == 0)
-                {
-#ifndef UT_CUNIT
-                    gtest_output = optarg;
-                    TEST_INFO(("Listing Filename: [%s]\n", gtest_output));
-#endif
-                }
                 break;
             case '?':
             case ':':

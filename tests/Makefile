@@ -26,12 +26,14 @@ TARGET_EXEC = ut-test
 CFLAGS += -DNDEBUG
 ifneq ($(VARIANT),CPP)
 VARIANT = C
-SRC_DIRS = $(ROOT_DIR)/src/c_source
+XCFLAGS += -DUT_CUNIT
+SRC_DIRS = $(ROOT_DIR)/src/c_source $(ROOT_DIR)/src
 INC_DIRS := $(ROOT_DIR)/include
 INC_DIRS += $(ROOT_DIR)/../include
 else
 VARIANT = CPP
-SRC_DIRS = $(ROOT_DIR)/src/cpp_source
+SRC_DIRS = $(ROOT_DIR)/src/cpp_source $(ROOT_DIR)/src
+INC_DIRS := $(ROOT_DIR)/include
 endif
 
 ifneq ($(TARGET),arm)

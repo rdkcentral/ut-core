@@ -78,10 +78,3 @@ TEST_F(UTKVPProfileTestL1, TestProfileOpenFailure) {
 }
 
 // Other test cases as needed...
-
-// Main function to run tests
-int main(int argc, char** argv) {
-    UT_init( argc, argv );
-    UTTestRunner testRunner(argc, argv);
-    return testRunner.runTests();
-}

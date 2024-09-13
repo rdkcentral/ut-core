@@ -59,6 +59,7 @@
   "files.associations": {
     "ut_kvp_profile.h": "c",
     "ut_internal.h": "c",
-    "ut.h": "c"
+    "ut.h": "c",
+    "ut_log.h": "c"
   }
 }

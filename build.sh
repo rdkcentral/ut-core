@@ -42,7 +42,7 @@ echo "VARIANT= [$VARIANT] from [$0]"
 
 THIRD_PARTY_LIB_DIR=${FRAMEWORK_DIR}/ut-control/build/${TARGET}
 GTEST_DIR=${FRAMEWORK_DIR}/gtest/${TARGET}
-GTEST_LIB_DIR=${MY_DIR}/build/${TARGET}/gtest
+GTEST_LIB_DIR=${MY_DIR}/build/${TARGET}/cpp_libs
 
 pushd ${MY_DIR} > /dev/null
 # Clone CUnit
