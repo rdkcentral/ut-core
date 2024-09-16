@@ -1,10 +1,18 @@
 # Overview for release-test-script-platform.sh
 
-This Bash script is designed for automating the process of cloning a Git repository, building software, and validating build artifacts across multiple environments. It simplifies testing and development workflows by managing repository setup, environment-specific builds, and post-build checks for required binaries and libraries. Here’s a high-level breakdown:
+This Bash script is designed for automating the process of cloning a PR branch from platform test suite Git repository, building software, and validating build artifacts across multiple environments. It simplifies testing and development workflows by managing repository setup, environment-specific builds, and post-build checks for required binaries and libraries.
+It also checks for the existence of various third party packages like openssl, curl, cmake, gtest etc for various environments listed below.
+With these validations, it ensures if the PR is good for merge and has not broken the basic requirements.
+Here’s a high-level breakdown:
 
 ## Key Objectives:
 1. **Automated Repository Setup**:  
    Clones a given Git repository (or a default one if not specified) for different target environments (e.g., Ubuntu, VM-SYNC, Dunfell Linux, Dunfell ARM).
+
+   where:
+   VM-SYNC : is a docker simulating the RDK linux environment
+   Dunfell Linux : is a docker with linux environment
+   Dunfell arm : is a docker simulating the arm environment
 
 2. **Environment-Specific Builds**:  
    Runs a customized build process based on the environment. It supports branching logic to switch and build from a specific branch (`UT_CORE_BRANCH_NAME`) when provided.
@@ -16,12 +24,16 @@ This Bash script is designed for automating the process of cloning a Git reposit
    Supports testing on multiple environments for following packages:
   
 
-|ENV|CMAKE(Host)|CURL(Target)|OPENSSL(Target)|GTEST(Host)
-|----|--------|------|---------|----------|
-|Ubuntu+build essentials|NO|YES|NO|YES
-|VM-SYNC|YES|YES|YES|YES
-|RDK-DUNFELL(arm)|NO|YES|YES|YES
-|RDK-DUNFELL(linux)|NO|YES|NO|YES
+|#|ENV/PACKAGES|CMAKE(Host)|CURL(Target)|OPENSSL(Target)|GTEST(Target)
+|-----|----|--------|------|---------|----------|
+|1|Ubuntu+build essentials|NO|YES|NO|YES
+|2|VM-SYNC|YES|YES|YES|YES
+|3|RDK-DUNFELL(arm)|NO|YES|YES|YES
+|4|RDK-DUNFELL(linux)|NO|YES|NO|YES
+
+For ex:
+On env 1,  the script will check for availability of CURL library, OpenSSL libraraies and Gtest libraries for Target.It would however would not look for CMAKE binary for host as this environment already provides cmake support which is provided by build essentials.
+On env 2, on the other hand, none of the packages are present , hence the script will check for all of the packages listed above.
 
 5. **Error Handling**:  
    Provides error messaging and graceful exits if any step (cloning, building, or checking) fails, ensuring robust automation.

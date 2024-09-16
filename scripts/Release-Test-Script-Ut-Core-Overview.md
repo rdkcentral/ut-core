@@ -1,12 +1,18 @@
 # Overview of release-test-script-ut-core.sh
 
 ## Purpose
-This Bash script automates the process of cloning a Git repository, building code, and validating build artifacts across multiple environments. It is designed to handle different system architectures (like ARM and x86) and environments (like Ubuntu, VM-SYNC, Dunfell Linux), simplifying testing, building, and validation processes.
+This Bash script automates the process of cloning the PR branch on ut-core Git repository, building code, and validating build artifacts across multiple environments. It is designed to handle different system architectures (like ARM and x86) and environments (like Ubuntu, VM-SYNC, Dunfell Linux, Dunfell ARM), simplifying testing, building, and validation processes.
+where:
+   VM-SYNC : is a docker simulating the RDK linux environment
+   Dunfell Linux : is a docker with linux environment
+   Dunfell ARM : is a docker simulating the arm environment.
+ It checks for the existence of various third party packages like openssl, curl, cmake, gtest etc for various environments listed above.
+ With these validations, it ensures if the PR is good for merge and has not broken the basic requirements.
 
 ## Key Features
 
 1. **Repository Cloning**: 
-   - The script clones a specified branch from a Git repository.
+   - The script clones a specified branch from ut-core  Git repository.
    - A default repository (`git@github.com:rdkcentral/ut-core.git`) is used if none is provided.
    
 2. **Environment-Specific Build Setup**:
@@ -28,16 +34,19 @@ This Bash script automates the process of cloning a Git repository, building cod
     Supports testing on multiple environments for following packages:
   
 
-|ENV|CMAKE(Host)|CURL(Target)|OPENSSL(Target)|GTEST(Host)
-|----|--------|------|---------|----------|
-|Ubuntu+build essentials|NO|YES|NO|YES
-|VM-SYNC|YES|YES|YES|YES
-|RDK-DUNFELL(arm)|NO|YES|YES|YES
-|RDK-DUNFELL(linux)|NO|YES|NO|YES
+|#|ENV/PACKAGES|CMAKE(Host)|CURL(Target)|OPENSSL(Target)|GTEST(Target)
+|---|----|--------|------|---------|----------|
+|1|Ubuntu+build essentials|NO|YES|NO|YES
+|2|VM-SYNC|YES|YES|YES|YES
+|3|RDK-DUNFELL(arm)|NO|YES|YES|YES
+|4|RDK-DUNFELL(linux)|NO|YES|NO|YES
 
-7. **Parallel Execution**:
-   - The script is designed to potentially run the builds and checks for different environments in parallel, although this feature is commented out in the script.
+For ex:
+On env 1,  the script will check for availability of CURL library, OpenSSL libraraies and Gtest libraries for Target.It would however would not look for CMAKE binary for host as this environment already provides cmake support which is provided by build essentials.
+On env 2, on the other hand, none of the packages are present , hence the script will check for all of the packages listed above.
+
+
 
 ## Usage Example
 ```bash
-./script.sh -u <REPO_URL> -t <BRANCH_NAME>
+./release-test-script-ut-core.sh -t <BRANCH_NAME_TO_BE_TESTED_UT_CORE_REPO>
