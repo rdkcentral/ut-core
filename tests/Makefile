@@ -17,9 +17,9 @@
 # * limitations under the License.
 # *
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
-BIN_DIR := $(ROOT_DIR)/bin
-BUILD_DIR := $(ROOT_DIR)/obj
+BIN_DIR := $(ROOT_DIR)/build/bin
 #TOP_DIR := $(ROOT_DIR)
+ECHOE = /bin/echo -e
 
 SRC_DIRS = $(ROOT_DIR)/src
 INC_DIRS := $(ROOT_DIR)/include
@@ -32,6 +32,7 @@ TARGET_EXEC = ut-test
 ifneq ($(TARGET),arm)
 TARGET = linux
 endif
+BUILD_DIR := $(ROOT_DIR)/build/${TARGET}/obj
 
 $(info TARGET [$(TARGET)])
 
@@ -53,19 +54,14 @@ NC='\033[0m'
 
 .PHONY: clean list build all
 
-all: framework build 
+all: framework
 
 build:
-	@echo -e ${GREEN}Build [$@] ${NC}
+	@${ECHOE} ${GREEN}Build [$@] ${NC}
 	@make -C ../ test TARGET=$(TARGET)
-	@echo -e ${GREEN}Copy Assets to [${BIN_DIR}/assets] ${NC}
-	@mkdir -p ${BIN_DIR}/assets
-	@cp ${ROOT_DIR}/src/assets/* ${BIN_DIR}/assets
-	@cp ${ROOT_DIR}/src/*.sh ${BIN_DIR}/.
-	@echo -e ${GREEN}Build Complete${NC}
 
 run: build
-	@echo -e ${GREEN}Running [$@]${NC}
+	@${ECHOE} ${GREEN}Running [$@]${NC}
 	@mkdir -p ${ROOT_DIR}/logs
 	@bash -c "cd ${ROOT_DIR}/bin; ./ut-test -a -p ./assets/test_kvp.yaml -l ${ROOT_DIR}/logs/"
 
@@ -73,20 +69,25 @@ rebuild: clean build
 
 framework:
 	make -C ../ framework TARGET=$(TARGET)
+	@${ECHOE} ${GREEN}Copy Assets to [${BIN_DIR}/assets] ${NC}
+	@mkdir -p ${BIN_DIR}/assets
+	@cp ${ROOT_DIR}/src/assets/* ${BIN_DIR}/assets
+	@cp ${ROOT_DIR}/src/*.sh ${BIN_DIR}/.
+	@${ECHOE} ${GREEN}Build Complete${NC}
 
 list:
-	@echo ${GREEN}List [$@]${NC}
-	@echo INC_DIRS: ${INC_DIRS}
-	@echo SRC_DIRS: ${SRC_DIRS}
-	@echo CFLAGS: ${CFLAGS}
-	@echo LDFLAGS: ${LDFLAGS}
+	@${ECHOE} ${GREEN}List [$@]${NC}
+	@${ECHOE} INC_DIRS: ${INC_DIRS}
+	@${ECHOE} SRC_DIRS: ${SRC_DIRS}
+	@${ECHOE} CFLAGS: ${CFLAGS}
+	@${ECHOE} LDFLAGS: ${LDFLAGS}
 	@make -C ../ list TARGET=$(TARGET)
 
 clean:
-	@echo ${GREEN}Clean [$@]${NC}
+	@${ECHOE} ${GREEN}Clean [$@]${NC}
 	@$(RM) -rf ${BIN_DIR}
 	@make -C ../ clean TARGET=$(TARGET)
 
 cleanall:
-	@echo ${GREEN}Clean [$@]${NC}
+	@${ECHOE} ${GREEN}Clean [$@]${NC}
 	@make -C ../ cleanall TARGET=$(TARGET)
