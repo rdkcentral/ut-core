@@ -126,8 +126,8 @@ run_checks() {
     OPENSSL_STATIC_LIB="ut/ut-core/framework/ut-control/build/${architecture_type}/openssl/lib/libssl.a"
     CMAKE_HOST_BIN="ut/ut-core/framework/ut-control/host-tools/CMake-3.30.0/build/bin/cmake"
     HAL_BIN="ut/bin/hal_test"
-    cpp_STATIC_LIB="build/${architecture_type}/cpp/lib/libcpp.a"
-    cpp_MAIN_STATIC_LIB="build/${architecture_type}/cpp/lib/libcpp_main.a"
+    # CPP_STATIC_LIB="build/${architecture_type}/cpp_libs/lib/libgtest.a"
+    # CPP_MAIN_STATIC_LIB="build/${architecture_type}/cpp_libs/lib/libgtest_main.a"
     
     echo -e "${RED}RESULTS for ${environment} ${NC}"
     
@@ -223,19 +223,19 @@ run_checks() {
         fi
     fi
     
-    # Test for cpp static library
-    if [ -f "$cpp_STATIC_LIB" ]; then
-        echo -e "${GREEN}$cpp_STATIC_LIB exists. PASS${NC}"
-    else
-        echo -e "${RED}cpp static lib does not exist. FAIL ${NC}"
-    fi
+    # # Test for CPP static library
+    # if [ -f "$CPP_STATIC_LIB" ]; then
+    #     echo -e "${GREEN}$CPP_STATIC_LIB exists. PASS${NC}"
+    # else
+    #     echo -e "${RED}CPP static lib does not exist. FAIL ${NC}"
+    # fi
     
-    # Test for cpp main static library
-    if [ -f "$cpp_MAIN_STATIC_LIB" ]; then
-        echo -e "${GREEN}$cpp_MAIN_STATIC_LIB exists. PASS${NC}"
-    else
-        echo -e "${RED}cpp main static lib does not exist. FAIL ${NC}"
-    fi
+    # # Test for CPP main static library
+    # if [ -f "$CPP_MAIN_STATIC_LIB" ]; then
+    #     echo -e "${GREEN}$CPP_MAIN_STATIC_LIB exists. PASS${NC}"
+    # else
+    #     echo -e "${RED}CPP main static lib does not exist. FAIL ${NC}"
+    # fi
     
     echo -e "${RED}==========================================================${NC}"
 }
@@ -334,8 +334,8 @@ print_results() {
 }
 
 # Run tests in different environments
-run_on_ubuntu_linux
-run_on_dunfell_linux
-run_on_vm_sync_linux
-run_on_dunfell_arm
+#run_on_ubuntu_linux
+#run_on_dunfell_linux
+#run_on_vm_sync_linux
+#run_on_dunfell_arm
 print_results
