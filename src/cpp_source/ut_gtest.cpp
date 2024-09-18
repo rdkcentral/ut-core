@@ -56,3 +56,10 @@ UT_status_t startup_system( void )
 {
     return UT_STATUS_OK;
 }
+
+UT_status_t UT_run_tests()
+{
+    UTTestRunner testRunner;
+    testRunner.runTests();
+    return UT_STATUS_OK;
+}

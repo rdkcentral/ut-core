@@ -149,7 +149,7 @@ void UT_exit(void);
  * @retval UT_STATUS_OK - All tests passed.
  * @retval UT_STATUS_FAILURE - One or more tests failed.
  */
-UT_status_t UT_run_tests( void );
+UT_status_t UT_run_tests();
 
 /**!
  * @brief Registers a test suite with the unit testing framework.
@@ -228,8 +228,10 @@ protected:
 class UTTestRunner
 {
 public:
-    explicit UTTestRunner(int &argc, char **argv)
+    explicit UTTestRunner()
     {
+        int argc = 1;
+        char *argv[1] = {(char *)"test_runner"};
         ::testing::InitGoogleTest(&argc, argv);
     }
 

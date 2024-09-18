@@ -117,15 +117,5 @@ extern void UT_toggle_all_suites(bool enable_disable);
  */
 extern UT_status_t startup_system( void );
 
-/**
- * @brief Executes all registered unit tests.
- *
- * @return UT_status_t
- *         - A status code representing the outcome of the test execution.
- *           - UT_STATUS_OK: All tests passed successfully.
- *           - UT_STATUS_FAILURE: One or more tests failed during execution.
- */
-extern UT_status_t UT_run_tests( void );
-
 #endif  /*  __UT_INTERNAL_H  */
 /** @} */ // End of UT group

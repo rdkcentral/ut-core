@@ -34,7 +34,7 @@
 #include <MyMem.h>
 
 #include <ut.h>
-#include <ut_internal.h>
+#include "ut_internal.h"
 #include "ut_cunit_internal.h"
 
 typedef struct
