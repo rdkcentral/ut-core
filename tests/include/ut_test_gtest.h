@@ -17,8 +17,6 @@
  * limitations under the License.
 */
 
-#include <ut_test_fixture.h>
-#include <ut_test_runner.h>
 #include <ut_kvp_profile.h>
 #include <ut.h>
 

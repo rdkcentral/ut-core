@@ -19,7 +19,6 @@
 
 #include <ut.h>
 #include <ut_internal.h>
-#include <ut_test_runner.h>
 
 void UT_set_results_output_filename(const char* szFilenameRoot)
 {

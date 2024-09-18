@@ -42,6 +42,10 @@
 
 #ifdef UT_CUNIT
 #include <ut_cunit.h>
+#else
+#include <gtest/gtest.h>
+#include <functional>
+#include <string>
 #endif
 
 /**!
@@ -195,6 +199,70 @@ const char *UT_getTestSuiteTitle( UT_test_suite_t *pSuite );
  * @param[in] pFunction - Cleanup function to register.
  */
 void UT_regsiter_test_cleanup_function( UT_test_suite_t *pSuite, UT_TestCleanupFunction_t pFunction); 
+
+#ifndef UT_CUNIT
+class UTTestFixture : public ::testing::Test
+{
+protected:
+    UTTestFixture()
+    {
+        // Initialization code if needed
+    }
+
+    ~UTTestFixture() override
+    {
+        // Cleanup code if needed
+    }
+
+    void SetUp() override
+    {
+        // Code to initialize resources before each test
+    }
+
+    void TearDown() override
+    {
+        // Code to clean up resources after each test
+    }
+};
+
+class UTTestRunner
+{
+public:
+    explicit UTTestRunner(int &argc, char **argv)
+    {
+        ::testing::InitGoogleTest(&argc, argv);
+    }
+
+    void setTestFilter(const std::string &filter)
+    {
+        ::testing::GTEST_FLAG(filter) = filter;
+    }
+
+    void setGTestFlag(const std::string &flagName, const std::string &value)
+    {
+        if (flagName == "filter")
+        {
+            setTestFilter(value);
+        }
+        // Add more flags as needed
+    }
+
+    int runTests() const
+    {
+        return RUN_ALL_TESTS();
+    }
+
+    int runTestsWithCustomSetup(std::function<void()> setup = nullptr) const
+    {
+        if (setup)
+        {
+            setup();
+        }
+        return RUN_ALL_TESTS();
+    }
+};
+
+#endif
 
 
 #endif  /*  __UT_H  */
