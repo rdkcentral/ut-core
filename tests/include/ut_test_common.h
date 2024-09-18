@@ -17,21 +17,16 @@
  * limitations under the License.
 */
 
-#include <ut_test_common.h>
+#include <ut.h>
+
 /**
- * @brief Main launch function for the test app
- * 
- * @param argc - param count from the command line
- * @param argv  - param list from the command line
- * @return int - 0 on success, otherwise failure
+ * @brief Executes the unit test framework.
+ *
+ * This function runs all registered unit tests. It iterates over the list 
+ * of available tests, executes them, and reports the results. This is the 
+ * main function responsible for driving the unit test execution process.
+ *
+ * The function does not take any parameters and does not return a value.
  */
 
-int main(int argc, char** argv)
-{
-    /* Register tests as required, then call the UT-main to support switches and triggering */
-    UT_init(argc, argv);
-
-    UT_run(argc, argv);
-
-    return 0;
-}
+int UT_run(int argc, char** argv);

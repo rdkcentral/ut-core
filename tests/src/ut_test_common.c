@@ -17,21 +17,32 @@
  * limitations under the License.
 */
 
-#include <ut_test_common.h>
-/**
- * @brief Main launch function for the test app
- * 
- * @param argc - param count from the command line
- * @param argv  - param list from the command line
- * @return int - 0 on success, otherwise failure
- */
+#ifdef UT_CUNIT
+#include <stdlib.h>
+#include <stdbool.h>
+#include <ut.h>
+#include <ut_internal.h>
+extern void register_assert_functions(void);
+extern void register_kvp_profile_testing_functions(void);
+#else
+#include <ut_test_gtest.h>
+#endif
 
-int main(int argc, char** argv)
+
+int UT_run(int argc, char** argv)
 {
-    /* Register tests as required, then call the UT-main to support switches and triggering */
-    UT_init(argc, argv);
+#ifdef UT_CUNIT
+    // register_assert_functions(); /* FIXME: Enable when any change is performed to the UT_ASSERT functions.
+    // Since this always fails we want it outside our normal testing, which currently is 100% PASS */
+    register_kvp_profile_testing_functions();
 
-    UT_run(argc, argv);
+    UT_run_tests();
 
     return 0;
+#else
+
+    UTTestRunner testRunner(argc, argv);
+    return testRunner.runTests();
+
+#endif
 }

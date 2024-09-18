@@ -30,25 +30,14 @@
 #include <ut_log.h>
 #include <ut_kvp_profile.h>
 #include <ut_internal.h>
-#ifdef UT_CUNIT
-#include "ut_cunit_internal.h"
-#endif
 
 
 #define DEFAULT_FILENAME "ut_test"
 
-
-/* Global External Functions */
-extern UT_status_t startup_system( void );
-
 /* Global variables */
 static optionFlags_t gOptions;  /*!< Control flags, should not be exposed outside of this file */
 
-#ifdef UT_CUNIT
-#define UT_LOG_DEFAULT_PATH "/tmp/"
-#else
-const char* UT_LOG_DEFAULT_PATH = "/tmp/";
-#endif
+const char* UT_LOG_DEFAULT_PATH = "/tmp/"; /*Converted to const char inorder to make it compatible with CPP compiler */
 
 /* Function prototypes */
 
@@ -92,14 +81,9 @@ static bool decodeOptions( int argc, char **argv )
         {0, 0, 0, 0} // Terminator
     };
 
-#ifdef UT_CUNIT
-    /* Set the filepath always by default to /tmp/ */
-    UT_log_setLogFilePath(UT_LOG_DEFAULT_PATH); /* Use Macro */
-    UT_set_results_output_filename( UT_log_getLogFilename() );
-#else
     /* Set the filepath always by default to /tmp/ */
     UT_log_setLogFilePath((char* )UT_LOG_DEFAULT_PATH);
-#endif
+    UT_set_results_output_filename( UT_log_getLogFilename() );
 
     while ((opt = getopt_long(argc, argv, "cabhf:l:tp:d:e:", long_options, &option_index)) != -1)
     {
@@ -121,7 +105,6 @@ static bool decodeOptions( int argc, char **argv )
             case 'l':
                 TEST_INFO(("Setting Log Path [%s]\n", optarg));
                 UT_log_setLogFilePath(optarg);
-#ifdef UT_CUNIT
                 UT_set_results_output_filename( UT_log_getLogFilename() );
                 break;
             case 'd':
@@ -141,7 +124,6 @@ static bool decodeOptions( int argc, char **argv )
                 }
                 TEST_INFO(("Enable group [%d]\n", atoi(optarg)));
                 UT_Manage_Suite_Activation(atoi(optarg), true);
-#endif
                 break;
             case 'p':
                 TEST_INFO(("Using Profile[%s]\n", optarg));
@@ -171,9 +153,7 @@ static bool decodeOptions( int argc, char **argv )
         TEST_INFO(("unknown arguments: %s\n", argv[optind]));
     }
 
-#ifdef UT_CUNIT
     UT_set_test_mode(gOptions.testMode);
-#endif
     return true;
 }
 
@@ -196,12 +176,10 @@ UT_status_t UT_init(int argc, char** argv)
         return UT_STATUS_FAILURE;
     }
 
-#ifdef UT_CUNIT
     if ( startup_system() != UT_STATUS_OK )
     {
         return UT_STATUS_FAILURE;
     }
-#endif
 
     return UT_STATUS_OK;
 }
