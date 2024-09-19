@@ -18,7 +18,15 @@ Here’s a high-level breakdown:
    Runs a customized build process based on the environment. It supports branching logic to switch and build from a specific branch (`UT_CORE_BRANCH_NAME`) when provided.
 
 3. **Post-Build Checks**:  
-   Verifies the presence of key files (such as binaries and libraries) in the build output, ensuring that each environment’s build process produces the required results.
+  After compiling, the script verifies:
+   - The current branch matches the target branch.
+   - The existence of specific libraries such as:
+   - [ ] -  **CURL static library** (`libcurl.a`)
+   - [ ] -     **OpenSSL static library** (`libssl.a`)
+   - [ ] -     **CMake binary**
+   - [ ]  -     **HAL binary**
+- Each check outputs either `PASS` or `FAIL`, depending on whether the conditions are met.
+- The checks vary based on the environment, allowing for customized validation for each setup.
 
 4. **Cross-Environment Testing**:  
    Supports testing on multiple environments for following packages:
@@ -52,4 +60,4 @@ This script is a powerful tool for managing multi-environment development workfl
 ## Caveats:
 - Observed that during some of the runs the build_log.txt have undefined reference error, however same is not observed while runing it on terminal (w/o using the script).
  In the rare case of the above occurence, user can run manually change to the respective directory, remove `ut/ut-core` and `ut/build/`, and trigger the command : `build_ut.sh TARGET=<TARGET>`.To print the results user can comment all the 4 commands at the end of the bash script except print_results and run the script as usual.
-- This script doesnot handle the case of `build_ut.sh TARGET=<TARGET> VARIANT=CPP` as this change is not available from platform test-suit as of now. This script only checks that the PR changes doesnot break the platform test-suit as it exists today.  
+- This script doesnot handle the case of `build_ut.sh TARGET=<TARGET> VARIANT=CPP` as this change is not available from platform test-suit as of now. This script only checks that the PR changes doesnot break the platform test-suit as it exists today.

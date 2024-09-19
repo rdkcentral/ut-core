@@ -14,7 +14,7 @@ where:
 1. **Repository Cloning**: 
    - The script clones a specified branch from ut-core  Git repository.
    - A default repository (`git@github.com:rdkcentral/ut-core.git`) is used if none is provided.
-   
+
 2. **Environment-Specific Build Setup**:
    - Supports different environments such as Ubuntu, VM-SYNC, Dunfell Linux, and Dunfell ARM.
    - The script runs platform-specific build commands (e.g., `make` for Linux or ARM) in each environment.
@@ -24,7 +24,9 @@ where:
    - Logs can be reviewed in case of build failure.
 
 4. **Build Verification**:
-   - After building, the script checks if key static libraries (e.g., CURL, OpenSSL, GTest) and binaries (e.g., CMake) exist.
+   - After building, the script checks if key artifacts :
+   - [ ]  - static libraries - CURL, OpenSSL, GTest exist
+   - [ ]    - binaries - CMake  exist.
    - Each environment has customized checks based on expected outputs (for instance, checking for the OpenSSL static library in some environments and not in others).
 
 5. **Error Handling**:
@@ -49,4 +51,4 @@ On env 2, on the other hand, none of the packages are present , hence the script
 
 ## Usage Example
 ```bash
-./release-test-script-ut-core.sh -t <BRANCH_NAME_TO_BE_TESTED_UT_CORE_REPO>
+./release-test-script-ut-core.sh -t <BRANCH_NAME_TO_BE_TESTED_ON_UT_CORE_REPO>
