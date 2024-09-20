@@ -63,6 +63,7 @@
     "ut_log.h": "c",
     "ut_gtest.h": "c",
     "ut_cunit_internal.h": "c",
-    "ut_test_runner.h": "c"
+    "ut_test_runner.h": "c",
+    "ut_cunit.h": "c"
   }
 }
