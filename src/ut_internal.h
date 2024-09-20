@@ -107,5 +107,15 @@ extern void UT_Manage_Suite_Activation(int groupID, bool enable_disable);
  */
 extern void UT_toggle_all_suites(bool enable_disable);
 
+/**
+ * @brief Initializes and starts up the system.
+ *
+ * @return UT_status_t
+ *         - A status code indicating the success or failure of the startup operation.
+ *           - UT_STATUS_OK: The system started successfully.
+ *           - UT_STATUS_FAILURE: The startup encountered an error.
+ */
+extern UT_status_t startup_system( void );
+
 #endif  /*  __UT_INTERNAL_H  */
 /** @} */ // End of UT group

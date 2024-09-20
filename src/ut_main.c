@@ -29,20 +29,15 @@
 #include <ut.h>
 #include <ut_log.h>
 #include <ut_kvp_profile.h>
-#include "ut_internal.h"
-#include "ut_cunit_internal.h"
+#include <ut_internal.h>
 
 
 #define DEFAULT_FILENAME "ut_test"
 
-
-/* Global External Functions */
-extern UT_status_t startup_system( void );
-
 /* Global variables */
 static optionFlags_t gOptions;  /*!< Control flags, should not be exposed outside of this file */
 
-#define UT_LOG_DEFAULT_PATH "/tmp/"
+const char* UT_LOG_DEFAULT_PATH = "/tmp/"; /*Converted to const char inorder to make it compatible with CPP compiler */
 
 /* Function prototypes */
 
@@ -72,18 +67,25 @@ static void usage( void )
 static bool decodeOptions( int argc, char **argv )
 {
     int opt;
+    int option_index = 0;
     ut_kvp_status_t status;
 
     memset(&gOptions,0,sizeof(gOptions));
 
     /* Console mode is always enabled we don't need a switch for that */
     gOptions.testMode = UT_MODE_CONSOLE;
+    
+    // Define long options
+    static struct option long_options[] = {
+        {"gtest_output", required_argument, 0, 0}, // 0 is used as a placeholder for gtest_output
+        {0, 0, 0, 0} // Terminator
+    };
 
     /* Set the filepath always by default to /tmp/ */
-    UT_log_setLogFilePath(UT_LOG_DEFAULT_PATH); /* Use Macro */
+    UT_log_setLogFilePath((char* )UT_LOG_DEFAULT_PATH);
     UT_set_results_output_filename( UT_log_getLogFilename() );
 
-    while ((opt = getopt(argc, argv, "cabhf:l:tp:d:e:")) != -1)
+    while ((opt = getopt_long(argc, argv, "cabhf:l:tp:d:e:", long_options, &option_index)) != -1)
     {
         switch(opt)
         {

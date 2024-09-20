@@ -26,27 +26,38 @@ MY_DIR="$(dirname $SCRIPT_EXEC)"
 FRAMEWORK_DIR=${MY_DIR}/framework
 UT_CONTROL_LIB_DIR=${FRAMEWORK_DIR}/ut-control
 
+if [[ "$*" == *"VARIANT=CPP"* ]]; then
+    VARIANT="CPP"
+else
+    VARIANT="C"
+fi
+
 if [[ "$*" == *"TARGET=arm"* ]]; then
     TARGET="arm"
 else
     TARGET="linux"
 fi
 echo "TARGET= [$TARGET] from [$0]"
+echo "VARIANT= [$VARIANT] from [$0]"
 
 THIRD_PARTY_LIB_DIR=${FRAMEWORK_DIR}/ut-control/build/${TARGET}
+GTEST_DIR=${FRAMEWORK_DIR}/gtest/${TARGET}
+GTEST_LIB_DIR=${MY_DIR}/build/${TARGET}/cpp_libs
 
 pushd ${MY_DIR} > /dev/null
 # Clone CUnit
-if [ ! -d "${FRAMEWORK_DIR}/CUnit-2.1-3" ]; then
+if [[ ! -d "${FRAMEWORK_DIR}/CUnit-2.1-3" && "${VARIANT}" == "C" ]]; then
     echo "Clone Framework"
     wget https://sourceforge.net/projects/cunit/files/CUnit/2.1-3/CUnit-2.1-3.tar.bz2 --no-check-certificate -P ${FRAMEWORK_DIR}
     tar xvfj framework/CUnit-2.1-3.tar.bz2 -C ${FRAMEWORK_DIR}
     cp ${FRAMEWORK_DIR}/CUnit-2.1-3/CUnit/Headers/CUnit.h.in ${FRAMEWORK_DIR}/CUnit-2.1-3/CUnit/Headers/CUnit.h
     echo "Patching Framework"
     cd ${FRAMEWORK_DIR}
-    cp ../src/cunit/cunit_lgpl/patches/CorrectBuildWarningsInCunit.patch  .
+    cp ../src/c_source/cunit_lgpl/patches/CorrectBuildWarningsInCunit.patch  .
     patch -u CUnit-2.1-3/CUnit/Sources/Framework/TestRun.c -i CorrectBuildWarningsInCunit.patch
     echo "Patching Complete"
+else
+    mkdir -p ${FRAMEWORK_DIR}
 fi
 popd > /dev/null # ${MY_DIR}
 
@@ -55,7 +66,7 @@ popd > /dev/null # ${MY_DIR}
 # Therefore in that case it warns you but doesnt' chnage to that version, which could cause your tests to break.
 # Change this to upgrade your ut-control Major versions. Non ABI Changes 1.x.x are supported, between major revisions
 
-UT_CONTROL_PROJECT_VERSION="1.4.2"  # Fixed version
+UT_CONTROL_PROJECT_VERSION="1.5.0"  # Fixed version
 
 # Clone the Unit Test Requirements
 TEST_REPO=git@github.com:rdkcentral/ut-control.git
@@ -107,3 +118,27 @@ else
     fi
 fi
 popd > /dev/null # ${FRAMEWORK_DIR}
+
+
+CMAKE_BIN=${UT_CONTROL_LIB_DIR}/host-tools/CMake-3.30.0/build/bin/cmake
+if [ ! -f "$CMAKE_BIN" ]; then
+    CMAKE_BIN=$CMAKE_VAR
+fi
+
+pushd ${MY_DIR} > /dev/null
+#Clone GTEST
+if [[ ! -d "${GTEST_DIR}/googletest-1.15.2" && "${VARIANT}" == "CPP" ]]; then
+    wget https://github.com/google/googletest/archive/refs/tags/v1.15.2.zip --no-check-certificate -P ${GTEST_DIR}
+    cd ${GTEST_DIR}/
+    unzip v1.15.2.zip
+    cd googletest-1.15.2/
+    mkdir -p ${GTEST_LIB_DIR}
+    cd ${GTEST_LIB_DIR}
+    if command -v cmake &> /dev/null; then
+        cmake ${GTEST_DIR}/googletest-1.15.2/
+    else
+        ${CMAKE_BIN} ${GTEST_DIR}/googletest-1.15.2/
+    fi
+    make
+fi
+popd > /dev/null # ${MY_DIR}
