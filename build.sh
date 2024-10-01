@@ -80,10 +80,11 @@ function check_ut_control_revision()
 # Check if the common document configuration is present, if not clone it
 pushd ${FRAMEWORK_DIR} > /dev/null
 
-configure_ut_control() {
-    cd ./ut-control
-    git checkout ${UT_CONTROL_PROJECT_VERSION}
+configure_ut_control() 
+{
+    pushd ${UT_CONTROL_LIB_DIR} > /dev/null
     ./configure.sh ${TARGET}
+    popd > /dev/null
 }
 
 if [ -d "${UT_CONTROL_LIB_DIR}" ]; then
@@ -100,6 +101,9 @@ else
     if [ "$1" != "no_ut_control" ]; then
         echo "Clone ut_control in ${UT_CONTROL_LIB_DIR}"
         git clone ${TEST_REPO} ut-control
+        pushd ${UT_CONTROL_LIB_DIR} > /dev/null
+        git checkout ${UT_CONTROL_PROJECT_VERSION}
+        popd > /dev/null
         check_ut_control_revision
         configure_ut_control
     else

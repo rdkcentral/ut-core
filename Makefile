@@ -144,7 +144,6 @@ $(BUILD_DIR)/%.o: %.c
 	@$(MKDIR_P) $(dir $@)
 	@$(CC) $(XCFLAGS) -c $< -o $@
 
-
 arm:
 	make TARGET=arm
 
@@ -152,14 +151,17 @@ linux: framework
 	make TARGET=linux
 
 clean:
-	@${ECHOE} ${GREEN}Performing Clean for $(TARGET) ${NC}
+	@${ECHOE} ${GREEN}Performing Clean for $(TARGET) ${BUILD_DIR} ${NC}
 	@$(RM) -rf $(BUILD_DIR)
+	@${ECHOE} ${GREEN}Performing Clean for $(TARGET) ${LIB_DIR} ${NC}
+	@${RM} -fr ${LIB_DIR}
 	@${ECHOE} ${GREEN}Clean Completed${NC}
 
 cleanall: clean 
-	@${ECHOE} ${GREEN}Performing Clean on frameworks [$(UT_CORE_DIR)/framework] and build [$(UT_CORE_DIR)/build]${NC}
+	@${ECHOE} ${GREEN}Performing Clean on frameworks [$(UT_CORE_DIR)/framework]${NC}
 	@$(RM) -rf $(UT_CORE_DIR)/framework
-	@$(RM) -rf $(UT_CORE_DIR)/build/
+	@${ECHOE} ${GREEN}Performing Clean on frameworks [$(UT_CORE_DIR)/build]${NC}
+	@@$(RM) -rf $(UT_CORE_DIR)/build/
 
 list:
 	@${ECHOE} --------- ut_core ----------------
