@@ -105,7 +105,7 @@ XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\"
 VPATH += $(UT_CORE_DIR)
 VPATH += $(TOP_DIR)
 
-.PHONY: clean list arm linux framework test createdirs all
+.PHONY: clean list arm linux framework test createdirs all printenv
 
 all: framework $(OBJS)
 
@@ -144,7 +144,6 @@ $(BUILD_DIR)/%.o: %.c
 	@$(MKDIR_P) $(dir $@)
 	@$(CC) $(XCFLAGS) -c $< -o $@
 
-
 arm:
 	make TARGET=arm
 
@@ -152,51 +151,62 @@ linux: framework
 	make TARGET=linux
 
 clean:
-	@${ECHOE} ${GREEN}Performing Clean for $(TARGET) ${NC}
+	@${ECHOE} ${GREEN}Performing Clean for $(TARGET) ${BUILD_DIR} ${NC}
 	@$(RM) -rf $(BUILD_DIR)
+	@${ECHOE} ${GREEN}Performing Clean for $(TARGET) ${LIB_DIR} ${NC}
+	@${RM} -fr ${LIB_DIR}
 	@${ECHOE} ${GREEN}Clean Completed${NC}
 
 cleanall: clean 
-	@${ECHOE} ${GREEN}Performing Clean on frameworks [$(UT_CORE_DIR)/framework] and build [$(UT_CORE_DIR)/build]${NC}
+	@${ECHOE} ${GREEN}Performing Clean on [$(UT_CORE_DIR)/framework]${NC}
 	@$(RM) -rf $(UT_CORE_DIR)/framework
+	@${ECHOE} ${GREEN}Performing Clean on [$(UT_CORE_DIR)/build]${NC}
 	@$(RM) -rf $(UT_CORE_DIR)/build/
+	@${ECHOE} ${GREEN}Performing Clean on [$(TOP_DIR)/build/]${NC}
+	@$(RM) -rf $(TOP_DIR)/build/
+
+printenv:
+	@${ECHOE} "Environment variables: [ut-core]"
+	@${ECHOE} "---------------------------"
+	@$(foreach v, $(.VARIABLES), $(info $(v) = $($(v))))
+	@${ECHOE} "---------------------------"
 
 list:
 	@${ECHOE} --------- ut_core ----------------
 	@${ECHOE}
-	@${ECHOE} CC:$(CC)
+	@${ECHOE} ${YELLOW}CC:${NC} $(CC)
 	@${ECHOE}
-	@${ECHOE} BUILD_DIR:$(BUILD_DIR)
+	@${ECHOE} ${YELLOW}UT_CORE_DIR:${NC} $(UT_CORE_DIR)
 	@${ECHOE}
-	@${ECHOE} BIN_DIR:$(BIN_DIR)
+	@${ECHOE} ${YELLOW}TOP_DIR:${NC} $(TOP_DIR)
 	@${ECHOE}
-	@${ECHOE} OBJS:$(OBJS)
+	@${ECHOE} ${YELLOW}BIN_DIR:${NC} $(BIN_DIR)
 	@${ECHOE}
-	@${ECHOE} SRCS:$(SRCS)
+	@${ECHOE} ${YELLOW}LIB_DIR:${NC} $(LIB_DIR)
 	@${ECHOE}
-	@${ECHOE} UT_CORE_DIR:$(UT_CORE_DIR)
+	@${ECHOE} ${YELLOW}BUILD_DIR:${NC} $(BUILD_DIR)
 	@${ECHOE}
-	@${ECHOE} TOP_DIR:$(TOP_DIR)
+	@${ECHOE} ${YELLOW}CFLAGS:${NC} $(CFLAGS)
 	@${ECHOE}
-	@${ECHOE} BUILD_DIR:$(BUILD_DIR)
+	@${ECHOE} ${YELLOW}XCFLAGS:${NC} $(XCFLAGS)
 	@${ECHOE}
-	@${ECHOE} CFLAGS:$(CFLAGS)
+	@${ECHOE} ${YELLOW}LDFLAGS:${NC} $(LDFLAGS)
 	@${ECHOE}
-	@${ECHOE} XCFLAGS:$(XCFLAGS)
+	@${ECHOE} ${YELLOW}YLDFLAGS:${NC} $(YLDFLAGS)
 	@${ECHOE}
-	@${ECHOE} LDFLAGS:$(LDFLAGS)
+	@${ECHOE} ${YELLOW}XLDFLAGS:${NC} $(XLDFLAGS)
 	@${ECHOE}
-	@${ECHOE} YLDFLAGS:$(YLDFLAGS)
+	@${ECHOE} ${YELLOW}OBJS:${NC} $(OBJS)
 	@${ECHOE}
-	@${ECHOE} XLDFLAGS:$(XLDFLAGS)
+	@${ECHOE} ${YELLOW}SRCS:${NC} $(SRCS)
 	@${ECHOE}
-	@${ECHOE} SRC_DIRS:$(SRC_DIRS)
+	@${ECHOE} ${YELLOW}SRC_DIRS:${NC} $(SRC_DIRS)
 	@${ECHOE}
-	@${ECHOE} INC_DIRS:$(INC_DIRS)
+	@${ECHOE} ${YELLOW}INC_DIRS:${NC} $(INC_DIRS)
 	@${ECHOE}
-	@${ECHOE} INC_FLAGS:$(INC_FLAGS)
+	@${ECHOE} ${YELLOW}INC_FLAGS:${NC} $(INC_FLAGS)
 	@${ECHOE}
-	@${ECHOE} DEPS:$(DEPS)
+	@${ECHOE} ${YELLOW}DEPS:${NC} $(DEPS)
 	@${ECHOE}
 	@${ECHOE} --------- ut_control ----------------
 	@${MAKE} -C $(UT_CONTROL) list
