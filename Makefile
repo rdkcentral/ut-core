@@ -158,11 +158,11 @@ clean:
 	@${ECHOE} ${GREEN}Clean Completed${NC}
 
 cleanall: clean 
-	@${ECHOE} ${GREEN}Performing Clean on frameworks [$(UT_CORE_DIR)/framework]${NC}
+	@${ECHOE} ${GREEN}Performing Clean on [$(UT_CORE_DIR)/framework]${NC}
 	@$(RM) -rf $(UT_CORE_DIR)/framework
-	@${ECHOE} ${GREEN}Performing Clean on frameworks [$(UT_CORE_DIR)/build]${NC}
+	@${ECHOE} ${GREEN}Performing Clean on [$(UT_CORE_DIR)/build]${NC}
 	@$(RM) -rf $(UT_CORE_DIR)/build/
-	@${ECHOE} ${GREEN}Performing Clean on build [$(TOP_DIR)/build/]${NC}
+	@${ECHOE} ${GREEN}Performing Clean on [$(TOP_DIR)/build/]${NC}
 	@$(RM) -rf $(TOP_DIR)/build/
 
 printenv:
