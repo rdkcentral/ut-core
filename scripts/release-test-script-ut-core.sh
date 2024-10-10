@@ -11,15 +11,16 @@ NC='\033[0m' # No Color
 
 # Function to print usage
 usage() {
-    echo -e "${YELLOW}Usage: $0 -u <REPO_URL> -t <UT_CORE_BRANCH_NAME>${NC}"
+    echo -e "${YELLOW}Usage: $0 -u <REPO_URL> -t <UT_CORE_BRANCH_NAME> -c <UT_CONTROL_BRANCH_NAME>${NC}"
     exit 1
 }
 
 # Parse command-line arguments
-while getopts "u:t:" opt; do
+while getopts "u:t:c:" opt; do
     case $opt in
         u) REPO_URL="$OPTARG" ;;
         t) UT_CORE_BRANCH_NAME="$OPTARG" ;;
+        c) UT_CONTROL_BRANCH_NAME="$OPTARG" ;;
         *) usage ;;
     esac
 done
@@ -36,6 +37,14 @@ if [ -z "$UT_CORE_BRANCH_NAME" ]; then
     echo "UT_CORE_BRANCH_NAME is empty"
     usage
     exit 1
+fi
+
+echo "UT_CONTROL_BRANCH_NAME = $UT_CONTROL_BRANCH_NAME"
+# Check if the branch name is passed else display the usage
+if [ -z "$UT_CONTROL_BRANCH_NAME" ]; then
+    echo "UT_CONTROL_BRANCH_NAME is empty"
+    usage
+    #exit 1
 fi
 
 # If repo_url is not passed by user set it to default
@@ -74,6 +83,10 @@ run_git_clone(){
     echo -e "Current path is: $PWD"
     cd "$REPO_NAME-$environment" || error_exit "Error: Failed to change directory to $REPO_NAME-$environment."
     UT_CNTRL_DIR=${MY_DIR}/$REPO_NAME-$environment
+
+    if [ ! -z "$UT_CONTROL_BRANCH_NAME" ]; then
+        sed -i "108s|.*|    git checkout $UT_CONTROL_BRANCH_NAME|" build.sh
+    fi
 }
 
 # Define a function to run the commands
@@ -286,7 +299,7 @@ run_on_dunfell_arm() {
 
 run_on_vm_sync_linux() {
     pushd ${MY_DIR} > /dev/null
-    SETUP_ENV="sc docker run --local vm-sync"
+    SETUP_ENV="sc docker run vm-sync"
     run_git_clone "VM-SYNC"
     /bin/bash -c "$SETUP_ENV '$(declare -f run_make_with_logs); run_make_with_logs 'linux';'"
     run_checks "VM-SYNC" "linux" $UT_CORE_BRANCH_NAME

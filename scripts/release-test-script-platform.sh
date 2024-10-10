@@ -11,14 +11,15 @@ NC='\033[0m' # No Color
 
 # Function to print usage
 usage() {
-    echo -e "${YELLOW}Usage: $0 -u <REPO_URL> -t <UT_CORE_BRANCH_NAME>${NC}"
+    echo -e "${YELLOW}Usage: $0 -u <REPO_URL> -t <UT_CORE_BRANCH_NAME> -c <UT_CONTROL_BRANCH_NAME>${NC}"
 }
 
 # Parse command-line arguments
-while getopts "u:t:" opt; do
+while getopts "u:t:c:" opt; do
     case $opt in
         u) REPO_URL="$OPTARG" ;;
         t) UT_CORE_BRANCH_NAME="$OPTARG" ;;
+        c) UT_CONTROL_BRANCH_NAME="$OPTARG" ;;
         *) usage ;;
     esac
 done
@@ -33,6 +34,14 @@ echo "UT_CORE_BRANCH_NAME = $UT_CORE_BRANCH_NAME"
 # Check if the branch name is passed else display the usage
 if [ -z "$UT_CORE_BRANCH_NAME" ]; then
     echo "UT_CORE_BRANCH_NAME is empty"
+    usage
+    #exit 1
+fi
+
+echo "UT_CONTROL_BRANCH_NAME = $UT_CONTROL_BRANCH_NAME"
+# Check if the branch name is passed else display the usage
+if [ -z "$UT_CONTROL_BRANCH_NAME" ]; then
+    echo "UT_CONTROL_BRANCH_NAME is empty"
     usage
     #exit 1
 fi
@@ -67,6 +76,7 @@ run_build(){
     local environment="$1"
     local target="$2"
     local UT_CORE_BRANCH_NAME="$3"
+    local UT_CONTROL_BRANCH_NAME="$4"
     echo "environment=$environment"
     echo "target=$target"
     echo "UT_CORE_BRANCH_NAME=$UT_CORE_BRANCH_NAME"
@@ -95,12 +105,25 @@ run_build(){
         
         sleep 10
         
-        # Edit ut_core_branch_namel branch
-        echo "UT_CORE_BRANCH_NAME = $UT_CORE_BRANCH_NAME"
-        sed -i "62s|.*|    git checkout $UT_CORE_BRANCH_NAME|" ut/build.sh
-        sleep 5
-        rm -rf ut/ut-core || error_exit "Failed to remove ut-core"
-        sleep 5
+        # switch ut-core to ut_core_branch_name
+        # echo "UT_CORE_BRANCH_NAME = $UT_CORE_BRANCH_NAME"
+        # sed -i "62s|.*|    git checkout $UT_CORE_BRANCH_NAME|" ut/build.sh
+        # sleep 5
+        # rm -rf ut/ut-core || error_exit "Failed to remove ut-core"
+        # sleep 5
+        cd ut/ut-core
+        git checkout $UT_CORE_BRANCH_NAME
+        git pull
+        cd -
+
+        if [ ! -z "$UT_CONTROL_BRANCH_NAME" ]; then
+            cd ut/ut-core/framework/ut-control
+            git checkout $UT_CONTROL_BRANCH_NAME
+            git pull
+            cd -
+        fi
+
+        rm -rf ut/build/ ut/ut-core/framework/ut-control/build/ ut/ut-core/framework/ut-control/framework/ ut/ut-core/framework/ut-control/host-tools/
     fi
     
     echo -e "${YELLOW}You may also tail the output in another shell using ${NC}"
@@ -119,6 +142,7 @@ run_checks() {
     environment=$1
     architecture_type=$2
     UT_CORE_BRANCH_NAME=$3
+    UT_CONTROL_BRANCH_NAME=$4
     
     echo -e "${RED}==========================================================${NC}"
     # Variables to test existence of different librararies
@@ -144,6 +168,22 @@ run_checks() {
             echo -e "${RED}Branch is not switched. FAIL${NC}"
         fi
         
+        cd -
+    fi
+
+    if [ ! -z "$UT_CONTROL_BRANCH_NAME" ]; then
+        cd ut/ut-core/framework/ut-control/
+
+        current_branch=$(git branch | grep '\*' | sed 's/* //')
+
+        # Compare with the target branch name
+        if [ "${current_branch}" == "${UT_CONTROL_BRANCH_NAME}" ]; then
+            echo -e "${GREEN}On the branch $UT_CONTROL_BRANCH_NAME
+            . PASS${NC}"
+        else
+            echo -e "${RED}Branch is not switched. FAIL${NC}"
+        fi
+
         cd -
     fi
     
@@ -256,8 +296,8 @@ run_on_ubuntu_linux() {
     # Change to the repository directory
     PLAT_DIR="${REPO_NAME}-ubuntu"
     pushd ${PLAT_DIR} > /dev/null
-    run_build "ubuntu" "linux" "$UT_CORE_BRANCH_NAME"
-    run_checks "ubuntu" "linux" "$UT_CORE_BRANCH_NAME"
+    run_build "ubuntu" "linux" "$UT_CORE_BRANCH_NAME" "$UT_CONTROL_BRANCH_NAME"
+    run_checks "ubuntu" "linux" "$UT_CORE_BRANCH_NAME" "$UT_CONTROL_BRANCH_NAME"
     popd > /dev/null
     popd > /dev/null
 }
@@ -269,8 +309,8 @@ run_on_dunfell_linux() {
     # Change to the repository directory
     PLAT_DIR="${REPO_NAME}-dunfell_linux"
     pushd ${PLAT_DIR} > /dev/null
-    /bin/bash -c "$SETUP_ENV; $(declare -f run_build); run_build ''dunfell_linux 'linux' '$UT_CORE_BRANCH_NAME'"
-    run_checks "dunfell_linux" "linux" $UT_CORE_BRANCH_NAME
+    /bin/bash -c "$SETUP_ENV; $(declare -f run_build); run_build ''dunfell_linux 'linux' '$UT_CORE_BRANCH_NAME' '$UT_CONTROL_BRANCH_NAME'"
+    run_checks "dunfell_linux" "linux" $UT_CORE_BRANCH_NAME $UT_CONTROL_BRANCH_NAME
     popd > /dev/null
     popd > /dev/null
 }
@@ -283,21 +323,21 @@ run_on_dunfell_arm() {
     pushd ${PLAT_DIR} > /dev/null
     /bin/bash -c "sc docker run rdk-dunfell 'cd /opt/toolchains/rdk-glibc-x86_64-arm-toolchain; \
      . environment-setup-armv7at2hf-neon-oe-linux-gnueabi; env | grep CC; cd -; \
-    $(declare -f run_build); run_build 'dunfell_arm' 'arm' '$UT_CORE_BRANCH_NAME';exit'"
-    run_checks "dunfell_arm" "arm" $UT_CORE_BRANCH_NAME
+    $(declare -f run_build); run_build 'dunfell_arm' 'arm' '$UT_CORE_BRANCH_NAME' '$UT_CONTROL_BRANCH_NAME';exit'"
+    run_checks "dunfell_arm" "arm" $UT_CORE_BRANCH_NAME $UT_CONTROL_BRANCH_NAME
     popd > /dev/null
     popd > /dev/null
 }
 
 run_on_vm_sync_linux() {
     pushd ${MY_DIR} > /dev/null
-    SETUP_ENV="sc docker run --local vm-sync"
+    SETUP_ENV="sc docker run vm-sync"
     run_git_clone "VM-SYNC" "linux"
     # Change to the repository directory
     PLAT_DIR="${REPO_NAME}-VM-SYNC"
     pushd ${PLAT_DIR} > /dev/null
-    /bin/bash -c "$SETUP_ENV '$(declare -f run_build); run_build 'VM-SYNC' 'linux' '$UT_CORE_BRANCH_NAME';'"
-    run_checks "VM-SYNC" "linux" $UT_CORE_BRANCH_NAME
+    /bin/bash -c "$SETUP_ENV '$(declare -f run_build); run_build 'VM-SYNC' 'linux' '$UT_CORE_BRANCH_NAME' '$UT_CONTROL_BRANCH_NAME';'"
+    run_checks "VM-SYNC" "linux" $UT_CORE_BRANCH_NAME $UT_CONTROL_BRANCH_NAME
     popd > /dev/null
     popd > /dev/null
 }
