@@ -177,7 +177,10 @@ linux: framework
 clean:
 	@${ECHOE} ${GREEN}Performing Clean for $(TARGET) ${BUILD_DIR} ${NC}
 	@$(RM) -rf $(BUILD_DIR)
+	@${ECHOE} ${GREEN}Performing Clean for $(TARGET) $(VARIANT_FILE) ${NC}
 	@$(RM) -rf $(VARIANT_FILE)
+	@${ECHOE} ${GREEN}Performing Clean for $(TARGET) ${LIB_DIR} ${NC}
+	@${RM} -rf ${LIB_DIR}
 	@${ECHOE} ${GREEN}Clean Completed${NC}
 
 cleanall: clean 
@@ -187,8 +190,6 @@ cleanall: clean
 	@$(RM) -rf $(UT_CORE_DIR)/build/
 	@${ECHOE} ${GREEN}Performing Clean on [$(TOP_DIR)/build/]${NC}
 	@$(RM) -rf $(TOP_DIR)/build/
-	@${ECHOE} ${GREEN}Performing Clean for $(TARGET) ${LIB_DIR} ${NC}
-	@${RM} -fr ${LIB_DIR}
 	@${ECHOE} ${GREEN}Clean Completed${NC}
 
 printenv:

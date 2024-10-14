@@ -43,6 +43,7 @@ echo "VARIANT= [$VARIANT] from [$0]"
 THIRD_PARTY_LIB_DIR=${FRAMEWORK_DIR}/ut-control/build/${TARGET}
 GTEST_DIR=${FRAMEWORK_DIR}/gtest/${TARGET}
 GTEST_LIB_DIR=${MY_DIR}/build/${TARGET}/cpp_libs
+GTEST_VERSION=1.15.2
 
 pushd ${MY_DIR} > /dev/null
 # Clone CUnit
@@ -92,7 +93,7 @@ function check_ut_control_revision()
 pushd ${FRAMEWORK_DIR} > /dev/null
 
 # This function sets up ut-control requrements based on target
-configure_ut_control() 
+configure_ut_control()
 {
     pushd ${UT_CONTROL_LIB_DIR} > /dev/null
     ./configure.sh ${TARGET}
@@ -125,25 +126,36 @@ else
 fi
 popd > /dev/null # ${FRAMEWORK_DIR}
 
-
-CMAKE_BIN=${UT_CONTROL_LIB_DIR}/host-tools/CMake-3.30.0/build/bin/cmake
-if [ ! -f "$CMAKE_BIN" ]; then
-    CMAKE_BIN=$CMAKE_VAR
-fi
-
 pushd ${MY_DIR} > /dev/null
 #Clone GTEST
-if [[ ! -d "${GTEST_DIR}/googletest-1.15.2" && "${VARIANT}" == "CPP" ]]; then
-    wget https://github.com/google/googletest/archive/refs/tags/v1.15.2.zip --no-check-certificate -P ${GTEST_DIR}
+if [[ ! -d "${GTEST_DIR}/googletest-${GTEST_VERSION}" && "${VARIANT}" == "CPP" ]]; then
+    wget "https://github.com/google/googletest/archive/refs/tags/v${GTEST_VERSION}.zip" --no-check-certificate -P "${GTEST_DIR}"
     cd ${GTEST_DIR}/
-    unzip v1.15.2.zip
-    cd googletest-1.15.2/
+    if [ -f "v${GTEST_VERSION}.zip" ]; then
+        unzip "v${GTEST_VERSION}.zip"
+        if [ -d "googletest-${GTEST_VERSION}" ]; then
+            cd "googletest-${GTEST_VERSION}/"
+        else
+            echo "Directory googletest-${GTEST_VERSION} not found!"
+        fi
+    else
+        echo "File v${GTEST_VERSION}.zip not found!"
+    fi
     mkdir -p ${GTEST_LIB_DIR}
     cd ${GTEST_LIB_DIR}
     if command -v cmake &> /dev/null; then
-        cmake ${GTEST_DIR}/googletest-1.15.2/
+        cmake "${GTEST_DIR}/googletest-${GTEST_VERSION}/"
     else
-        ${CMAKE_BIN} ${GTEST_DIR}/googletest-1.15.2/
+        CMAKE_BIN=$(find ${UT_CONTROL_LIB_DIR} -name cmake -type f | grep '/bin/')
+        if [ -x "${CMAKE_BIN}" ]; then
+            if [ -d "${GTEST_DIR}/googletest-${GTEST_VERSION}/" ]; then
+                "${CMAKE_BIN}" "${GTEST_DIR}/googletest-${GTEST_VERSION}/"
+            else
+                echo "Directory ${GTEST_DIR}/googletest-${GTEST_VERSION}/ not found!"
+            fi
+        else
+            echo "CMake binary ${CMAKE_BIN} not found or is not executable!"
+        fi
     fi
     make
 fi
