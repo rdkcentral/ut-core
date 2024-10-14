@@ -55,10 +55,10 @@ popd > /dev/null # ${MY_DIR}
 # Therefore in that case it warns you but doesnt' chnage to that version, which could cause your tests to break.
 # Change this to upgrade your ut-control Major versions. Non ABI Changes 1.x.x are supported, between major revisions
 
-UT_CONTROL_PROJECT_VERSION="1.4.2"  # Fixed version
+UT_CONTROL_PROJECT_VERSION="1.5.1"  # Fixed version
 
 # Clone the Unit Test Requirements
-TEST_REPO=git@github.com:rdkcentral/ut-control.git
+UT_CONTROL_REPO=git@github.com:rdkcentral/ut-control.git
 
 # This function checks the latest version of UT core and recommends an upgrade if reuqired
 function check_ut_control_revision()
@@ -66,7 +66,7 @@ function check_ut_control_revision()
     pushd ${UT_CONTROL_LIB_DIR} > /dev/null
     # Set default UT_CONTROL_PROJECT_VERSION to next revision, if it's set then we don't need to tell you again
     if [ -v ${UT_CONTROL_PROJECT_VERSION} ]; then
-        UT_CONTROL_PROJECT_VERSION=$(git tag | grep ${UT_CONTROL_PROJECT_CURRENT_VERSION} | sort -r | head -n1)
+        UT_CONTROL_PROJECT_VERSION=$(git tag | grep ^${UT_CONTROL_PROJECT_CURRENT_VERSION} | sort -r | head -n1)
         UT_NEXT_VERSION=$(git tag | sort -r | head -n1)
         echo -e ${YELLOW}ut-control version selected:[${UT_CONTROL_PROJECT_VERSION}]${NC}
         if [ "${UT_NEXT_VERSION}" != "${UT_CONTROL_PROJECT_VERSION}" ]; then
@@ -80,15 +80,17 @@ function check_ut_control_revision()
 # Check if the common document configuration is present, if not clone it
 pushd ${FRAMEWORK_DIR} > /dev/null
 
-configure_ut_control() {
-    cd ./ut-control
-    git checkout ${UT_CONTROL_PROJECT_VERSION}
+# This function sets up ut-control requrements based on target
+configure_ut_control() 
+{
+    pushd ${UT_CONTROL_LIB_DIR} > /dev/null
     ./configure.sh ${TARGET}
+    popd > /dev/null
 }
 
 if [ -d "${UT_CONTROL_LIB_DIR}" ]; then
     echo "Framework ut-control already exists"
-    # ut-control exists so run the makefile from ut
+    # ut-control exists so run the makefile from ut, but warn the user that they could update
     check_ut_control_revision
     if [ -d "${THIRD_PARTY_LIB_DIR}" ]; then
         echo "Third party libraries are built for ${TARGET}"
@@ -99,8 +101,12 @@ if [ -d "${UT_CONTROL_LIB_DIR}" ]; then
 else
     if [ "$1" != "no_ut_control" ]; then
         echo "Clone ut_control in ${UT_CONTROL_LIB_DIR}"
-        git clone ${TEST_REPO} ut-control
+        git clone ${UT_CONTROL_REPO} ut-control
         check_ut_control_revision
+        # Check out the version required based on control_revision
+        pushd ${UT_CONTROL_LIB_DIR} > /dev/null
+        git checkout ${UT_CONTROL_PROJECT_VERSION}
+        popd > /dev/null
         configure_ut_control
     else
         echo "$1 requested, hence ut-control is not required to be cloned"
