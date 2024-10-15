@@ -159,10 +159,11 @@ checkvariantchange:
 	@if [ -f "$(VARIANT_FILE)" ]; then \
 		PREVIOUS_VARIANT=$$(cat $(VARIANT_FILE)); \
 		if [ "$$PREVIOUS_VARIANT" != "$(VARIANT)" ]; then \
-			${ECHOE} ${RED}********************************************${NC}; \
+			${ECHOE} ${RED}********************************************************************${NC}; \
 			${ECHOE} ${RED}Error: VARIANT has changed from $$PREVIOUS_VARIANT to $(VARIANT)${NC}; \
-			${ECHOE} ${RED}Please ${YELLOW} make clean TARGET=${TARGET} ${NC}the build and try again.${NC}; \
-			${ECHOE} ${RED}********************************************${NC}; \
+			${ECHOE} ${RED}Please ${YELLOW} make clean TARGET=${TARGET}\; make -C tests\/ clean TARGET=${TARGET} ${NC}; \
+			${ECHOE} ${RED}the build and try again.${NC}; \
+			${ECHOE} ${RED}********************************************************************${NC}; \
 			exit 1; \
 		fi \
 	fi
