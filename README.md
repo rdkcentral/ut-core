@@ -171,7 +171,7 @@ make clean
 
 is not required unless you swap between targets or wish to clean
 
-### Build the `linux` environment with CUNIT backend
+### Build the `linux` environment with C language
 
 ```bash
 make
@@ -181,7 +181,7 @@ This will build the following directories `src/*.c`, in addition to core functio
 
 `skeletons/src` - will be included in the linux build to enable stubs to compile against
 
-### Build the target `arm` environment with CUNIT backend
+### Build the target `arm` environment with C language
 
 The toolchain must be sourced as above, once sources though swapping between linux & arm is possible as required.
 
@@ -193,7 +193,7 @@ This will build the following directories `src/*.c`, in addition to core functio
 
 The final output binary is build as `hal_test` and resides in the `bin` directory, the framework .so files will be copied to the same directory.
 
-### Build the `linux` environment with GTEST backend
+### Build the `linux` environment with CPP language
 
 ```bash
 make VARIANT=CPP
@@ -203,7 +203,7 @@ This will build the following directories `src/*.c`, in addition to core functio
 
 `skeletons/src` - will be included in the linux build to enable stubs to compile against
 
-### Build the target `arm` environment with GTEST backend
+### Build the target `arm` environment with CPP language
 
 The toolchain must be sourced as above, once sources though swapping between linux & arm is possible as required.
 
