@@ -42,6 +42,8 @@
 
 #ifdef UT_CUNIT
 #include <ut_cunit.h>
+#else
+#include <ut_gtest.h>
 #endif
 
 /**!
@@ -145,7 +147,7 @@ void UT_exit(void);
  * @retval UT_STATUS_OK - All tests passed.
  * @retval UT_STATUS_FAILURE - One or more tests failed.
  */
-UT_status_t UT_run_tests( void );
+UT_status_t UT_run_tests();
 
 /**!
  * @brief Registers a test suite with the unit testing framework.
@@ -195,6 +197,33 @@ const char *UT_getTestSuiteTitle( UT_test_suite_t *pSuite );
  * @param[in] pFunction - Cleanup function to register.
  */
 void UT_regsiter_test_cleanup_function( UT_test_suite_t *pSuite, UT_TestCleanupFunction_t pFunction); 
+
+#ifndef UT_CUNIT
+class UTCore : public ::testing::Test
+{
+protected:
+    UTCore()
+    {
+        // Initialization code if needed
+    }
+
+    ~UTCore() override
+    {
+        // Cleanup code if needed
+    }
+
+    void SetUp() override
+    {
+        // Code to initialize resources before each test
+    }
+
+    void TearDown() override
+    {
+        // Code to clean up resources after each test
+    }
+};
+
+#endif
 
 
 #endif  /*  __UT_H  */

@@ -171,17 +171,17 @@ make clean
 
 is not required unless you swap between targets or wish to clean
 
-### Build the `linux` environment
+### Build the `linux` environment with C language
 
 ```bash
 make
 ```
 
-This will build the following directories `src/*.c`, in addition to core functions from `ut-core/src/*.c` and linking against libraries in `ut-core/framework`
+This will build the following directories `src/*.c`, in addition to core functions from `ut-core/src/c_source` and linking against libraries in `ut-core/framework`
 
 `skeletons/src` - will be included in the linux build to enable stubs to compile against
 
-### Build the target `arm` environment
+### Build the target `arm` environment with C language
 
 The toolchain must be sourced as above, once sources though swapping between linux & arm is possible as required.
 
@@ -189,7 +189,29 @@ The toolchain must be sourced as above, once sources though swapping between lin
 make TARGET=arm
 ```
 
-TThis will build the following directories `src/*.c`, in addition to core functions from `ut-core/src/*.c` and linking against libraries in `ut-core/framework` and link against `libs/.so` or from `sysroot` path in the SDK.
+This will build the following directories `src/*.c`, in addition to core functions from `ut-core/src/c_source` and linking against libraries in `ut-core/framework` and link against `libs/.so` or from `sysroot` path in the SDK.
+
+The final output binary is build as `hal_test` and resides in the `bin` directory, the framework .so files will be copied to the same directory.
+
+### Build the `linux` environment with CPP language
+
+```bash
+make VARIANT=CPP
+```
+
+This will build the following directories `src/*.c`, in addition to core functions from `ut-core/src/cpp_source` and linking against libraries in `ut-core/framework`
+
+`skeletons/src` - will be included in the linux build to enable stubs to compile against
+
+### Build the target `arm` environment with CPP language
+
+The toolchain must be sourced as above, once sources though swapping between linux & arm is possible as required.
+
+```bash
+make VARIANT=CPP TARGET=arm
+```
+
+This will build the following directories `src/*.c`, in addition to core functions from `ut-core/src/cpp_source` and linking against libraries in `ut-core/framework` and link against `libs/.so` or from `sysroot` path in the SDK.
 
 The final output binary is build as `hal_test` and resides in the `bin` directory, the framework .so files will be copied to the same directory.
 

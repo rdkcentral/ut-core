@@ -26,27 +26,39 @@ MY_DIR="$(dirname $SCRIPT_EXEC)"
 FRAMEWORK_DIR=${MY_DIR}/framework
 UT_CONTROL_LIB_DIR=${FRAMEWORK_DIR}/ut-control
 
+if [[ "$*" == *"VARIANT=CPP"* ]]; then
+    VARIANT="CPP"
+else
+    VARIANT="C"
+fi
+
 if [[ "$*" == *"TARGET=arm"* ]]; then
     TARGET="arm"
 else
     TARGET="linux"
 fi
 echo "TARGET= [$TARGET] from [$0]"
+echo "VARIANT= [$VARIANT] from [$0]"
 
 THIRD_PARTY_LIB_DIR=${FRAMEWORK_DIR}/ut-control/build/${TARGET}
+GTEST_DIR=${FRAMEWORK_DIR}/gtest/${TARGET}
+GTEST_LIB_DIR=${MY_DIR}/build/${TARGET}/cpp_libs
+GTEST_VERSION=1.15.2
 
 pushd ${MY_DIR} > /dev/null
 # Clone CUnit
-if [ ! -d "${FRAMEWORK_DIR}/CUnit-2.1-3" ]; then
+if [[ ! -d "${FRAMEWORK_DIR}/CUnit-2.1-3" && "${VARIANT}" == "C" ]]; then
     echo "Clone Framework"
     wget https://sourceforge.net/projects/cunit/files/CUnit/2.1-3/CUnit-2.1-3.tar.bz2 --no-check-certificate -P ${FRAMEWORK_DIR}
     tar xvfj framework/CUnit-2.1-3.tar.bz2 -C ${FRAMEWORK_DIR}
     cp ${FRAMEWORK_DIR}/CUnit-2.1-3/CUnit/Headers/CUnit.h.in ${FRAMEWORK_DIR}/CUnit-2.1-3/CUnit/Headers/CUnit.h
     echo "Patching Framework"
     cd ${FRAMEWORK_DIR}
-    cp ../src/cunit/cunit_lgpl/patches/CorrectBuildWarningsInCunit.patch  .
+    cp ../src/c_source/cunit_lgpl/patches/CorrectBuildWarningsInCunit.patch  .
     patch -u CUnit-2.1-3/CUnit/Sources/Framework/TestRun.c -i CorrectBuildWarningsInCunit.patch
     echo "Patching Complete"
+else
+    mkdir -p ${FRAMEWORK_DIR}
 fi
 popd > /dev/null # ${MY_DIR}
 
@@ -81,7 +93,7 @@ function check_ut_control_revision()
 pushd ${FRAMEWORK_DIR} > /dev/null
 
 # This function sets up ut-control requrements based on target
-configure_ut_control() 
+configure_ut_control()
 {
     pushd ${UT_CONTROL_LIB_DIR} > /dev/null
     ./configure.sh ${TARGET}
@@ -113,3 +125,38 @@ else
     fi
 fi
 popd > /dev/null # ${FRAMEWORK_DIR}
+
+pushd ${MY_DIR} > /dev/null
+#Clone GTEST
+if [[ ! -d "${GTEST_DIR}/googletest-${GTEST_VERSION}" && "${VARIANT}" == "CPP" ]]; then
+    wget "https://github.com/google/googletest/archive/refs/tags/v${GTEST_VERSION}.zip" --no-check-certificate -P "${GTEST_DIR}"
+    cd ${GTEST_DIR}/
+    if [ -f "v${GTEST_VERSION}.zip" ]; then
+        unzip "v${GTEST_VERSION}.zip"
+        if [ -d "googletest-${GTEST_VERSION}" ]; then
+            cd "googletest-${GTEST_VERSION}/"
+        else
+            echo "Directory googletest-${GTEST_VERSION} not found!"
+        fi
+    else
+        echo "File v${GTEST_VERSION}.zip not found!"
+    fi
+    mkdir -p ${GTEST_LIB_DIR}
+    cd ${GTEST_LIB_DIR}
+    if command -v cmake &> /dev/null; then
+        cmake "${GTEST_DIR}/googletest-${GTEST_VERSION}/"
+    else
+        CMAKE_BIN=$(find ${UT_CONTROL_LIB_DIR} -name cmake -type f | grep '/bin/')
+        if [ -x "${CMAKE_BIN}" ]; then
+            if [ -d "${GTEST_DIR}/googletest-${GTEST_VERSION}/" ]; then
+                "${CMAKE_BIN}" "${GTEST_DIR}/googletest-${GTEST_VERSION}/"
+            else
+                echo "Directory ${GTEST_DIR}/googletest-${GTEST_VERSION}/ not found!"
+            fi
+        else
+            echo "CMake binary ${CMAKE_BIN} not found or is not executable!"
+        fi
+    fi
+    make
+fi
+popd > /dev/null # ${MY_DIR}
