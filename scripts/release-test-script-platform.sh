@@ -61,8 +61,6 @@ echo "UT_CONTROL_BRANCH_NAME = $UT_CONTROL_BRANCH_NAME"
 # Check if the branch name is passed else display the usage
 if [ -z "$UT_CONTROL_BRANCH_NAME" ]; then
     echo "UT_CONTROL_BRANCH_NAME is empty"
-    usage
-    #exit 1
 fi
 
 # If repo_url is not passed by user set it to default
@@ -130,19 +128,28 @@ run_build(){
         # sleep 5
         # rm -rf ut/ut-core || error_exit "Failed to remove ut-core"
         # sleep 5
-        cd ut/ut-core
-        git checkout $UT_CORE_BRANCH_NAME
-        git pull
-        cd -
 
         if [ ! -z "$UT_CONTROL_BRANCH_NAME" ]; then
+            cd ut/ut-core
+            git checkout $UT_CORE_BRANCH_NAME
+            git pull
+            cd -
+
             cd ut/ut-core/framework/ut-control
             git checkout $UT_CONTROL_BRANCH_NAME
             git pull
             cd -
-        fi
+            rm -rf ut/build/ ut/ut-core/framework/ut-control/build/ ut/ut-core/framework/ut-control/framework/ ut/ut-core/framework/ut-control/host-tools/
+        else
+	    # switch ut-core to ut_core_branch_name
+            echo "UT_CORE_BRANCH_NAME = $UT_CORE_BRANCH_NAME"
+            sed -i "62s|.*|    git checkout $UT_CORE_BRANCH_NAME|" ut/build.sh
+            sleep 5
+            rm -rf ut/ut-core || error_exit "Failed to remove ut-core"
+            sleep 5
+	fi
 
-        rm -rf ut/build/ ut/ut-core/framework/ut-control/build/ ut/ut-core/framework/ut-control/framework/ ut/ut-core/framework/ut-control/host-tools/
+
     fi
     
     echo -e "${YELLOW}You may also tail the output in another shell using ${NC}"

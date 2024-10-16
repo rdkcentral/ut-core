@@ -62,8 +62,6 @@ echo "UT_CONTROL_BRANCH_NAME = $UT_CONTROL_BRANCH_NAME"
 # Check if the branch name is passed else display the usage
 if [ -z "$UT_CONTROL_BRANCH_NAME" ]; then
     echo "UT_CONTROL_BRANCH_NAME is empty"
-    usage
-    #exit 1
 fi
 
 # If repo_url is not passed by user set it to default
