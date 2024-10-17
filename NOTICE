@@ -7,24 +7,9 @@ listed below.  Your use of this material within the component is also subject to
 conditions of these licenses.  The LICENSE file contains the text of all the licenses which apply
 within this component.
 
-The src/cunit/cunit_lgpl directory tree within this component contains some software which is
-Licensed under the LGPL-2.0 License.  The src/cunit/cunt_lgpl directory contains its own license file,
-called COPYING, which describes the licensing of the software under the src/cunit/cunit_lgpl directory.
-
-cJSON
-Copyright (c) 2009-2017 Dave Gamble and cJSON contributors
-Licensed under the MIT License
-
-libyaml
-This framework uses the libfyaml library (https://github.com/pantoniou/libfyaml), which is:
-Copyright (c) 2019 Pantelis Antoniou <pantelis.antoniou@konsulko.com>
-Licensed under the MIT License
-It also uses asprintf.c (https://github.com/jwerle/asprintf.c) which is:
-Copyright (c) 2014 Little Star Media, Inc.
-Licensed under the MIT License
-
-This repository make use of the libwebsockets framework, which is licensed under the MIT License,
-https://github.com/warmcat/libwebsockets?tab=License-1-ov-file
+The src/c_source/cunit_lgpl directory tree within this component contains some software which is
+Licensed under the LGPL-2.0 License.  The src/c_source/cunit_lgpl directory contains its own license file,
+called COPYING, which describes the licensing of the software under the src/c_source/cunit_lgpl directory.
 
 templates directory
 The license files in the "template" directory or directories are intended as templates, and that the actual repository is licensed according to the licensing information at top level.

@@ -25,29 +25,37 @@
 #include <stdbool.h>
 #include <assert.h>
 
-/**!
- * @brief Opens a profile configuration file for processing.
- *
- * @param[in] fileName - Path to the configuration file.
- * @returns Status of the operation:
- * @retval UT_KVP_STATUS_SUCCESS - Success.
- * @retval UT_KVP_STATUS_FILE_OPEN_ERROR - Failed to open the file.
- * @retval UT_KVP_STATUS_INVALID_PARAM - Invalid filename provided.
- * @retval UT_KVP_STATUS_PARSING_ERROR - Error parsing the file.
- */
-extern ut_kvp_status_t ut_kvp_profile_open(char *fileName);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
-/**
- * @brief Closes the currently open profile configuration file.
- * 
- */
-extern void ut_kvp_profile_close(void);
+    /**!
+     * @brief Opens a profile configuration file for processing.
+     *
+     * @param[in] fileName - Path to the configuration file.
+     * @returns Status of the operation:
+     * @retval UT_KVP_STATUS_SUCCESS - Success.
+     * @retval UT_KVP_STATUS_FILE_OPEN_ERROR - Failed to open the file.
+     * @retval UT_KVP_STATUS_INVALID_PARAM - Invalid filename provided.
+     * @retval UT_KVP_STATUS_PARSING_ERROR - Error parsing the file.
+     */
+    extern ut_kvp_status_t ut_kvp_profile_open(char *fileName);
 
-/**
- * @brief Retrieves the current KVP instance for the active configuration profile
-*/
-extern ut_kvp_instance_t *ut_kvp_profile_getInstance(void);
+    /**
+     * @brief Closes the currently open profile configuration file.
+     *
+     */
+    extern void ut_kvp_profile_close(void);
 
+    /**
+     * @brief Retrieves the current KVP instance for the active configuration profile
+     */
+    extern ut_kvp_instance_t *ut_kvp_profile_getInstance(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #define UT_KVP_PROFILE_GET_BOOL(key) ut_kvp_getBoolField(ut_kvp_profile_getInstance(), key)
 #define UT_KVP_PROFILE_GET_UINT8(key) ut_kvp_getUInt8Field(ut_kvp_profile_getInstance(), key)
