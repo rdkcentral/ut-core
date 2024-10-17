@@ -58,6 +58,12 @@
   "C_Cpp_Runner.msvcSecureNoWarnings": false,
   "files.associations": {
     "ut_kvp_profile.h": "c",
-    "ut_internal.h": "c"
+    "ut_internal.h": "c",
+    "ut.h": "c",
+    "ut_log.h": "c",
+    "ut_gtest.h": "c",
+    "ut_cunit_internal.h": "c",
+    "ut_test_runner.h": "c",
+    "ut_cunit.h": "c"
   }
 }

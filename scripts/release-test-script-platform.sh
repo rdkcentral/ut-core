@@ -227,12 +227,6 @@ run_checks() {
         else
             echo -e "${GREEN}CURL static lib does not exist. PASS ${NC}"
         fi
-    elif [[ "$environment" == "kirkstone_linux" ]]; then
-        if [ -f "$CURL_STATIC_LIB" ]; then
-            echo -e "${RED}$CURL_STATIC_LIB exists. FAIL${NC}"
-        else
-            echo -e "${GREEN}CURL static lib does not exist. PASS ${NC}"
-        fi
     else
         if [ -f "$CURL_STATIC_LIB" ]; then
             echo -e "${GREEN}$CURL_STATIC_LIB exists. PASS${NC}"

@@ -5,9 +5,23 @@ This Bash script automates the process of cloning the PR branch on ut-core Git r
 where:
    VM-SYNC : is a docker simulating the RDK linux environment
    Dunfell Linux : is a docker with linux environment
-   Dunfell ARM : is a docker simulating the arm environment.
- It checks for the existence of various third party packages like openssl, curl, cmake, gtest etc for various environments listed above.
- With these validations, it ensures if the PR is good for merge and has not broken the basic requirements.
+   Dunfell ARM : is a docker simulating the arm environment for yocto version dunfell
+   Kirkstone ARM : is a docker simulating the arm environment for yocto version kirkstone
+It checks for the existence of various third party packages like openssl, curl, cmake, gtest etc for various environments listed above.
+With these validations, it ensures if the PR is good for merge and has not broken the basic requirements.
+
+Following table gives the overview:
+
+|#|Target|Docker|Expectation
+|---|-----|-----------|---------
+|1|make TARGET=arm|rdk-dunfell|builds ut-core for target arm
+|2|make TARGET=arm|rdk-kirkstone|builds ut-core for target arm
+|3|make TARGET=linux|vm-sync|builds ut-core for target linux
+|4|make TARGET=linux|none|builds ut-core for target linux
+|5|make -C tests/ TARGET=arm|rdk-dunfell|builds ut-core tests for target arm
+|6|make -C tests/  TARGET=arm|rdk-kirkstone|builds ut-core tests for target arm
+|7|make -C tests/ TARGET=linux|vm-sync|builds ut-core tests for target linux
+|8|make -C tests/ TARGET=linux|none|builds ut-core tests for target linux
 
 ## Key Features
 
@@ -42,6 +56,8 @@ where:
 |2|VM-SYNC|YES|YES|YES|YES
 |3|RDK-DUNFELL(arm)|NO|YES|YES|YES
 |4|RDK-DUNFELL(linux)|NO|YES|NO|YES
+|5|RDK-KIRKSTONE(arm)|NO|YES|YES|YES
+|6|RDK-KIRKSTONE(linux)|NO|YES|NO|YES
 
 For ex:
 On env 1,  the script will check for availability of CURL library, OpenSSL libraraies and Gtest libraries for Target.It would however would not look for CMAKE binary for host as this environment already provides cmake support which is provided by build essentials.
