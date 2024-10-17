@@ -227,6 +227,12 @@ run_checks() {
         else
             echo -e "${GREEN}CURL static lib does not exist. PASS ${NC}"
         fi
+    elif [[ "$environment" == "kirkstone_linux" ]]; then
+        if [ -f "$CURL_STATIC_LIB" ]; then
+            echo -e "${RED}$CURL_STATIC_LIB exists. FAIL${NC}"
+        else
+            echo -e "${GREEN}CURL static lib does not exist. PASS ${NC}"
+        fi
     else
         if [ -f "$CURL_STATIC_LIB" ]; then
             echo -e "${GREEN}$CURL_STATIC_LIB exists. PASS${NC}"
@@ -242,19 +248,31 @@ run_checks() {
         else
             echo -e "${RED}Openssl static lib exists. FAIL ${NC}"
         fi
-        elif [[ "$environment" == "VM-SYNC" ]]; then
+    elif [[ "$environment" == "VM-SYNC" ]]; then
         if [ -f "$OPENSSL_STATIC_LIB" ]; then
             echo -e "${GREEN}$OPENSSL_STATIC_LIB exists. PASS ${NC}"
         else
             echo -e "${RED}Openssl static lib does not exist. FAIL ${NC}"
         fi
-        elif [[ "$environment" == "dunfell_arm" ]]; then
+    elif [[ "$environment" == "dunfell_arm" ]]; then
         if [ -f "$OPENSSL_STATIC_LIB" ]; then
             echo -e "${GREEN}$OPENSSL_STATIC_LIB exists. PASS ${NC}"
         else
             echo -e "${RED}Openssl static lib does not exist. FAIL ${NC}"
         fi
-        elif [[ "$environment" == "dunfell_linux" ]]; then
+    elif [[ "$environment" == "dunfell_linux" ]]; then
+        if [ -f "$OPENSSL_STATIC_LIB" ]; then
+            echo -e "${RED}$OPENSSL_STATIC_LIB exists. FAIL ${NC}"
+        else
+            echo -e "${GREEN}Openssl static lib does not exist. PASS ${NC}"
+        fi
+    elif [[ "$environment" == "kirkstone_arm" ]]; then
+        if [ -f "$OPENSSL_STATIC_LIB" ]; then
+            echo -e "${GREEN}$OPENSSL_STATIC_LIB exists. PASS ${NC}"
+        else
+            echo -e "${RED}Openssl static lib does not exist. FAIL ${NC}"
+        fi
+    elif [[ "$environment" == "kirkstone_linux" ]]; then
         if [ -f "$OPENSSL_STATIC_LIB" ]; then
             echo -e "${RED}$OPENSSL_STATIC_LIB exists. FAIL ${NC}"
         else
@@ -269,19 +287,31 @@ run_checks() {
         else
             echo -e "${RED}CMake host binary exists. FAIL ${NC}"
         fi
-        elif [[ "$environment" == "VM-SYNC" ]]; then
+    elif [[ "$environment" == "VM-SYNC" ]]; then
         if [ -f "$CMAKE_HOST_BIN" ]; then
             echo -e "${GREEN}$CMAKE_HOST_BIN exists. PASS ${NC}"
         else
             echo -e "${RED}CMake host binary does not exist. FAIL ${NC}"
         fi
-        elif [[ "$environment" == "dunfell_arm" ]]; then
+    elif [[ "$environment" == "dunfell_arm" ]]; then
         if [ ! -f "$CMAKE_HOST_BIN" ]; then
             echo -e "${GREEN}CMake host binary does not exist. PASS ${NC}"
         else
             echo -e "${RED}CMake host binary exists. FAIL ${NC}"
         fi
-        elif [[ "$environment" == "dunfell_linux" ]]; then
+    elif [[ "$environment" == "dunfell_linux" ]]; then
+        if [ ! -f "$CMAKE_HOST_BIN" ]; then
+            echo -e "${GREEN}CMake host binary does not exist. PASS ${NC}"
+        else
+            echo -e "${RED}CMake host binary exists. FAIL ${NC}"
+        fi
+    elif [[ "$environment" == "kirkstone_arm" ]]; then
+        if [ ! -f "$CMAKE_HOST_BIN" ]; then
+            echo -e "${GREEN}CMake host binary does not exist. PASS ${NC}"
+        else
+            echo -e "${RED}CMake host binary exists. FAIL ${NC}"
+        fi
+    elif [[ "$environment" == "kirkstone_linux" ]]; then
         if [ ! -f "$CMAKE_HOST_BIN" ]; then
             echo -e "${GREEN}CMake host binary does not exist. PASS ${NC}"
         else
@@ -368,6 +398,33 @@ run_on_vm_sync_linux() {
     popd > /dev/null
 }
 
+run_on_kirkstone_linux() {
+    pushd ${MY_DIR} > /dev/null
+    SETUP_ENV="sc docker run rdk-kirkstone"
+    run_git_clone "kirkstone_linux" "linux"
+    # Change to the repository directory
+    PLAT_DIR="${REPO_NAME}-kirkstone_linux"
+    pushd ${PLAT_DIR} > /dev/null
+    /bin/bash -c "$SETUP_ENV; $(declare -f run_build); run_build ''kirkstone_linux 'linux' '$UT_CORE_BRANCH_NAME' '$UT_CONTROL_BRANCH_NAME'"
+    run_checks "kirkstone_linux" "linux" $UT_CORE_BRANCH_NAME $UT_CONTROL_BRANCH_NAME
+    popd > /dev/null
+    popd > /dev/null
+}
+
+run_on_kirkstone_arm() {
+    pushd ${MY_DIR} > /dev/null
+    run_git_clone "kirkstone_arm" "arm"
+    # Change to the repository directory
+    PLAT_DIR="${REPO_NAME}-kirkstone_arm"
+    pushd ${PLAT_DIR} > /dev/null
+    /bin/bash -c "sc docker run rdk-kirkstone 'cd /opt/toolchains/rdk-glibc-x86_64-arm-toolchain; \
+     . environment-setup-armv7at2hf-neon-oe-linux-gnueabi; env | grep CC; cd -; \
+    $(declare -f run_build); run_build 'kirkstone_arm' 'arm' '$UT_CORE_BRANCH_NAME' '$UT_CONTROL_BRANCH_NAME';exit'"
+    run_checks "kirkstone_arm" "arm" $UT_CORE_BRANCH_NAME $UT_CONTROL_BRANCH_NAME
+    popd > /dev/null
+    popd > /dev/null
+}
+
 print_results() {
     pushd ${MY_DIR} > /dev/null
     
@@ -394,14 +451,28 @@ print_results() {
     pushd ${PLAT_DIR} > /dev/null
     run_checks "dunfell_linux" "linux" $UT_CORE_BRANCH_NAME
     popd > /dev/null
+
+    #Results for kirkstone-arm
+    PLAT_DIR="${REPO_NAME}-kirkstone_arm"
+    pushd ${PLAT_DIR} > /dev/null
+    run_checks "kirkstone_arm" "arm" $UT_CORE_BRANCH_NAME
+    popd > /dev/null
+
+    #Results for kirkstone-linux
+    PLAT_DIR="${REPO_NAME}-kirkstone_linux"
+    pushd ${PLAT_DIR} > /dev/null
+    run_checks "kirkstone_linux" "linux" $UT_CORE_BRANCH_NAME
+    popd > /dev/null
     
     popd > /dev/null
     
 }
 
 # Run tests in different environments
-#run_on_ubuntu_linux
-#run_on_dunfell_linux
-#run_on_vm_sync_linux
-#run_on_dunfell_arm
+run_on_ubuntu_linux
+run_on_dunfell_linux
+run_on_vm_sync_linux
+run_on_dunfell_arm
+run_on_kirkstone_arm
+run_on_kirkstone_linux
 print_results
