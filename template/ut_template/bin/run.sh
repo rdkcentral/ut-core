@@ -58,7 +58,7 @@ cd "$(dirname "$0")"
 export LD_LIBRARY_PATH=/usr/lib:/lib:/home/root:./
 
 # Run the actual program with the resolved absolute profile path and any other arguments
-./hal_test "${other_args[@]}" -p "$profile_path"
+./hal_test -p "$profile_path" "${other_args[@]}"
 
 # Optionally, return to the original directory
 cd "$original_dir"
