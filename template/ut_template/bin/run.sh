@@ -57,8 +57,14 @@ cd "$(dirname "$0")"
 # Set necessary library paths
 export LD_LIBRARY_PATH=/usr/lib:/lib:/home/root:./
 
-# Run the actual program with the resolved absolute profile path and any other arguments
-./hal_test -p "$profile_path" "${other_args[@]}"
+# Run the actual program with the resolved absolute profile path if provided
+if [[ -n "$profile_path" ]]; then
+    # If profile_path is not empty, include it in the command
+    ./hal_test -p "$profile_path" "${other_args[@]}"
+else
+    # If no profile path, just run the program with other arguments
+    ./hal_test "${other_args[@]}"
+fi
 
 # Optionally, return to the original directory
 cd "$original_dir"
