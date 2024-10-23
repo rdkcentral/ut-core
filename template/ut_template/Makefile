@@ -23,11 +23,16 @@ TOP_DIR := $(ROOT_DIR)
 
 SRC_DIRS = $(ROOT_DIR)/src
 INC_DIRS := $(ROOT_DIR)/../include
+XCFLAGS := -DNDEBUG
 
 ifeq ($(TARGET),)
 $(info TARGET NOT SET )
 $(info TARGET FORCED TO Linux)
 TARGET=linux
+SRC_DIRS += $(ROOT_DIR)/skeletons/src
+endif
+
+ifeq ($(TARGET),linux)
 SRC_DIRS += $(ROOT_DIR)/skeletons/src
 endif
 
@@ -47,6 +52,7 @@ export INC_DIRS
 export TARGET
 export TOP_DIR
 export HAL_LIB_DIR
+export XCFLAGS
 
 .PHONY: clean list build
 
