@@ -117,7 +117,8 @@ else
         check_ut_control_revision
         # Check out the version required based on control_revision
         pushd ${UT_CONTROL_LIB_DIR} > /dev/null
-        git checkout ${UT_CONTROL_PROJECT_VERSION}
+        #git checkout ${UT_CONTROL_PROJECT_VERSION}
+        git checkout feature/gh51-fix-relative-path
         popd > /dev/null
         configure_ut_control
     else
