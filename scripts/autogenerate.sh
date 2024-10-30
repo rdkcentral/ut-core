@@ -33,6 +33,40 @@
 
 set -e
 
+# Minimum required versions
+MIN_RUBY_VERSION="2.7.0"
+MIN_BUNDLER_VERSION="2.4.17"
+
+# Function to compare two version numbers
+AGT_version_ge() {
+    # Returns 0 (true) if $1 >= $2
+    [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" == "$2" ]
+}
+
+# Function to check Ruby version
+AGT_check_ruby_version() {
+    # Get the installed Ruby version
+    INSTALLED_RUBY_VERSION=$(ruby -v 2>/dev/null | awk '{print $2}')
+    if AGT_version_ge "$INSTALLED_RUBY_VERSION" "$MIN_RUBY_VERSION"; then
+        AGT_INFO "Ruby version $INSTALLED_RUBY_VERSION meets the minimum requirement of $MIN_RUBY_VERSION."
+    else
+        AGT_ERROR "Ruby version $MIN_RUBY_VERSION or higher is required. Installed version is $INSTALLED_RUBY_VERSION."
+        exit 1
+    fi
+}
+
+# Function to check Bundler version
+AGT_check_bundler_version() {
+    # Get the installed Bundler version
+    INSTALLED_BUNDLER_VERSION=$(bundle -v 2>/dev/null | awk '{print $3}')
+    if AGT_version_ge "$INSTALLED_BUNDLER_VERSION" "$MIN_BUNDLER_VERSION"; then
+        AGT_INFO "Bundler version $INSTALLED_BUNDLER_VERSION meets the minimum requirement of $MIN_BUNDLER_VERSION."
+    else
+        AGT_ERROR "Bundler version $MIN_BUNDLER_VERSION or higher is required. Bundler is not installed or the installed version is $INSTALLED_BUNDLER_VERSION."
+        exit 1
+    fi
+}
+
 # Validate if the branch is correct and exit script if it isn't
 AGT_validate_branch()
 {
@@ -377,6 +411,12 @@ function AGT_init()
 	AGT_update_variables ${AGT_UT_WORKSPACE}
 	AGT_update_variables ${AGT_APIDEF_HOME}
 	AGT_update_variables ${AGT_UT_HOME}
+
+	# Check for Ruby and Bundler versions
+	AGT_check_ruby_version
+	AGT_check_bundler_version
+
+	AGT_INFO "All version checks passed."
 }
 # URL of API definition repo to be cloned as first command line argument
 AGT_APIDEF_URL=$1
