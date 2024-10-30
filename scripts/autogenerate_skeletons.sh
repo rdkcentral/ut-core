@@ -41,8 +41,20 @@ function AGT_install_cmock()
         # Install latest cmock tool if it does not already exists in the dir
         git clone --recursive https://github.com/throwtheswitch/cmock.git ${AGT_CMOCK_DIR} &> /dev/null
         cd ${AGT_CMOCK_DIR}
-        bundle install &> /dev/null
-        AGT_SUCCESS "CMock is now installed"
+        if ! command -v bundle &> /dev/null; then
+                AGT_WARNING "bundle not found. Check if Ruby is installed..."
+                AGT_WARNING "CMock is not installed"
+        else
+                if ! bundle install &> /dev/null; then
+                        # Set local bundle path and retry installation
+                        bundle config set --local path 'vendor/bundle'
+                        if bundle install &> /dev/null; then
+                                AGT_SUCCESS "Successfully installed gems in 'vendor/bundle'."
+                                AGT_SUCCESS "CMock is now installed"
+                        fi
+
+                fi
+        fi
         cd - &> /dev/null
 
         AGT_DEBUG_END "Installing cmock tool required for skeletons' generation"

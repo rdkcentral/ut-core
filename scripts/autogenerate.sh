@@ -212,7 +212,7 @@ function AGT_clone_ut()
 	fi
 
 	# Default UT repo url
-	UT_URL=$(echo "$url" | sed 's,hal,haltest,g')
+	UT_URL=$(echo "$url" | sed 's,halif,halif-test,g')
 	AGT_WARNING " The url for UT clone is : ${UT_URL} "
 
 	# Check with user if ut repo url is correct , else get the correct one
@@ -356,7 +356,7 @@ function AGT_init()
 	fi
 
 	# Variables
-	AGT_DOXY_REPO="rdk-components-hal-doxygen.git"
+	AGT_DOXY_REPO="hal-doxygen.git"
 	AGT_DOXYGEN_REPO_NAME=`echo "$(basename "$AGT_DOXY_REPO" .git)"`
 	AGT_DOXYGEN_DIR=${AGT_UT_WORKSPACE}/${AGT_DOXYGEN_REPO_NAME}
 	# Dir path for API Defintion template in ut-core
