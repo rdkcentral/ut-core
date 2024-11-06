@@ -68,7 +68,11 @@ function AGT_commons_init()
         # API Definition home inside the worksapce dir
         AGT_APIDEF_HOME=${AGT_UT_WORKSPACE}/${AGT_APIDEF_NAME}
         # Include dir inside worksapce dir
-        AGT_INCLUDE_DIR=${AGT_APIDEF_HOME}/include
+        if [ ! -z "$(ls ${AGT_APIDEF_HOME}/include/*.h &> /dev/null)" ]; then
+                AGT_INCLUDE_DIR=${AGT_APIDEF_HOME}/include
+        else
+                AGT_APIDEF_HEADER_FILES=$(find ${AGT_APIDEF_HOME} -type f -name "*.h" -print0 2> /dev/null | tr '\0' ' ')
+        fi
         # UT dir inside worksapce dir 
         AGT_UT_HOME=${AGT_APIDEF_HOME}/ut
         # Cmock dir inside worksapce dir
@@ -79,6 +83,8 @@ function AGT_commons_init()
         AGT_SKELETONS_DIR=${AGT_UT_HOME}/skeletons
         # Skeleton dir's child dir, src inside worksapce dir
         AGT_SKELETONS_SRC=${AGT_SKELETONS_DIR}/src
+        # CMock Config file path
+        AGT_CMOCK_CONFIG_FILE=${AGT_SCRIPTS_HOME}/cmock_config.yml
 
 }
 

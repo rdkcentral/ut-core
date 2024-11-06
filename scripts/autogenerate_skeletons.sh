@@ -82,6 +82,7 @@ AGT_delete_mocks()
 function AGT_generate_skeletons()
 {
         local COUNT_SRC
+        local HEADER_FILES
         AGT_DEBUG_START "Generating skeletons"
 
         # Install cmock tool required to generate skeletons
@@ -89,7 +90,12 @@ function AGT_generate_skeletons()
 
         # Run the skeleton generate command
         cd ${AGT_UT_HOME}
-        ruby ${AGT_CMOCK_DIR}/lib/cmock.rb --skeleton --mock_path=${AGT_SKELETONS_DIR} ${AGT_INCLUDE_DIR}/*.h &> /dev/null
+        if [[ -n $AGT_INCLUDE_DIR ]]; then
+                HEADER_FILES=${AGT_INCLUDE_DIR}/*.h
+        else
+                HEADER_FILES=${AGT_APIDEF_HEADER_FILES}
+        fi
+        ruby ${AGT_CMOCK_DIR}/lib/cmock.rb -o${AGT_CMOCK_CONFIG_FILE} --skeleton --mock_path=${AGT_SKELETONS_DIR} ${HEADER_FILES} &> /dev/null
 
         cd ${AGT_SKELETONS_DIR}
 

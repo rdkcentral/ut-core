@@ -122,7 +122,7 @@ function AGT_clone_doxygen_repo()
 
 	if [ ! -d "${AGT_DOXYGEN_DIR}"  ]; then
 		# Clone doxygen template into doxy dir in workspace/api-def dir
-		git clone ${AGT_BASE_URL}/${AGT_DOXY_REPO} ${AGT_DOXYGEN_DIR} &> /dev/null
+		git clone git@github.com:rdkcentral/hal-doxygen.git ${AGT_DOXYGEN_DIR} &> /dev/null
 		AGT_SUCCESS "Doxygen repo has been cloned in [../workspace/${AGT_DOXYGEN_REPO_NAME}]"
 	fi
 
@@ -252,19 +252,34 @@ function AGT_clone_ut()
 	# Check with user if ut repo url is correct , else get the correct one
 	read -p "$( AGT_ALERT Is this correct? )" yn
 	case $yn in
-		[Yy]* ) ;;
-		[Nn]* ) read -p "$(AGT_ALERT Please input the correct url : ) " UT_URL
+		[Yy]* )
+		# Proceed without prompting
 		;;
-		* ) AGT_WARNING "No input added. Keeping original url "
+		[Nn]* )
+		# Prompt for inputs
+		read -p "$(AGT_ALERT "Please input the URL (or leave blank to skip): ") " UT_INPUT_URL
+		read -p "$(AGT_ALERT "Please input the directory (absolute) path (or leave blank to skip): ") " UT_DIR_PATH
+		;;
+		* )
+		AGT_WARNING "No input added. Keeping original URL"
 		;;
 	esac
 
+	if [[ ! -z "$UT_INPUT_URL" ]]; then
+		AGT_SUCCESS "UT url is '${UT_INPUT_URL}'"
+		# Clone the UT repo
+		git clone ${UT_INPUT_URL} ${AGT_APIDEF_HOME}/ut &> /dev/null
+	elif [[ ! -z "$UT_DIR_PATH" ]]; then
+		AGT_SUCCESS "UT directory path  is '${UT_DIR_PATH}'"
+		mkdir ${AGT_APIDEF_HOME}/ut
+		cp -r ${UT_DIR_PATH}/* ${AGT_APIDEF_HOME}/ut/
+	else
+		AGT_SUCCESS "Original UT url is '${UT_URL}'"
+		# Clone the UT repo
+		git clone ${UT_URL} ${AGT_APIDEF_HOME}/ut &> /dev/null
+	fi
 
-	AGT_SUCCESS "UT url is '${UT_URL}'"
-	# Validate if UT url is correct
-	# Clone the UT repo
-	git clone ${UT_URL} ${AGT_APIDEF_HOME}/ut &> /dev/null
-	AGT_SUCCESS "UT repo is now cloned"
+	AGT_SUCCESS "UT repo is now cloned/copied"
 	AGT_UT_EXISTS=true
 
 	AGT_DEBUG_END "Building UT"
@@ -417,6 +432,7 @@ function AGT_init()
 	AGT_check_bundler_version
 
 	AGT_INFO "All version checks passed."
+	AGT_INFO "Also make sure that you have access to all the git repos like rdkcentral etc"
 }
 # URL of API definition repo to be cloned as first command line argument
 AGT_APIDEF_URL=$1
