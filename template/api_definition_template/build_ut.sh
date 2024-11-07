@@ -29,10 +29,30 @@
 TEST_REPO=$(git remote -vv | head -n1 | awk -F ' ' '{print $2}' | sed 's/halif/halif-test/g' | sed 's/hal-/haltest-/g' )
 DIR="."
 
-# Set default UT_PROJECT_VERSION to master
+# Setting default UT_PROJECT_VERSION to 1.
 if [ -z "${UT_PROJECT_VERSION}" ]; then
-    UT_PROJECT_VERSION=main
+    # This script aims to provide the latest binary compatible version of the testing suite for a clean environment.
+    # It supports automatic upgrades within the same major version (e.g., 1.x.x to 1.y.y). However, when a new major
+    # version is released (e.g., 2.x.x), manual intervention is required to update UT_PROJECT_VERSION.
+    # This precaution prevents potential test breakages caused by incompatible changes introduced in the new major version.
+
+    UT_PROJECT_VERSION="1." #alternatively use : UT_PROJECT_VERSION=main ./build_ut.sh, to force build version main/master
 fi
+
+
+# This function checks the latest version of UT project and recommends an upgrade if reuqired
+function check_next_revision()
+{
+    # Set default UT_SUITE_VERSION to next revision, if it's set then we don't need to tell you again
+    if [ -v ${UT_SUITE_VERSION} ]; then
+        UT_SUITE_VERSION=$(git tag | grep ^${UT_PROJECT_VERSION} | sort -r | head -n1)
+        UT_NEXT_VERSION=$(git tag | sort -r | head -n1)
+        echo -e ${YELLOW}ut project version selected:[${UT_SUITE_VERSION}]${NC}
+        if [ "${UT_NEXT_VERSION}" != "${UT_SUITE_VERSION}" ]; then
+            echo -e ${RED}--- New Version of ut project released [${UT_NEXT_VERSION}] consider upgrading ---${NC}
+        fi
+    fi
+}
 
 # Simple help
 if [ "${1}" == "-h" ]; then
@@ -46,7 +66,7 @@ fi
 
 PARAMS=$@
 if [ "${1}" == "--dir" ]; then
-# Remove the --dir & the command from the switches
+    # Remove the --dir & the command from the switches
     shift
     DIR=${1}
     shift
@@ -57,6 +77,7 @@ UT_DIR="${DIR}/ut"
 # Check if the common document configuration is present, if not clone it
 if [ -d ${UT_DIR} ]; then
     pushd ${UT_DIR} > /dev/null
+    check_next_revision
     ./build.sh $@
     popd > /dev/null
 else
@@ -65,7 +86,8 @@ else
     pushd ${DIR} > /dev/null
     git clone ${TEST_REPO} ut
     cd ${UT_DIR}
-    git checkout ${UT_PROJECT_VERSION}
+    check_next_revision
+    git checkout ${UT_SUITE_VERSION}
     popd > /dev/null
     ./${0} ${PARAMS}
 fi
