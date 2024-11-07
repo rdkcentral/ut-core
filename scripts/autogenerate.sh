@@ -19,7 +19,7 @@
 # * limitations under the License.
 # *
 
-#* *************************************************************************************************
+#* *************************************************************************************************************************
 #*
 #*   ** Project      : Unit Test Script
 #*   ** @addtogroup  : ut
@@ -27,9 +27,9 @@
 #*   ** @date        : 12/01/2023
 #*   **
 #*   ** @brief : Shell script to initiate autogeneration of skeletons and L1 and L2 tests' framework
-#*   **
+#*   ** @user-manual : https://github.com/rdkcentral/ut-core/wiki/autogenerate.sh:-Running-the-Framework-Generation-Script
 #*
-#* **************************************************************************************************
+#* *************************************************************************************************************************
 
 set -e
 
@@ -341,6 +341,7 @@ function AGT_show_usage()
 	AGT_INFO "	-branch / -b <branch-name>\t - Use this switch along with branch-name"
 	AGT_INFO "	-help / -h\t\t\t - Shows the usage"
 	AGT_WARNING "	\n\nPLEASE NOTE: run \`export AGT_DEBUG=1\` on terminal before running this script to get the debug messages"
+	AGT_INFO "   \nUser Manual : https://github.com/rdkcentral/ut-core/wiki/autogenerate.sh:-Running-the-Framework-Generation-Script"
 	echo
 }
 

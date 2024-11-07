@@ -2,6 +2,7 @@
 
 | Date (DD/MM/YY)  | Comment | Document Version |
 |--------|---------|---------|
+| 07/11/24 | Updated How to use Autogenerate script url | 2.0.2|
 | 19/06/24 | Extended LD_LIBRARY_PATH | 2.0.1|
 | 02/01/24 | Added Release Notes | 2.0.0|
 | 06/10/23 | Initial release| 1.2.0|
@@ -397,7 +398,7 @@ The purpose of the test level is to test the module functionality as much as pos
 
 ## Autogen scripts
 
-Please refer to [docs/pages/autogenTemplate.md](autogenTemplate.md)
+Please refer to [Running-the-Framework-Generation-Script](https://github.com/rdkcentral/ut-core/wiki/autogenerate.sh:-Running-the-Framework-Generation-Script)
 
 ## UT-Core testing suite
 
