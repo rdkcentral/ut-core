@@ -72,6 +72,10 @@ AGT_validate_branch()
 {
 	local url=$1
 	local branch=$2
+	if [ -d "$url" ]; then
+		AGT_ERROR "Please use this option along with url!"
+		exit 1
+	fi
 	# Exit with error if remote branch does not exist
 	if [ ! `git ls-remote --heads "${url}" "${branch}" | awk '{print $2}' ` ]; then
 		AGT_ERROR "Branch [${branch}] does not exist!"
@@ -274,9 +278,15 @@ function AGT_clone_ut()
 		mkdir ${AGT_APIDEF_HOME}/ut
 		cp -r ${UT_DIR_PATH}/* ${AGT_APIDEF_HOME}/ut/
 	else
-		AGT_SUCCESS "Original UT url is '${UT_URL}'"
-		# Clone the UT repo
-		git clone ${UT_URL} ${AGT_APIDEF_HOME}/ut &> /dev/null
+        AGT_SUCCESS "Original UT url is '${UT_URL}'"
+        if [ ! -d "$UT_URL" ]; then
+            # Clone the UT repo
+            git clone ${UT_URL} ${AGT_APIDEF_HOME}/ut &> /dev/null
+        else
+            mkdir -p ${AGT_APIDEF_HOME}/ut
+            resolved_path="$(readlink -f "$url")"
+            cp -r "$resolved_path"/* "${AGT_APIDEF_HOME}/ut/."
+        fi
 	fi
 
 	AGT_SUCCESS "UT repo is now cloned/copied"
@@ -297,13 +307,18 @@ AGT_generate_all()
 	AGT_SUCCESS "Workspace directory available at [../workspace/]"
 
 	AGT_DEBUG_END "Creating Workspace"
-	AGT_clone_apidef $url &> /dev/null
-	if [ ! -z "${branch}" ]; then
-		cd ${AGT_APIDEF_HOME}
-		git checkout ${branch} &> /dev/null
-		AGT_SUCCESS "Branch [${branch}] is now checked out"
-		cd - 1>/dev/null
-	fi
+    if [ ! -d "$url" ]; then
+        AGT_clone_apidef $url &> /dev/null
+        if [ ! -z "${branch}" ]; then
+            cd ${AGT_APIDEF_HOME}
+            git checkout ${branch} &> /dev/null
+            AGT_SUCCESS "Branch [${branch}] is now checked out"
+            cd - 1>/dev/null
+        fi
+    else
+        cp -r "$(readlink -f "$url")" ${AGT_UT_WORKSPACE}
+        AGT_APIDEF_EXISTS=true
+    fi
 	AGT_clone_doxygen_repo
 	AGT_copy_templates ${AGT_DIR_APIDEF}
 	AGT_clone_ut $url
@@ -334,11 +349,11 @@ function AGT_show_usage()
 	echo -e ""
 	AGT_ALERT "./autogenerate.sh <api-def-repo-url/-c/-clean/-b/-branch/-h/-help>"
 	echo -e ""
-	AGT_INFO "	api-def-repo-url\t\t - The API Definition url to be used as first argument separately"
-	AGT_INFO "	branch-name\t\t\t - API definition branch to be checked out and used along with branch switch"
+	AGT_INFO "	api-def-repo-url\t\t - The API Definition url or directrory path to be used as first argument separately"
+	AGT_INFO "	branch-name\t\t\t - API definition branch to be checked out and used along with branch switch, applicable only with urls"
 	echo -e ""
 	AGT_INFO "	-clean / -c\t\t\t - Cleans the workspace directory"
-	AGT_INFO "	-branch / -b <branch-name>\t - Use this switch along with branch-name"
+	AGT_INFO "	-branch / -b <branch-name>\t - Use this switch along with branch-name, applicable only with urls"
 	AGT_INFO "	-help / -h\t\t\t - Shows the usage"
 	AGT_WARNING "	\n\nPLEASE NOTE: run \`export AGT_DEBUG=1\` on terminal before running this script to get the debug messages"
 	AGT_INFO "   \nUser Manual : https://github.com/rdkcentral/ut-core/wiki/autogenerate.sh:-Running-the-Framework-Generation-Script"
@@ -370,13 +385,20 @@ function AGT_decode_switches()
 			# - http://git
 
 			git@github.com*|github.com*|git://git*|ssh://git*|http://git*|https://git*)
-			;;
+                AGT_INFO "Processing git URL: $switch"
+            ;;
 
-			* )
-				AGT_ERROR "[$switch] unknown switch"
-				AGT_show_usage
-				exit 1
-			;;
+            # Check if the argument is a valid directory path
+            *)
+                if [ -d "$switch" ]; then
+                    AGT_INFO "Processing directory path: $switch"
+                    # Add your directory processing commands here
+                else
+                    AGT_ERROR "[$switch] unknown switch"
+                    AGT_show_usage
+                    exit 1
+                fi
+            ;;
 		esac
 	done
 

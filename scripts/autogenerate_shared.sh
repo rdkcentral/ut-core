@@ -64,7 +64,15 @@ function AGT_commons_init()
         # API Definition name inside the worksapce dir
         AGT_APIDEF_NAME=`echo ${1##*/}| cut -d'.' -f1`
         # Base URL for git repos
-        AGT_BASE_URL=`echo ${1} | sed 's|\(.*\)/.*|\1|'`
+        if [ ! -d "$1" ]; then
+                # API Definition name inside the worksapce dir
+                AGT_APIDEF_NAME=`echo ${1##*/}| cut -d'.' -f1`
+                # Base URL for git repos
+                AGT_BASE_URL=`echo ${1} | sed 's|\(.*\)/.*|\1|'`
+        else
+                # API Definition name inside the worksapce dir
+                AGT_APIDEF_NAME=`basename $(readlink -f "$1")`
+        fi
         # API Definition home inside the worksapce dir
         AGT_APIDEF_HOME=${AGT_UT_WORKSPACE}/${AGT_APIDEF_NAME}
         # Include dir inside worksapce dir
