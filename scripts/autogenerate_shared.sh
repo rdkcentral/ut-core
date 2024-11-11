@@ -64,11 +64,23 @@ function AGT_commons_init()
         # API Definition name inside the worksapce dir
         AGT_APIDEF_NAME=`echo ${1##*/}| cut -d'.' -f1`
         # Base URL for git repos
-        AGT_BASE_URL=`echo ${1} | sed 's|\(.*\)/.*|\1|'`
+        if [ ! -d "$1" ]; then
+                # API Definition name inside the worksapce dir
+                AGT_APIDEF_NAME=`echo ${1##*/}| cut -d'.' -f1`
+                # Base URL for git repos
+                AGT_BASE_URL=`echo ${1} | sed 's|\(.*\)/.*|\1|'`
+        else
+                # API Definition name inside the worksapce dir
+                AGT_APIDEF_NAME=`basename $(readlink -f "$1")`
+        fi
         # API Definition home inside the worksapce dir
         AGT_APIDEF_HOME=${AGT_UT_WORKSPACE}/${AGT_APIDEF_NAME}
         # Include dir inside worksapce dir
-        AGT_INCLUDE_DIR=${AGT_APIDEF_HOME}/include
+        if [ ! -z "$(ls ${AGT_APIDEF_HOME}/include/*.h &> /dev/null)" ]; then
+                AGT_INCLUDE_DIR=${AGT_APIDEF_HOME}/include
+        else
+                AGT_APIDEF_HEADER_FILES=$(find ${AGT_APIDEF_HOME} -type f -name "*.h" -print0 2> /dev/null | tr '\0' ' ')
+        fi
         # UT dir inside worksapce dir 
         AGT_UT_HOME=${AGT_APIDEF_HOME}/ut
         # Cmock dir inside worksapce dir
@@ -79,6 +91,8 @@ function AGT_commons_init()
         AGT_SKELETONS_DIR=${AGT_UT_HOME}/skeletons
         # Skeleton dir's child dir, src inside worksapce dir
         AGT_SKELETONS_SRC=${AGT_SKELETONS_DIR}/src
+        # CMock Config file path
+        AGT_CMOCK_CONFIG_FILE=${AGT_SCRIPTS_HOME}/cmock_config.yml
 
 }
 
