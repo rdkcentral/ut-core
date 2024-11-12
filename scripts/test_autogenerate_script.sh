@@ -94,6 +94,10 @@ sleep 2
 run_command 'echo "y" | ./autogenerate.sh https://github.com/rdkcentral/RdkWanManager.git -b RDKB-56270-gtest'
 run_command './autogenerate.sh -c'
 
+#Test 7
+run_command 'echo "y" | ./autogenerate.sh https://github.com/rdkcentral/rdkb-halif-wifi'
+run_command './autogenerate.sh -c'
+
 # Display consolidated results
 echo
 echo "Total tests run: $total_tests"
