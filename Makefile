@@ -121,6 +121,9 @@ framework: checkvariantchange createdirs download_and_build
 	@make test VARIANT=${VARIANT}
 	@cp -r $(UT_CONTROL)/build/$(TARGET)/lib/libut_control.* $(LIB_DIR) $(BIN_DIR)
 	@${ECHOE} ${GREEN}ut-control LIB Copied to [${BIN_DIR}]${NC}
+	@if [ -d "$(TOP_DIR)/../include" ] && [ -d "$(BUILD_DIR)/src" ]; then \
+		${UT_CORE_DIR}/compare-functions-in-headers-testsuite.sh $(TOP_DIR)/../include $(BUILD_DIR)/src; \
+	fi
 
 download_and_build:
 	@${ECHOE} ${GREEN}Ensure ut-core frameworks are present${NC}
