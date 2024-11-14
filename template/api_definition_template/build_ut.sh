@@ -26,27 +26,33 @@
 # This will look up the last tag in the git repo, depending on the project this may require modification
 # We need to check for the old format, and also support either old or new depending on the repo.
 # Transition was from hal -> hal-test, new format is from halif -> halif-test
+# More Info : https://github.com/rdkcentral/ut-core/wiki/2.3.-Standards:-Performing-Changes-to-an-interface
+
+# This script aims to provide the latest binary compatible version of the testing suite for a clean environment.
+# It supports automatic upgrades within the same major version (e.g., 1.x.x to 1.y.y). However, when a new major
+# version is released (e.g., 2.x.x), manual intervention is required to update UT_PROJECT_VERSION.
+# This precaution prevents potential test breakages caused by incompatible changes introduced in the new major version.
+# The script will choose highest version of the tags starting with ${UT_PROJECT_VERSION}. If it fails to find one, then
+# it falls back to the highest version available among tags
+
 TEST_REPO=$(git remote -vv | head -n1 | awk -F ' ' '{print $2}' | sed 's/halif/halif-test/g' | sed 's/hal-/haltest-/g' )
 DIR="."
 
 # Setting default UT_PROJECT_VERSION to 1.
 if [ -z "${UT_PROJECT_VERSION}" ]; then
-    # This script aims to provide the latest binary compatible version of the testing suite for a clean environment.
-    # It supports automatic upgrades within the same major version (e.g., 1.x.x to 1.y.y). However, when a new major
-    # version is released (e.g., 2.x.x), manual intervention is required to update UT_PROJECT_VERSION.
-    # This precaution prevents potential test breakages caused by incompatible changes introduced in the new major version.
-
     UT_PROJECT_VERSION="1." #alternatively use : UT_PROJECT_VERSION=main ./build_ut.sh, to force build version main/master
 fi
-
 
 # This function checks the latest version of UT project and recommends an upgrade if reuqired
 function check_next_revision()
 {
-    # Set default UT_SUITE_VERSION to next revision, if it's set then we don't need to tell you again
+    # Set default UT_SUITE_VERSION to best revision, if it's set then we don't need to tell you again
     if [ -v ${UT_SUITE_VERSION} ]; then
-        UT_SUITE_VERSION=$(git tag | grep ^${UT_PROJECT_VERSION} | sort -r | head -n1)
-        UT_NEXT_VERSION=$(git tag | sort -r | head -n1)
+        UT_SUITE_VERSION=$(git tag | grep ^${UT_PROJECT_VERSION} | sort -r | head -n1)  # Selects the highest version of the tags starting with ${UT_PROJECT_VERSION}
+        UT_NEXT_VERSION=$(git tag | sort -r | head -n1)                                 # Selects the highest version from the tags
+        if [ -z ${UT_SUITE_VERSION} ]; then
+            UT_SUITE_VERSION="${UT_NEXT_VERSION}"                                       # Fallback if there is no version of tags are available starting with ${UT_PROJECT_VERSION}
+        fi
         echo -e ${YELLOW}ut project version selected:[${UT_SUITE_VERSION}]${NC}
         if [ "${UT_NEXT_VERSION}" != "${UT_SUITE_VERSION}" ]; then
             echo -e ${RED}--- New Version of ut project released [${UT_NEXT_VERSION}] consider upgrading ---${NC}
