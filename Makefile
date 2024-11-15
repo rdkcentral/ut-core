@@ -122,7 +122,7 @@ framework: checkvariantchange createdirs download_and_build
 	@cp -r $(UT_CONTROL)/build/$(TARGET)/lib/libut_control.* $(LIB_DIR) $(BIN_DIR)
 	@${ECHOE} ${GREEN}ut-control LIB Copied to [${BIN_DIR}]${NC}
 	@if [ -d "$(TOP_DIR)/../include" ] && [ -d "$(BUILD_DIR)/src" ]; then \
-		${UT_CORE_DIR}/compare-functions-in-headers-testsuite.sh $(TOP_DIR)/../include $(BUILD_DIR)/src; \
+		${UT_CORE_DIR}/compare-functions-in-headers-testsuite.sh $(TOP_DIR)/../include $(BUILD_DIR)/src ${TARGET}; \
 	fi
 
 download_and_build:

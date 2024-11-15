@@ -34,14 +34,15 @@ RED='\033[0;31m'
 NC='\033[0m' # No color (reset)
 
 # Check if the correct number of arguments is provided
-if [ "$#" -ne 2 ]; then
-  echo "Usage: $0 <header_folder> <object_folder>"
+if [ "$#" -ne 3 ]; then
+  echo "Usage: $0 <header_folder> <object_folder> <target>"
   exit 1
 fi
 
 # Assign folders from arguments
 header_folder=$1
 object_folder=$2
+target=$3
 
 # Check if the header folder exists
 if [ ! -d "$header_folder" ]; then
@@ -94,9 +95,9 @@ for header_file in "$header_folder"/*.h; do
 
     # If the function was not found in any object file, highlight it as missing
     if [ "$found_in_any_object" = false ]; then
-      echo -e "${RED}*******************************************************************************${NC}"
-      echo -e "${RED}  ** Function '$func' is NOT found in ANY object file! **${NC}"
-      echo -e "${RED}*******************************************************************************${NC}"
+      echo -e "${RED}***************************************************************************************${NC}"
+      echo -e "${RED}  ** Function '$func' is NOT found in ANY object file on target ${target}! **${NC}"
+      echo -e "${RED}***************************************************************************************${NC}"
     fi
   done
 done	
