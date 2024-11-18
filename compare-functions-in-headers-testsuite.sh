@@ -72,9 +72,7 @@ for header_file in "$header_folder"/*.h; do
   for func in $function_names; do
     # Check if the function is found in the binary file (defined or undefined)
     if ! nm "$binary_file" | grep -wP "\b$func\b" > /dev/null; then
-      echo -e "${YELLOW}***************************************************************************************${NC}"
-      echo -e "${YELLOW}  ** Function '$func' is NOT found in the binary file on target ${target}! **${NC}"
-      echo -e "${YELLOW}***************************************************************************************${NC}"
+      echo -e "${YELLOW}  ** Warning Function '$func' is NOT found on target ${target}! **${NC}"
     fi
   done
 done
