@@ -29,19 +29,19 @@
 #* *************************************************************************************************************************
 
 
-# Color code for red text
-RED='\033[0;31m'
+# Color code for yellow text
+YELLOW='\033[0;33m'
 NC='\033[0m' # No color (reset)
 
 # Check if the correct number of arguments is provided
 if [ "$#" -ne 3 ]; then
-  echo "Usage: $0 <header_folder> <object_folder> <target>"
+  echo "Usage: $0 <header_folder> <binary_file> <target>"
   exit 1
 fi
 
-# Assign folders from arguments
+# Assign arguments
 header_folder=$1
-object_folder=$2
+binary_file=$2
 target=$3
 
 # Check if the header folder exists
@@ -50,9 +50,9 @@ if [ ! -d "$header_folder" ]; then
   exit 1
 fi
 
-# Check if the object folder exists
-if [ ! -d "$object_folder" ]; then
-  echo "Error: Object folder '$object_folder' not found!"
+# Check if the binary file exists
+if [ ! -f "$binary_file" ]; then
+  echo "Error: Binary file '$binary_file' not found!"
   exit 1
 fi
 
@@ -64,40 +64,17 @@ for header_file in "$header_folder"/*.h; do
     break
   fi
 
-  #echo "Checking functions in header file: $header_file"    #TODO: Enable for logs
-  
   # Extract function names from the header file, excluding typedefs and function pointers
-  #function_names=$(grep -P '^\w+\s+\w+\s*\([^)]*\)\s*;' "$header_file" | \
-  #  grep -Pv 'typedef|(\w+\s*\*.*\(\))' | \
-  #  sed -E 's/\s*\(.*\)//')
   function_names=$(grep -hoP '^\s*(?!typedef)\w+\s+\w+\s*\(.*\)\s*;' "$header_file" | \
                    sed -E 's/^\s*\w+\s+(\w+)\s*\(.*/\1/' | sort | uniq)
  
-  # Initialize a list of functions to check if they're found in any object file
+ # Initialize a list of functions to check if they're found in the binary file
   for func in $function_names; do
-    found_in_any_object=false
-
-    # Loop through all object files in the object folder
-    for object_file in "$object_folder"/*.o; do
-      # Check if the object file exists
-      if [ ! -f "$object_file" ]; then
-        echo "Warning: No object files found in '$object_folder'."
-        break
-      fi
-
-      # Check if the function is found in the object file (defined or undefined)
-      if nm "$object_file" | grep -w " $func$" > /dev/null || nm "$object_file" | grep -w " U $func$" > /dev/null; then
-        #echo "  Function '$func' is available in object file '$object_file'.PASS"      #TODO: Enable for logs
-        found_in_any_object=true
-        break  # No need to check further object files for this function
-      fi
-    done
-
-    # If the function was not found in any object file, highlight it as missing
-    if [ "$found_in_any_object" = false ]; then
-      echo -e "${RED}***************************************************************************************${NC}"
-      echo -e "${RED}  ** Function '$func' is NOT found in ANY object file on target ${target}! **${NC}"
-      echo -e "${RED}***************************************************************************************${NC}"
+    # Check if the function is found in the binary file (defined or undefined)
+    if ! nm "$binary_file" | grep -wP "\b$func\b" > /dev/null; then
+      echo -e "${YELLOW}***************************************************************************************${NC}"
+      echo -e "${YELLOW}  ** Function '$func' is NOT found in the binary file on target ${target}! **${NC}"
+      echo -e "${YELLOW}***************************************************************************************${NC}"
     fi
   done
-done	
+done
