@@ -90,8 +90,8 @@ function AGT_generate_skeletons()
 
         # Run the skeleton generate command
         cd ${AGT_UT_HOME}
-        if [[ -n $AGT_INCLUDE_DIR ]]; then
-                HEADER_FILES=${AGT_INCLUDE_DIR}/*.h
+        if [ -n "${AGT_INCLUDE_DIR}" ] && [ -d "${AGT_INCLUDE_DIR}" ]; then
+                HEADER_FILES=$(ls "${AGT_INCLUDE_DIR}"/*.h)
         else
                 HEADER_FILES=${AGT_APIDEF_HEADER_FILES}
         fi
@@ -130,6 +130,7 @@ function AGT_set_up_skeletons()
                 AGT_DEBUG_START "Deleting skeletons' src files"
                 rm ${AGT_SKELETONS_SRC}/*
                 AGT_DEBUG_END "Deleting skeletons' src files"
+                AGT_WARNING "Deleted skeletons' original src files"
         fi
 }
 

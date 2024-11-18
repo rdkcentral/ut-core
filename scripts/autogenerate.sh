@@ -127,7 +127,7 @@ function AGT_clone_doxygen_repo()
 	if [ ! -d "${AGT_DOXYGEN_DIR}"  ]; then
 		# Clone doxygen template into doxy dir in workspace/api-def dir
 		git clone git@github.com:rdkcentral/hal-doxygen.git ${AGT_DOXYGEN_DIR} &> /dev/null
-		AGT_SUCCESS "Doxygen repo has been cloned in [../workspace/${AGT_DOXYGEN_REPO_NAME}]"
+		AGT_SUCCESS "Doxygen repo has been cloned in [${AGT_UT_WORKSPACE_RELATIVE_PATH}/${AGT_DOXYGEN_REPO_NAME}]"
 	fi
 
 	cd ${AGT_SCRIPTS_HOME}
@@ -304,7 +304,7 @@ AGT_generate_all()
 	# Create workspace if it doesn't exist already
 	AGT_DEBUG_START "Creating Workspace"
 	mkdir -p ${AGT_UT_WORKSPACE}
-	AGT_SUCCESS "Workspace directory available at [../workspace/]"
+	AGT_SUCCESS "Workspace directory available at [${AGT_UT_WORKSPACE_RELATIVE_PATH}]"
 
 	AGT_DEBUG_END "Creating Workspace"
     if [ ! -d "$url" ]; then
@@ -327,7 +327,7 @@ AGT_generate_all()
 	./autogenerate_tests.sh ${AGT_APIDEF_URL} ${AGT_DEBUG}
 	echo -e ""
 	AGT_ALERT "PLEASE REVIEW, SELECT, EDIT AND COMMIT AS REQUIRED"
-	AGT_ALERT "GENERATED TESTS AVAILABLE IN ${PURPLE}[../workspace/${AGT_APIDEF_NAME}/ut/src]"
+	AGT_ALERT "GENERATED TESTS AVAILABLE IN ${PURPLE}[${AGT_UT_WORKSPACE_RELATIVE_PATH}/${AGT_APIDEF_NAME}/ut/src]"
 }
 
 # Clear workspace dir
