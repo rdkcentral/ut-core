@@ -60,7 +60,8 @@ function AGT_commons_init()
         # Base dir of where the scripts are in ut-core
         AGT_BASEDIR=${AGT_SCRIPTS_HOME}/..
         # Workspace dir in ut-core where the script generates the tests
-        AGT_UT_WORKSPACE=${AGT_BASEDIR}/workspace
+        AGT_UT_WORKSPACE=${AGT_SCRIPTS_HOME}/workspace
+        AGT_UT_WORKSPACE_RELATIVE_PATH="./workspace"
         # API Definition name inside the worksapce dir
         AGT_APIDEF_NAME=`echo ${1##*/}| cut -d'.' -f1`
         # Base URL for git repos
@@ -76,8 +77,8 @@ function AGT_commons_init()
         # API Definition home inside the worksapce dir
         AGT_APIDEF_HOME=${AGT_UT_WORKSPACE}/${AGT_APIDEF_NAME}
         # Include dir inside worksapce dir
-        if [ ! -z "$(ls ${AGT_APIDEF_HOME}/include/*.h &> /dev/null)" ]; then
-                AGT_INCLUDE_DIR=${AGT_APIDEF_HOME}/include
+        if [ -d "${AGT_APIDEF_HOME}/include/" ]; then
+                AGT_INCLUDE_DIR="${AGT_APIDEF_HOME}/include"
         else
                 AGT_APIDEF_HEADER_FILES=$(find ${AGT_APIDEF_HOME} -type f -name "*.h" -print0 2> /dev/null | tr '\0' ' ')
         fi
