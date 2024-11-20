@@ -67,7 +67,7 @@ popd > /dev/null # ${MY_DIR}
 # Therefore in that case it warns you but doesnt' chnage to that version, which could cause your tests to break.
 # Change this to upgrade your ut-control Major versions. Non ABI Changes 1.x.x are supported, between major revisions
 
-UT_CONTROL_PROJECT_VERSION="1.6.0"  # Fixed version
+UT_CONTROL_PROJECT_VERSION="1.6.1"  # Fixed version
 
 # Clone the Unit Test Requirements
 UT_CONTROL_REPO=git@github.com:rdkcentral/ut-control.git

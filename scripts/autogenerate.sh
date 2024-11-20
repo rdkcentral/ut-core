@@ -19,7 +19,7 @@
 # * limitations under the License.
 # *
 
-#* *************************************************************************************************
+#* *************************************************************************************************************************
 #*
 #*   ** Project      : Unit Test Script
 #*   ** @addtogroup  : ut
@@ -27,17 +27,55 @@
 #*   ** @date        : 12/01/2023
 #*   **
 #*   ** @brief : Shell script to initiate autogeneration of skeletons and L1 and L2 tests' framework
-#*   **
+#*   ** @user-manual : https://github.com/rdkcentral/ut-core/wiki/autogenerate.sh:-Running-the-Framework-Generation-Script
 #*
-#* **************************************************************************************************
+#* *************************************************************************************************************************
 
 set -e
+
+# Minimum required versions
+MIN_RUBY_VERSION="2.7.0"
+MIN_BUNDLER_VERSION="2.4.17"
+
+# Function to compare two version numbers
+AGT_version_ge() {
+    # Returns 0 (true) if $1 >= $2
+    [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" == "$2" ]
+}
+
+# Function to check Ruby version
+AGT_check_ruby_version() {
+    # Get the installed Ruby version
+    INSTALLED_RUBY_VERSION=$(ruby -v 2>/dev/null | awk '{print $2}')
+    if AGT_version_ge "$INSTALLED_RUBY_VERSION" "$MIN_RUBY_VERSION"; then
+        AGT_INFO "Ruby version $INSTALLED_RUBY_VERSION meets the minimum requirement of $MIN_RUBY_VERSION."
+    else
+        AGT_ERROR "Ruby version $MIN_RUBY_VERSION or higher is required. Installed version is $INSTALLED_RUBY_VERSION."
+        exit 1
+    fi
+}
+
+# Function to check Bundler version
+AGT_check_bundler_version() {
+    # Get the installed Bundler version
+    INSTALLED_BUNDLER_VERSION=$(bundle -v 2>/dev/null | awk '{print $3}')
+    if AGT_version_ge "$INSTALLED_BUNDLER_VERSION" "$MIN_BUNDLER_VERSION"; then
+        AGT_INFO "Bundler version $INSTALLED_BUNDLER_VERSION meets the minimum requirement of $MIN_BUNDLER_VERSION."
+    else
+        AGT_ERROR "Bundler version $MIN_BUNDLER_VERSION or higher is required. Bundler is not installed or the installed version is $INSTALLED_BUNDLER_VERSION."
+        exit 1
+    fi
+}
 
 # Validate if the branch is correct and exit script if it isn't
 AGT_validate_branch()
 {
 	local url=$1
 	local branch=$2
+	if [ -d "$url" ]; then
+		AGT_ERROR "Please use this option along with url!"
+		exit 1
+	fi
 	# Exit with error if remote branch does not exist
 	if [ ! `git ls-remote --heads "${url}" "${branch}" | awk '{print $2}' ` ]; then
 		AGT_ERROR "Branch [${branch}] does not exist!"
@@ -88,8 +126,8 @@ function AGT_clone_doxygen_repo()
 
 	if [ ! -d "${AGT_DOXYGEN_DIR}"  ]; then
 		# Clone doxygen template into doxy dir in workspace/api-def dir
-		git clone ${AGT_BASE_URL}/${AGT_DOXY_REPO} ${AGT_DOXYGEN_DIR} &> /dev/null
-		AGT_SUCCESS "Doxygen repo has been cloned in [../workspace/${AGT_DOXYGEN_REPO_NAME}]"
+		git clone git@github.com:rdkcentral/hal-doxygen.git ${AGT_DOXYGEN_DIR} &> /dev/null
+		AGT_SUCCESS "Doxygen repo has been cloned in [${AGT_UT_WORKSPACE_RELATIVE_PATH}/${AGT_DOXYGEN_REPO_NAME}]"
 	fi
 
 	cd ${AGT_SCRIPTS_HOME}
@@ -212,25 +250,46 @@ function AGT_clone_ut()
 	fi
 
 	# Default UT repo url
-	UT_URL=$(echo "$url" | sed 's,hal,haltest,g')
+	UT_URL=$(echo "$url" | sed 's,halif,halif-test,g')
 	AGT_WARNING " The url for UT clone is : ${UT_URL} "
 
 	# Check with user if ut repo url is correct , else get the correct one
 	read -p "$( AGT_ALERT Is this correct? )" yn
 	case $yn in
-		[Yy]* ) ;;
-		[Nn]* ) read -p "$(AGT_ALERT Please input the correct url : ) " UT_URL
+		[Yy]* )
+		# Proceed without prompting
 		;;
-		* ) AGT_WARNING "No input added. Keeping original url "
+		[Nn]* )
+		# Prompt for inputs
+		read -p "$(AGT_ALERT "Please input the URL (or leave blank to skip): ") " UT_INPUT_URL
+		read -p "$(AGT_ALERT "Please input the directory (absolute) path (or leave blank to skip): ") " UT_DIR_PATH
+		;;
+		* )
+		AGT_WARNING "No input added. Keeping original URL"
 		;;
 	esac
 
+	if [[ ! -z "$UT_INPUT_URL" ]]; then
+		AGT_SUCCESS "UT url is '${UT_INPUT_URL}'"
+		# Clone the UT repo
+		git clone ${UT_INPUT_URL} ${AGT_APIDEF_HOME}/ut &> /dev/null
+	elif [[ ! -z "$UT_DIR_PATH" ]]; then
+		AGT_SUCCESS "UT directory path  is '${UT_DIR_PATH}'"
+		mkdir ${AGT_APIDEF_HOME}/ut
+		cp -r ${UT_DIR_PATH}/* ${AGT_APIDEF_HOME}/ut/
+	else
+        AGT_SUCCESS "Original UT url is '${UT_URL}'"
+        if [ ! -d "$UT_URL" ]; then
+            # Clone the UT repo
+            git clone ${UT_URL} ${AGT_APIDEF_HOME}/ut &> /dev/null
+        else
+            mkdir -p ${AGT_APIDEF_HOME}/ut
+            resolved_path="$(readlink -f "$url")"
+            cp -r "$resolved_path"/* "${AGT_APIDEF_HOME}/ut/."
+        fi
+	fi
 
-	AGT_SUCCESS "UT url is '${UT_URL}'"
-	# Validate if UT url is correct
-	# Clone the UT repo
-	git clone ${UT_URL} ${AGT_APIDEF_HOME}/ut &> /dev/null
-	AGT_SUCCESS "UT repo is now cloned"
+	AGT_SUCCESS "UT repo is now cloned/copied"
 	AGT_UT_EXISTS=true
 
 	AGT_DEBUG_END "Building UT"
@@ -245,16 +304,21 @@ AGT_generate_all()
 	# Create workspace if it doesn't exist already
 	AGT_DEBUG_START "Creating Workspace"
 	mkdir -p ${AGT_UT_WORKSPACE}
-	AGT_SUCCESS "Workspace directory available at [../workspace/]"
+	AGT_SUCCESS "Workspace directory available at [${AGT_UT_WORKSPACE_RELATIVE_PATH}]"
 
 	AGT_DEBUG_END "Creating Workspace"
-	AGT_clone_apidef $url &> /dev/null
-	if [ ! -z "${branch}" ]; then
-		cd ${AGT_APIDEF_HOME}
-		git checkout ${branch} &> /dev/null
-		AGT_SUCCESS "Branch [${branch}] is now checked out"
-		cd - 1>/dev/null
-	fi
+    if [ ! -d "$url" ]; then
+        AGT_clone_apidef $url &> /dev/null
+        if [ ! -z "${branch}" ]; then
+            cd ${AGT_APIDEF_HOME}
+            git checkout ${branch} &> /dev/null
+            AGT_SUCCESS "Branch [${branch}] is now checked out"
+            cd - 1>/dev/null
+        fi
+    else
+        cp -r "$(readlink -f "$url")" ${AGT_UT_WORKSPACE}
+        AGT_APIDEF_EXISTS=true
+    fi
 	AGT_clone_doxygen_repo
 	AGT_copy_templates ${AGT_DIR_APIDEF}
 	AGT_clone_ut $url
@@ -263,7 +327,7 @@ AGT_generate_all()
 	./autogenerate_tests.sh ${AGT_APIDEF_URL} ${AGT_DEBUG}
 	echo -e ""
 	AGT_ALERT "PLEASE REVIEW, SELECT, EDIT AND COMMIT AS REQUIRED"
-	AGT_ALERT "GENERATED TESTS AVAILABLE IN ${PURPLE}[../workspace/${AGT_APIDEF_NAME}/ut/src]"
+	AGT_ALERT "GENERATED TESTS AVAILABLE IN ${PURPLE}[${AGT_UT_WORKSPACE_RELATIVE_PATH}/${AGT_APIDEF_NAME}/ut/src]"
 }
 
 # Clear workspace dir
@@ -285,13 +349,14 @@ function AGT_show_usage()
 	echo -e ""
 	AGT_ALERT "./autogenerate.sh <api-def-repo-url/-c/-clean/-b/-branch/-h/-help>"
 	echo -e ""
-	AGT_INFO "	api-def-repo-url\t\t - The API Definition url to be used as first argument separately"
-	AGT_INFO "	branch-name\t\t\t - API definition branch to be checked out and used along with branch switch"
+	AGT_INFO "	api-def-repo-url\t\t - The API Definition url or directrory path to be used as first argument separately"
+	AGT_INFO "	branch-name\t\t\t - API definition branch to be checked out and used along with branch switch, applicable only with urls"
 	echo -e ""
 	AGT_INFO "	-clean / -c\t\t\t - Cleans the workspace directory"
-	AGT_INFO "	-branch / -b <branch-name>\t - Use this switch along with branch-name"
+	AGT_INFO "	-branch / -b <branch-name>\t - Use this switch along with branch-name, applicable only with urls"
 	AGT_INFO "	-help / -h\t\t\t - Shows the usage"
 	AGT_WARNING "	\n\nPLEASE NOTE: run \`export AGT_DEBUG=1\` on terminal before running this script to get the debug messages"
+	AGT_INFO "   \nUser Manual : https://github.com/rdkcentral/ut-core/wiki/autogenerate.sh:-Running-the-Framework-Generation-Script"
 	echo
 }
 
@@ -320,13 +385,20 @@ function AGT_decode_switches()
 			# - http://git
 
 			git@github.com*|github.com*|git://git*|ssh://git*|http://git*|https://git*)
-			;;
+                AGT_INFO "Processing git URL: $switch"
+            ;;
 
-			* )
-				AGT_ERROR "[$switch] unknown switch"
-				AGT_show_usage
-				exit 1
-			;;
+            # Check if the argument is a valid directory path
+            *)
+                if [ -d "$switch" ]; then
+                    AGT_INFO "Processing directory path: $switch"
+                    # Add your directory processing commands here
+                else
+                    AGT_ERROR "[$switch] unknown switch"
+                    AGT_show_usage
+                    exit 1
+                fi
+            ;;
 		esac
 	done
 
@@ -356,7 +428,7 @@ function AGT_init()
 	fi
 
 	# Variables
-	AGT_DOXY_REPO="rdk-components-hal-doxygen.git"
+	AGT_DOXY_REPO="hal-doxygen.git"
 	AGT_DOXYGEN_REPO_NAME=`echo "$(basename "$AGT_DOXY_REPO" .git)"`
 	AGT_DOXYGEN_DIR=${AGT_UT_WORKSPACE}/${AGT_DOXYGEN_REPO_NAME}
 	# Dir path for API Defintion template in ut-core
@@ -377,6 +449,13 @@ function AGT_init()
 	AGT_update_variables ${AGT_UT_WORKSPACE}
 	AGT_update_variables ${AGT_APIDEF_HOME}
 	AGT_update_variables ${AGT_UT_HOME}
+
+	# Check for Ruby and Bundler versions
+	AGT_check_ruby_version
+	AGT_check_bundler_version
+
+	AGT_INFO "All version checks passed."
+	AGT_INFO "Also make sure that you have access to all the git repos like rdkcentral etc"
 }
 # URL of API definition repo to be cloned as first command line argument
 AGT_APIDEF_URL=$1
