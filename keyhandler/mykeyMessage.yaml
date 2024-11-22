@@ -1,0 +1,15 @@
+---
+remote:
+  map: rc6
+  events:
+    - event:
+        code : KEY_SPACE
+        type : EV_KEY
+        value : 1
+    - event:
+        code : KEY_SPACE
+        type : EV_KEY
+        value : 0
+    - event:
+        key: KEY_DOWN
+        repeat: 3
