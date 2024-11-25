@@ -38,12 +38,12 @@ all: $(TARGET_EXEC)
 
 # Build target
 $(TARGET_EXEC): $(SRC)
-	$(CC) $(SRC) $(XCFLAGS) $(XLDFLAGS) -o $(TARGET_EXEC)
+	@$(CC) $(SRC) $(XCFLAGS) $(XLDFLAGS) -o $(TARGET_EXEC)
 	@cp -r ../framework/ut-control/build/linux/lib/libut_control.* .
 
 # Clean target
 clean:
-	rm -f $(TARGET_EXEC)
+	@rm -f $(TARGET_EXEC)
 
 # # Run target
 # run: $(TARGTARGET_EXECET)
