@@ -182,22 +182,15 @@ int main(int argc, char *argv[])
     ioctl(fd, UI_DEV_SETUP, &usetup);
     ioctl(fd, UI_DEV_CREATE);
 
-    sleep(1);
 
     // Print the parsed arguments
-    UT_LOG_DEBUG("Profile file: %s\n", profile_file);
-    UT_LOG_DEBUG("type: %s\n", type);
-    UT_LOG_DEBUG("code: %s\n", code);
-    UT_LOG_DEBUG("value: %d\n", value);
+    //UT_LOG_DEBUG("Profile file: %s\n", profile_file);
+    //UT_LOG_DEBUG("type: %s\n", type);
+    //UT_LOG_DEBUG("code: %s\n", code);
+    //UT_LOG_DEBUG("value: %d\n", value);
 
     /* Key press, report the event, send key release, and report again */
     emit(fd, get_type(pInstance, type), get_code(pInstance, type, code), value);
-
-    // /*
-    //  * Give userspace some time to read the events before we destroy the
-    //  * device with UI_DEV_DESTROY.
-    //  */
-    sleep(1);
 
     ioctl(fd, UI_DEV_DESTROY);
     close(fd);

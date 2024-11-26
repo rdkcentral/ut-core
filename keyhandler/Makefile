@@ -24,7 +24,6 @@ TARGET_EXEC = ut_core_key_input
 
 # Variables
 CC = gcc -ggdb -o0 -Wall
-#CFLAGS = -Wall -Wextra -pedantic -std=c11
 SRC = keyhandler.c ../src/ut_kvp_profile.c
 INC_DIRS = ../include ../framework/CUnit-2.1-3/CUnit/Headers ../framework/ut-control/include
 
@@ -39,15 +38,10 @@ all: $(TARGET_EXEC)
 # Build target
 $(TARGET_EXEC): $(SRC)
 	@$(CC) $(SRC) $(XCFLAGS) $(XLDFLAGS) -o $(TARGET_EXEC)
-	@cp -r ../framework/ut-control/build/linux/lib/libut_control.* .
 
 # Clean target
 clean:
 	@rm -f $(TARGET_EXEC)
-
-# # Run target
-# run: $(TARGTARGET_EXECET)
-# 	./$(TARGET_EXEC) -p linux_profile_5.28.yaml -m mykeymessage.yaml
 
 # Phony targets
 .PHONY: all clean

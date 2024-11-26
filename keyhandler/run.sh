@@ -21,5 +21,15 @@
 
 set -e # error out if required
 
+# Check if $@ is empty
+if [ $# -eq 0 ]; then
+  echo "Error: No arguments provided."
+  echo "Usage: ${0} -c <event_code> -t <event_type> -v <value>"
+  exit 1
+fi
+
+if [ -d ../build/linux/lib ]; then
+  cp ../build/linux/lib/libut_control.so .
+fi
 export LD_LIBRARY_PATH=/usr/lib:/lib:/home/root:.
-./ut_core_key_input -p input-event-codes-5.15.yaml -c KEY_SPACE -t EV_KEY -v 1
+./ut_core_key_input -p input-event-codes-5.15.yaml $@

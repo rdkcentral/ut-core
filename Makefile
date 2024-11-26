@@ -118,9 +118,10 @@ all: framework $(OBJS)
 # Recursive make is needed as src files are not available during the first iteration
 framework: checkvariantchange createdirs download_and_build
 	@${ECHOE} ${GREEN}Framework downloaded and built${NC}
+	@cp $(UT_CONTROL)/build/$(TARGET)/lib/libut_control.* $(LIB_DIR)
+	@cp $(UT_CONTROL)/build/$(TARGET)/lib/libut_control.* $(BIN_DIR)
+	@${ECHOE} ${GREEN}ut-control LIB Copied to [${BIN_DIR}] and [${LIB_DIR}]${NC}
 	@make test VARIANT=${VARIANT}
-	@cp -r $(UT_CONTROL)/build/$(TARGET)/lib/libut_control.* $(LIB_DIR) $(BIN_DIR)
-	@${ECHOE} ${GREEN}ut-control LIB Copied to [${BIN_DIR}]${NC}
 	@if [ -d "$(TOP_DIR)/../include" ] && [ -d "$(BUILD_DIR)/src" ]; then \
 		${UT_CORE_DIR}/compare-functions-in-headers-testsuite.sh $(TOP_DIR)/../include $(BIN_DIR)/${TARGET_EXEC} ${TARGET}; \
 	fi
