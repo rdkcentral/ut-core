@@ -20,6 +20,7 @@
 #include <ut.h>
 #include <ut_internal.h>
 
+static TestMode_t  gTestMode;
 class UTTestRunner
 {
 public:
@@ -28,6 +29,7 @@ public:
         int argc = 1;
         char *argv[1] = {(char *)"test_runner"};
         ::testing::InitGoogleTest(&argc, argv);
+        std::cout <<"\n***************** UT-CORE CONSOLE - MAIN MENU ******************************\n";
     }
 
     void setTestFilter(const std::string &filter)
@@ -57,6 +59,47 @@ public:
         }
         return RUN_ALL_TESTS();
     }
+
+    void listTestSuites()
+    {
+        const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
+
+        std::cout << "--------------------- Registered Suites -----------------------------\n";
+        for (int i = 0; i < unit_test.total_test_suite_count(); ++i)
+        {
+            const ::testing::TestSuite *test_suite = unit_test.GetTestSuite(i);
+            std::cout << test_suite->name() << ":\n";
+            // for (int j = 0; j < test_suite->total_test_count(); ++j)
+            // {
+            //     const ::testing::TestInfo *test_info = test_suite->GetTestInfo(j);
+            //     std::cout << "  " << test_info->name() << "\n";
+            // }
+        }
+    }
+
+    std::string getUserSelectedTestSuites()
+    {
+        std::cout << "\nEnter the test suite names to run (separate by spaces): ";
+        std::string input;
+        std::string output;
+        std::getline(std::cin, input);
+
+        // Replace spaces with `:`, as Google Test uses `:` to combine multiple filters
+        for (auto &ch : input)
+        {
+            if (ch == ' ')
+            {
+                output += ".*:"; // Replace space with ".*:"
+            }
+            else
+            {
+                output += ch; // Keep other characters as is
+            }
+        }
+
+        return output + ".*"; // Append wildcard to select all tests in the suite(s)
+    }
+
 };
 
 void UT_set_results_output_filename(const char* szFilenameRoot)
@@ -78,7 +121,13 @@ void UT_set_results_output_filename(const char* szFilenameRoot)
 
 void UT_set_test_mode(TestMode_t  mode)
 {
+    gTestMode = mode;
     return;
+}
+
+TestMode_t UT_get_test_mode()
+{
+    return gTestMode;
 }
 
 void UT_Manage_Suite_Activation(int groupID, bool enable_disable)
@@ -99,6 +148,16 @@ UT_status_t startup_system( void )
 UT_status_t UT_run_tests()
 {
     UTTestRunner testRunner;
+    if (UT_get_test_mode() == UT_MODE_CONSOLE)
+    {
+        testRunner.listTestSuites();
+        std::string selected_suites = testRunner.getUserSelectedTestSuites();
+        if (selected_suites != ".*")
+        {
+            testRunner.setTestFilter(selected_suites);
+            // testRunner.setTestFilter("UTKVPProfileTestL1.*:SampleTestSuite.*");
+        }
+    }
     testRunner.runTests();
     return UT_STATUS_OK;
 }
