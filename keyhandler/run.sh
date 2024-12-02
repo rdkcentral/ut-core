@@ -32,4 +32,4 @@ if [ -d ../build/linux/lib ]; then
   cp ../build/linux/lib/libut_control.so .
 fi
 export LD_LIBRARY_PATH=/usr/lib:/lib:/home/root:.
-./ut_core_key_input -p input-event-codes-5.15.yaml $@
+./ut_core_key_input $@

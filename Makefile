@@ -38,6 +38,7 @@ TOP_DIR ?= $(UT_CORE_DIR)
 BIN_DIR ?= $(TOP_DIR)/build/bin
 LIB_DIR ?= $(TOP_DIR)/build/$(TARGET)/lib
 BUILD_DIR ?= $(TOP_DIR)/build/$(TARGET)/obj
+HEADER_DIR ?= $(TOP_DIR)/build/include
 
 # Non-Moveable Directories
 FRAMEWORK_DIR = $(UT_CORE_DIR)/framework
@@ -116,7 +117,7 @@ all: framework $(OBJS)
 
 # Build framework
 # Recursive make is needed as src files are not available during the first iteration
-framework: checkvariantchange createdirs download_and_build
+framework: check_variant_change createdirs download_and_build copy_headers
 	@${ECHOE} ${GREEN}Framework downloaded and built${NC}
 	@cp $(UT_CONTROL)/build/$(TARGET)/lib/libut_control.* $(LIB_DIR)
 	@cp $(UT_CONTROL)/build/$(TARGET)/lib/libut_control.* $(BIN_DIR)
@@ -125,6 +126,19 @@ framework: checkvariantchange createdirs download_and_build
 	@if [ -d "$(TOP_DIR)/../include" ] && [ -d "$(BUILD_DIR)/src" ]; then \
 		${UT_CORE_DIR}/compare-functions-in-headers-testsuite.sh $(TOP_DIR)/../include $(BIN_DIR)/${TARGET_EXEC} ${TARGET}; \
 	fi
+	@${ECHOE} ${GREEN}Building keyhandler${NC}
+	@make -C keyhandler/
+
+# Copy header files to the build directory
+copy_headers:
+	@${ECHOE} ${GREEN}Copying header files to [$(HEADER_DIR)]${NC}
+	@$(MKDIR_P) $(HEADER_DIR)
+	@for dir in $(INC_DIRS); do \
+		if [ -d "$$dir" ]; then \
+			find "$$dir" -type f -name "*.h" -exec cp {} $(HEADER_DIR) \; ; \
+		fi \
+	done
+	@${ECHOE} ${GREEN}Header files copied to ${HEADER_DIR}${NC}
 
 download_and_build:
 	@${ECHOE} ${GREEN}Ensure ut-core frameworks are present${NC}
@@ -159,7 +173,7 @@ $(BUILD_DIR)/%.o: %.cpp
 	@$(COMPILER) $(CXXFLAGS) -c $< -o $@
 
 # Rule to check if the VARIANT has changed
-checkvariantchange:
+check_variant_change:
 	@if [ -f "$(VARIANT_FILE)" ]; then \
 		PREVIOUS_VARIANT=$$(cat $(VARIANT_FILE)); \
 		if [ "$$PREVIOUS_VARIANT" != "$(VARIANT)" ]; then \
@@ -186,6 +200,8 @@ clean:
 	@$(RM) -rf $(VARIANT_FILE)
 	@${ECHOE} ${GREEN}Performing Clean for $(TARGET) ${LIB_DIR} ${NC}
 	@${RM} -rf ${LIB_DIR}
+	@${ECHOE} ${GREEN}Performing Clean for Keyhandler ${NC}
+	@make -C keyhandler/ clean
 	@${ECHOE} ${GREEN}Clean Completed${NC}
 
 cleanall: clean 
