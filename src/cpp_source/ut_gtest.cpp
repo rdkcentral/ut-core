@@ -36,6 +36,7 @@ struct TestSuiteInfo {
     int number;
     std::string name;
 };
+
 class UTTestRunner
 {
 public:
@@ -124,6 +125,9 @@ public:
                       << _("           L - List all registered suites") << "\n"
                       << _("           H - Show this help message") << "\n"
                       << _("           Q - Quit the application") << "\n"
+                      << _("           A - Activate - implementation pending") << "\n"
+                      << _("           O - Option - implementation pending") << "\n"
+                      << _("           F - Failures - implementation pending") << "\n"
                       << std::flush;
 
     }
@@ -188,8 +192,11 @@ UT_status_t UT_run_tests()
                       << _("Enter command: ")
                       << std::flush; // Ensures the buffer is flushed immediately
 
-            char choice;
-            choice = std::toupper(std::cin.get());
+            char choice = '\0';
+            std::cin >> choice; // Read the user input
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear the buffer
+
+            choice = std::toupper(choice); // Convert input to uppercase for consistency
 
             if (choice == _("L")[0])
             {
@@ -222,6 +229,10 @@ UT_status_t UT_run_tests()
             else if ((choice == _("H")[0]) || (choice == _("?")[0]))
             {
                 testRunner.printUsage();
+            }
+            else if ((choice == _("A")[0]) || (choice == _("F")[0]) || (choice == _("O")[0]))
+            {
+                std::cout << "To be implemented soon\n" << std::flush;
             }
         }
     }
