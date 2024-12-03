@@ -18,9 +18,24 @@
 */
 
 #include <ut.h>
+#include <ut_log.h>
 #include <ut_internal.h>
 
+#include <iomanip>
+
 static TestMode_t  gTestMode;
+#define _(x) x
+typedef enum
+{
+  UT_STATUS_CONTINUE = 1,   /**< Continue processing commands in current menu. */
+  UT_STATUS_MOVE_UP,        /**< Move up to the previous menu. */
+  UT_STATUS_STOP            /**< Stop processing (user selected 'Quit'). */
+} UT_STATUS;
+
+struct TestSuiteInfo {
+    int number;
+    std::string name;
+};
 class UTTestRunner
 {
 public:
@@ -29,7 +44,6 @@ public:
         int argc = 1;
         char *argv[1] = {(char *)"test_runner"};
         ::testing::InitGoogleTest(&argc, argv);
-        std::cout <<"\n***************** UT-CORE CONSOLE - MAIN MENU ******************************\n";
     }
 
     void setTestFilter(const std::string &filter)
@@ -60,46 +74,59 @@ public:
         return RUN_ALL_TESTS();
     }
 
-    void listTestSuites()
+    std::vector<TestSuiteInfo> listTestSuites()
     {
         const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
 
-        std::cout << "--------------------- Registered Suites -----------------------------\n";
+        std::vector<TestSuiteInfo> suites;
+        std::cout << "\n"
+                      << _("--------------------- Registered Suites -----------------------------") << "\n"
+                      << std::flush;
+        std::cout << std::setw(1) << "#" << "  "  // Right-aligned
+              << std::left << std::setw(20) << _("Suite Name") // Left-aligned
+              << std::endl;
         for (int i = 0; i < unit_test.total_test_suite_count(); ++i)
         {
             const ::testing::TestSuite *test_suite = unit_test.GetTestSuite(i);
-            std::cout << test_suite->name() << ":\n";
-            // for (int j = 0; j < test_suite->total_test_count(); ++j)
-            // {
-            //     const ::testing::TestInfo *test_info = test_suite->GetTestInfo(j);
-            //     std::cout << "  " << test_info->name() << "\n";
-            // }
+            suites.push_back({i + 1, test_suite->name()});
+            std::cout << i + 1 << ". " << test_suite->name() << "\n";
         }
+        std::cout  << _("---------------------------------------------------------------------") << "\n"
+                   << std::flush;
+        std::cout << "\n"
+                      <<"Total Number of Suites : "<< unit_test.total_test_suite_count() << "\n";
+        return suites;
     }
 
-    std::string getUserSelectedTestSuites()
+    std::string getUserSelectedTestSuites(const std::vector<TestSuiteInfo>& suites)
     {
-        std::cout << "\nEnter the test suite names to run (separate by spaces): ";
-        std::string input;
-        std::string output;
-        std::getline(std::cin, input);
+        std::cout << "\nEnter number of suite to select (1-" << suites.size() << ") : ";
+        int number;
+        std::cin >> number;
 
-        // Replace spaces with `:`, as Google Test uses `:` to combine multiple filters
-        for (auto &ch : input)
+        if (std::cin.fail() || number <= 0 || number > static_cast<int>(suites.size()))
         {
-            if (ch == ' ')
-            {
-                output += ".*:"; // Replace space with ".*:"
-            }
-            else
-            {
-                output += ch; // Keep other characters as is
-            }
+            // Clear the error state and ignore the invalid input
+            std::cin.clear();                                                   // Clear the error flag
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignore invalid input
+            return "";
         }
 
-        return output + ".*"; // Append wildcard to select all tests in the suite(s)
+        // Return the selected test suite's filter
+        return suites[number - 1].name + ".*";
     }
 
+    void printUsage()
+    {
+        std::cout << "\n\n"
+                      << _("Commands:  R - Run all tests in suite") << "\n"
+                      << _("           S - Select a suite to run or modify") << "\n"
+                      << _("           L - List all registered suites") << "\n"
+                      << _("           H - Show this help message") << "\n"
+                      << _("           Q - Quit the application") << "\n"
+                      << std::flush;
+
+    }
 };
 
 void UT_set_results_output_filename(const char* szFilenameRoot)
@@ -147,17 +174,64 @@ UT_status_t startup_system( void )
 
 UT_status_t UT_run_tests()
 {
+    UT_STATUS eStatus = UT_STATUS_CONTINUE;
+
     UTTestRunner testRunner;
+
     if (UT_get_test_mode() == UT_MODE_CONSOLE)
     {
-        testRunner.listTestSuites();
-        std::string selected_suites = testRunner.getUserSelectedTestSuites();
-        if (selected_suites != ".*")
+        while (eStatus == UT_STATUS_CONTINUE)
         {
-            testRunner.setTestFilter(selected_suites);
-            // testRunner.setTestFilter("UTKVPProfileTestL1.*:SampleTestSuite.*");
+            std::cout << "\n\n"
+                      << _("***************** UT CORE CONSOLE - MAIN MENU ******************************") << "\n"
+                      << _("(R)un  (S)elect  (L)ist  (A)ctivate  (F)ailures  (O)ptions  (H)elp  (Q)uit") << "\n"
+                      << _("Enter command: ")
+                      << std::flush; // Ensures the buffer is flushed immediately
+
+            char choice;
+            choice = std::toupper(std::cin.get());
+
+            if (choice == _("L")[0])
+            {
+                testRunner.listTestSuites();
+            }
+            else if (choice == _("S")[0])
+            {
+                auto suites = testRunner.listTestSuites();
+                std::string selected_suites = testRunner.getUserSelectedTestSuites(suites);
+
+                if (!selected_suites.empty())
+                {
+                    std::cout << "Suite '" << selected_suites << "' selected.\n";
+                    // Set the GTest filter
+                    ::testing::GTEST_FLAG(filter) = selected_suites;
+                }
+                else
+                {
+                    std::cout << "\nTest not found.\n";
+                }
+            }
+            else if (choice == _("R")[0])
+            {
+                testRunner.runTests();
+            }
+            else if (choice == _("Q")[0])
+            {
+                eStatus = UT_STATUS_STOP;
+            }
+            else if ((choice == _("H")[0]) || (choice == _("?")[0]))
+            {
+                testRunner.printUsage();
+            }
         }
     }
-    testRunner.runTests();
+    else
+    {
+        testRunner.runTests();
+    }
+
+    UT_LOG( UT_LOG_ASCII_GREEN "Logfile" UT_LOG_ASCII_NC ":[" UT_LOG_ASCII_YELLOW "%s" UT_LOG_ASCII_NC "]\n", UT_log_getLogFilename() );
+    UT_exit();
+
     return UT_STATUS_OK;
 }
