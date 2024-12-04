@@ -148,6 +148,8 @@ void UT_set_results_output_filename(const char* szFilenameRoot)
 
     // Set the output format and path programmatically
     ::testing::FLAGS_gtest_output = std::string("xml:") + filepath + "-report.xml";
+    std::cout << "Listing Filename:[" << filepath << "-report.xml]\n" << std::flush;
+    std::cout << "Results Filename:[" << filepath << ".log]\n" << std::flush;
 }
 
 void UT_set_test_mode(TestMode_t  mode)
