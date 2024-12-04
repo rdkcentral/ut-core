@@ -24,7 +24,7 @@
 #include <iomanip>
 
 static TestMode_t  gTestMode;
-#define _(x) x
+#define STRING_FORMAT(x) x
 typedef enum
 {
   UT_STATUS_CONTINUE = 1,   /**< Continue processing commands in current menu. */
@@ -81,10 +81,10 @@ public:
 
         std::vector<TestSuiteInfo> suites;
         std::cout << "\n"
-                      << _("--------------------- Registered Suites -----------------------------") << "\n"
+                      << STRING_FORMAT("--------------------- Registered Suites -----------------------------") << "\n"
                       << std::flush;
         std::cout << std::setw(1) << "#" << "  "  // Right-aligned
-              << std::left << std::setw(20) << _("Suite Name") // Left-aligned
+              << std::left << std::setw(20) << STRING_FORMAT("Suite Name") // Left-aligned
               << std::endl;
         for (int i = 0; i < unit_test.total_test_suite_count(); ++i)
         {
@@ -92,7 +92,7 @@ public:
             suites.push_back({i + 1, test_suite->name()});
             std::cout << i + 1 << ". " << test_suite->name() << "\n";
         }
-        std::cout  << _("---------------------------------------------------------------------") << "\n"
+        std::cout  << STRING_FORMAT("---------------------------------------------------------------------") << "\n"
                    << std::flush;
         std::cout << "\n"
                       <<"Total Number of Suites : "<< unit_test.total_test_suite_count() << "\n";
@@ -120,14 +120,14 @@ public:
     void printUsage()
     {
         std::cout << "\n\n"
-                      << _("Commands:  R - Run all tests in suite") << "\n"
-                      << _("           S - Select a suite to run or modify") << "\n"
-                      << _("           L - List all registered suites") << "\n"
-                      << _("           H - Show this help message") << "\n"
-                      << _("           Q - Quit the application") << "\n"
-                      << _("           A - Activate - implementation pending") << "\n"
-                      << _("           O - Option - implementation pending") << "\n"
-                      << _("           F - Failures - implementation pending") << "\n"
+                      << STRING_FORMAT("Commands:  R - Run all tests in suite") << "\n"
+                      << STRING_FORMAT("           S - Select a suite to run or modify") << "\n"
+                      << STRING_FORMAT("           L - List all registered suites") << "\n"
+                      << STRING_FORMAT("           H - Show this help message") << "\n"
+                      << STRING_FORMAT("           Q - Quit the application") << "\n"
+                      << STRING_FORMAT("           A - Activate - implementation pending") << "\n"
+                      << STRING_FORMAT("           O - Option - implementation pending") << "\n"
+                      << STRING_FORMAT("           F - Failures - implementation pending") << "\n"
                       << std::flush;
 
     }
@@ -187,9 +187,9 @@ UT_status_t UT_run_tests()
         while (eStatus == UT_STATUS_CONTINUE)
         {
             std::cout << "\n\n"
-                      << _("***************** UT CORE CONSOLE - MAIN MENU ******************************") << "\n"
-                      << _("(R)un  (S)elect  (L)ist  (A)ctivate  (F)ailures  (O)ptions  (H)elp  (Q)uit") << "\n"
-                      << _("Enter command: ")
+                      << STRING_FORMAT("***************** UT CORE CONSOLE - MAIN MENU ******************************") << "\n"
+                      << STRING_FORMAT("(R)un  (S)elect  (L)ist  (A)ctivate  (F)ailures  (O)ptions  (H)elp  (Q)uit") << "\n"
+                      << STRING_FORMAT("Enter command: ")
                       << std::flush; // Ensures the buffer is flushed immediately
 
             char choice = '\0';
@@ -198,11 +198,11 @@ UT_status_t UT_run_tests()
 
             choice = std::toupper(choice); // Convert input to uppercase for consistency
 
-            if (choice == _("L")[0])
+            if (choice == STRING_FORMAT("L")[0])
             {
                 testRunner.listTestSuites();
             }
-            else if (choice == _("S")[0])
+            else if (choice == STRING_FORMAT("S")[0])
             {
                 auto suites = testRunner.listTestSuites();
                 std::string selected_suites = testRunner.getUserSelectedTestSuites(suites);
@@ -218,19 +218,19 @@ UT_status_t UT_run_tests()
                     std::cout << "\nTest not found.\n";
                 }
             }
-            else if (choice == _("R")[0])
+            else if (choice == STRING_FORMAT("R")[0])
             {
                 testRunner.runTests();
             }
-            else if (choice == _("Q")[0])
+            else if (choice == STRING_FORMAT("Q")[0])
             {
                 eStatus = UT_STATUS_STOP;
             }
-            else if ((choice == _("H")[0]) || (choice == _("?")[0]))
+            else if ((choice == STRING_FORMAT("H")[0]) || (choice == STRING_FORMAT("?")[0]))
             {
                 testRunner.printUsage();
             }
-            else if ((choice == _("A")[0]) || (choice == _("F")[0]) || (choice == _("O")[0]))
+            else if ((choice == STRING_FORMAT("A")[0]) || (choice == STRING_FORMAT("F")[0]) || (choice == STRING_FORMAT("O")[0]))
             {
                 std::cout << "To be implemented soon\n" << std::flush;
             }
