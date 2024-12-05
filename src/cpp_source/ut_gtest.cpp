@@ -18,7 +18,24 @@
 */
 
 #include <ut.h>
+#include <ut_log.h>
 #include <ut_internal.h>
+
+#include <iomanip>
+
+static TestMode_t  gTestMode;
+#define STRING_FORMAT(x) x
+typedef enum
+{
+  UT_STATUS_CONTINUE = 1,   /**< Continue processing commands in current menu. */
+  UT_STATUS_MOVE_UP,        /**< Move up to the previous menu. */
+  UT_STATUS_STOP            /**< Stop processing (user selected 'Quit'). */
+} UT_STATUS;
+
+struct TestSuiteInfo {
+    int number;
+    std::string name;
+};
 
 class UTTestRunner
 {
@@ -57,6 +74,63 @@ public:
         }
         return RUN_ALL_TESTS();
     }
+
+    std::vector<TestSuiteInfo> listTestSuites()
+    {
+        const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
+
+        std::vector<TestSuiteInfo> suites;
+        std::cout << "\n"
+                      << STRING_FORMAT("--------------------- Registered Suites -----------------------------") << "\n"
+                      << std::flush;
+        std::cout << std::setw(1) << "#" << "  "  // Right-aligned
+              << std::left << std::setw(20) << STRING_FORMAT("Suite Name") // Left-aligned
+              << std::endl;
+        for (int i = 0; i < unit_test.total_test_suite_count(); ++i)
+        {
+            const ::testing::TestSuite *test_suite = unit_test.GetTestSuite(i);
+            suites.push_back({i + 1, test_suite->name()});
+            std::cout << i + 1 << ". " << test_suite->name() << "\n";
+        }
+        std::cout  << STRING_FORMAT("---------------------------------------------------------------------") << "\n"
+                   << std::flush;
+        std::cout << "\n"
+                      <<"Total Number of Suites : "<< unit_test.total_test_suite_count() << "\n";
+        return suites;
+    }
+
+    std::string getUserSelectedTestSuites(const std::vector<TestSuiteInfo>& suites)
+    {
+        std::cout << "\nEnter number of suite to select (1-" << suites.size() << ") : ";
+        int number;
+        std::cin >> number;
+
+        if (std::cin.fail() || number <= 0 || number > static_cast<int>(suites.size()))
+        {
+            // Clear the error state and ignore the invalid input
+            std::cin.clear();                                                   // Clear the error flag
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignore invalid input
+            return "";
+        }
+
+        // Return the selected test suite's filter
+        return suites[number - 1].name + ".*";
+    }
+
+    void printUsage()
+    {
+        std::cout << "\n\n"
+                      << STRING_FORMAT("Commands:  R - Run all tests in suite") << "\n"
+                      << STRING_FORMAT("           S - Select a suite to run or modify") << "\n"
+                      << STRING_FORMAT("           L - List all registered suites") << "\n"
+                      << STRING_FORMAT("           H - Show this help message") << "\n"
+                      << STRING_FORMAT("           Q - Quit the application") << "\n"
+                      << STRING_FORMAT("           A - Activate - implementation pending") << "\n"
+                      << STRING_FORMAT("           O - Option - implementation pending") << "\n"
+                      << STRING_FORMAT("           F - Failures - implementation pending") << "\n"
+                      << std::flush;
+
+    }
 };
 
 void UT_set_results_output_filename(const char* szFilenameRoot)
@@ -74,11 +148,19 @@ void UT_set_results_output_filename(const char* szFilenameRoot)
 
     // Set the output format and path programmatically
     ::testing::FLAGS_gtest_output = std::string("xml:") + filepath + "-report.xml";
+    std::cout << "Listing Filename:[" << filepath << "-report.xml]\n" << std::flush;
+    std::cout << "Results Filename:[" << filepath << ".log]\n" << std::flush;
 }
 
 void UT_set_test_mode(TestMode_t  mode)
 {
+    gTestMode = mode;
     return;
+}
+
+TestMode_t UT_get_test_mode()
+{
+    return gTestMode;
 }
 
 void UT_Manage_Suite_Activation(int groupID, bool enable_disable)
@@ -98,7 +180,71 @@ UT_status_t startup_system( void )
 
 UT_status_t UT_run_tests()
 {
+    UT_STATUS eStatus = UT_STATUS_CONTINUE;
+
     UTTestRunner testRunner;
-    testRunner.runTests();
+
+    if (UT_get_test_mode() == UT_MODE_CONSOLE)
+    {
+        while (eStatus == UT_STATUS_CONTINUE)
+        {
+            std::cout << "\n\n"
+                      << STRING_FORMAT("***************** UT CORE CONSOLE - MAIN MENU ******************************") << "\n"
+                      << STRING_FORMAT("(R)un  (S)elect  (L)ist  (A)ctivate  (F)ailures  (O)ptions  (H)elp  (Q)uit") << "\n"
+                      << STRING_FORMAT("Enter command: ")
+                      << std::flush; // Ensures the buffer is flushed immediately
+
+            char choice = '\0';
+            std::cin >> choice; // Read the user input
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear the buffer
+
+            choice = std::toupper(choice); // Convert input to uppercase for consistency
+
+            if (choice == STRING_FORMAT("L")[0])
+            {
+                testRunner.listTestSuites();
+            }
+            else if (choice == STRING_FORMAT("S")[0])
+            {
+                auto suites = testRunner.listTestSuites();
+                std::string selected_suites = testRunner.getUserSelectedTestSuites(suites);
+
+                if (!selected_suites.empty())
+                {
+                    std::cout << "Suite '" << selected_suites << "' selected.\n";
+                    // Set the GTest filter
+                    ::testing::GTEST_FLAG(filter) = selected_suites;
+                }
+                else
+                {
+                    std::cout << "\nTest not found.\n";
+                }
+            }
+            else if (choice == STRING_FORMAT("R")[0])
+            {
+                testRunner.runTests();
+            }
+            else if (choice == STRING_FORMAT("Q")[0])
+            {
+                eStatus = UT_STATUS_STOP;
+            }
+            else if ((choice == STRING_FORMAT("H")[0]) || (choice == STRING_FORMAT("?")[0]))
+            {
+                testRunner.printUsage();
+            }
+            else if ((choice == STRING_FORMAT("A")[0]) || (choice == STRING_FORMAT("F")[0]) || (choice == STRING_FORMAT("O")[0]))
+            {
+                std::cout << "To be implemented soon\n" << std::flush;
+            }
+        }
+    }
+    else
+    {
+        testRunner.runTests();
+    }
+
+    UT_LOG( UT_LOG_ASCII_GREEN "Logfile" UT_LOG_ASCII_NC ":[" UT_LOG_ASCII_YELLOW "%s" UT_LOG_ASCII_NC "]\n", UT_log_getLogFilename() );
+    UT_exit();
+
     return UT_STATUS_OK;
 }
