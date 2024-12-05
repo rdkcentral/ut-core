@@ -39,32 +39,18 @@ protected:
     }
 };
 
-TEST_F(UTKVPProfileTestL1, TestProfileGetInstance)
-{
-    // Getinstance from the profile passed via cli
-    ut_kvp_instance_t *instance = ut_kvp_profile_getInstance();
-    EXPECT_NE(instance, nullptr);
-}
-
-TEST_F(UTKVPProfileTestL1, TestProfileClose)
-{
-    // Getinstance from the profile passed via cli
-    ut_kvp_instance_t *instance = ut_kvp_profile_getInstance();
-    EXPECT_NE(instance, nullptr);
-
-    ut_kvp_profile_close();
-    ut_kvp_profile_close();
-    ut_kvp_profile_close();
-    // Since close doesn't return a status, we assume success if no exceptions were thrown.
-    SUCCEED();
-}
-
 TEST_F(UTKVPProfileTestL1, TestProfileOpenSuccess)
 {
     const char *validFileName = KVP_VALID_TEST_YAML_FILE;
     ut_kvp_status_t status = ut_kvp_profile_open((char *)validFileName);
     EXPECT_EQ(status, UT_KVP_STATUS_SUCCESS);
-    ut_kvp_profile_close();
+}
+
+TEST_F(UTKVPProfileTestL1, TestProfileGetInstance)
+{
+    // Getinstance from the profile passed via cli
+    ut_kvp_instance_t *instance = ut_kvp_profile_getInstance();
+    EXPECT_NE(instance, nullptr);
 }
 
 TEST_F(UTKVPProfileTestL1, TestProfileOpenFailure)
@@ -77,7 +63,16 @@ TEST_F(UTKVPProfileTestL1, TestProfileOpenFailure)
     // Test with a null file name.
     status = ut_kvp_profile_open(nullptr);
     EXPECT_EQ(status, UT_KVP_STATUS_INVALID_PARAM);
+}
+
+TEST_F(UTKVPProfileTestL1, TestProfileClose)
+{
+    // Test profile close
     ut_kvp_profile_close();
+    ut_kvp_profile_close();
+    ut_kvp_profile_close();
+    // Since close doesn't return a status, we assume success if no exceptions were thrown.
+    SUCCEED();
 }
 
 // Other test cases as needed...
