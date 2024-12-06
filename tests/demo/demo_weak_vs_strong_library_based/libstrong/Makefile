@@ -1,4 +1,8 @@
+ifeq ($(TARGET),)
 CC = gcc
+else
+#CC = rm-rdk-linux-gnueabi-gcc -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -mabi=aapcs-linux -mno-thumb-interwork -ffixed-r8 -fomit-frame-pointer
+endif
 CFLAGS = -Wall -Wextra -fPIC
 LDFLAGS = -shared
 AR = ar

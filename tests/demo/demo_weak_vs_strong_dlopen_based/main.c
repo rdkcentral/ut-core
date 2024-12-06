@@ -1,11 +1,39 @@
+/**
+ * @file main.c
+ * @brief Demonstrates the use of weak and strong symbols in C with dynamic linking.
+ *
+ * This program defines a weak symbol `foo()` and dynamically loads a shared library
+ * to override it with a strong implementation if specified. The program calls the
+ * appropriate implementation of `foo()` based on the input arguments.
+ */
+
 #include <stdio.h>
 #include <dlfcn.h>
 #include <stdlib.h>
 
-// Weak symbol declaration
+/**
+ * @brief Weak symbol implementation of `foo()`.
+ *
+ * Prints a message indicating that the weak implementation of `foo()` is called.
+ */
 void __attribute__((weak)) foo() {
     printf("Weak symbol: foo() called\n");
 }
+
+/**
+ * @brief Entry point for the program.
+ *
+ * This function checks the command-line arguments to determine whether to load
+ * a shared library containing a strong implementation of `foo()`. If the first
+ * argument is '1', it dynamically loads the shared library and calls the strong
+ * implementation. Otherwise, it calls the weak implementation.
+ *
+ * @param argc The number of command-line arguments.
+ * @param argv The array of command-line argument strings.
+ *
+ * @returns 0 on success, or 1 if an error occurs while loading the shared library
+ *          or resolving the strong implementation of `foo()`.
+ */
 
 int main(int argc, char *argv[]) {
     
