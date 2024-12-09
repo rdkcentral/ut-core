@@ -40,28 +40,28 @@ This project demonstrates the concept of weak and strong symbols in C, showcasin
 ## Usage
 
 ### Static Linking
-1. Run `weak_first`:
+1. Run `weak_linked_first_static_lib`:
    ```bash
-   ./weak_first
+   ./weak_linked_first_static_lib
    ```
    Links `libweak.a` first, so weak symbols take precedence.
 
-2. Run `strong_first`:
+2. Run `strong_linked_first_static_lib`:
    ```bash
-   ./strong_first
+   ./strong_linked_first_static_lib
    ```
    Links `libstrong.a` first, so strong symbols take precedence.
 
 ### Dynamic Linking
-1. Run `weak_first_link_so`:
+1. Run `weak_first_link_shared_lib`:
    ```bash
-   ./weak_first_link_so
+   ./weak_first_link_shared_lib
    ```
    Dynamically links `libweak1.so` first, so weak symbols take precedence unless overridden.
 
-2. Run `strong_first_link_so`:
+2. Run `strong_first_link_shared_lib`:
    ```bash
-   ./strong_first_link_so
+   ./strong_first_link_shared_lib
    ```
    Dynamically links `libstrong1.so` first, so strong symbols take precedence.
    
@@ -69,24 +69,40 @@ This project demonstrates the concept of weak and strong symbols in C, showcasin
 1. For linux
  ```bash
    ./run.sh 
-Using static libs
+Using strong_linked_first_static_lib
 This is the strong implementation of my_function.
+This is the strong implementation of func() weak_prototype from strong.c.
+This is the weak implementation of func() weak_implementation_only .
+Using weak_linked_first_static_lib
 This is the weak implementation of my_function.
-Using dynamic libs
+This is the weak implementation of func() weak_implementation_only .
+Using strong_first_link_shared_lib
 This is the strong implementation of my_function.
+This is the strong implementation of func() weak_prototype from strong.c.
+This is the weak implementation of func() weak_implementation_only .
+Using weak_first_link_shared_lib
 This is the weak implementation of my_function.
+This is the weak implementation of func() weak_implementation_only .
 
    ```
 2. For arm
 ```bash
 root@xione-uk:/opt/jyo# ./run.sh
-Using static libs
+Using strong_linked_first_static_lib
 This is the strong implementation of my_function.
+This is the strong implementation of func() weak_prototype from strong.c.
+This is the weak implementation of func() weak_implementation_only .
+Using weak_linked_first_static_lib
 This is the weak implementation of my_function.
-Using dynamic libs
+This is the weak implementation of func() weak_implementation_only .
+Using strong_first_link_shared_lib
 This is the strong implementation of my_function.
+This is the strong implementation of func() weak_prototype from strong.c.
+This is the weak implementation of func() weak_implementation_only .
+Using weak_first_link_shared_lib
 This is the weak implementation of my_function.
-
+This is the strong implementation of func() weak_prototype from strong.c.
+This is the weak implementation of func() weak_implementation_only .
    ```
 
 ## Key Concepts

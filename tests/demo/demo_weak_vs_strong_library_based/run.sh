@@ -23,10 +23,14 @@ set -e # error out if required
 
 export LD_LIBRARY_PATH=/usr/lib:/lib:/home/root:./.
 
-echo "Using static libs"
-./strong_first
-./weak_first
+echo "Using strong_linked_first_static_lib"
+./strong_linked_first_static_lib
 
-echo "Using dynamic libs"
-./strong_first_link_so
-./weak_first_link_so
+echo "Using weak_linked_first_static_lib "
+./weak_linked_first_static_lib
+
+echo "Using strong_first_link_shared_lib "
+./strong_first_link_shared_lib
+
+echo "Using weak_first_link_shared_lib "
+./weak_first_link_shared_lib
