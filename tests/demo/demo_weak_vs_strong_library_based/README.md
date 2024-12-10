@@ -125,5 +125,7 @@ This is the weak implementation of func() weak_implementation_only .
 
 ## Notes
 
+- Do ensure that both weak and strong implementations are in separate librararies and link the strong library first so that its symbols take precedence over the weak ones and if its not found in strong then it will fall back to weak.
+- When a weak function is defined in the main executable, the linker resolves  calls to that function within the same binary and does not look for overrides in dynamically loaded shared libraries.
 - Ensure `libweak/` and `libstrong/` directories are built before running the targets.
 - For dynamic linking, ensure `libweak1.so` and `libstrong1.so` are in the same directory as the executables or in the library search path (e.g., `LD_LIBRARY_PATH`).
