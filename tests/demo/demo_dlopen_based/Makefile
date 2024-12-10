@@ -29,11 +29,11 @@ LDFLAGS = -ldl
 
 # Targets
 EXECUTABLE = main
-SHARED_LIB = libstrong.so
+SHARED_LIB = libplugin.so
 
 # Source files
 MAIN_SRC = main.c
-STRONG_SRC = strong.c
+PLUGIN_SRC = plugin.c
 
 .PHONY: all clean
 
@@ -42,7 +42,7 @@ all: $(EXECUTABLE) $(SHARED_LIB)
 $(EXECUTABLE): $(MAIN_SRC)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-$(SHARED_LIB): $(STRONG_SRC)
+$(SHARED_LIB): $(PLUGIN_SRC)
 	$(CC) $(CFLAGS) -shared -o $@ $^
 
 clean:
