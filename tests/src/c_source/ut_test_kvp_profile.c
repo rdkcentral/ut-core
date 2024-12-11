@@ -30,6 +30,7 @@
 #include <ut_kvp_profile.h>
 
 #define KVP_VALID_TEST_ASSERT_YAML_FILE "assets/test_kvp.yaml"
+#define KVP_VALID_TEST_CONFIG_YAML_FILE "assets/config-test.yaml"
 #define KVP_VALID_TEST_ASSERT_JSON_FILE "assets/test_kvp.json"
 
 static UT_test_suite_t *gpAssertSuite1 = NULL;
@@ -143,8 +144,21 @@ void test_ut_kvp_profile_open( void )
 {
     UT_LOG_STEP( "test_ut_kvp_profile_open - start" );
     ut_kvp_profile_open( KVP_VALID_TEST_ASSERT_YAML_FILE );
-    ut_kvp_profile_open( KVP_VALID_TEST_ASSERT_YAML_FILE );
-    ut_kvp_profile_open( KVP_VALID_TEST_ASSERT_YAML_FILE );
+    ut_kvp_profile_open( KVP_VALID_TEST_CONFIG_YAML_FILE );
+    ut_kvp_instance_t *pInstance;
+
+    pInstance = ut_kvp_profile_getInstance();
+    char* kvpdata = ut_kvp_getData(pInstance);
+
+    if(kvpdata != NULL)
+    {
+        // Print the emitted KVP string
+        printf("%s\n", kvpdata);
+
+        // Free the emitted KVP string
+           free(kvpdata);
+    }
+
     UT_LOG_STEP( "test_ut_kvp_profile_open - end" );
 }
 

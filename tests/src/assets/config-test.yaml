@@ -1,0 +1,59 @@
+profile: DUMMY_PROFILE           # Dummy string value
+hal version: X.X.X               # Dummy string value
+components:                      # Array of dummy components
+  - name: ComponentManager1      # Dummy component object begins
+    interfaceVersion: X          # Dummy integer value
+    ResourceList1:               # Dummy resource list
+      - id: 0                    # Dummy resource object begins
+        dummyCapabilities:       # Array of dummy capabilities
+          - DUMMY_CAPABILITY_1
+          - DUMMY_CAPABILITY_2
+          - DUMMY_CAPABILITY_3
+          - DUMMY_CAPABILITY_4
+        supportsFeatureX: true
+      - id: 1
+        dummyCapabilities:
+          - DUMMY_CAPABILITY_1
+          - DUMMY_CAPABILITY_2
+          - DUMMY_CAPABILITY_3
+          - DUMMY_CAPABILITY_4
+        supportsFeatureX: true
+  - name: ComponentManager2       # Another dummy component
+    interfaceVersion: X
+    platformCapabilities:
+      - supportsFeatureY: false
+        sampleRateHz: 00000
+        pcmFormat: DUMMY_FORMAT
+        supportsAdditionalFormat: false
+    ResourceList2:
+      - id: 0
+      - id: 1
+  - name: ComponentManager3
+    interfaceVersion: X
+    supportedModes:
+      - DUMMY_MODE
+    ResourceList3:
+      - id: 0
+        dummyCapabilities:
+          - capability: DUMMY_CODEC_1
+            maxFrameRate: XX
+            maxFrameWidth: XXXX
+            maxFrameHeight: XXXX
+          - capability: DUMMY_CODEC_2
+            maxFrameRate: XX
+            maxFrameWidth: XXXX
+            maxFrameHeight: XXXX
+        supportedRanges:
+          - RANGE_1
+          - RANGE_2
+          - RANGE_3
+        supportsFeatureZ: true
+      - id: 1
+        dummyCapabilities:
+          - capability: DUMMY_CODEC_1
+            maxFrameRate: XX
+            maxFrameWidth: XXXX
+            maxFrameHeight: XXXX
+        supportedRanges:
+          - RANGE_1
+        supportsFeatureZ: true
