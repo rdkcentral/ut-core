@@ -38,6 +38,7 @@ TOP_DIR ?= $(UT_CORE_DIR)
 BIN_DIR ?= $(TOP_DIR)/build/bin
 LIB_DIR ?= $(TOP_DIR)/build/$(TARGET)/lib
 BUILD_DIR ?= $(TOP_DIR)/build/$(TARGET)/obj
+LIBRARY_DIR = $(LIB_DIR)
 
 # Non-Moveable Directories
 FRAMEWORK_DIR = $(UT_CORE_DIR)/framework
@@ -94,6 +95,12 @@ OBJS := $(filter %.o, $(sort $(OBJS))) # Filter and sort the object files and re
 # Dependency files
 DEPS := $(OBJS:.o=.d)
 
+# Add the library type (static or shared)
+LIBRARY_TYPE ?= shared # Default to shared, change to static to build a static library
+
+# Object files for the library
+LIBRARY_OBJS = $(subst $(TOP_DIR),$(BUILD_DIR),$(LIBRARY_SRCS:.c=.o))
+
 # Final flags
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 VERSION := $(shell git describe --tags | head -n1)
@@ -112,7 +119,7 @@ VPATH += $(UT_CORE_DIR) $(TOP_DIR)
 # Default target
 .PHONY: clean list arm linux framework test createdirs all printenv
 
-all: framework $(OBJS)
+all: framework $(OBJS) $(if $(LIBRARY_NAME),$(LIBRARY_DIR)/$(LIBRARY_NAME)$(LIBRARY_EXTENSION))
 
 # Build framework
 # Recursive make is needed as src files are not available during the first iteration
@@ -133,7 +140,7 @@ download_and_build:
 	@${MAKE} -C $(UT_CONTROL) TARGET=${TARGET}
 
 # Build the test binary
-test: $(OBJS) createdirs
+test: $(OBJS) createdirs $(if $(LIBRARY_NAME),$(LIBRARY_DIR)/$(LIBRARY_NAME)$(LIBRARY_EXTENSION))
 	@${ECHOE} ${GREEN}Linking $@ $(BUILD_DIR)/$(TARGET_EXEC)${NC}
 	@$(COMPILER) $(OBJS) -o $(BUILD_DIR)/$(TARGET_EXEC) $(XCFLAGS) $(XLDFLAGS)
 	@cp $(BUILD_DIR)/$(TARGET_EXEC) $(BIN_DIR)/
@@ -170,6 +177,22 @@ checkvariantchange:
 			exit 1; \
 		fi \
 	fi
+
+# Create the library (shared or static)
+$(LIBRARY_DIR)/$(LIBRARY_NAME)$(LIBRARY_EXTENSION): $(LIBRARY_OBJS) createdirs
+	@if [ "${LIBRARY_TYPE}" = "shared" ]; then \
+		${ECHOE} ${GREEN}Building shared library $(LIBRARY_NAME)$(LIBRARY_EXTENSION)${NC}; \
+		$(CC) $(LIBRARY_OBJS) $(LIBRARY_FLAGS) -o $@; \
+	else \
+		${ECHOE} ${GREEN}Building static library $(LIBRARY_NAME)$(LIBRARY_EXTENSION)${NC}; \
+		$(AR) rcs $@ $(LIBRARY_OBJS); \
+	fi
+
+# Create object files for the library
+$(LIBRARY_DIR)/%.o: $(SRC_DIR)/%.c
+	@${ECHOE} ${GREEN}Building [${YELLOW}$<${GREEN}] for library${NC}
+	@$(MKDIR_P) $(dir $@)
+	@$(CC) $(XCFLAGS) $(CFLAGS) -I$(LIBRARY_INC) -c $< -o $@
 
 arm:
 	make TARGET=arm
@@ -239,6 +262,14 @@ list:
 	@${ECHOE} ${YELLOW}INC_DIRS:${NC} $(INC_DIRS)
 	@${ECHOE}
 	@${ECHOE} ${YELLOW}INC_FLAGS:${NC} $(INC_FLAGS)
+	@${ECHOE}
+	@${ECHOE} ${YELLOW}LIBRARY_DIR:${NC} $(LIBRARY_DIR)
+	@${ECHOE}
+	@${ECHOE} ${YELLOW}LIBRARY_NAME:${NC} $(LIBRARY_NAME)
+	@${ECHOE}
+	@${ECHOE} ${YELLOW}LIBRARY_EXTENSION:${NC} $(LIBRARY_EXTENSION)
+	@${ECHOE}
+	@${ECHOE} ${YELLOW}LIBRARY_TYPE:${NC} $(LIBRARY_TYPE)
 	@${ECHOE}
 	@${ECHOE} ${YELLOW}DEPS:${NC} $(DEPS)
 	@${ECHOE}
