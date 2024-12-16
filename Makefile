@@ -38,7 +38,6 @@ TOP_DIR ?= $(UT_CORE_DIR)
 BIN_DIR ?= $(TOP_DIR)/build/bin
 LIB_DIR ?= $(TOP_DIR)/build/$(TARGET)/lib
 BUILD_DIR ?= $(TOP_DIR)/build/$(TARGET)/obj
-LIBRARY_DIR = $(LIB_DIR)
 
 # Non-Moveable Directories
 FRAMEWORK_DIR = $(UT_CORE_DIR)/framework
@@ -76,6 +75,17 @@ else # GTEST case
   SRCS := $(shell find $(SRC_DIRS) -type f \( -name '*.cpp' -o -name '*.c' \) | grep -v "$(EXCLUDE_DIRS)")
 endif
 
+# Check if BUILD_WEAK_STUBS_SRC is defined
+ifdef BUILD_WEAK_STUBS_SRC
+
+# Define variables for the static library and its source files
+WEAK_STUBS_LIB := $(LIB_DIR)/libweak_stubs_libs.a
+WEAK_STUBS_SRC := $(shell find $(BUILD_WEAK_STUBS_SRC) -name *.c)
+WEAK_STUBS_OBJ := $(patsubst $(TOP_DIR)/%, $(BUILD_DIR)/%, $(WEAK_STUBS_SRC:.c=.o)) # Apply the pattern substitution to create object file paths
+
+XLDFLAGS := -L$(LIB_DIR) -lweak_stubs_libs $(XLDFLAGS)
+endif
+
 VARIANT_FILE := .variant
 
 ifeq ($(TARGET),arm)
@@ -95,12 +105,6 @@ OBJS := $(filter %.o, $(sort $(OBJS))) # Filter and sort the object files and re
 # Dependency files
 DEPS := $(OBJS:.o=.d)
 
-# Add the library type (static or shared)
-LIBRARY_TYPE ?= shared # Default to shared, change to static to build a static library
-
-# Object files for the library
-LIBRARY_OBJS = $(subst $(TOP_DIR),$(BUILD_DIR),$(LIBRARY_SRCS:.c=.o))
-
 # Final flags
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 VERSION := $(shell git describe --tags | head -n1)
@@ -119,7 +123,7 @@ VPATH += $(UT_CORE_DIR) $(TOP_DIR)
 # Default target
 .PHONY: clean list arm linux framework test createdirs all printenv
 
-all: framework $(OBJS) $(if $(LIBRARY_NAME),$(LIBRARY_DIR)/$(LIBRARY_NAME)$(LIBRARY_EXTENSION))
+all: framework $(OBJS) $(if $(BUILD_WEAK_STUBS_SRC),$(WEAK_STUBS_LIB))
 
 # Build framework
 # Recursive make is needed as src files are not available during the first iteration
@@ -140,7 +144,7 @@ download_and_build:
 	@${MAKE} -C $(UT_CONTROL) TARGET=${TARGET}
 
 # Build the test binary
-test: $(OBJS) createdirs $(if $(LIBRARY_NAME),$(LIBRARY_DIR)/$(LIBRARY_NAME)$(LIBRARY_EXTENSION))
+test: $(OBJS) createdirs $(if $(BUILD_WEAK_STUBS_SRC),$(WEAK_STUBS_LIB))
 	@${ECHOE} ${GREEN}Linking $@ $(BUILD_DIR)/$(TARGET_EXEC)${NC}
 	@$(COMPILER) $(OBJS) -o $(BUILD_DIR)/$(TARGET_EXEC) $(XCFLAGS) $(XLDFLAGS)
 	@cp $(BUILD_DIR)/$(TARGET_EXEC) $(BIN_DIR)/
@@ -178,21 +182,15 @@ checkvariantchange:
 		fi \
 	fi
 
-# Create the library (shared or static)
-$(LIBRARY_DIR)/$(LIBRARY_NAME)$(LIBRARY_EXTENSION): $(LIBRARY_OBJS) createdirs
-	@if [ "${LIBRARY_TYPE}" = "shared" ]; then \
-		${ECHOE} ${GREEN}Building shared library $(LIBRARY_NAME)$(LIBRARY_EXTENSION)${NC}; \
-		$(CC) $(LIBRARY_OBJS) $(LIBRARY_FLAGS) -o $@; \
-	else \
-		${ECHOE} ${GREEN}Building static library $(LIBRARY_NAME)$(LIBRARY_EXTENSION)${NC}; \
-		$(AR) rcs $@ $(LIBRARY_OBJS); \
-	fi
+# Create the library weak_stubs_libs
+$(WEAK_STUBS_LIB): $(WEAK_STUBS_OBJ)
+	@${ECHOE} ${GREEN}Building weak_stubs_libs...${NC}
+	@$(AR) rcs $@ $^
 
-# Create object files for the library
-$(LIBRARY_DIR)/%.o: $(SRC_DIR)/%.c
-	@${ECHOE} ${GREEN}Building [${YELLOW}$<${GREEN}] for library${NC}
+# Rule to compile .c files into .o files in the correct directory
+$(BUILD_DIR)/skelton/src/%.o: $(BUILD_WEAK_STUBS_SRC)/%.c
 	@$(MKDIR_P) $(dir $@)
-	@$(CC) $(XCFLAGS) $(CFLAGS) -I$(LIBRARY_INC) -c $< -o $@
+	@$(COMPILER) $(XCFLAGS) -c $< -o $@
 
 arm:
 	make TARGET=arm
@@ -263,13 +261,7 @@ list:
 	@${ECHOE}
 	@${ECHOE} ${YELLOW}INC_FLAGS:${NC} $(INC_FLAGS)
 	@${ECHOE}
-	@${ECHOE} ${YELLOW}LIBRARY_DIR:${NC} $(LIBRARY_DIR)
-	@${ECHOE}
-	@${ECHOE} ${YELLOW}LIBRARY_NAME:${NC} $(LIBRARY_NAME)
-	@${ECHOE}
-	@${ECHOE} ${YELLOW}LIBRARY_EXTENSION:${NC} $(LIBRARY_EXTENSION)
-	@${ECHOE}
-	@${ECHOE} ${YELLOW}LIBRARY_TYPE:${NC} $(LIBRARY_TYPE)
+	@${ECHOE} ${YELLOW}BUILD_WEAK_STUBS_SRC:${NC} $(BUILD_WEAK_STUBS_SRC)
 	@${ECHOE}
 	@${ECHOE} ${YELLOW}DEPS:${NC} $(DEPS)
 	@${ECHOE}
