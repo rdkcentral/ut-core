@@ -75,6 +75,17 @@ else # GTEST case
   SRCS := $(shell find $(SRC_DIRS) -type f \( -name '*.cpp' -o -name '*.c' \) | grep -v "$(EXCLUDE_DIRS)")
 endif
 
+# Check if BUILD_WEAK_STUBS_SRC is defined
+ifdef BUILD_WEAK_STUBS_SRC
+
+# Define variables for the static library and its source files
+WEAK_STUBS_LIB := $(LIB_DIR)/libweak_stubs_libs.a
+WEAK_STUBS_SRC := $(shell find $(BUILD_WEAK_STUBS_SRC) -name *.c)
+WEAK_STUBS_OBJ := $(patsubst $(TOP_DIR)/%, $(BUILD_DIR)/%, $(WEAK_STUBS_SRC:.c=.o)) # Apply the pattern substitution to create object file paths
+
+XLDFLAGS := -L$(LIB_DIR) -lweak_stubs_libs $(XLDFLAGS)
+endif
+
 VARIANT_FILE := .variant
 
 ifeq ($(TARGET),arm)
@@ -112,7 +123,7 @@ VPATH += $(UT_CORE_DIR) $(TOP_DIR)
 # Default target
 .PHONY: clean list arm linux framework test createdirs all printenv
 
-all: framework $(OBJS)
+all: framework $(OBJS) $(if $(BUILD_WEAK_STUBS_SRC),$(WEAK_STUBS_LIB))
 
 # Build framework
 # Recursive make is needed as src files are not available during the first iteration
@@ -133,7 +144,7 @@ download_and_build:
 	@${MAKE} -C $(UT_CONTROL) TARGET=${TARGET}
 
 # Build the test binary
-test: $(OBJS) createdirs
+test: $(OBJS) createdirs $(if $(BUILD_WEAK_STUBS_SRC),$(WEAK_STUBS_LIB))
 	@${ECHOE} ${GREEN}Linking $@ $(BUILD_DIR)/$(TARGET_EXEC)${NC}
 	@$(COMPILER) $(OBJS) -o $(BUILD_DIR)/$(TARGET_EXEC) $(XCFLAGS) $(XLDFLAGS)
 	@cp $(BUILD_DIR)/$(TARGET_EXEC) $(BIN_DIR)/
@@ -170,6 +181,16 @@ checkvariantchange:
 			exit 1; \
 		fi \
 	fi
+
+# Create the library weak_stubs_libs
+$(WEAK_STUBS_LIB): $(WEAK_STUBS_OBJ)
+	@${ECHOE} ${GREEN}Building weak_stubs_libs...${NC}
+	@$(AR) rcs $@ $^
+
+# Rule to compile .c files into .o files in the correct directory
+$(BUILD_DIR)/skelton/src/%.o: $(BUILD_WEAK_STUBS_SRC)/%.c
+	@$(MKDIR_P) $(dir $@)
+	@$(COMPILER) $(XCFLAGS) -c $< -o $@
 
 arm:
 	make TARGET=arm
@@ -239,6 +260,8 @@ list:
 	@${ECHOE} ${YELLOW}INC_DIRS:${NC} $(INC_DIRS)
 	@${ECHOE}
 	@${ECHOE} ${YELLOW}INC_FLAGS:${NC} $(INC_FLAGS)
+	@${ECHOE}
+	@${ECHOE} ${YELLOW}BUILD_WEAK_STUBS_SRC:${NC} $(BUILD_WEAK_STUBS_SRC)
 	@${ECHOE}
 	@${ECHOE} ${YELLOW}DEPS:${NC} $(DEPS)
 	@${ECHOE}
