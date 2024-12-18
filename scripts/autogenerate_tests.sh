@@ -122,6 +122,26 @@ function AGT_add_common_to_tests_file()
         AGT_add_headers_to_files "${1}.c" true
 }
 
+# Function to add headers to the start of the skeleton src
+function AGT_add_common_to_skeleton_src_file()
+{
+    # Change to the target directory, exit on failure
+    cd "${AGT_SKELETONS_SRC}" || {
+        return 1
+    }
+
+    COPYRGT_MESSAGE=`cat ${AGT_COPYRGT_TEMPLATE}`
+
+    # Process all .c files in the directory
+    for filename in *.c; do
+        # Ensure the file exists (in case no .c files are found)
+        [ -e "$filename" ] || continue
+
+        # Call the helper functions with the actual filename
+        eval "echo -e \"${COPYRGT_MESSAGE}\\n\"" | cat - "$filename" > temp && mv temp "$filename"
+    done
+}
+
 # Function to make a copy of the config template and update it for each test
 # @param [in] Keyname to be changed
 # @param [in] Value to be changed into
@@ -348,8 +368,8 @@ function AGT_generate_l1_l2_tests()
                         continue
                 fi
 
-                # Get the list of functions and copy into another temp file
-                cat ${AGT_TEMP_FUNC_DEF_FILE} | cut -d"(" -f1 | cut -d" " -f2  > ${AGT_TEMP_FUNC_NAMES_FILE}
+                # Get the list of functions and copy into another temp file making sure the attribute is removed
+                cat ${AGT_TEMP_FUNC_DEF_FILE} | grep -oP '\w+\s\w+(?=\()' | awk '{print $2}' > ${AGT_TEMP_FUNC_NAMES_FILE}
 
                 # Set up the L1 filename
                 new_L1_filename="test_l1_`echo $filename| cut -d"." -f1`"
@@ -418,3 +438,4 @@ AGT_delete_and_create_ut_src
 AGT_add_main_file
 AGT_generate_l1_l2_tests
 AGT_add_test_register_file
+AGT_add_common_to_skeleton_src_file
