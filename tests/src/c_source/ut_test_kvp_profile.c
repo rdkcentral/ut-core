@@ -143,8 +143,22 @@ void test_ut_kvp_profile_open( void )
 {
     UT_LOG_STEP( "test_ut_kvp_profile_open - start" );
     ut_kvp_profile_open( KVP_VALID_TEST_ASSERT_YAML_FILE );
-    ut_kvp_profile_open( KVP_VALID_TEST_ASSERT_YAML_FILE );
-    ut_kvp_profile_open( KVP_VALID_TEST_ASSERT_YAML_FILE );
+    UT_LOG_STEP( "ut_kvp_profile_open - %s", KVP_VALID_TEST_ASSERT_YAML_FILE);
+
+    ut_kvp_instance_t *pInstance;
+
+    pInstance = ut_kvp_profile_getInstance();
+    char* kvpdata = ut_kvp_getData(pInstance);
+
+    if(kvpdata != NULL)
+    {
+        // Print the emitted KVP string
+        printf("%s\n", kvpdata);
+
+        // Free the emitted KVP string
+           free(kvpdata);
+    }
+
     UT_LOG_STEP( "test_ut_kvp_profile_open - end" );
 }
 
