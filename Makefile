@@ -80,8 +80,9 @@ ifdef BUILD_WEAK_STUBS_SRC
 
 # Define variables for the static library and its source files
 WEAK_STUBS_LIB := $(LIB_DIR)/libweak_stubs_libs.a
+WEAK_STUBS_OUTPUT_DIR ?= $(BUILD_DIR)/weak_stubs/src
 WEAK_STUBS_SRC := $(shell find $(BUILD_WEAK_STUBS_SRC) -name *.c)
-WEAK_STUBS_OBJ := $(patsubst $(TOP_DIR)/%, $(BUILD_DIR)/%, $(WEAK_STUBS_SRC:.c=.o)) # Apply the pattern substitution to create object file paths
+WEAK_STUBS_OBJ := $(patsubst $(BUILD_WEAK_STUBS_SRC)/%, $(WEAK_STUBS_OUTPUT_DIR)/%, $(WEAK_STUBS_SRC:.c=.o)) # Apply the pattern substitution to create object file paths
 
 XLDFLAGS := -L$(LIB_DIR) -lweak_stubs_libs $(XLDFLAGS)
 endif
@@ -155,7 +156,7 @@ endif
 # Create necessary directories
 createdirs:
 	@echo "$(VARIANT)" > $(VARIANT_FILE)
-	@$(MKDIR_P) ${BIN_DIR} ${LIB_DIR}
+	@$(MKDIR_P) ${BIN_DIR} ${LIB_DIR} $(if $(BUILD_WEAK_STUBS_SRC),${WEAK_STUBS_OUTPUT_DIR})
 
 # Compilation rules
 $(BUILD_DIR)/%.o: %.c
@@ -184,11 +185,11 @@ checkvariantchange:
 
 # Create the library weak_stubs_libs
 $(WEAK_STUBS_LIB): $(WEAK_STUBS_OBJ)
-	@${ECHOE} ${GREEN}Building weak_stubs_libs...${NC}
+	${ECHOE} ${GREEN}Building weak_stubs_libs...${NC}
 	@$(AR) rcs $@ $^
 
 # Rule to compile .c files into .o files in the correct directory
-$(BUILD_DIR)/skelton/src/%.o: $(BUILD_WEAK_STUBS_SRC)/%.c
+$(WEAK_STUBS_OUTPUT_DIR)/%.o: $(BUILD_WEAK_STUBS_SRC)/%.c
 	@$(MKDIR_P) $(dir $@)
 	@$(COMPILER) $(XCFLAGS) -c $< -o $@
 
