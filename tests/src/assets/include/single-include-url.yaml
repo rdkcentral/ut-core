@@ -1,0 +1,6 @@
+---
+"1":
+  value: true
+include_0: https://raw.githubusercontent.com/rdkcentral/ut-control/main/tests/src/assets/include/2s.yaml
+include_1: https://raw.githubusercontent.com/rdkcentral/ut-control/main/tests/src/assets/include/3s.yaml
+include_2: https://raw.githubusercontent.com/rdkcentral/ut-control/main/tests/src/assets/include/4s.yaml
