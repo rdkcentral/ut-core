@@ -24,6 +24,7 @@ TARGET_EXEC = ut-test
 
 # Switch on Linux & disable asserts for the testing suites
 CFLAGS += -DNDEBUG
+BUILD_WEAK_STUBS_SRC = $(ROOT_DIR)/src_weak
 ifneq ($(VARIANT),CPP)
 VARIANT = C
 XCFLAGS += -DUT_CUNIT
@@ -55,6 +56,7 @@ export TARGET
 export TARGET_EXEC
 export CFLAGS
 export LDFLAGS
+export BUILD_WEAK_STUBS_SRC
 
 GREEN='\033[0;32m'
 NC='\033[0m'
