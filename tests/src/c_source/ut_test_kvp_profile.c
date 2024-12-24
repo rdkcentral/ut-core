@@ -205,9 +205,9 @@ void test_ut_kvp_get_instance( void )
     UT_ASSERT( resultP2 == true );
     if(resultP2 != true)
     {
-        UT_LOG_ERROR("perhaps platform profile(assets/include/5d.yaml) was not passed using -p switch");
+        UT_LOG_ERROR("perhaps platform profile(assets/5d.yaml) was not passed using -p switch");
     }
-    UT_LOG_STEP("Tested for profile : assets/include/5d.yaml");
+    UT_LOG_STEP("Tested for profile : assets/5d.yaml");
 }
 
 void register_kvp_profile_testing_functions(void)
