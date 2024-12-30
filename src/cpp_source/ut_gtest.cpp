@@ -37,6 +37,12 @@ struct TestSuiteInfo {
     std::string name;
 };
 
+// Struct to hold test information within a suite
+struct TestInfo {
+    int number;
+    std::string name;
+};
+
 class UTTestRunner
 {
 public:
@@ -99,7 +105,7 @@ public:
         return suites;
     }
 
-    std::string getUserSelectedTestSuites(const std::vector<TestSuiteInfo>& suites)
+    int getUserSelectedTestSuites(const std::vector<TestSuiteInfo>& suites)
     {
         std::cout << "\nEnter number of suite to select (1-" << suites.size() << ") : ";
         int number;
@@ -110,11 +116,120 @@ public:
             // Clear the error state and ignore the invalid input
             std::cin.clear();                                                   // Clear the error flag
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignore invalid input
+            return 0;
+        }
+
+        return number;
+    }
+
+    std::string getUserSelectedTest(std::vector<TestInfo> tests, const TestSuiteInfo &suite)
+    {
+        std::cout << "\nEnter number of test to select (1-" << tests.size() << ") : ";
+        int test_number;
+        std::cin >> test_number;
+
+        if (std::cin.fail() || test_number <= 0 || test_number > static_cast<int>(tests.size()))
+        {
+            // Clear the error state and ignore the invalid input
+            std::cin.clear();                                                   // Clear the error flag
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignore invalid
+            std::cout << "\n" << "Test not found.\n";
             return "";
         }
 
-        // Return the selected test suite's filter
-        return suites[number - 1].name + ".*";
+        return suite.name + "." + tests[test_number - 1].name; // Construct the filter
+    }
+
+    std::vector<TestInfo> listTestsFromSuite(const TestSuiteInfo &suite)
+    {
+        const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
+        const ::testing::TestSuite *test_suite = unit_test.GetTestSuite(suite.number - 1);
+
+        std::cout << "\n"
+                      << STRING_FORMAT("---------------------------Test List -----------------------------") << "\n"
+                      << std::flush;
+        std::cout << "Suite: "<< suite.name << "\n\n";
+        std::cout << std::setw(1) << "#" << "  "  // Right-aligned
+              << std::left << std::setw(20) << STRING_FORMAT("Test Name") // Left-aligned
+              << std::endl;
+        std::vector<TestInfo> tests;
+
+        for (int i = 0; i < test_suite->total_test_count(); ++i)
+        {
+            const ::testing::TestInfo *test_info = test_suite->GetTestInfo(i);
+            tests.push_back({i + 1, test_info->name()});
+            std::cout << i + 1 << ". " << test_info->name() << "\n";
+        }
+
+        std::cout  << STRING_FORMAT("---------------------------------------------------------------------") << "\n"
+                   << std::flush;
+        std::cout << "\n"
+                      <<"Total Number of Tests : "<< test_suite->total_test_count() << "\n";
+
+        return tests;
+    }
+
+    // Function to list all tests in a specific suite and allow the user to select one
+    UT_STATUS selectTestFromSuite(const TestSuiteInfo &suite)
+    {
+        UT_STATUS eStatus = UT_STATUS_CONTINUE;
+        UTTestRunner testRunner;
+        const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
+        const ::testing::TestSuite *test_suite = unit_test.GetTestSuite(suite.number - 1);
+
+        if (!test_suite)
+        {
+            std::cerr << "Invalid test suite selection.\n";
+            return UT_STATUS_CONTINUE;
+        }
+
+        while (eStatus == UT_STATUS_CONTINUE)
+        {
+            std::cout << "\n\n"
+                      << STRING_FORMAT("***************** UT CORE CONSOLE - SUITE MENU ******************************") << "\n"
+                      << STRING_FORMAT("(R)un  (S)elect  (L)ist  (A)ctivate  (F)ailures  (O)ptions  (H)elp  (Q)uit") << "\n"
+                      << STRING_FORMAT("Enter command: ")
+                      << std::flush; // Ensures the buffer is flushed immediately
+
+            char choice = '\0';
+            std::cin >> choice; // Read the user input
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear the buffer
+
+            choice = std::toupper(choice); // Convert input to uppercase for consistency
+
+            if (choice == STRING_FORMAT("L")[0])
+            {
+                listTestsFromSuite(suite);
+            }
+            else if (choice == STRING_FORMAT("S")[0])
+            {
+                std::vector<TestInfo> tests = listTestsFromSuite(suite);
+                std::string testName = getUserSelectedTest(tests, suite);
+                if (testName.empty())
+                { // Handle empty test name
+                    continue; // Return to the menu without changing eStatus
+                }
+                ::testing::GTEST_FLAG(filter) = testName;
+                testRunner.runTests();
+            }
+            else if (choice == STRING_FORMAT("R")[0])
+            {
+                testRunner.runTests();
+            }
+            else if (choice == STRING_FORMAT("Q")[0])
+            {
+                eStatus = UT_STATUS_STOP;
+            }
+            else if ((choice == STRING_FORMAT("H")[0]) || (choice == STRING_FORMAT("?")[0]))
+            {
+                testRunner.printUsage();
+            }
+            else if ((choice == STRING_FORMAT("A")[0]) || (choice == STRING_FORMAT("F")[0]) || (choice == STRING_FORMAT("O")[0]))
+            {
+                std::cout << "To be implemented soon\n" << std::flush;
+            }
+        }
+        return eStatus;
     }
 
     void printUsage()
@@ -207,13 +322,15 @@ UT_status_t UT_run_tests()
             else if (choice == STRING_FORMAT("S")[0])
             {
                 auto suites = testRunner.listTestSuites();
-                std::string selected_suites = testRunner.getUserSelectedTestSuites(suites);
+                int selected_suites = testRunner.getUserSelectedTestSuites(suites);
 
-                if (!selected_suites.empty())
+                if (selected_suites)
                 {
                     std::cout << "Suite '" << selected_suites << "' selected.\n";
                     // Set the GTest filter
-                    ::testing::GTEST_FLAG(filter) = selected_suites;
+                    ::testing::GTEST_FLAG(filter) = suites[selected_suites - 1].name + ".*";
+                    // Select a test from the chosen suite
+                    eStatus = testRunner.selectTestFromSuite(suites[selected_suites - 1]);
                 }
                 else
                 {
