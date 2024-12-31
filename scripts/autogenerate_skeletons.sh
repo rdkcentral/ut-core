@@ -108,6 +108,30 @@ function AGT_generate_skeletons()
                 mv *.c src/
         fi
 
+        # Process all .c files in the directory to be weak functions
+        for file in src/*.c;
+        do
+                # Skip if no .c files are found
+                [ -e "$file" ] || continue
+
+                temp_file="${file}.tmp"
+
+                # Process the file to add __attribute__((weak)) to function definitions
+                awk '
+                {
+                # Match function definitions: return type, function name, and arguments
+                if ($0 ~ /^[a-zA-Z_][a-zA-Z0-9_]*[ \t]+[a-zA-Z_][a-zA-Z0-9_]*[ \t]*\(/) {
+                print "__attribute__((weak)) " $0;
+                } else {
+                print $0;
+                }
+                }' "$file" > "$temp_file"
+
+                # Replace the original file with the updated file
+                mv "$temp_file" "$file"
+                AGT_SUCCESS "$file updated with weak attribute"
+        done
+
         AGT_SUCCESS "Skeletons are generated successfully"
         cd - &> /dev/null
 

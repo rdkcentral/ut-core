@@ -20,14 +20,17 @@
 # *
 
 set -e # error out if required
-SCRIPT_EXEC="$(realpath $0)"
-MY_DIR="$(dirname $SCRIPT_EXEC)"
 
-cd "$(dirname "$0")"
-mkdir -p ./logs
+export LD_LIBRARY_PATH=/usr/lib:/lib:/home/root:./.
 
-export LD_LIBRARY_PATH=/usr/lib:/lib:/home/root:${MY_DIR}
+echo "Using strong_linked_first_static_lib"
+./strong_linked_first_static_lib
 
-./ut-test -l ./logs -p ./assets/test_kvp.yaml -p assets/config-test.yaml -p assets/5d.yaml $@
+echo "Using weak_linked_first_static_lib "
+./weak_linked_first_static_lib
 
+echo "Using strong_first_link_shared_lib "
+./strong_first_link_shared_lib
 
+echo "Using weak_first_link_shared_lib "
+./weak_first_link_shared_lib

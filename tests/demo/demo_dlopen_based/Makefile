@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # *
 # * If not stated otherwise in this file or this component's LICENSE file the
 # * following copyright and licenses apply:
@@ -19,15 +17,34 @@
 # * limitations under the License.
 # *
 
-set -e # error out if required
-SCRIPT_EXEC="$(realpath $0)"
-MY_DIR="$(dirname $SCRIPT_EXEC)"
+# Makefile for demonstrating weak vs strong symbols using dlopen
 
-cd "$(dirname "$0")"
-mkdir -p ./logs
+ifeq ($(TARGET),)
+CC = gcc
+else
+#CC = rm-rdk-linux-gnueabi-gcc -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -mabi=aapcs-linux -mno-thumb-interwork -ffixed-r8 -fomit-frame-pointer
+endif
+CFLAGS = -Wall -fPIC
+LDFLAGS = -ldl
 
-export LD_LIBRARY_PATH=/usr/lib:/lib:/home/root:${MY_DIR}
+# Targets
+EXECUTABLE = main
+SHARED_LIB = libplugin.so
 
-./ut-test -l ./logs -p ./assets/test_kvp.yaml -p assets/config-test.yaml -p assets/5d.yaml $@
+# Source files
+MAIN_SRC = main.c
+PLUGIN_SRC = plugin.c
 
+.PHONY: all clean
+
+all: $(EXECUTABLE) $(SHARED_LIB)
+
+$(EXECUTABLE): $(MAIN_SRC)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+$(SHARED_LIB): $(PLUGIN_SRC)
+	$(CC) $(CFLAGS) -shared -o $@ $^
+
+clean:
+	rm -f $(EXECUTABLE) $(SHARED_LIB)
 
