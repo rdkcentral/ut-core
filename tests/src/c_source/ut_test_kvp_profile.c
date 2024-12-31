@@ -143,8 +143,6 @@ void test_ut_kvp_profile_open( void )
 {
     UT_LOG_STEP( "test_ut_kvp_profile_open - start" );
     ut_kvp_profile_open( KVP_VALID_TEST_ASSERT_YAML_FILE );
-    ut_kvp_profile_open( KVP_VALID_TEST_ASSERT_YAML_FILE );
-    ut_kvp_profile_open( KVP_VALID_TEST_ASSERT_YAML_FILE );
     UT_LOG_STEP( "test_ut_kvp_profile_open - end" );
 }
 
@@ -178,6 +176,8 @@ int test_ut_kvp_profile_cleanup( void )
 void test_ut_kvp_get_instance( void )
 {
     bool result;
+    bool resultP1;
+    bool resultP2;
     ut_kvp_instance_t *pInstance;
 
     pInstance = ut_kvp_profile_getInstance();
@@ -192,6 +192,22 @@ void test_ut_kvp_get_instance( void )
     // Check for decoding correctly a field from the platformProfile
     result = ut_kvp_getBoolField( pInstance, "decodeTest/checkBoolTRUE" );
     UT_ASSERT( result == true );
+    UT_LOG_STEP("Tested for profile : assets/test_kvp.yaml");
+    resultP1 = ut_kvp_getBoolField( pInstance, "components/0/ResourceList1/0/supportsFeatureX" );
+    UT_ASSERT( resultP1 == true );
+    if(resultP1 != true)
+    {
+        UT_LOG_ERROR("perhaps platform profile(assets/config-test.yaml) was not passed using -p switch");
+    }
+    UT_LOG_STEP("Tested for profile : assets/config-test.yaml");
+
+    resultP2 = ut_kvp_getBoolField( pInstance, "5/value" );
+    UT_ASSERT( resultP2 == true );
+    if(resultP2 != true)
+    {
+        UT_LOG_ERROR("perhaps platform profile(assets/5d.yaml) was not passed using -p switch");
+    }
+    UT_LOG_STEP("Tested for profile : assets/5d.yaml");
 }
 
 void register_kvp_profile_testing_functions(void)

@@ -28,6 +28,6 @@ mkdir -p ./logs
 
 export LD_LIBRARY_PATH=/usr/lib:/lib:/home/root:${MY_DIR}
 
-./ut-test -l ./logs -p ./assets/test_kvp.yaml $@
+./ut-test -l ./logs -p ./assets/test_kvp.yaml -p assets/config-test.yaml -p assets/5d.yaml $@
 
 
