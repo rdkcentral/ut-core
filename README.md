@@ -2,6 +2,7 @@
 
 | Date (DD/MM/YY)  | Comment | Document Version |
 |--------|---------|---------|
+| 24/12/24 | Updated usage of Weak Library | 2.0.3
 | 07/11/24 | Updated How to use Autogenerate script url | 2.0.2|
 | 19/06/24 | Extended LD_LIBRARY_PATH | 2.0.1|
 | 02/01/24 | Added Release Notes | 2.0.0|
@@ -215,6 +216,37 @@ make VARIANT=CPP TARGET=arm
 This will build the following directories `src/*.c`, in addition to core functions from `ut-core/src/cpp_source` and linking against libraries in `ut-core/framework` and link against `libs/.so` or from `sysroot` path in the SDK.
 
 The final output binary is build as `hal_test` and resides in the `bin` directory, the framework .so files will be copied to the same directory.
+
+### Feature: `BUILD_WEAK_STUBS_SRC` for Weak Library Compilation
+
+The `BUILD_WEAK_STUBS_SRC` variable enables clients to define and export a list of source files that will be compiled into a weak library. This allows testing suites to use stubbed implementations of functions during development, with the strong implementation provided by vendors or third parties at a later stage.
+
+#### Benefits:
+1. **Supports Testing Development**: Enables testing suites to run without waiting for strong implementations.
+2. **Decouples Development**: Testing can proceed independently of vendor timelines.
+3. **Seamless Replacement**: Strong implementations can replace weak stubs without changes to the testing suites.
+
+#### Key Makefile Logic:
+```make
+WEAK_STUBS_LIB := $(LIB_DIR)/libweak_stubs_libs.so
+WEAK_STUBS_OUTPUT_DIR ?= $(BUILD_DIR)/weak_stubs/src
+WEAK_STUBS_SRC := $(shell find $(BUILD_WEAK_STUBS_SRC) -name *.c)
+WEAK_STUBS_OBJ := $(patsubst $(BUILD_WEAK_STUBS_SRC)/%, $(WEAK_STUBS_OUTPUT_DIR)/%, $(WEAK_STUBS_SRC:.c=.o))
+```
+- `BUILD_WEAK_STUBS_SRC`: Path to source files for weak stubs.
+- `WEAK_STUBS_LIB`: Compiled weak library (`libweak_stubs_libs.so`).
+- `WEAK_STUBS_SRC` and `WEAK_STUBS_OBJ`: Dynamically map source to object files.
+
+#### Workflow:
+1. **Define Stubs**: Clients export `BUILD_WEAK_STUBS_SRC` with the path to stub source files.
+   ```bash
+   export BUILD_WEAK_STUBS_SRC=/path/to/stubs
+   ```
+2. **Build Library**: The Makefile compiles the stubs into a weak library.
+3. **Develop and Test**: Testing suites use the weak library.
+4. **Integrate Strong Implementation**: Vendors replace the weak stubs when ready.
+
+This approach ensures smooth testing suite development while awaiting third-party components.
 
 ## Running on the target
 
