@@ -35,6 +35,7 @@ typedef enum
 struct TestSuiteInfo {
     int number;
     std::string name;
+    bool isActive;
 };
 
 // Struct to hold test information within a suite
@@ -45,12 +46,24 @@ struct TestInfo {
 
 class UTTestRunner
 {
+
+private:
+    static std::vector<TestSuiteInfo> suites;
+
 public:
     explicit UTTestRunner()
     {
         int argc = 1;
         char *argv[1] = {(char *)"test_runner"};
         ::testing::InitGoogleTest(&argc, argv);
+        const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
+        std::vector<TestSuiteInfo> &suites = UTTestRunner::suites;
+
+        for (int i = 0; i < unit_test.total_test_suite_count(); ++i)
+        {
+            const ::testing::TestSuite *test_suite = unit_test.GetTestSuite(i);
+            suites.push_back({i + 1, test_suite->name(), true});
+        }
     }
 
     void setTestFilter(const std::string &filter)
@@ -85,18 +98,26 @@ public:
     {
         const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
 
-        std::vector<TestSuiteInfo> suites;
+        std::vector<TestSuiteInfo> &suites = UTTestRunner::suites;
+        std::string filter = ::testing::GTEST_FLAG(filter);
+
         std::cout << "\n"
                       << STRING_FORMAT("--------------------- Registered Suites -----------------------------") << "\n"
                       << std::flush;
         std::cout << std::setw(1) << "#" << "  "  // Right-aligned
-              << std::left << std::setw(20) << STRING_FORMAT("Suite Name") // Left-aligned
+              << std::left << std::setw(50) << STRING_FORMAT("Suite Name") // Left-aligned
+              << std::left << std::setw(10) << STRING_FORMAT("#Tests") // Left-aligned
+              << std::left << std::setw(10) << STRING_FORMAT("Active?") // Left-aligned
               << std::endl;
-        for (int i = 0; i < unit_test.total_test_suite_count(); ++i)
+        for (size_t i = 0; i < suites.size(); ++i)
         {
             const ::testing::TestSuite *test_suite = unit_test.GetTestSuite(i);
-            suites.push_back({i + 1, test_suite->name()});
-            std::cout << i + 1 << ". " << test_suite->name() << "\n";
+
+            std::cout << std::setw(1) << i + 1 << ". "
+                      << std::left << std::setw(50) << suites[i].name
+                      << std::left << std::setw(10) << test_suite->total_test_count()
+                      << std::left << std::setw(10) << (suites[i].isActive ? "Yes" : "No")
+                      << "\n";
         }
         std::cout  << STRING_FORMAT("---------------------------------------------------------------------") << "\n"
                    << std::flush;
@@ -169,6 +190,66 @@ public:
         return tests;
     }
 
+    void ToggleTestSuiteExclusion(int suite_num)
+    {
+        // Get the current filter
+        std::string &filter = ::testing::GTEST_FLAG(filter);
+        std::vector<TestSuiteInfo> &suites = UTTestRunner::suites;
+
+        // Toggle the suite's active status
+        suites[suite_num - 1].isActive = !suites[suite_num - 1].isActive;
+
+        // Check if all suites are inactive
+        bool all_inactive = std::all_of(suites.begin(), suites.end(), [](const TestSuiteInfo &suite)
+                                        { return !suite.isActive; });
+
+        // Rebuild the filter
+        if (all_inactive)
+        {
+            // Exclude all suites
+            filter = "-*";
+        }
+        else
+        {
+            // Build the include and exclude filters
+            std::string include_filter;
+            std::string exclude_filter;
+
+            for (const auto &suite : suites)
+            {
+                if (suite.isActive)
+                {
+                    if (!include_filter.empty())
+                        include_filter += ":";
+                    include_filter += suite.name + ".*";
+                }
+                else
+                {
+                    if (!exclude_filter.empty())
+                        exclude_filter += ":";
+                    exclude_filter += "-" + suite.name + ".*";
+                }
+            }
+
+            // Combine include and exclude filters
+            if (!include_filter.empty())
+            {
+                filter = include_filter;
+                if (!exclude_filter.empty())
+                {
+                    filter += ":" + exclude_filter;
+                }
+            }
+            else
+            {
+                filter = exclude_filter;
+            }
+        }
+
+        // Provide feedback to the user
+        std::cout << "Updated GTest filter: " << filter << "\n";
+    }
+
     // Function to list all tests in a specific suite and allow the user to select one
     UT_STATUS selectTestFromSuite(const TestSuiteInfo &suite)
     {
@@ -224,7 +305,17 @@ public:
             {
                 testRunner.printUsage();
             }
-            else if ((choice == STRING_FORMAT("A")[0]) || (choice == STRING_FORMAT("F")[0]) || (choice == STRING_FORMAT("O")[0]))
+            else if ((choice == STRING_FORMAT("A")[0]))
+            {
+                std::vector<TestInfo> tests = listTestsFromSuite(suite);
+                std::string testName = getUserSelectedTest(tests, suite);
+                if (testName.empty())
+                { // Handle empty test name
+                    continue; // Return to the menu without changing eStatus
+                }
+                ::testing::GTEST_FLAG(filter) = "-" + testName;
+            }
+            else if ((choice == STRING_FORMAT("F")[0]) || (choice == STRING_FORMAT("O")[0]))
             {
                 std::cout << "To be implemented soon\n" << std::flush;
             }
@@ -247,6 +338,8 @@ public:
 
     }
 };
+
+std::vector<TestSuiteInfo> UTTestRunner::suites;
 
 void UT_set_results_output_filename(const char* szFilenameRoot)
 {
@@ -349,7 +442,15 @@ UT_status_t UT_run_tests()
             {
                 testRunner.printUsage();
             }
-            else if ((choice == STRING_FORMAT("A")[0]) || (choice == STRING_FORMAT("F")[0]) || (choice == STRING_FORMAT("O")[0]))
+            else if ((choice == STRING_FORMAT("A")[0]))
+            {
+                auto suites = testRunner.listTestSuites();
+                int selected_suites = testRunner.getUserSelectedTestSuites(suites);
+                //::testing::GTEST_FLAG(filter) = "-" + suites[selected_suites - 1].name + ".*";
+                testRunner.ToggleTestSuiteExclusion(selected_suites);
+                testRunner.listTestSuites();
+            }
+            else if ((choice == STRING_FORMAT("F")[0]) || (choice == STRING_FORMAT("O")[0]))
             {
                 std::cout << "To be implemented soon\n" << std::flush;
             }
