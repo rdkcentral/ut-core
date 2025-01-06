@@ -151,7 +151,7 @@ public:
         return number;
     }
 
-    std::string getUserSelectedTest(std::vector<TestInfo> tests, const TestSuiteInfo &suite)
+    std::string getUserSelectedTest(std::vector<TestInfo> tests, TestSuiteInfo &suite, bool isActivate)
     {
         std::cout << "\nEnter number of test to select (1-" << tests.size() << ") : ";
         int test_number;
@@ -164,6 +164,11 @@ public:
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignore invalid
             std::cout << "\n" << "Test not found.\n";
             return "";
+        }
+
+        if (isActivate)
+        {
+            suite.tests[test_number - 1].isActive = ! suite.tests[test_number - 1].isActive;
         }
 
         return suite.name + "." + tests[test_number - 1].name; // Construct the filter
@@ -257,8 +262,54 @@ public:
         std::cout << "Updated GTest filter: " << filter << "\n";
     }
 
+    void setFlag(const TestSuiteInfo &suite)
+    {
+        // Get the current filter
+        std::string &filter = ::testing::GTEST_FLAG(filter);
+
+        // Check the active status of all tests in the suite
+        bool allActive = true;
+        bool anyActive = false;
+
+        std::string filterString;
+
+        for (const auto &test : suite.tests)
+        {
+            if (test.isActive)
+            {
+                anyActive = true;
+                filterString += suite.name + "." + test.name + ":";
+            }
+            else
+            {
+                allActive = false;
+            }
+        }
+
+        if (allActive)
+        {
+            // If all tests are active, use the default filter to execute all tests
+            filter = suite.name + "*";
+        }
+        else if (anyActive)
+        {
+            // If some tests are active, construct a filter for the active ones
+            // Remove the trailing colon (":") from the filter string
+            if (!filterString.empty() && filterString.back() == ':')
+            {
+                filterString.pop_back();
+            }
+            filter = filterString;
+        }
+        else
+        {
+            // If no tests are active, set the filter to exclude everything
+            filter = "-*";
+        }
+    }
+
     // Function to list all tests in a specific suite and allow the user to select one
-    UT_STATUS selectTestFromSuite(const TestSuiteInfo &suite)
+    UT_STATUS selectTestFromSuite(TestSuiteInfo &suite)
     {
         UT_STATUS eStatus = UT_STATUS_CONTINUE;
         const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
@@ -291,16 +342,29 @@ public:
             else if (choice == STRING_FORMAT("S")[0])
             {
                 std::vector<TestInfo> tests = listTestsFromSuite(suite);
-                std::string testName = getUserSelectedTest(tests, suite);
+                std::string testName = getUserSelectedTest(tests, suite, false);
                 if (testName.empty())
-                { // Handle empty test name
+                {             // Handle empty test name
                     continue; // Return to the menu without changing eStatus
                 }
-                ::testing::GTEST_FLAG(filter) = testName;
-                runTests();
+
+                // Extract the second part of the testName
+                std::string targetTestName = testName.substr(testName.find('.') + 1);
+
+                // Make sure the test is active before executing it
+                for (const auto &test : tests)
+                {
+                    if (test.name == targetTestName && test.isActive)
+                    {
+                        ::testing::GTEST_FLAG(filter) = testName;
+                        runTests();
+                        break; // Exit the loop once the test is found and executed
+                    }
+                }
             }
             else if (choice == STRING_FORMAT("R")[0])
             {
+                setFlag(suite);
                 runTests();
             }
             else if (choice == STRING_FORMAT("Q")[0])
@@ -318,12 +382,12 @@ public:
             else if ((choice == STRING_FORMAT("A")[0]))
             {
                 std::vector<TestInfo> tests = listTestsFromSuite(suite);
-                std::string testName = getUserSelectedTest(tests, suite);
+                std::string testName = getUserSelectedTest(tests, suite, true);
                 if (testName.empty())
                 { // Handle empty test name
                     continue; // Return to the menu without changing eStatus
                 }
-                ::testing::GTEST_FLAG(filter) = "-" + testName;
+                listTestsFromSuite(suite);
             }
             else if ((choice == STRING_FORMAT("F")[0]) || (choice == STRING_FORMAT("O")[0]))
             {
