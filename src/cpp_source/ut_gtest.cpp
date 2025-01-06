@@ -32,16 +32,18 @@ typedef enum
   UT_STATUS_STOP            /**< Stop processing (user selected 'Quit'). */
 } UT_STATUS;
 
-struct TestSuiteInfo {
+// Struct to hold test information within a suite
+struct TestInfo {
     int number;
     std::string name;
     bool isActive;
 };
 
-// Struct to hold test information within a suite
-struct TestInfo {
+struct TestSuiteInfo {
     int number;
     std::string name;
+    bool isActive;
+    std::vector<TestInfo> tests;
 };
 
 class UTTestRunner
@@ -57,12 +59,19 @@ public:
         char *argv[1] = {(char *)"test_runner"};
         ::testing::InitGoogleTest(&argc, argv);
         const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
-        std::vector<TestSuiteInfo> &suites = UTTestRunner::suites;
 
         for (int i = 0; i < unit_test.total_test_suite_count(); ++i)
         {
             const ::testing::TestSuite *test_suite = unit_test.GetTestSuite(i);
-            suites.push_back({i + 1, test_suite->name(), true});
+            std::vector<TestInfo> testInfos;
+
+            for (int j = 0; j < test_suite->total_test_count(); ++j)
+            {
+                const ::testing::TestInfo *test_info = test_suite->GetTestInfo(j);
+                testInfos.push_back({j + 1, test_info->name(), true});
+            }
+
+            suites.push_back({i + 1, test_suite->name(), true, testInfos});
         }
     }
 
@@ -108,14 +117,13 @@ public:
               << std::left << std::setw(50) << STRING_FORMAT("Suite Name") // Left-aligned
               << std::left << std::setw(10) << STRING_FORMAT("#Tests") // Left-aligned
               << std::left << std::setw(10) << STRING_FORMAT("Active?") // Left-aligned
-              << std::endl;
+              << std::endl << "\n";
         for (size_t i = 0; i < suites.size(); ++i)
         {
-            const ::testing::TestSuite *test_suite = unit_test.GetTestSuite(i);
 
             std::cout << std::setw(1) << i + 1 << ". "
                       << std::left << std::setw(50) << suites[i].name
-                      << std::left << std::setw(10) << test_suite->total_test_count()
+                      << std::left << std::setw(10) << suites[i].tests.size()
                       << std::left << std::setw(10) << (suites[i].isActive ? "Yes" : "No")
                       << "\n";
         }
@@ -163,31 +171,30 @@ public:
 
     std::vector<TestInfo> listTestsFromSuite(const TestSuiteInfo &suite)
     {
-        const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
-        const ::testing::TestSuite *test_suite = unit_test.GetTestSuite(suite.number - 1);
 
         std::cout << "\n"
-                      << STRING_FORMAT("---------------------------Test List -----------------------------") << "\n"
-                      << std::flush;
+                  << STRING_FORMAT("---------------------------Test List ------------------------------") << "\n"
+                  << std::flush;
         std::cout << "Suite: "<< suite.name << "\n\n";
         std::cout << std::setw(1) << "#" << "  "  // Right-aligned
-              << std::left << std::setw(20) << STRING_FORMAT("Test Name") // Left-aligned
-              << std::endl;
-        std::vector<TestInfo> tests;
+              << std::left << std::setw(50) << STRING_FORMAT("Test Name") // Left-aligned
+              << std::left << std::setw(10) << STRING_FORMAT("Active?") // Left-aligned
+              << std::endl << "\n";
 
-        for (int i = 0; i < test_suite->total_test_count(); ++i)
+        for (size_t i = 0; i < suite.tests.size(); ++i)
         {
-            const ::testing::TestInfo *test_info = test_suite->GetTestInfo(i);
-            tests.push_back({i + 1, test_info->name()});
-            std::cout << i + 1 << ". " << test_info->name() << "\n";
+            std::cout << std::setw(1) << suite.tests[i].number << ". "
+            << std::left << std::setw(50) << suite.tests[i].name
+            << std::left << std::setw(10) << (suite.tests[i].isActive ? "Yes" : "No")
+            << "\n";
         }
 
-        std::cout  << STRING_FORMAT("---------------------------------------------------------------------") << "\n"
+        std::cout  << STRING_FORMAT("-------------------------------------------------------------------") << "\n"
                    << std::flush;
         std::cout << "\n"
-                      <<"Total Number of Tests : "<< test_suite->total_test_count() << "\n";
+                      <<"Total Number of Tests : "<< suite.tests.size() << "\n";
 
-        return tests;
+        return suite.tests;
     }
 
     void ToggleTestSuiteExclusion(int suite_num)
@@ -254,7 +261,6 @@ public:
     UT_STATUS selectTestFromSuite(const TestSuiteInfo &suite)
     {
         UT_STATUS eStatus = UT_STATUS_CONTINUE;
-        UTTestRunner testRunner;
         const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
         const ::testing::TestSuite *test_suite = unit_test.GetTestSuite(suite.number - 1);
 
@@ -291,19 +297,23 @@ public:
                     continue; // Return to the menu without changing eStatus
                 }
                 ::testing::GTEST_FLAG(filter) = testName;
-                testRunner.runTests();
+                runTests();
             }
             else if (choice == STRING_FORMAT("R")[0])
             {
-                testRunner.runTests();
+                runTests();
             }
             else if (choice == STRING_FORMAT("Q")[0])
             {
                 eStatus = UT_STATUS_STOP;
             }
+            else if (choice == STRING_FORMAT("M")[0])
+            {
+                eStatus = UT_STATUS_MOVE_UP;
+            }
             else if ((choice == STRING_FORMAT("H")[0]) || (choice == STRING_FORMAT("?")[0]))
             {
-                testRunner.printUsage();
+                printUsageForSuite(suite);
             }
             else if ((choice == STRING_FORMAT("A")[0]))
             {
@@ -326,9 +336,25 @@ public:
     void printUsage()
     {
         std::cout << "\n\n"
-                      << STRING_FORMAT("Commands:  R - Run all tests in suite") << "\n"
-                      << STRING_FORMAT("           S - Select a suite to run or modify") << "\n"
+                      << STRING_FORMAT("Commands:  R - Run tests in suite") << "\n"
+                      << STRING_FORMAT("           S - Select a suite to run") << "\n"
                       << STRING_FORMAT("           L - List all registered suites") << "\n"
+                      << STRING_FORMAT("           H - Show this help message") << "\n"
+                      << STRING_FORMAT("           Q - Quit the application") << "\n"
+                      << STRING_FORMAT("           A - Activate - implementation pending") << "\n"
+                      << STRING_FORMAT("           O - Option - implementation pending") << "\n"
+                      << STRING_FORMAT("           F - Failures - implementation pending") << "\n"
+                      << std::flush;
+
+    }
+
+    void printUsageForSuite(const TestSuiteInfo &suite)
+    {
+        std::cout << "\n\n"
+                      << STRING_FORMAT("Commands:  R - Run tests in suite: ") << suite.name << "\n"
+                      << STRING_FORMAT("           S - Select a test to run ") << "\n"
+                      << STRING_FORMAT("           L - List all registered tests in suite: ") << suite.name << "\n"
+                      << STRING_FORMAT("           M - Move up to the main menu") << "\n"
                       << STRING_FORMAT("           H - Show this help message") << "\n"
                       << STRING_FORMAT("           Q - Quit the application") << "\n"
                       << STRING_FORMAT("           A - Activate - implementation pending") << "\n"
@@ -424,6 +450,11 @@ UT_status_t UT_run_tests()
                     ::testing::GTEST_FLAG(filter) = suites[selected_suites - 1].name + ".*";
                     // Select a test from the chosen suite
                     eStatus = testRunner.selectTestFromSuite(suites[selected_suites - 1]);
+                    if (eStatus == UT_STATUS_MOVE_UP)
+                    {
+                        ::testing::GTEST_FLAG(filter) = "*"; //Reset the filter back to all
+                        eStatus = UT_STATUS_CONTINUE;
+                    }
                 }
                 else
                 {
