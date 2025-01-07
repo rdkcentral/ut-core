@@ -168,7 +168,14 @@ public:
 
         if (isActivate)
         {
-            suite.tests[test_number - 1].isActive = ! suite.tests[test_number - 1].isActive;
+            if (suite.isActive == false)
+            {
+                std::cout << "\n" << suite.name << " is inactive.\n";
+            }
+            else
+            {
+                suite.tests[test_number - 1].isActive = !suite.tests[test_number - 1].isActive;
+            }
         }
 
         return suite.name + "." + tests[test_number - 1].name; // Construct the filter
@@ -209,7 +216,14 @@ public:
         std::vector<TestSuiteInfo> &suites = UTTestRunner::suites;
 
         // Toggle the suite's active status
-        suites[suite_num - 1].isActive = !suites[suite_num - 1].isActive;
+        TestSuiteInfo &suite = suites[suite_num - 1];
+        suite.isActive = !suite.isActive;
+
+        // Reflect the change in the tests' active statuses
+        for (auto &test : suite.tests)
+        {
+            test.isActive = suite.isActive;
+        }
 
         // Check if all suites are inactive
         bool all_inactive = std::all_of(suites.begin(), suites.end(), [](const TestSuiteInfo &suite)
@@ -324,8 +338,8 @@ public:
         while (eStatus == UT_STATUS_CONTINUE)
         {
             std::cout << "\n\n"
-                      << STRING_FORMAT("***************** UT CORE CONSOLE - SUITE MENU ******************************") << "\n"
-                      << STRING_FORMAT("(R)un  (S)elect  (L)ist  (A)ctivate  (F)ailures  (O)ptions  (H)elp  (Q)uit") << "\n"
+                      << STRING_FORMAT("*********************** UT CORE CONSOLE - SUITE MENU ******************************") << "\n"
+                      << STRING_FORMAT("(R)un  (S)elect  (L)ist  (A)ctivate  (F)ailures  (M)oveUp  (H)elp (O)ptions (Q)uit") << "\n"
                       << STRING_FORMAT("Enter command: ")
                       << std::flush; // Ensures the buffer is flushed immediately
 
@@ -375,11 +389,11 @@ public:
             {
                 eStatus = UT_STATUS_MOVE_UP;
             }
-            else if ((choice == STRING_FORMAT("H")[0]) || (choice == STRING_FORMAT("?")[0]))
+            else if (choice == STRING_FORMAT("H")[0])
             {
                 printUsageForSuite(suite);
             }
-            else if ((choice == STRING_FORMAT("A")[0]))
+            else if (choice == STRING_FORMAT("A")[0])
             {
                 std::vector<TestInfo> tests = listTestsFromSuite(suite);
                 std::string testName = getUserSelectedTest(tests, suite, true);
@@ -389,9 +403,13 @@ public:
                 }
                 listTestsFromSuite(suite);
             }
-            else if ((choice == STRING_FORMAT("F")[0]) || (choice == STRING_FORMAT("O")[0]))
+            else if (choice == STRING_FORMAT("F")[0])
             {
-                std::cout << "To be implemented soon\n" << std::flush;
+                displayFailedTests();
+            }
+            else if ((choice == STRING_FORMAT("O")[0]))
+            {
+                displayOptionsMenu();
             }
         }
         return eStatus;
@@ -405,9 +423,9 @@ public:
                       << STRING_FORMAT("           L - List all registered suites") << "\n"
                       << STRING_FORMAT("           H - Show this help message") << "\n"
                       << STRING_FORMAT("           Q - Quit the application") << "\n"
-                      << STRING_FORMAT("           A - Activate - implementation pending") << "\n"
-                      << STRING_FORMAT("           O - Option - implementation pending") << "\n"
-                      << STRING_FORMAT("           F - Failures - implementation pending") << "\n"
+                      << STRING_FORMAT("           A - Activates/De-activates a suite") << "\n"
+                      << STRING_FORMAT("           F - Show failures") << "\n"
+                      << STRING_FORMAT("           O - Show gtest options menu") << "\n"
                       << std::flush;
 
     }
@@ -421,11 +439,121 @@ public:
                       << STRING_FORMAT("           M - Move up to the main menu") << "\n"
                       << STRING_FORMAT("           H - Show this help message") << "\n"
                       << STRING_FORMAT("           Q - Quit the application") << "\n"
-                      << STRING_FORMAT("           A - Activate - implementation pending") << "\n"
-                      << STRING_FORMAT("           O - Option - implementation pending") << "\n"
-                      << STRING_FORMAT("           F - Failures - implementation pending") << "\n"
+                      << STRING_FORMAT("           A - Activates/De-activates a test") << "\n"
+                      << STRING_FORMAT("           F - Show failures") << "\n"
+                      << STRING_FORMAT("           O - Show gtest options menu") << "\n"
                       << std::flush;
 
+    }
+
+    void displayFailedTests()
+    {
+        const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
+
+        std::cout << "\n"
+                  << "------------------------- Failed Tests -------------------------\n";
+
+        int failedTestCount = 0;
+
+        for (int i = 0; i < unit_test.total_test_suite_count(); ++i)
+        {
+            const ::testing::TestSuite *test_suite = unit_test.GetTestSuite(i);
+
+            for (int j = 0; j < test_suite->total_test_count(); ++j)
+            {
+                const ::testing::TestInfo *test_info = test_suite->GetTestInfo(j);
+
+                if (test_info->result()->Failed())
+                {
+                    ++failedTestCount;
+                    std::cout << "Suite: " << test_suite->name()
+                              << " | Test: " << test_info->name()
+                              << " - FAILED\n";
+                }
+            }
+        }
+
+        if (failedTestCount == 0)
+        {
+            std::cout << "No failed tests.\n";
+        }
+
+        std::cout << "----------------------------------------------------------------\n";
+    }
+
+    void displayOptionsMenu()
+    {
+        while (true)
+        {
+            std::cout << "\n"
+                      << "------------------------- GTest Options -------------------------\n"
+                      << "(1) Enable/Disable test shuffle\n"
+                      << "(2) Set random seed for shuffling\n"
+                      << "(3) Repeat tests multiple times\n"
+                      << "(4) Enable/Disable break on failure\n"
+                      << "(5) Enable/Disable colored output\n"
+                      << "(Q) Quit options menu\n"
+                      << "-----------------------------------------------------------------\n"
+                      << "Enter your choice: ";
+
+            char choice;
+            std::cin >> choice;
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+            switch (std::toupper(choice))
+            {
+            case '1':
+            {
+                ::testing::GTEST_FLAG(shuffle) = !::testing::GTEST_FLAG(shuffle);
+                std::cout << "Shuffle " << (::testing::GTEST_FLAG(shuffle) ? "enabled" : "disabled") << ".\n";
+                break;
+            }
+            case '2':
+            {
+                std::cout << "Enter random seed (integer): ";
+                int seed;
+                std::cin >> seed;
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                ::testing::GTEST_FLAG(random_seed) = seed;
+                std::cout << "Random seed set to: " << seed << "\n";
+                break;
+            }
+            case '3':
+            {
+                std::cout << "Enter number of repetitions: ";
+                int repeat;
+                std::cin >> repeat;
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                ::testing::GTEST_FLAG(repeat) = repeat;
+                std::cout << "Tests will be repeated " << repeat << " times.\n";
+                break;
+            }
+            case '4':
+            {
+                ::testing::GTEST_FLAG(break_on_failure) = !::testing::GTEST_FLAG(break_on_failure);
+                std::cout << "Break on failure " << (::testing::GTEST_FLAG(break_on_failure) ? "enabled" : "disabled") << ".\n";
+                break;
+            }
+            case '5':
+            {
+                std::cout << "Enter color option (yes/no/auto): ";
+                std::string color;
+                std::getline(std::cin, color);
+                ::testing::GTEST_FLAG(color) = color;
+                std::cout << "Color output set to: " << color << "\n";
+                break;
+            }
+            case 'Q':
+            {
+                return;
+            }
+            default:
+            {
+                std::cout << "Invalid choice. Please try again.\n";
+                break;
+            }
+            }
+        }
     }
 };
 
@@ -488,7 +616,7 @@ UT_status_t UT_run_tests()
         {
             std::cout << "\n\n"
                       << STRING_FORMAT("***************** UT CORE CONSOLE - MAIN MENU ******************************") << "\n"
-                      << STRING_FORMAT("(R)un  (S)elect  (L)ist  (A)ctivate  (F)ailures  (O)ptions  (H)elp  (Q)uit") << "\n"
+                      << STRING_FORMAT("(R)un  (S)elect  (L)ist  (A)ctivate  (F)ailures  (H)elp  (O)ptions (Q)uit") << "\n"
                       << STRING_FORMAT("Enter command: ")
                       << std::flush; // Ensures the buffer is flushed immediately
 
@@ -541,13 +669,16 @@ UT_status_t UT_run_tests()
             {
                 auto suites = testRunner.listTestSuites();
                 int selected_suites = testRunner.getUserSelectedTestSuites(suites);
-                //::testing::GTEST_FLAG(filter) = "-" + suites[selected_suites - 1].name + ".*";
                 testRunner.ToggleTestSuiteExclusion(selected_suites);
                 testRunner.listTestSuites();
             }
-            else if ((choice == STRING_FORMAT("F")[0]) || (choice == STRING_FORMAT("O")[0]))
+            else if ((choice == STRING_FORMAT("F")[0]))
             {
-                std::cout << "To be implemented soon\n" << std::flush;
+                testRunner.displayFailedTests();
+            }
+            else if ((choice == STRING_FORMAT("O")[0]))
+            {
+                testRunner.displayOptionsMenu();
             }
         }
     }
