@@ -344,8 +344,16 @@ public:
                       << std::flush; // Ensures the buffer is flushed immediately
 
             char choice = '\0';
-            std::cin >> choice; // Read the user input
+            std::cin >> choice;                                                 // Read the user input
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear the buffer
+
+            // Check if the input was valid
+            if (std::cin.fail())
+            {
+                std::cin.clear(); // Clear the error state
+                std::cerr << "Invalid input. Please enter a single character.\n";
+                continue; // Retry
+            }
 
             choice = std::toupper(choice); // Convert input to uppercase for consistency
 
@@ -410,6 +418,10 @@ public:
             else if ((choice == STRING_FORMAT("O")[0]))
             {
                 displayOptionsMenu();
+            }
+            else
+            {
+                std::cerr << "Invalid choice. Please enter a valid option (e.g., L).\n";
             }
         }
         return eStatus;
@@ -561,7 +573,21 @@ std::vector<TestSuiteInfo> UTTestRunner::suites;
 
 void UT_set_results_output_filename(const char* szFilenameRoot)
 {
+    // Null pointer check
+    if (szFilenameRoot == nullptr)
+    {
+        std::cerr << "Error: Filename root is null." << std::endl;
+        return; // Exit early to avoid undefined behavior
+    }
+
     std::string filepath = szFilenameRoot;
+
+    // Empty string check
+    if (filepath.empty())
+    {
+        std::cerr << "Error: Filename root is empty." << std::endl;
+        return; // Exit early as the filename is invalid
+    }
 
     // Find the position of the last dot
     size_t lastDot = filepath.find_last_of('.');
@@ -574,8 +600,8 @@ void UT_set_results_output_filename(const char* szFilenameRoot)
 
     // Set the output format and path programmatically
     ::testing::FLAGS_gtest_output = std::string("xml:") + filepath + "-report.xml";
-    std::cout << "Listing Filename:[" << filepath << "-report.xml]\n" << std::flush;
-    std::cout << "Results Filename:[" << filepath << ".log]\n" << std::flush;
+    std::cout << "Listing Filename: [" << filepath << "-report.xml]\n" << std::flush;
+    std::cout << "Results Filename: [" << filepath << ".log]\n" << std::flush;
 }
 
 void UT_set_test_mode(TestMode_t  mode)
