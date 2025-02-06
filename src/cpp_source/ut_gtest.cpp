@@ -48,9 +48,9 @@ struct TestSuiteInfo {
 };
 
 // Initialize static variables
-std::unordered_map<std::string, UT_groupID_t> TestGroupManager::suiteToGroup;
-std::unordered_set<UT_groupID_t> TestGroupManager::enabledGroups;
-std::unordered_set<UT_groupID_t> TestGroupManager::disabledGroups;
+std::unordered_map<std::string, UT_groupID_t> UTTestGroupManager::suiteToGroup;
+std::unordered_set<UT_groupID_t> UTTestGroupManager::enabledGroups;
+std::unordered_set<UT_groupID_t> UTTestGroupManager::disabledGroups;
 
 class UTTestRunner
 {
@@ -65,7 +65,7 @@ public:
         char *argv[1] = {(char *)"test_runner"};
         ::testing::InitGoogleTest(&argc, argv);
         const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
-        std::string filter = TestGroupManager::GetTestFilter();
+        std::string filter = UTTestGroupManager::UT_get_test_filter();
         std::vector<std::string> activeFilters;
         std::vector<std::string> inactiveFilters;
         parseFilterString(filter, activeFilters, inactiveFilters);
@@ -677,6 +677,100 @@ public:
 
 std::vector<TestSuiteInfo> UTTestRunner::suites;
 
+void UTTestGroupManager::UT_add_suite_withGroupID(const std::string &suiteName, UT_groupID_t group)
+{
+    suiteToGroup[suiteName] = group;
+}
+
+void UTTestGroupManager::UT_enable_group(UT_groupID_t group)
+{
+    if (disabledGroups.find(group) == disabledGroups.end()) // Only enable if not disabled
+    {
+        enabledGroups.insert(group);
+    }
+}
+
+void UTTestGroupManager::UT_disable_group(UT_groupID_t group)
+{
+    disabledGroups.insert(group);
+    enabledGroups.erase(group);
+}
+
+bool UTTestGroupManager::UT_is_group_enabled(UT_groupID_t group)
+{
+    if (disabledGroups.find(group) != disabledGroups.end()) // If explicitly disabled, return false
+    {
+        return false;
+    }
+    if (enabledGroups.empty()) // If no groups are enabled, assume all are enabled
+    {
+        return true;
+    }
+    bool status = enabledGroups.find(group) != enabledGroups.end(); // Only enabled groups should run
+    return status;
+}
+
+std::string UTTestGroupManager::UT_get_test_filter()
+{
+    if (enabledGroups.empty() && disabledGroups.empty())
+    {
+        return "*"; // No restrictions, run all tests
+    }
+
+    std::ostringstream includeFilter, excludeFilter;
+    bool firstInclude = true, firstExclude = true;
+
+    for (const auto &[suiteName, group] : suiteToGroup)
+    {
+        if (disabledGroups.find(group) != disabledGroups.end())
+        {
+            // If the group is explicitly disabled, add it to the exclude filter
+            if (!firstExclude)
+                excludeFilter << ":";
+            excludeFilter << "-" << suiteName << ".*"; // Exclude tests from this suite
+            firstExclude = false;
+        }
+        else if (enabledGroups.empty() || enabledGroups.find(group) != enabledGroups.end())
+        {
+            // If no groups are explicitly enabled, allow all (unless disabled)
+            if (!firstInclude)
+                includeFilter << ":";
+            includeFilter << suiteName << ".*"; // Include tests from this suite
+            firstInclude = false;
+        }
+    }
+
+    // Combine the include and exclude filters
+    if (firstInclude)
+    {
+        std::string excludeFilterString = excludeFilter.str().empty() ? "*" : excludeFilter.str();
+        return excludeFilterString;
+    }
+
+    std::string includeFilterString = includeFilter.str() + (excludeFilter.str().empty() ? "" : ":" + excludeFilter.str());
+    return includeFilterString;
+}
+
+UTCore::UTCore()
+{
+    // Initialization code if needed
+}
+
+UTCore::~UTCore()
+{
+    // Cleanup code if needed
+}
+
+void UTCore::SetUp()
+{
+    // Code to initialize resources before each test
+}
+
+void UTCore::TearDown()
+{
+    // Code to clean up resources after each test
+}
+
 void UT_set_results_output_filename(const char* szFilenameRoot)
 {
     // Null pointer check
@@ -724,9 +818,9 @@ TestMode_t UT_get_test_mode()
 void UT_Manage_Suite_Activation(int groupID, bool enable_disable)
 {
     if (enable_disable)
-        TestGroupManager::EnableGroup(static_cast<UT_groupID_t>(groupID));
+        UTTestGroupManager::UT_enable_group(static_cast<UT_groupID_t>(groupID));
     else
-        TestGroupManager::DisableGroup(static_cast<UT_groupID_t>(groupID));
+        UTTestGroupManager::UT_disable_group(static_cast<UT_groupID_t>(groupID));
     return;
 }
 

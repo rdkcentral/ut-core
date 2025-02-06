@@ -40,7 +40,7 @@ protected:
 };
 
 // Define and initialize static variable
-bool UTGTestL1::registered = (TestGroupManager::RegisterSuite("UTGTestL1", UT_TESTS_L2), true);
+bool UTGTestL1::registered = (UTTestGroupManager::UT_add_suite_withGroupID("UTGTestL1", UT_TESTS_L2), true);
 
 TEST_F(UTGTestL1, TestGtestL1Equal)
 {

@@ -43,7 +43,7 @@ protected:
 };
 
 // Define and initialize static variable
-bool UTKVPProfileTestL1::registered = (TestGroupManager::RegisterSuite("UTKVPProfileTestL1", UT_TESTS_L1), true);
+bool UTKVPProfileTestL1::registered = (UTTestGroupManager::UT_add_suite_withGroupID("UTKVPProfileTestL1", UT_TESTS_L1), true);
 
 TEST_F(UTKVPProfileTestL1, TestProfileOpenSuccess)
 {
