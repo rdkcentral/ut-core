@@ -22,6 +22,7 @@
 #include <ut_internal.h>
 
 #include <iomanip>
+#include <regex>
 
 static TestMode_t  gTestMode;
 #define STRING_FORMAT(x) x
@@ -46,6 +47,11 @@ struct TestSuiteInfo {
     std::vector<TestInfo> tests;
 };
 
+// Initialize static variables
+std::unordered_map<std::string, UT_groupID_t> TestGroupManager::suiteToGroup;
+std::unordered_set<UT_groupID_t> TestGroupManager::enabledGroups;
+std::unordered_set<UT_groupID_t> TestGroupManager::disabledGroups;
+
 class UTTestRunner
 {
 
@@ -59,19 +65,119 @@ public:
         char *argv[1] = {(char *)"test_runner"};
         ::testing::InitGoogleTest(&argc, argv);
         const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
+        std::string filter = TestGroupManager::GetTestFilter();
+        std::vector<std::string> activeFilters;
+        std::vector<std::string> inactiveFilters;
+        parseFilterString(filter, activeFilters, inactiveFilters);
+
+        // Check if both filters are empty
+        bool noFilters = activeFilters.empty() && inactiveFilters.empty();
 
         for (int i = 0; i < unit_test.total_test_suite_count(); ++i)
         {
             const ::testing::TestSuite *test_suite = unit_test.GetTestSuite(i);
+            std::string suiteName = test_suite->name();
+
+            // If no filters are provided, consider all suites as active
+            bool isActive = noFilters || (!matchesAnyPattern(suiteName, activeFilters) && !matchesAnyPattern(suiteName, inactiveFilters)) ||
+                            (matchesAnyPattern(suiteName, activeFilters) && !matchesAnyPattern(suiteName, inactiveFilters));
+
             std::vector<TestInfo> testInfos;
+            testInfos.reserve(test_suite->total_test_count());
 
             for (int j = 0; j < test_suite->total_test_count(); ++j)
             {
                 const ::testing::TestInfo *test_info = test_suite->GetTestInfo(j);
-                testInfos.push_back({j + 1, test_info->name(), true});
+                bool testIsActive = isActive;
+                testInfos.push_back(TestInfo{j + 1, test_info->name(), testIsActive});
             }
 
-            suites.push_back({i + 1, test_suite->name(), true, testInfos});
+            suites.push_back(TestSuiteInfo{i + 1, suiteName, isActive, std::move(testInfos)});
+        }
+
+        std::string inactiveFilterString = formatPatterns(inactiveFilters);
+        setTestFilter(inactiveFilterString);
+    }
+
+    std::string formatPatterns(const std::vector<std::string> &patterns)
+    {
+        std::string result = "-"; // Leading '-'
+
+        for (size_t i = 0; i < patterns.size(); ++i)
+        {
+            std::string modifiedPattern = patterns[i];
+
+            // Remove leading '-' if present
+            if (!modifiedPattern.empty() && modifiedPattern[0] == '-')
+            {
+                modifiedPattern = modifiedPattern.substr(1);
+            }
+
+            // Append to result with separator ":*" (skip separator for the last item)
+            result += modifiedPattern;
+            if (i < patterns.size() - 1)
+            {
+                result += ":*";
+            }
+        }
+
+        return result;
+    }
+
+    // Function to split a string by a delimiter
+    std::vector<std::string> split(const std::string &str, char delimiter)
+    {
+        std::vector<std::string> tokens;
+        std::stringstream ss(str);
+        std::string token;
+        while (std::getline(ss, token, delimiter))
+        {
+            tokens.push_back(token);
+        }
+        return tokens;
+    }
+
+    // Function to check if a string matches any regex pattern in a vector
+    bool matchesAnyPattern(const std::string &str, const std::vector<std::string> &patterns)
+    {
+        for (const auto &pattern : patterns)
+        {
+            std::string modifiedPattern = pattern;
+
+            // Remove leading '-' if present
+            if (!modifiedPattern.empty() && modifiedPattern[0] == '-')
+            {
+                modifiedPattern = modifiedPattern.substr(1);
+            }
+
+            std::regex regexPattern(modifiedPattern);
+            if (std::regex_search(str, regexPattern))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Function to parse the filter string into active and inactive filters
+    void parseFilterString(const std::string &filter, std::vector<std::string> &activeFilters, std::vector<std::string> &inactiveFilters)
+    {
+        auto filters = split(filter, ':');
+        for (const auto &f : filters)
+        {
+            if (f == "*")
+            {
+                continue; // Skip the default filter
+            }
+
+            if (f.front() == '-')
+            {
+                inactiveFilters.push_back(f);
+            }
+            else
+            {
+                activeFilters.push_back(f);
+            }
         }
     }
 
@@ -617,6 +723,10 @@ TestMode_t UT_get_test_mode()
 
 void UT_Manage_Suite_Activation(int groupID, bool enable_disable)
 {
+    if (enable_disable)
+        TestGroupManager::EnableGroup(static_cast<UT_groupID_t>(groupID));
+    else
+        TestGroupManager::DisableGroup(static_cast<UT_groupID_t>(groupID));
     return;
 }
 

@@ -26,10 +26,13 @@
 class UTKVPProfileTestL1 : public UTCore
 {
 protected:
+
+    // Static member ensures suite is registered at startup
+    static bool registered;
+
     void SetUp() override
     {
         UTCore::SetUp(); // Call base class SetUp
-        // Additional setup specific to UTKVPProfileTestL1
     }
 
     void TearDown() override
@@ -38,6 +41,9 @@ protected:
         UTCore::TearDown(); // Call base class TearDown
     }
 };
+
+// Define and initialize static variable
+bool UTKVPProfileTestL1::registered = (TestGroupManager::RegisterSuite("UTKVPProfileTestL1", UT_TESTS_L1), true);
 
 TEST_F(UTKVPProfileTestL1, TestProfileOpenSuccess)
 {

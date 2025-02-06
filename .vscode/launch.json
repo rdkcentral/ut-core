@@ -10,7 +10,7 @@
       "cwd": "${workspaceFolder}/tests/build/bin/",
       "program": "${workspaceFolder}/tests/build/bin/ut-test",
       "environment": [ {"name": "LD_LIBRARY_PATH", "value":"${workspaceFolder}/tests/build/bin/"} ],
-      "args": [ "-l", "${workspaceFolder}/tests/logs/", "-p", "${workspaceFolder}/tests/build/bin/assets/test_kvp.yaml", "-p", "${workspaceFolder}/tests/build/bin/assets/config-test.yaml"],
+      "args": [ "-l", "${workspaceFolder}/tests/logs/", "-p", "${workspaceFolder}/tests/build/bin/assets/test_kvp.yaml", "-p", "${workspaceFolder}/tests/build/bin/assets/config-test.yaml", "-d", "1"],
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

@@ -44,6 +44,9 @@
 #include <ut_cunit.h>
 #else
 #include <ut_gtest.h>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
 #endif
 
 /**!
@@ -199,9 +202,100 @@ const char *UT_getTestSuiteTitle( UT_test_suite_t *pSuite );
 void UT_regsiter_test_cleanup_function( UT_test_suite_t *pSuite, UT_TestCleanupFunction_t pFunction); 
 
 #ifndef UT_CUNIT
+
+// Manages enabled test groups and suite-to-group mapping
+class TestGroupManager
+{
+public:
+    // Registers a test suite to a specific group
+    static void RegisterSuite(const std::string &suiteName, UT_groupID_t group)
+    {
+        suiteToGroup[suiteName] = group;
+    }
+
+    // Enables a test group (unless it has been explicitly disabled)
+    static void EnableGroup(UT_groupID_t group)
+    {
+        if (disabledGroups.find(group) == disabledGroups.end()) // Only enable if not disabled
+        {
+            enabledGroups.insert(group);
+        }
+    }
+
+    // Disables a test group and removes it from enabled groups
+    static void DisableGroup(UT_groupID_t group)
+    {
+        disabledGroups.insert(group);
+        enabledGroups.erase(group);
+    }
+
+    // Returns true if a test group is allowed to run
+    static bool IsGroupEnabled(UT_groupID_t group)
+    {
+        if (disabledGroups.find(group) != disabledGroups.end()) // If explicitly disabled, return false
+        {
+            return false;
+        }
+        if (enabledGroups.empty()) // If no groups are enabled, assume all are enabled
+        {
+            return true;
+        }
+        bool status = enabledGroups.find(group) != enabledGroups.end(); // Only enabled groups should run
+        return status;
+    }
+
+    static std::string GetTestFilter()
+    {
+        if (enabledGroups.empty() && disabledGroups.empty())
+        {
+            return "*"; // No restrictions, run all tests
+        }
+
+        std::ostringstream includeFilter, excludeFilter;
+        bool firstInclude = true, firstExclude = true;
+
+        for (const auto &[suiteName, group] : suiteToGroup)
+        {
+
+            if (disabledGroups.find(group) != disabledGroups.end())
+            {
+                // If the group is explicitly disabled, add it to the exclude filter
+                if (!firstExclude)
+                    excludeFilter << ":";
+                excludeFilter << "-" << suiteName << ".*"; // Exclude tests from this suite
+                firstExclude = false;
+            }
+            else if (enabledGroups.empty() || enabledGroups.find(group) != enabledGroups.end())
+            {
+                // If no groups are explicitly enabled, allow all (unless disabled)
+                if (!firstInclude)
+                    includeFilter << ":";
+                includeFilter << suiteName << ".*"; // Include tests from this suite
+                firstInclude = false;
+            }
+        }
+
+        // Combine the include and exclude filters
+        if (firstInclude)
+        {
+            std::string excludeFilterString = excludeFilter.str().empty() ? "*" : excludeFilter.str();
+            return excludeFilterString;
+        }
+
+        std::string includeFilterString = includeFilter.str() + (excludeFilter.str().empty() ? "" : ":" + excludeFilter.str());
+        return includeFilterString;
+    }
+
+private:
+    static std::unordered_map<std::string, UT_groupID_t> suiteToGroup;
+    static std::unordered_set<UT_groupID_t> enabledGroups;
+    static std::unordered_set<UT_groupID_t> disabledGroups;
+};
+
 class UTCore : public ::testing::Test
 {
 protected:
+
     UTCore()
     {
         // Initialization code if needed
