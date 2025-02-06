@@ -20,10 +20,7 @@
 #include <ut_kvp_profile.h>
 #include <ut.h>
 
-#define KVP_VALID_TEST_NO_FILE "assets/this_does_not_exist.yaml"
-#define KVP_VALID_TEST_YAML_FILE "assets/test_kvp.yaml"
-
-class UTKVPProfileTestL1 : public UTCore
+class UTGTestL1 : public UTCore
 {
 protected:
 
@@ -37,48 +34,27 @@ protected:
 
     void TearDown() override
     {
-        // Additional teardown specific to UTKVPProfileTestL1
+        // Additional teardown specific to UTGTestL1
         UTCore::TearDown(); // Call base class TearDown
     }
 };
 
 // Define and initialize static variable
-bool UTKVPProfileTestL1::registered = (UTTestGroupManager::UT_add_suite_withGroupID("UTKVPProfileTestL1", UT_TESTS_L1), true);
+bool UTGTestL1::registered = (UTTestGroupManager::UT_add_suite_withGroupID("UTGTestL1", UT_TESTS_L2), true);
 
-TEST_F(UTKVPProfileTestL1, TestProfileOpenSuccess)
+TEST_F(UTGTestL1, TestGtestL1Equal)
 {
-    const char *validFileName = KVP_VALID_TEST_YAML_FILE;
-    ut_kvp_status_t status = ut_kvp_profile_open((char *)validFileName);
-    EXPECT_EQ(status, UT_KVP_STATUS_SUCCESS);
+    EXPECT_EQ(1, 1); // Basic test case
 }
 
-TEST_F(UTKVPProfileTestL1, TestProfileGetInstance)
+TEST_F(UTGTestL1, TestGtestL1NotEqual)
 {
-    // Getinstance from the profile passed via cli
-    ut_kvp_instance_t *instance = ut_kvp_profile_getInstance();
-    EXPECT_NE(instance, nullptr);
+    EXPECT_NE(1, 2);
 }
 
-TEST_F(UTKVPProfileTestL1, TestProfileOpenFailure)
+TEST_F(UTGTestL1, TestGtestL1GreaterThan)
 {
-    // Test with an invalid file name.
-    const char *invalidFileName = KVP_VALID_TEST_NO_FILE;
-    ut_kvp_status_t status = ut_kvp_profile_open((char *)invalidFileName);
-    EXPECT_EQ(status, UT_KVP_STATUS_FILE_OPEN_ERROR);
-
-    // Test with a null file name.
-    status = ut_kvp_profile_open(nullptr);
-    EXPECT_EQ(status, UT_KVP_STATUS_INVALID_PARAM);
-}
-
-TEST_F(UTKVPProfileTestL1, TestProfileClose)
-{
-    // Test profile close
-    ut_kvp_profile_close();
-    ut_kvp_profile_close();
-    ut_kvp_profile_close();
-    // Since close doesn't return a status, we assume success if no exceptions were thrown.
-    SUCCEED();
+    EXPECT_GT(2, 1);
 }
 
 // Other test cases as needed...
