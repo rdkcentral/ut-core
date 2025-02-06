@@ -39,40 +39,40 @@ protected:
     }
 };
 
-TEST_F(UTKVPProfileTestL1, TestProfileOpenSuccess)
+UT_ADD_TEST(UTKVPProfileTestL1, TestProfileOpenSuccess)
 {
     const char *validFileName = KVP_VALID_TEST_YAML_FILE;
     ut_kvp_status_t status = ut_kvp_profile_open((char *)validFileName);
-    EXPECT_EQ(status, UT_KVP_STATUS_SUCCESS);
+    UT_ASSERT_EQUAL(status, UT_KVP_STATUS_SUCCESS);
 }
 
-TEST_F(UTKVPProfileTestL1, TestProfileGetInstance)
+UT_ADD_TEST(UTKVPProfileTestL1, TestProfileGetInstance)
 {
     // Getinstance from the profile passed via cli
     ut_kvp_instance_t *instance = ut_kvp_profile_getInstance();
-    EXPECT_NE(instance, nullptr);
+    UT_ASSERT_NOT_NULL(instance);
 }
 
-TEST_F(UTKVPProfileTestL1, TestProfileOpenFailure)
+UT_ADD_TEST(UTKVPProfileTestL1, TestProfileOpenFailure)
 {
     // Test with an invalid file name.
     const char *invalidFileName = KVP_VALID_TEST_NO_FILE;
     ut_kvp_status_t status = ut_kvp_profile_open((char *)invalidFileName);
-    EXPECT_EQ(status, UT_KVP_STATUS_FILE_OPEN_ERROR);
+    UT_ASSERT_EQUAL(status, UT_KVP_STATUS_FILE_OPEN_ERROR);
 
     // Test with a null file name.
     status = ut_kvp_profile_open(nullptr);
-    EXPECT_EQ(status, UT_KVP_STATUS_INVALID_PARAM);
+    UT_ASSERT_EQUAL(status, UT_KVP_STATUS_INVALID_PARAM);
 }
 
-TEST_F(UTKVPProfileTestL1, TestProfileClose)
+UT_ADD_TEST(UTKVPProfileTestL1, TestProfileClose)
 {
     // Test profile close
     ut_kvp_profile_close();
     ut_kvp_profile_close();
     ut_kvp_profile_close();
     // Since close doesn't return a status, we assume success if no exceptions were thrown.
-    SUCCEED();
+    UT_PASS("TestProfileClose");
 }
 
 // Other test cases as needed...
