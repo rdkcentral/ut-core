@@ -203,30 +203,24 @@ void UT_regsiter_test_cleanup_function( UT_test_suite_t *pSuite, UT_TestCleanupF
 
 #ifndef UT_CUNIT
 
-// Manages enabled test groups and suite-to-group mapping
-class UTTestGroupManager
-{
-public:
-    static void UT_add_suite_withGroupID(const std::string &suiteName, UT_groupID_t group);
-    static void UT_enable_group(UT_groupID_t group);
-    static void UT_disable_group(UT_groupID_t group);
-    static bool UT_is_group_enabled(UT_groupID_t group);
-    static std::string UT_get_test_filter();
-
-private:
-    static std::unordered_map<std::string, UT_groupID_t> suiteToGroup;
-    static std::unordered_set<UT_groupID_t> enabledGroups;
-    static std::unordered_set<UT_groupID_t> disabledGroups;
-};;
-
 class UTCore : public ::testing::Test
 {
 protected:
-    UTCore();
-    ~UTCore() override;
-
+    UTCore() = default;
+    ~UTCore() override = default;
     void SetUp() override;
     void TearDown() override;
+
+public:
+    static void UT_enable_group(UT_groupID_t group);
+    static void UT_disable_group(UT_groupID_t group);
+    static std::string UT_get_test_filter();
+    static void RegisterTestGroup(const std::string& testSuiteName, UT_groupID_t group);
+
+private:
+    static std::unordered_set<UT_groupID_t> enabledGroups;
+    static std::unordered_set<UT_groupID_t> disabledGroups;
+    static std::unordered_map<std::string, UT_groupID_t> suiteToGroup;
 };
 
 #endif
