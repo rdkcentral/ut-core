@@ -26,14 +26,32 @@
 class UTKVPProfileTestL1 : public UTCore
 {
 public:
-    UTKVPProfileTestL1(): UTCore()  { }
+    UTKVPProfileTestL1() : UTCore() {}
 
     ~UTKVPProfileTestL1() override = default;
 
-    static bool Register()  // Static function that registers test suite before test execution
+    void SetUp() override
     {
-        UTCore::RegisterTestGroup("UTKVPProfileTestL1", UT_TESTS_L1);
-        return true;  // Ensures execution during static initialization
+        // Code to set up resources before each test
+    }
+
+    void TearDown() override
+    {
+        // Code to clean up resources after each test
+    }
+
+    // Template function to register the test group with the correct class name
+    template <typename T>
+    static bool RegisterTest()
+    {
+        UTCore::UT_set_group(typeid(T).name(), UT_TESTS_L1);
+        return true; // Ensures execution during static initialization
+    }
+
+    // Static function to register this test suite
+    static bool Register()
+    {
+        return RegisterTest<UTKVPProfileTestL1>(); // Calls the template with the current class type
     }
 
     // Additional test cases as needed...

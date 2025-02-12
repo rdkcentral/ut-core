@@ -23,17 +23,34 @@
 class UTGTestL1 : public UTCore
 {
 public:
-    UTGTestL1(): UTCore()  { }
+    UTGTestL1() : UTCore() {}
 
     ~UTGTestL1() override = default;
 
-    static bool Register()  // Static function that registers test suite before test execution
+    void SetUp() override
     {
-        UTCore::RegisterTestGroup("UTGTestL1", UT_TESTS_L2);
-        return true;  // Ensures execution during static initialization
+        // Code to set up resources before each test
     }
 
-    // Additional test cases as needed...
+    void TearDown() override
+    {
+        // Code to clean up resources after each test
+    }
+
+    // Template function to register the test group with the correct class name
+    template <typename T>
+    static bool RegisterTest()
+    {
+        UTCore::UT_set_group(typeid(T).name(), UT_TESTS_L2);
+        return true; // Ensures execution during static initialization
+    }
+
+    // Static function to register this test suite
+    static bool Register()
+    {
+        return RegisterTest<UTGTestL1>(); // Calls the template with the current class type
+    }
+
 private:
     static bool registered;
 };

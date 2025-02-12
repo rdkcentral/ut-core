@@ -23,6 +23,7 @@
 
 #include <iomanip>
 #include <regex>
+#include <algorithm>
 
 static TestMode_t  gTestMode;
 #define STRING_FORMAT(x) x
@@ -701,6 +702,34 @@ void UTCore::UT_disable_group(UT_groupID_t group)
     enabledGroups.erase(group);
 }
 
+void UTCore::correctSuiteName()
+{
+    std::unordered_map<std::string, UT_groupID_t> newSuiteToGroup;
+
+    const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
+
+    for (const auto &[suiteName, group] : suiteToGroup)
+    {
+        std::string correctedName = suiteName; // Copy existing suite name
+
+        for (int i = 0; i < unit_test.total_test_suite_count(); ++i)
+        {
+            const ::testing::TestSuite *test_suite = unit_test.GetTestSuite(i);
+            std::string utsuiteName = test_suite->name();
+
+            if (suiteName.find(utsuiteName) != std::string::npos)
+            {
+                correctedName = utsuiteName;
+                break;
+            }
+        }
+
+        newSuiteToGroup[correctedName] = group; // Insert into new map
+    }
+
+    suiteToGroup = std::move(newSuiteToGroup); // Swap maps
+}
+
 std::string UTCore::UT_get_test_filter()
 {
     if (enabledGroups.empty() && disabledGroups.empty())
@@ -710,6 +739,8 @@ std::string UTCore::UT_get_test_filter()
 
     std::ostringstream includeFilter, excludeFilter;
     bool firstInclude = true, firstExclude = true;
+
+    correctSuiteName();
 
     for (const auto &[suiteName, group] : suiteToGroup)
     {
@@ -742,8 +773,9 @@ std::string UTCore::UT_get_test_filter()
     return includeFilterString;
 }
 
-void UTCore::RegisterTestGroup(const std::string& testSuiteName, UT_groupID_t group)
+void UTCore::UT_set_group(const std::string& testSuiteName, UT_groupID_t group)
 {
+    //std::cout << "Setting group for suite: " << testSuiteName << " to " << group << std::endl;
     suiteToGroup[testSuiteName] = group;
 }
 
