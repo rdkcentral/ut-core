@@ -39,21 +39,21 @@ protected:
     }
 };
 
-UT_ADD_TEST(UTKVPProfileTestL1, TestProfileOpenSuccess)
+UT_TEST(UTKVPProfileTestL1, TestProfileOpenSuccess)
 {
     const char *validFileName = KVP_VALID_TEST_YAML_FILE;
     ut_kvp_status_t status = ut_kvp_profile_open((char *)validFileName);
     UT_ASSERT_EQUAL(status, UT_KVP_STATUS_SUCCESS);
 }
 
-UT_ADD_TEST(UTKVPProfileTestL1, TestProfileGetInstance)
+UT_TEST(UTKVPProfileTestL1, TestProfileGetInstance)
 {
     // Getinstance from the profile passed via cli
     ut_kvp_instance_t *instance = ut_kvp_profile_getInstance();
     UT_ASSERT_NOT_NULL(instance);
 }
 
-UT_ADD_TEST(UTKVPProfileTestL1, TestProfileOpenFailure)
+UT_TEST(UTKVPProfileTestL1, TestProfileOpenFailure)
 {
     // Test with an invalid file name.
     const char *invalidFileName = KVP_VALID_TEST_NO_FILE;
@@ -65,7 +65,7 @@ UT_ADD_TEST(UTKVPProfileTestL1, TestProfileOpenFailure)
     UT_ASSERT_EQUAL(status, UT_KVP_STATUS_INVALID_PARAM);
 }
 
-UT_ADD_TEST(UTKVPProfileTestL1, TestProfileClose)
+UT_TEST(UTKVPProfileTestL1, TestProfileClose)
 {
     // Test profile close
     ut_kvp_profile_close();

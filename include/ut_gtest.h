@@ -203,10 +203,10 @@
  *
  * Example usage:
  * @code
- * UT_ADD_TEST(MyTestFixture, MyTestCase)
+ * UT_TEST(MyTestFixture, MyTestCase)
  * @endcode
  */
-#define UT_ADD_TEST(test_suite_name, test_name) TEST_F(test_suite_name, test_name)
+#define UT_TEST(test_suite_name, test_name) TEST_F(test_suite_name, test_name)
 
 #endif  /* UT -> GTEST - Wrapper */
 
