@@ -21,6 +21,7 @@ BIN_DIR := $(ROOT_DIR)/build/bin
 #TOP_DIR := $(ROOT_DIR)
 ECHOE = /bin/echo -e
 TARGET_EXEC = ut-test
+PYTHON_SCRIPT = $(ROOT_DIR)/check_macros_usage.py
 
 # Switch on Linux & disable asserts for the testing suites
 CFLAGS += -DNDEBUG
@@ -31,10 +32,14 @@ XCFLAGS += -DUT_CUNIT
 SRC_DIRS = $(ROOT_DIR)/src/c_source $(ROOT_DIR)/src
 INC_DIRS := $(ROOT_DIR)/include
 INC_DIRS += $(ROOT_DIR)/../include
+HEADER_FILE=$(ROOT_DIR)/../include/ut_cunit.h
+USAGE_FILE=$(ROOT_DIR)/../tests/src/c_source/ut_test_assert.c
 else
 VARIANT = CPP
 SRC_DIRS = $(ROOT_DIR)/src/cpp_source $(ROOT_DIR)/src
 INC_DIRS := $(ROOT_DIR)/include
+HEADER_FILE=$(ROOT_DIR)/../include/ut_gtest.h
+USAGE_FILE=$(ROOT_DIR)/../tests/src/cpp_source/ut_test_gtest_asserts.cpp
 endif
 
 ifneq ($(TARGET),arm)
@@ -63,7 +68,7 @@ NC='\033[0m'
 
 .PHONY: clean list build all
 
-all: framework
+all: framework check_macros
 
 build:
 	@${ECHOE} ${GREEN}Build [$@] ${NC}
@@ -100,3 +105,8 @@ clean:
 cleanall:
 	@${ECHOE} ${GREEN}Clean [$@]${NC}
 	@make -C ../ cleanall TARGET=$(TARGET) VARIANT=${VARIANT}
+
+# Target to check macro usage using Python script
+check_macros:
+	@echo "Running macro usage check..."
+	@$(PYTHON_SCRIPT) $(HEADER_FILE) $(USAGE_FILE)
