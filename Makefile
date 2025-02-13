@@ -42,6 +42,7 @@ BUILD_DIR ?= $(TOP_DIR)/build/$(TARGET)/obj
 # Non-Moveable Directories
 FRAMEWORK_DIR = $(UT_CORE_DIR)/framework
 UT_CONTROL = $(FRAMEWORK_DIR)/ut-control
+PYTHON_SCRIPT = $(UT_CORE_DIR)/check_macros_usage.py
 
 # Flags
 XCFLAGS := $(KCFLAGS)
@@ -58,6 +59,8 @@ ifneq ($(VARIANT),CPP) # CUNIT case
   INC_DIRS += $(CUNIT_DIR)/Headers $(UT_CORE_DIR)/src/c_source
   SRC_DIRS += $(CUNIT_DIR)/Sources/Framework $(UT_CORE_DIR)/src
   XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -lut_control -Wl,-rpath, -pthread -lpthread
+  HEADER_FILE=$(UT_CORE_DIR)/include/ut_cunit.h
+  USAGE_FILE=$(UT_CORE_DIR)/tests/src/c_source/ut_test_assert.c
 
   # Source files
   SRCS := $(shell find $(SRC_DIRS) -name *.c -or -name *.s)
@@ -70,6 +73,8 @@ else # GTEST case
   INC_DIRS += $(GTEST_SRC)/googletest/include $(UT_CORE_DIR)/src/cpp_source $(UT_CORE_DIR)/src
   TEST_LIB_DIR = $(UT_CORE_DIR)/build/$(TARGET)/cpp_libs/lib/
   XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -L$(TEST_LIB_DIR) -lgtest_main -lgtest -lut_control -lpthread
+  HEADER_FILE=$(UT_CORE_DIR)/include/ut_gtest.h
+  USAGE_FILE=$(UT_CORE_DIR)/tests/src/cpp_source/ut_test_gtest_asserts.cpp
 
   # Source files
   SRCS := $(shell find $(SRC_DIRS) -type f \( -name '*.cpp' -o -name '*.c' \) | grep -v "$(EXCLUDE_DIRS)")
@@ -219,6 +224,11 @@ cleanall: clean
 	@${ECHOE} ${GREEN}Performing Clean on [$(TOP_DIR)/build/]${NC}
 	@$(RM) -rf $(TOP_DIR)/build/
 	@${ECHOE} ${GREEN}Clean Completed${NC}
+
+# Target to check macro usage using Python script
+check_macros:
+	@echo "Running macro usage check..."
+	@$(PYTHON_SCRIPT) $(HEADER_FILE) $(USAGE_FILE)
 
 printenv:
 	@${ECHOE} "Environment variables: [ut-core]"
