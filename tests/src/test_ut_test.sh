@@ -40,11 +40,11 @@ run_test() {
 }
 
 # Run both test cases
-run_test "./run.sh -d 1 -a" 5
+run_test "./run.sh -d 1 -a" 33
 run_test "./run.sh -d 1 -d 2 -a" 2
-run_test "./run.sh -e 1 -d 2 -a" 6
-run_test "./run.sh -d 1 -e 2 -a" 5
-run_test "./run.sh -e 1 -a" 9
+run_test "./run.sh -e 1 -d 2 -a" 9
+run_test "./run.sh -d 1 -e 2 -a" 33
+run_test "./run.sh -e 1 -a" 40
 
 echo "✅ All tests validated successfully."
 exit 0

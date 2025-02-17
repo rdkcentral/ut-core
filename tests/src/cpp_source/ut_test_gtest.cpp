@@ -17,7 +17,6 @@
  * limitations under the License.
 */
 
-#include <ut_kvp_profile.h>
 #include <ut.h>
 
 class UTGTestL1 : public UTCore
@@ -41,7 +40,7 @@ public:
     template <typename T>
     static bool RegisterTest()
     {
-        UTCore::UT_set_group(typeid(T).name(), UT_TESTS_L2);
+        UTCore::UT_set_group(typeid(T).name(), UT_TESTS_L1);
         return true; // Ensures execution during static initialization
     }
 
@@ -59,19 +58,19 @@ private:
 bool UTGTestL1::registered = UTGTestL1::Register();
 
 
-TEST_F(UTGTestL1, TestGtestL1Equal)
+UT_TEST(UTGTestL1, TestGtestL1Equal)
 {
-    EXPECT_EQ(1, 1); // Basic test case
+    UT_ASSERT_EQUAL(1, 1); // Basic test case
 }
 
-TEST_F(UTGTestL1, TestGtestL1NotEqual)
+UT_TEST(UTGTestL1, TestGtestL1NotEqual)
 {
-    EXPECT_NE(1, 2);
+    UT_ASSERT_NOT_EQUAL(1, 2);
 }
 
-TEST_F(UTGTestL1, TestGtestL1GreaterThan)
+UT_TEST(UTGTestL1, TestGtestL1GreaterThan)
 {
-    EXPECT_GT(2, 1);
+    UT_ASSERT_GREATER(2, 1);
 }
 
 // Other test cases as needed...
