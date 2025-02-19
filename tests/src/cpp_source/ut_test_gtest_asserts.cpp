@@ -35,28 +35,10 @@ protected:
     {
         // Code for cleaning up after each test
     }
-
-    // Template function to register the test group with the correct class name
-    template <typename T>
-    static bool RegisterTest()
-    {
-        UTCore::UT_set_group(typeid(T).name(), UT_TESTS_L2);
-        return true; // Ensures execution during static initialization
-    }
-
-    // Static function to register this test suite
-    static bool Register()
-    {
-        return RegisterTest<UTGTestTest>(); // Calls the template with the current class type
-    }
-
-    // Additional test cases as needed...
-private:
-    static bool registered;
 };
 
 // Automatically register test suite before test execution
-bool UTGTestTest::registered = UTGTestTest::Register();
+bool UTGTestTest_group = UTCore::UT_add_suite_withGroupID("UTGTestTest", UT_TESTS_L2);
 
 // Test case for UT_ASSERT_TRUE
 UT_TEST(UTGTestTest, UT_ASSERT_TRUE_Test)

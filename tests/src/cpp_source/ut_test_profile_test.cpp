@@ -39,28 +39,10 @@ public:
     {
         // Code to clean up resources after each test
     }
-
-    // Template function to register the test group with the correct class name
-    template <typename T>
-    static bool RegisterTest()
-    {
-        UTCore::UT_set_group(typeid(T).name(), UT_TESTS_L1);
-        return true; // Ensures execution during static initialization
-    }
-
-    // Static function to register this test suite
-    static bool Register()
-    {
-        return RegisterTest<UTKVPProfileTestL1>(); // Calls the template with the current class type
-    }
-
-    // Additional test cases as needed...
-private:
-    static bool registered;
 };
 
 // Automatically register test suite before test execution
-bool UTKVPProfileTestL1::registered = UTKVPProfileTestL1::Register();
+bool group = UTCore::UT_add_suite_withGroupID("UTKVPProfileTestL1", UT_TESTS_L1);
 
 UT_TEST(UTKVPProfileTestL1, TestProfileOpenSuccess)
 {

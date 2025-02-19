@@ -212,16 +212,11 @@ protected:
     void TearDown() override;
 
 public:
-    static void UT_enable_group(UT_groupID_t group);
-    static void UT_disable_group(UT_groupID_t group);
     static std::string UT_get_test_filter();
-    static void UT_set_group(const std::string& testSuiteName, UT_groupID_t group);
+    static bool UT_add_suite_withGroupID(const std::string& testSuiteName, UT_groupID_t group);
 
 private:
-    static std::unordered_set<UT_groupID_t> enabledGroups;
-    static std::unordered_set<UT_groupID_t> disabledGroups;
     static std::unordered_map<std::string, UT_groupID_t> suiteToGroup;
-    static void correctSuiteName();
 };
 
 #endif
