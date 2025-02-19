@@ -38,20 +38,20 @@ public:
 };
 
 // Automatically register test suite before test execution
-bool UTGTestL1_group = UTCore::UT_add_suite_withGroupID("UTGTestL1", UT_TESTS_L1);
+UT_ADD_TEST_TO_GROUP(UTGTestL1, UT_TESTS_L1)
 
 
-UT_TEST(UTGTestL1, TestGtestL1Equal)
+UT_ADD_TEST(UTGTestL1, TestGtestL1Equal)
 {
     UT_ASSERT_EQUAL(1, 1); // Basic test case
 }
 
-UT_TEST(UTGTestL1, TestGtestL1NotEqual)
+UT_ADD_TEST(UTGTestL1, TestGtestL1NotEqual)
 {
     UT_ASSERT_NOT_EQUAL(1, 2);
 }
 
-UT_TEST(UTGTestL1, TestGtestL1GreaterThan)
+UT_ADD_TEST(UTGTestL1, TestGtestL1GreaterThan)
 {
     UT_ASSERT_GREATER(2, 1);
 }

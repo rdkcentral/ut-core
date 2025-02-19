@@ -2,7 +2,8 @@
 
 | Date (DD/MM/YY)  | Comment | Document Version |
 |--------|---------|---------|
-| 24/12/24 | Updated usage of Weak Library | 2.0.3
+| 19/02/25 | Updated link for Groups in UT Core | 2.1.0 |
+| 24/12/24 | Updated usage of Weak Library | 2.0.3 |
 | 07/11/24 | Updated How to use Autogenerate script url | 2.0.2|
 | 19/06/24 | Extended LD_LIBRARY_PATH | 2.0.1|
 | 02/01/24 | Added Release Notes | 2.0.0|
@@ -400,6 +401,12 @@ int test_l1_register( void )
 ```
 
 Each module has a optional `init` and `clean` function, which can be setup via UT_add_suite(), in the above example these are defaulted to `NULL`, since in this example case they are not used.
+
+## Groups in UT Core
+UT Core's test suite grouping enables efficient, targeted testing by allowing developers to organize and run only
+relevant tests, saving time and resources.
+
+More information can be found in: [UTCore: Test Group Support](https://github.com/rdkcentral/ut-core/wiki/UTCore:-Test-Group-Support)
 
 ## Testing
 

@@ -42,23 +42,23 @@ public:
 };
 
 // Automatically register test suite before test execution
-bool group = UTCore::UT_add_suite_withGroupID("UTKVPProfileTestL1", UT_TESTS_L1);
+UT_ADD_TEST_TO_GROUP(UTKVPProfileTestL1, UT_TESTS_L1)
 
-UT_TEST(UTKVPProfileTestL1, TestProfileOpenSuccess)
+UT_ADD_TEST(UTKVPProfileTestL1, TestProfileOpenSuccess)
 {
     const char *validFileName = KVP_VALID_TEST_YAML_FILE;
     ut_kvp_status_t status = ut_kvp_profile_open((char *)validFileName);
     UT_ASSERT_EQUAL_FATAL(status, UT_KVP_STATUS_SUCCESS);
 }
 
-UT_TEST(UTKVPProfileTestL1, TestProfileGetInstance)
+UT_ADD_TEST(UTKVPProfileTestL1, TestProfileGetInstance)
 {
     // Getinstance from the profile passed via cli
     ut_kvp_instance_t *instance = ut_kvp_profile_getInstance();
     UT_ASSERT_NOT_EQUAL_FATAL(instance, nullptr);
 }
 
-UT_TEST(UTKVPProfileTestL1, TestProfileOpenFailure)
+UT_ADD_TEST(UTKVPProfileTestL1, TestProfileOpenFailure)
 {
     // Test with an invalid file name.
     const char *invalidFileName = KVP_VALID_TEST_NO_FILE;
@@ -70,7 +70,7 @@ UT_TEST(UTKVPProfileTestL1, TestProfileOpenFailure)
     UT_ASSERT_EQUAL_FATAL(status, UT_KVP_STATUS_INVALID_PARAM);
 }
 
-UT_TEST(UTKVPProfileTestL1, TestProfileClose)
+UT_ADD_TEST(UTKVPProfileTestL1, TestProfileClose)
 {
     // Test profile close
     ut_kvp_profile_close();
