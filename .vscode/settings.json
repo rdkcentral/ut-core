@@ -125,6 +125,11 @@
     "thread": "cpp",
     "typeinfo": "cpp",
     "variant": "cpp",
-    "iomanip": "cpp"
+    "iomanip": "cpp",
+    "unordered_set": "cpp",
+    "bitset": "cpp",
+    "cstring": "cpp",
+    "regex": "cpp",
+    "shared_mutex": "cpp"
   }
 }

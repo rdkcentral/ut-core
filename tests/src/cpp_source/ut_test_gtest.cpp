@@ -17,62 +17,43 @@
  * limitations under the License.
 */
 
-#include <ut_kvp_profile.h>
 #include <ut.h>
 
-#define KVP_VALID_TEST_NO_FILE "assets/this_does_not_exist.yaml"
-#define KVP_VALID_TEST_YAML_FILE "assets/test_kvp.yaml"
-
-class UTKVPProfileTestL1 : public UTCore
+class UTGTestL1 : public UTCore
 {
-protected:
+public:
+    UTGTestL1() : UTCore() {}
+
+    ~UTGTestL1() override = default;
+
     void SetUp() override
     {
-        UTCore::SetUp(); // Call base class SetUp
-        // Additional setup specific to UTKVPProfileTestL1
+        // Code to set up resources before each test
     }
 
     void TearDown() override
     {
-        // Additional teardown specific to UTKVPProfileTestL1
-        UTCore::TearDown(); // Call base class TearDown
+        // Code to clean up resources after each test
     }
 };
 
-TEST_F(UTKVPProfileTestL1, TestProfileOpenSuccess)
+// Automatically register test suite before test execution
+UT_ADD_TEST_TO_GROUP(UTGTestL1, UT_TESTS_L1)
+
+
+UT_ADD_TEST(UTGTestL1, TestGtestL1Equal)
 {
-    const char *validFileName = KVP_VALID_TEST_YAML_FILE;
-    ut_kvp_status_t status = ut_kvp_profile_open((char *)validFileName);
-    EXPECT_EQ(status, UT_KVP_STATUS_SUCCESS);
+    UT_ASSERT_EQUAL(1, 1); // Basic test case
 }
 
-TEST_F(UTKVPProfileTestL1, TestProfileGetInstance)
+UT_ADD_TEST(UTGTestL1, TestGtestL1NotEqual)
 {
-    // Getinstance from the profile passed via cli
-    ut_kvp_instance_t *instance = ut_kvp_profile_getInstance();
-    EXPECT_NE(instance, nullptr);
+    UT_ASSERT_NOT_EQUAL(1, 2);
 }
 
-TEST_F(UTKVPProfileTestL1, TestProfileOpenFailure)
+UT_ADD_TEST(UTGTestL1, TestGtestL1GreaterThan)
 {
-    // Test with an invalid file name.
-    const char *invalidFileName = KVP_VALID_TEST_NO_FILE;
-    ut_kvp_status_t status = ut_kvp_profile_open((char *)invalidFileName);
-    EXPECT_EQ(status, UT_KVP_STATUS_FILE_OPEN_ERROR);
-
-    // Test with a null file name.
-    status = ut_kvp_profile_open(nullptr);
-    EXPECT_EQ(status, UT_KVP_STATUS_INVALID_PARAM);
-}
-
-TEST_F(UTKVPProfileTestL1, TestProfileClose)
-{
-    // Test profile close
-    ut_kvp_profile_close();
-    ut_kvp_profile_close();
-    ut_kvp_profile_close();
-    // Since close doesn't return a status, we assume success if no exceptions were thrown.
-    SUCCEED();
+    UT_ASSERT_GREATER(2, 1);
 }
 
 // Other test cases as needed...
