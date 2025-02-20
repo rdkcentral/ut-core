@@ -22,6 +22,8 @@
 #include <ut_internal.h>
 
 #include <iomanip>
+#include <regex>
+#include <algorithm>
 
 static TestMode_t  gTestMode;
 #define STRING_FORMAT(x) x
@@ -46,6 +48,9 @@ struct TestSuiteInfo {
     std::vector<TestInfo> tests;
 };
 
+// Initialize static variables
+std::unordered_map<std::string, UT_groupID_t> UTCore::suiteToGroup;
+
 class UTTestRunner
 {
 
@@ -53,33 +58,218 @@ private:
     static std::vector<TestSuiteInfo> suites;
 
 public:
+    static std::unordered_set<UT_groupID_t> enabledGroups;
+    static std::unordered_set<UT_groupID_t> disabledGroups;
+
+    /**
+     * @brief Constructs a UTTestRunner object and initializes Google Test framework.
+     *
+     * This constructor initializes the Google Test framework with a single argument
+     * "test_runner". It retrieves the test filter string from UTCore, parses it into
+     * active and inactive filters, and processes each test suite accordingly.
+     *
+     * The constructor performs the following steps:
+     * 1. Initializes Google Test with a single argument.
+     * 2. Retrieves the test filter string from UTCore.
+     * 3. Parses the filter string into active and inactive filters.
+     * 4. Checks if both filters are empty.
+     * 5. Iterates through all test suites and determines their active status based on the filters.
+     * 6. Collects test information for each test suite and stores it in the `suites` vector.
+     * 7. Formats the inactive filter string and sets it as the test filter.
+     *
+     * The `suites` vector contains information about each test suite, including its
+     * index, name, active status, and a list of tests with their respective indices,
+     * names, and active statuses.
+     */
     explicit UTTestRunner()
     {
         int argc = 1;
         char *argv[1] = {(char *)"test_runner"};
         ::testing::InitGoogleTest(&argc, argv);
         const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
+        std::string filter = UTCore::UT_get_test_filter();
+        std::vector<std::string> activeFilters;
+        std::vector<std::string> inactiveFilters;
+        parseFilterString(filter, activeFilters, inactiveFilters);
+
+        // Check if both filters are empty
+        bool noFilters = activeFilters.empty() && inactiveFilters.empty();
 
         for (int i = 0; i < unit_test.total_test_suite_count(); ++i)
         {
             const ::testing::TestSuite *test_suite = unit_test.GetTestSuite(i);
+            std::string suiteName = test_suite->name();
+
+            // If no filters are provided, consider all suites as active
+            bool isActive = noFilters || (!matchesAnyPattern(suiteName, activeFilters) && !matchesAnyPattern(suiteName, inactiveFilters)) ||
+                            (matchesAnyPattern(suiteName, activeFilters) && !matchesAnyPattern(suiteName, inactiveFilters));
+
             std::vector<TestInfo> testInfos;
+            testInfos.reserve(test_suite->total_test_count());
 
             for (int j = 0; j < test_suite->total_test_count(); ++j)
             {
                 const ::testing::TestInfo *test_info = test_suite->GetTestInfo(j);
-                testInfos.push_back({j + 1, test_info->name(), true});
+                bool testIsActive = isActive;
+                testInfos.push_back(TestInfo{j + 1, test_info->name(), testIsActive});
             }
 
-            suites.push_back({i + 1, test_suite->name(), true, testInfos});
+            suites.push_back(TestSuiteInfo{i + 1, suiteName, isActive, std::move(testInfos)});
+        }
+
+        std::string inactiveFilterString = formatPatterns(inactiveFilters);
+        setTestFilter(inactiveFilterString);
+    }
+
+    /**
+     * @brief Formats a list of patterns into a single string with a specific format.
+     *
+     * This function takes a vector of strings (patterns) and concatenates them into a single
+     * string. Each pattern is separated by ":*". If a pattern starts with a '-', it is removed.
+     * The resulting string starts with a leading '-'.
+     *
+     * @param patterns A vector of strings representing the patterns to be formatted.
+     * @return A formatted string with each pattern separated by ":*".
+     */
+    std::string formatPatterns(const std::vector<std::string> &patterns)
+    {
+        std::string result = "-"; // Leading '-'
+
+        for (size_t i = 0; i < patterns.size(); ++i)
+        {
+            std::string modifiedPattern = patterns[i];
+
+            // Remove leading '-' if present
+            if (!modifiedPattern.empty() && modifiedPattern[0] == '-')
+            {
+                modifiedPattern = modifiedPattern.substr(1);
+            }
+
+            // Append to result with separator ":*" (skip separator for the last item)
+            result += modifiedPattern;
+            if (i < patterns.size() - 1)
+            {
+                result += ":*";
+            }
+        }
+
+        return result;
+    }
+
+    // Function to split a string by a delimiter
+    /**
+     * @brief Splits a given string into a vector of substrings based on a specified delimiter.
+     *
+     * This function takes a string and a delimiter character, and splits the string into
+     * substrings wherever the delimiter character is found. The substrings are stored in
+     * a vector and returned.
+     *
+     * @param str The input string to be split.
+     * @param delimiter The character used to split the string.
+     * @return std::vector<std::string> A vector containing the substrings obtained by splitting the input string.
+     */
+    std::vector<std::string> split(const std::string &str, char delimiter)
+    {
+        std::vector<std::string> tokens;
+        std::stringstream ss(str);
+        std::string token;
+        while (std::getline(ss, token, delimiter))
+        {
+            tokens.push_back(token);
+        }
+        return tokens;
+    }
+
+    // Function to check if a string matches any regex pattern in a vector
+    /**
+     * @brief Checks if a given string matches any pattern in a list of patterns.
+     *
+     * This function iterates through a list of patterns and checks if the given string
+     * matches any of the patterns using regular expressions. If a pattern starts with
+     * a '-', it is removed before performing the match.
+     *
+     * @param str The string to be checked against the patterns.
+     * @param patterns A vector of patterns to match against the string.
+     * @return true if the string matches any of the patterns, false otherwise.
+     */
+    bool matchesAnyPattern(const std::string &str, const std::vector<std::string> &patterns)
+    {
+        for (const auto &pattern : patterns)
+        {
+            std::string modifiedPattern = pattern;
+
+            // Remove leading '-' if present
+            if (!modifiedPattern.empty() && modifiedPattern[0] == '-')
+            {
+                modifiedPattern = modifiedPattern.substr(1);
+            }
+
+            std::regex regexPattern(modifiedPattern);
+            if (std::regex_search(str, regexPattern))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Function to parse the filter string into active and inactive filters
+    /**
+     * @brief Parses a filter string and separates it into active and inactive filters.
+     *
+     * This function takes a filter string, splits it by the ':' character, and categorizes
+     * each filter as either active or inactive. Filters that start with a '-' character
+     * are considered inactive, while all other filters are considered active. The special
+     * filter "*" is ignored.
+     *
+     * @param filter The filter string to be parsed.
+     * @param activeFilters A vector to store the active filters.
+     * @param inactiveFilters A vector to store the inactive filters.
+     */
+    void parseFilterString(const std::string &filter, std::vector<std::string> &activeFilters, std::vector<std::string> &inactiveFilters)
+    {
+        auto filters = split(filter, ':');
+        for (const auto &f : filters)
+        {
+            if (f == "*")
+            {
+                continue; // Skip the default filter
+            }
+
+            if (f.front() == '-')
+            {
+                inactiveFilters.push_back(f);
+            }
+            else
+            {
+                activeFilters.push_back(f);
+            }
         }
     }
 
+    /**
+     * @brief Sets the Google Test filter for test execution.
+     *
+     * This function sets the filter for Google Test to determine which tests
+     * should be run. The filter is a string that can include positive and
+     * negative patterns separated by colons (e.g., "FooTest.*:BarTest.*-BazTest.*").
+     *
+     * @param filter A string representing the test filter pattern.
+     */
     void setTestFilter(const std::string &filter)
     {
         ::testing::GTEST_FLAG(filter) = filter;
     }
 
+    /**
+     * @brief Sets a Google Test flag to a specified value.
+     *
+     * This function allows setting various Google Test flags by specifying the flag name and its corresponding value.
+     * Currently, it supports setting the "filter" flag, which is used to filter test cases.
+     *
+     * @param flagName The name of the Google Test flag to set (e.g., "filter").
+     * @param value The value to set for the specified flag.
+     */
     void setGTestFlag(const std::string &flagName, const std::string &value)
     {
         if (flagName == "filter")
@@ -89,11 +279,31 @@ public:
         // Add more flags as needed
     }
 
+    /**
+     * @brief Runs all the Google Test unit tests.
+     *
+     * This function executes all the tests that have been defined using the
+     * Google Test framework. It returns the result of the test execution.
+     *
+     * @return int The result of running all tests. Typically, it returns 0 if
+     * all tests pass, and a non-zero value if any test fails.
+     */
     int runTests() const
     {
         return RUN_ALL_TESTS();
     }
 
+    /**
+     * @brief Runs all tests with an optional custom setup function.
+     *
+     * This function allows you to run all tests, optionally providing a custom setup function
+     * that will be executed before the tests are run. If no setup function is provided, the tests
+     * will be run without any additional setup.
+     *
+     * @param setup A std::function<void()> representing the custom setup function to be executed
+     *              before running the tests. If nullptr, no setup function will be executed.
+     * @return An integer representing the result of RUN_ALL_TESTS().
+     */
     int runTestsWithCustomSetup(std::function<void()> setup = nullptr) const
     {
         if (setup)
@@ -103,6 +313,16 @@ public:
         return RUN_ALL_TESTS();
     }
 
+    /**
+     * @brief Lists all registered test suites and prints their details.
+     *
+     * This function retrieves all registered test suites from the Google Test framework,
+     * prints their details in a formatted manner, and returns a vector of TestSuiteInfo objects.
+     * The details printed include the suite name, the number of tests in each suite, and whether
+     * the suite is active or not.
+     *
+     * @return std::vector<TestSuiteInfo> A vector containing information about all registered test suites.
+     */
     std::vector<TestSuiteInfo> listTestSuites()
     {
         const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
@@ -134,6 +354,17 @@ public:
         return suites;
     }
 
+    /**
+     * @brief Prompts the user to select a test suite from a list of available test suites.
+     *
+     * This function displays a prompt to the user to enter the number corresponding to a test suite
+     * from the provided list of test suites. It validates the user input to ensure it is within the
+     * valid range and returns the selected test suite number. If the input is invalid, it clears the
+     * error state and ignores the invalid input, returning 0.
+     *
+     * @param suites A vector of TestSuiteInfo objects representing the available test suites.
+     * @return The number of the selected test suite if the input is valid, otherwise 0.
+     */
     int getUserSelectedTestSuites(const std::vector<TestSuiteInfo>& suites)
     {
         std::cout << "\nEnter number of suite to select (1-" << suites.size() << ") : ";
@@ -151,6 +382,19 @@ public:
         return number;
     }
 
+    /**
+     * @brief Prompts the user to select a test from a list and optionally toggles its activation status.
+     *
+     * This function displays a list of tests and prompts the user to enter the number corresponding to the test they want to select.
+     * If the input is invalid or out of range, an error message is displayed and an empty string is returned.
+     * If the `isActivate` flag is true, the function will toggle the activation status of the selected test within the provided test suite.
+     *
+     * @param tests A vector of TestInfo objects representing the available tests.
+     * @param suite A reference to a TestSuiteInfo object representing the test suite containing the tests.
+     * @param isActivate A boolean flag indicating whether to toggle the activation status of the selected test.
+     * @return A string representing the fully qualified name of the selected test in the format "suite_name.test_name",
+     * or an empty string if the selection was invalid.
+     */
     std::string getUserSelectedTest(std::vector<TestInfo> tests, TestSuiteInfo &suite, bool isActivate)
     {
         std::cout << "\nEnter number of test to select (1-" << tests.size() << ") : ";
@@ -181,6 +425,17 @@ public:
         return suite.name + "." + tests[test_number - 1].name; // Construct the filter
     }
 
+    /**
+     * @brief Lists all tests from a given test suite and prints them in a formatted manner.
+     *
+     * This function takes a TestSuiteInfo object as input, which contains information about a test suite
+     * and its associated tests. It prints the suite name and details of each test in a formatted table.
+     * The details include the test number, test name, and whether the test is active or not.
+     * Finally, it prints the total number of tests in the suite.
+     *
+     * @param suite A constant reference to a TestSuiteInfo object containing the test suite information.
+     * @return A vector of TestInfo objects representing the tests in the suite.
+     */
     std::vector<TestInfo> listTestsFromSuite(const TestSuiteInfo &suite)
     {
 
@@ -209,6 +464,15 @@ public:
         return suite.tests;
     }
 
+    /**
+     * @brief Toggles the active status of a test suite and updates the GTest filter accordingly.
+     *
+     * This function toggles the active status of the specified test suite by its number.
+     * It then updates the GTest filter to include or exclude tests based on the active status
+     * of all test suites. If all test suites are inactive, the filter will exclude all tests.
+     *
+     * @param suite_num The number of the test suite to toggle (1-based index).
+     */
     void ToggleTestSuiteExclusion(int suite_num)
     {
         // Get the current filter
@@ -276,6 +540,16 @@ public:
         std::cout << "Updated GTest filter: " << filter << "\n";
     }
 
+    /**
+     * @brief Sets the GTest filter flag based on the active status of tests in the given test suite.
+     *
+     * This function updates the GTest filter flag to include only the active tests in the specified
+     * test suite. If all tests in the suite are active, the filter is set to include all tests in the
+     * suite. If some tests are active, the filter is constructed to include only the active tests.
+     * If no tests are active, the filter is set to exclude all tests.
+     *
+     * @param suite The test suite containing the tests to be filtered.
+     */
     void setFlag(const TestSuiteInfo &suite)
     {
         // Get the current filter
@@ -323,6 +597,29 @@ public:
     }
 
     // Function to list all tests in a specific suite and allow the user to select one
+    /**
+     * @brief Handles the selection and execution of tests from a given test suite.
+     *
+     * This function provides a console-based menu for interacting with a specified test suite.
+     * Users can list tests, select and run specific tests, activate tests, display failures,
+     * move up in the menu hierarchy, display help, and quit the menu.
+     *
+     * @param suite Reference to the TestSuiteInfo object representing the test suite.
+     * @return UT_STATUS indicating the status of the operation (e.g., continue, stop, move up).
+     *
+     * The menu options include:
+     * - (L)ist: List all tests in the suite.
+     * - (S)elect: Select and run a specific test from the suite.
+     * - (R)un: Run all tests in the suite.
+     * - (Q)uit: Exit the menu.
+     * - (M)oveUp: Move up in the menu hierarchy.
+     * - (H)elp: Display help information for the suite.
+     * - (A)ctivate: Activate a specific test in the suite.
+     * - (F)ailures: Display failed tests.
+     * - (O)ptions: Display options menu.
+     *
+     * The function ensures that user input is validated and handles invalid input gracefully.
+     */
     UT_STATUS selectTestFromSuite(TestSuiteInfo &suite)
     {
         UT_STATUS eStatus = UT_STATUS_CONTINUE;
@@ -427,6 +724,20 @@ public:
         return eStatus;
     }
 
+    /**
+     * @brief Prints the usage instructions for the application.
+     *
+     * This function outputs a list of commands that the user can use to interact with the application.
+     * The commands include:
+     * - R: Run tests in suite
+     * - S: Select a suite to run
+     * - L: List all registered suites
+     * - H: Show this help message
+     * - Q: Quit the application
+     * - A: Activates/De-activates a suite
+     * - F: Show failures
+     * - O: Show gtest options menu
+     */
     void printUsage()
     {
         std::cout << "\n\n"
@@ -442,6 +753,15 @@ public:
 
     }
 
+    /**
+     * @brief Prints the usage instructions for a given test suite.
+     *
+     * This function outputs a list of commands and their descriptions to the console,
+     * providing guidance on how to interact with the test suite.
+     *
+     * @param suite The TestSuiteInfo object containing information about the test suite.
+     * The name of the suite is used in the printed instructions.
+     */
     void printUsageForSuite(const TestSuiteInfo &suite)
     {
         std::cout << "\n\n"
@@ -458,6 +778,14 @@ public:
 
     }
 
+    /**
+     * @brief Displays a list of all failed tests in the current test run.
+     *
+     * This function iterates through all test suites and their respective tests
+     * in the current Google Test instance. It prints the names of the test suites
+     * and tests that have failed, along with a count of the total number of failed tests.
+     * If no tests have failed, it prints a message indicating that there are no failed tests.
+     */
     void displayFailedTests()
     {
         const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
@@ -493,6 +821,26 @@ public:
         std::cout << "----------------------------------------------------------------\n";
     }
 
+    /**
+     * @brief Displays a menu for configuring Google Test (GTest) options.
+     *
+     * This function presents a menu to the user with various options to configure
+     * GTest settings such as enabling/disabling test shuffle, setting a random seed,
+     * repeating tests multiple times, enabling/disabling break on failure, and setting
+     * colored output. The user can select an option by entering the corresponding number
+     * or quit the menu by entering 'Q'.
+     *
+     * Menu options:
+     * 1. Enable/Disable test shuffle
+     * 2. Set random seed for shuffling
+     * 3. Repeat tests multiple times
+     * 4. Enable/Disable break on failure
+     * 5. Enable/Disable colored output
+     * Q. Quit options menu
+     *
+     * The function runs in a loop, allowing the user to make multiple changes until
+     * they choose to quit.
+     */
     void displayOptionsMenu()
     {
         while (true)
@@ -567,9 +915,128 @@ public:
             }
         }
     }
+
+    /**
+     * @brief Enables a specified group if it is not already disabled.
+     *
+     * This function checks if the given group is not present in the set of disabled groups.
+     * If the group is not found in the disabled groups, it adds the group to the set of enabled groups.
+     *
+     * @param group The identifier of the group to be enabled.
+     */
+    static void enableGroup(UT_groupID_t group)
+    {
+        if (disabledGroups.find(group) == disabledGroups.end()) // Only enable if not disabled
+        {
+            enabledGroups.insert(group);
+        }
+    }
+
+    /**
+     * @brief Disables a test group by adding it to the disabledGroups set and removing it from the enabledGroups set.
+     *
+     * @param group The identifier of the test group to be disabled.
+     */
+    static void disableGroup(UT_groupID_t group)
+    {
+        disabledGroups.insert(group);
+        enabledGroups.erase(group);
+    }
 };
 
 std::vector<TestSuiteInfo> UTTestRunner::suites;
+std::unordered_set<UT_groupID_t> UTTestRunner::enabledGroups;
+std::unordered_set<UT_groupID_t> UTTestRunner::disabledGroups;
+
+/**
+ * @brief Set up resources before each test.
+ *
+ * This function is called before each test case is executed. It is used to
+ * initialize any resources or state that are required for the tests.
+ */
+void UTCore::SetUp()
+{
+    // Code to set up resources before each test
+}
+
+/**
+ * @brief Cleans up resources after each test.
+ *
+ * This method is called after each test case is executed to perform any necessary
+ * cleanup operations. It ensures that resources allocated during the test are
+ * properly released.
+ */
+void UTCore::TearDown()
+{
+    // Code to clean up resources after each test
+}
+
+/**
+ * @brief Generates a test filter string for Google Test based on enabled and disabled test groups.
+ *
+ * This function constructs a filter string that can be used with Google Test to include or exclude
+ * specific test suites based on the enabled and disabled test groups defined in UTTestRunner.
+ *
+ * @return A string representing the test filter. If no groups are enabled or disabled, returns "*"
+ *         to indicate that all tests should be run. Otherwise, constructs a filter string that includes
+ *         suites from enabled groups and excludes suites from disabled groups.
+ */
+std::string UTCore::UT_get_test_filter()
+{
+    if (UTTestRunner::enabledGroups.empty() && UTTestRunner::disabledGroups.empty())
+    {
+        return "*"; // No restrictions, run all tests
+    }
+
+    std::ostringstream includeFilter, excludeFilter;
+    bool firstInclude = true, firstExclude = true;
+
+    for (const auto &[suiteName, group] : suiteToGroup)
+    {
+        if (UTTestRunner::disabledGroups.find(group) != UTTestRunner::disabledGroups.end())
+        {
+            // If the group is explicitly disabled, add it to the exclude filter
+            if (!firstExclude)
+                excludeFilter << ":";
+            excludeFilter << "-" << suiteName << ".*"; // Exclude tests from this suite
+            firstExclude = false;
+        }
+        else if (UTTestRunner::enabledGroups.empty() || UTTestRunner::enabledGroups.find(group) != UTTestRunner::enabledGroups.end())
+        {
+            // If no groups are explicitly enabled, allow all (unless disabled)
+            if (!firstInclude)
+                includeFilter << ":";
+            includeFilter << suiteName << ".*"; // Include tests from this suite
+            firstInclude = false;
+        }
+    }
+
+    // Combine the include and exclude filters
+    if (firstInclude)
+    {
+        std::string excludeFilterString = excludeFilter.str().empty() ? "*" : excludeFilter.str();
+        return excludeFilterString;
+    }
+
+    std::string includeFilterString = includeFilter.str() + (excludeFilter.str().empty() ? "" : ":" + excludeFilter.str());
+    return includeFilterString;
+}
+
+/**
+ * @brief Adds a test suite to a group.
+ *
+ * This function associates a test suite with a specific group ID.
+ *
+ * @param testSuiteName The name of the test suite to be added.
+ * @param group The group ID to associate with the test suite.
+ * @return true if the operation is successful.
+ */
+bool UTCore::UT_add_suite_withGroupID(const std::string& testSuiteName, UT_groupID_t group)
+{
+    //std::cout << "Setting group for suite: " << testSuiteName << " to " << group << std::endl;
+    suiteToGroup[testSuiteName] = group;
+    return true;
+}
 
 void UT_set_results_output_filename(const char* szFilenameRoot)
 {
@@ -617,6 +1084,10 @@ TestMode_t UT_get_test_mode()
 
 void UT_Manage_Suite_Activation(int groupID, bool enable_disable)
 {
+    if (enable_disable)
+        UTTestRunner::enableGroup(static_cast<UT_groupID_t>(groupID));
+    else
+        UTTestRunner::disableGroup(static_cast<UT_groupID_t>(groupID));
     return;
 }
 
