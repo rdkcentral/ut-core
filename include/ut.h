@@ -40,12 +40,6 @@
 
 #include <string.h>
 
-#ifdef UT_CUNIT
-#include <ut_cunit.h>
-#else
-#include <ut_gtest.h>
-#endif
-
 /**!
  * @brief Status codes for the unit testing (UT) framework.
  *
@@ -77,8 +71,48 @@ typedef enum
 *       - Assertion failures (e.g., `UT_ASSERT_EQUAL_FAILED`, `UT_ASSERT_TRUE_FAILED`)
 *       - Setup or teardown errors (e.g., `UT_SETUP_FAILED`, `UT_TEARDOWN_FAILED`)
 *       - Other framework-specific issues (e.g., invalid test configuration)
- */ 
+*/
 
+/* **************************/
+/* Common Function Prototypes */
+/* **************************/
+
+/**!
+ * @brief Initializes the unit testing (UT) framework.
+ *
+ * This function must be called from the main function of the test suite.
+ *
+ * Responsibilities:
+ *   - Parses command-line arguments for test configuration.
+ *   - Initializes the UT framework for subsequent test execution.
+ *
+ * @param[in] argc - Number of command-line arguments.
+ * @param[in] argv - Array of command-line argument strings.
+ *
+ * @returns Status of the initialization.
+ * @retval UT_STATUS_OK - Initialization successful.
+ * @retval UT_STATUS_FAILURE - Initialization failed.
+ *
+ * @see UT_run_tests() for running the registered test cases.
+ */
+UT_status_t UT_init(int argc, char** argv);
+
+/**
+ * @brief Exits the unit testing framework and releases resources.
+ * */
+void UT_exit(void);
+
+/**
+ * @brief Runs all registered test cases.
+ *
+ * @returns Status of the test execution.
+ * @retval UT_STATUS_OK - All tests passed.
+ * @retval UT_STATUS_FAILURE - One or more tests failed.
+ */
+UT_status_t UT_run_tests();
+
+#ifdef UT_CUNIT
+#include <ut_cunit.h>
 
 /* Typedefs */
 
@@ -114,40 +148,6 @@ typedef int (*UT_CleanupFunction_t)(void);
 /* *********************/
 /* Function Prototypes */
 /* *********************/
-
-/**!
- * @brief Initializes the unit testing (UT) framework.
- *
- * This function must be called from the main function of the test suite. 
- *
- * Responsibilities:
- *   - Parses command-line arguments for test configuration.
- *   - Initializes the UT framework for subsequent test execution.
- *
- * @param[in] argc - Number of command-line arguments.
- * @param[in] argv - Array of command-line argument strings.
- * 
- * @returns Status of the initialization.
- * @retval UT_STATUS_OK - Initialization successful.
- * @retval UT_STATUS_FAILURE - Initialization failed.
- *
- * @see UT_run_tests() for running the registered test cases.
- */
-UT_status_t UT_init(int argc, char** argv);
-
-/**! 
- * @brief Exits the unit testing framework and releases resources. 
- * */
-void UT_exit(void);
-
-/**!
- * @brief Runs all registered test cases.
- * 
- * @returns Status of the test execution.
- * @retval UT_STATUS_OK - All tests passed.
- * @retval UT_STATUS_FAILURE - One or more tests failed.
- */
-UT_status_t UT_run_tests();
 
 /**!
  * @brief Registers a test suite with the unit testing framework.
@@ -198,30 +198,9 @@ const char *UT_getTestSuiteTitle( UT_test_suite_t *pSuite );
  */
 void UT_regsiter_test_cleanup_function( UT_test_suite_t *pSuite, UT_TestCleanupFunction_t pFunction); 
 
-#ifndef UT_CUNIT
-class UTCore : public ::testing::Test
-{
-protected:
-    UTCore()
-    {
-        // Initialization code if needed
-    }
+#else
 
-    ~UTCore() override
-    {
-        // Cleanup code if needed
-    }
-
-    void SetUp() override
-    {
-        // Code to initialize resources before each test
-    }
-
-    void TearDown() override
-    {
-        // Code to clean up resources after each test
-    }
-};
+#include <ut_gtest.h>
 
 #endif
 

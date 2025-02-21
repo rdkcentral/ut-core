@@ -32,6 +32,8 @@
 #include <gtest/gtest.h>
 #include <functional>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 
 /**
  * @brief Verifies that condition is true.
@@ -203,10 +205,94 @@
  *
  * Example usage:
  * @code
- * UT_TEST(MyTestFixture, MyTestCase)
+ * UT_ADD_TEST(MyTestFixture, MyTestCase)
  * @endcode
  */
-#define UT_TEST(test_suite_name, test_name) TEST_F(test_suite_name, test_name)
+#define UT_ADD_TEST(test_suite_name, test_name) TEST_F(test_suite_name, test_name)
+
+/**
+ * @class UTCore
+ * @brief A test fixture class for unit tests using Google Test framework.
+ *
+ * This class provides setup and teardown functionality for unit tests.
+ * It also includes static methods for managing test suites and their associated groups.
+ */
+
+class UTCore : public ::testing::Test
+{
+protected:
+    /**
+     * @brief Default constructor for the UTCore class.
+     */
+    UTCore() = default;
+    /**
+     * @brief Destructor for the UTCore class.
+     *
+     * This destructor is marked as `override` to ensure it overrides a virtual destructor
+     * in the base class. It is also marked as `default` to use the compiler-generated
+     * default implementation.
+     */
+    ~UTCore() override = default;
+    /**
+     * @brief Sets up the necessary preconditions for each test.
+     *
+     * This method is called before each test is run. Override this method to
+     * initialize any resources or set up any state that is required for the tests.
+     */
+    void SetUp() override;
+    /**
+     * @brief Tears down the test environment after each test case.
+     *
+     * This method is called after each test case is run to perform any necessary
+     * cleanup. It overrides the TearDown method from the base class.
+     */
+    void TearDown() override;
+
+public:
+    /**
+     * @brief Retrieves the current test filter.
+     *
+     * This function returns a string representing the current test filter
+     * used to select which tests to run.
+     *
+     * @return A string containing the test filter.
+     */
+    static std::string UT_get_test_filter();
+    /**
+     * @brief Adds a test suite with a specified group ID.
+     *
+     * This function registers a new test suite under the given name and associates it with the specified group ID.
+     *
+     * @param testSuiteName The name of the test suite to be added.
+     * @param group The group ID to associate with the test suite.
+     * @return true if the test suite was successfully added, false otherwise.
+     */
+    static bool UT_add_suite_withGroupID(const std::string& testSuiteName, UT_groupID_t group);
+
+private:
+    static std::unordered_map<std::string, UT_groupID_t> suiteToGroup;
+};
+
+/**
+ * @brief Registers a test suite under a specific group.
+ *
+ * This macro defines a static boolean variable that ensures the test suite is
+ * added to the test framework upon execution. It calls `UTCore::UT_add_suite_withGroupID()`
+ * to associate the test suite name with a group ID.
+ *
+ * @param groupName The identifier of the test suite (must be a valid identifier, not a string).
+ * @param groupID   The group ID to which the test suite belongs.
+ *
+ * @note The `groupName` argument is automatically converted to a string using `#groupName`
+ *       when passed to `UT_add_suite_withGroupID()`.
+ *
+ * @warning `groupName` must be a valid identifier (not a string literal) and unique within the scope.
+ *
+ * @see UTCore::UT_add_suite_withGroupID()
+ */
+
+#define UT_ADD_TEST_TO_GROUP(groupName, groupID) \
+    static bool groupName##_group = UTCore::UT_add_suite_withGroupID(#groupName, groupID);
 
 #endif  /* UT -> GTEST - Wrapper */
 

@@ -37,8 +37,11 @@ protected:
     }
 };
 
+// Automatically register test suite before test execution
+UT_ADD_TEST_TO_GROUP(UTGTestTest, UT_TESTS_L2)
+
 // Test case for UT_ASSERT_TRUE
-UT_TEST(UTGTestTest, UT_ASSERT_TRUE_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_TRUE_Test)
 {
     int a = 5;
     int b = 5;
@@ -46,7 +49,7 @@ UT_TEST(UTGTestTest, UT_ASSERT_TRUE_Test)
 }
 
 // Test case for UT_ASSERT_FALSE
-UT_TEST(UTGTestTest, UT_ASSERT_FALSE_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_FALSE_Test)
 {
     int a = 5;
     int b = 6;
@@ -54,7 +57,7 @@ UT_TEST(UTGTestTest, UT_ASSERT_FALSE_Test)
 }
 
 // Test case for UT_ASSERT_EQUAL
-UT_TEST(UTGTestTest, UT_ASSERT_EQUAL_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_EQUAL_Test)
 {
     int a = 5;
     int b = 5;
@@ -62,7 +65,7 @@ UT_TEST(UTGTestTest, UT_ASSERT_EQUAL_Test)
 }
 
 // Test case for UT_ASSERT_NOT_EQUAL
-UT_TEST(UTGTestTest, UT_ASSERT_NOT_EQUAL_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_NOT_EQUAL_Test)
 {
     int a = 5;
     int b = 6;
@@ -70,7 +73,7 @@ UT_TEST(UTGTestTest, UT_ASSERT_NOT_EQUAL_Test)
 }
 
 // Test case for UT_ASSERT_LESS
-UT_TEST(UTGTestTest, UT_ASSERT_LESS_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_LESS_Test)
 {
     int a = 5;
     int b = 6;
@@ -78,7 +81,7 @@ UT_TEST(UTGTestTest, UT_ASSERT_LESS_Test)
 }
 
 // Test case for UT_ASSERT_LESS_EQUAL
-UT_TEST(UTGTestTest, UT_ASSERT_LESS_EQUAL_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_LESS_EQUAL_Test)
 {
     int a = 5;
     int b = 5;
@@ -86,7 +89,7 @@ UT_TEST(UTGTestTest, UT_ASSERT_LESS_EQUAL_Test)
 }
 
 // Test case for UT_ASSERT_GREATER
-UT_TEST(UTGTestTest, UT_ASSERT_GREATER_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_GREATER_Test)
 {
     int a = 6;
     int b = 5;
@@ -94,7 +97,7 @@ UT_TEST(UTGTestTest, UT_ASSERT_GREATER_Test)
 }
 
 // Test case for UT_ASSERT_GREATER_EQUAL
-UT_TEST(UTGTestTest, UT_ASSERT_GREATER_EQUAL_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_GREATER_EQUAL_Test)
 {
     int a = 5;
     int b = 5;
@@ -102,14 +105,14 @@ UT_TEST(UTGTestTest, UT_ASSERT_GREATER_EQUAL_Test)
 }
 
 // Test case for UT_ASSERT_NULL
-UT_TEST(UTGTestTest, UT_ASSERT_NULL_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_NULL_Test)
 {
     int *ptr = nullptr;
     UT_ASSERT_NULL(ptr);
 }
 
 // Test case for UT_ASSERT_NOT_NULL
-UT_TEST(UTGTestTest, UT_ASSERT_NOT_NULL_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_NOT_NULL_Test)
 {
     int a = 5;
     int *ptr = &a;
@@ -117,7 +120,7 @@ UT_TEST(UTGTestTest, UT_ASSERT_NOT_NULL_Test)
 }
 
 // Test case for UT_ASSERT_STRING_EQUAL
-UT_TEST(UTGTestTest, UT_ASSERT_STRING_EQUAL_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_STRING_EQUAL_Test)
 {
     const char *str1 = "test";
     const char *str2 = "test";
@@ -125,7 +128,7 @@ UT_TEST(UTGTestTest, UT_ASSERT_STRING_EQUAL_Test)
 }
 
 // Test case for UT_ASSERT_STRING_NOT_EQUAL
-UT_TEST(UTGTestTest, UT_ASSERT_STRING_NOT_EQUAL_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_STRING_NOT_EQUAL_Test)
 {
     const char *str1 = "test";
     const char *str2 = "test1";
@@ -133,7 +136,7 @@ UT_TEST(UTGTestTest, UT_ASSERT_STRING_NOT_EQUAL_Test)
 }
 
 // Test case for UT_ASSERT_STRING_EQUAL_IGNORE_CASE
-UT_TEST(UTGTestTest, UT_ASSERT_STRING_EQUAL_IGNORE_CASE_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_STRING_EQUAL_IGNORE_CASE_Test)
 {
     const char *str1 = "test";
     const char *str2 = "TEST";
@@ -141,7 +144,7 @@ UT_TEST(UTGTestTest, UT_ASSERT_STRING_EQUAL_IGNORE_CASE_Test)
 }
 
 // Test case for UT_ASSERT_STRING_NOT_EQUAL_IGNORE_CASE
-UT_TEST(UTGTestTest, UT_ASSERT_STRING_NOT_EQUAL_IGNORE_CASE_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_STRING_NOT_EQUAL_IGNORE_CASE_Test)
 {
     const char *str1 = "test";
     const char *str2 = "TEST1";
@@ -149,7 +152,7 @@ UT_TEST(UTGTestTest, UT_ASSERT_STRING_NOT_EQUAL_IGNORE_CASE_Test)
 }
 
 // Test case for UT_ASSERT_DOUBLE_EQUAL
-UT_TEST(UTGTestTest, UT_ASSERT_DOUBLE_EQUAL_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_DOUBLE_EQUAL_Test)
 {
     double a = 5.0;
     double b = 5.0;
@@ -158,7 +161,7 @@ UT_TEST(UTGTestTest, UT_ASSERT_DOUBLE_EQUAL_Test)
 }
 
 // Test case for UT_ASSERT_FLOAT_EQUAL
-UT_TEST(UTGTestTest, UT_ASSERT_FLOAT_EQUAL_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_FLOAT_EQUAL_Test)
 {
     float a = 5.0f;
     float b = 5.0f;
@@ -167,37 +170,37 @@ UT_TEST(UTGTestTest, UT_ASSERT_FLOAT_EQUAL_Test)
 }
 
 // Test case for UT_ASSERT_THROW
-UT_TEST(UTGTestTest, UT_ASSERT_THROW_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_THROW_Test)
 {
     UT_ASSERT_THROW(throw std::runtime_error("error"), std::runtime_error);
 }
 
 // Test case for UT_ASSERT_ANY_THROW
-UT_TEST(UTGTestTest, UT_ASSERT_ANY_THROW_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_ANY_THROW_Test)
 {
     UT_ASSERT_ANY_THROW(throw std::runtime_error("error"));
 }
 
 // Test case for UT_ASSERT_NO_THROW
-UT_TEST(UTGTestTest, UT_ASSERT_NO_THROW_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_NO_THROW_Test)
 {
     UT_ASSERT_NO_THROW(int a = 5; (void)a;);
 }
 
 // Test case for UT_FAIL
-UT_TEST(UTGTestTest, UT_FAIL_Test)
+UT_ADD_TEST(UTGTestTest, UT_FAIL_Test)
 {
     UT_FAIL("This test should fail");
 }
 
 // Test case for UT_PASS
-UT_TEST(UTGTestTest, UT_PASS_Test)
+UT_ADD_TEST(UTGTestTest, UT_PASS_Test)
 {
     UT_PASS("This test should pass");
 }
 
 // Test case for UT_ASSERT_MESSAGE
-UT_TEST(UTGTestTest, UT_ASSERT_MESSAGE_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_MESSAGE_Test)
 {
     int a = 5;
     int b = 5;
@@ -205,7 +208,7 @@ UT_TEST(UTGTestTest, UT_ASSERT_MESSAGE_Test)
 }
 
 // Test case for UT_ASSERT_EQUAL_FATAL
-UT_TEST(UTGTestTest, UT_ASSERT_EQUAL_FATAL_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_EQUAL_FATAL_Test)
 {
     int a = 5;
     int b = 5;
@@ -213,7 +216,7 @@ UT_TEST(UTGTestTest, UT_ASSERT_EQUAL_FATAL_Test)
 }
 
 // Test case for UT_ASSERT_NOT_EQUAL_FATAL
-UT_TEST(UTGTestTest, UT_ASSERT_NOT_EQUAL_FATAL_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_NOT_EQUAL_FATAL_Test)
 {
     int a = 5;
     int b = 6;
@@ -221,7 +224,7 @@ UT_TEST(UTGTestTest, UT_ASSERT_NOT_EQUAL_FATAL_Test)
 }
 
 // Test case for UT_ASSERT_TRUE_FATAL
-UT_TEST(UTGTestTest, UT_ASSERT_TRUE_FATAL_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_TRUE_FATAL_Test)
 {
     int a = 5;
     int b = 5;
@@ -229,7 +232,7 @@ UT_TEST(UTGTestTest, UT_ASSERT_TRUE_FATAL_Test)
 }
 
 // Test case for UT_ASSERT_FALSE_FATAL
-UT_TEST(UTGTestTest, UT_ASSERT_FALSE_FATAL_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_FALSE_FATAL_Test)
 {
     int a = 5;
     int b = 6;
@@ -237,14 +240,14 @@ UT_TEST(UTGTestTest, UT_ASSERT_FALSE_FATAL_Test)
 }
 
 // Test case for UT_ASSERT_NULL_FATAL
-UT_TEST(UTGTestTest, UT_ASSERT_NULL_FATAL_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_NULL_FATAL_Test)
 {
     int *ptr = nullptr;
     UT_ASSERT_NULL_FATAL(ptr);
 }
 
 // Test case for UT_ASSERT_NOT_NULL_FATAL
-UT_TEST(UTGTestTest, UT_ASSERT_NOT_NULL_FATAL_Test)
+UT_ADD_TEST(UTGTestTest, UT_ASSERT_NOT_NULL_FATAL_Test)
 {
     int a = 5;
     int *ptr = &a;
@@ -252,18 +255,18 @@ UT_TEST(UTGTestTest, UT_ASSERT_NOT_NULL_FATAL_Test)
 }
 
 // Test case for UT_FAIL_FATAL
-UT_TEST(UTGTestTest, UT_FAIL_FATAL_Test)
+UT_ADD_TEST(UTGTestTest, UT_FAIL_FATAL_Test)
 {
     UT_FAIL_FATAL("This test should fail");
 }
 
 // Test case for UT_PASS_FATAL
-UT_TEST(UTGTestTest, UT_PASS_FATAL_Test)
+UT_ADD_TEST(UTGTestTest, UT_PASS_FATAL_Test)
 {
     UT_PASS_FATAL("This test should pass");
 }
 
-UT_TEST(UTGTestTest, IgnoredTest)
+UT_ADD_TEST(UTGTestTest, IgnoredTest)
 {
     UT_IGNORE_TEST();   // This test will be skipped at runtime
     ASSERT_TRUE(false); // This line will never be executed
