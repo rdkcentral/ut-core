@@ -135,22 +135,7 @@ run_make_with_logs_for_C() {
     else
         echo -e "${RED}Make -C tests/ command failed for $vername. Check the logs in make_test_log_C.txt${NC}"
     fi
-
-    echo -e "${RED}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
-    if [ -f "$UT_CORE_BIN" ]; then
-        echo -e "${RED}$UT_CORE_BIN exists. clean was not perfect.C VARIANT FAIL for $vername ${NC}"
-    else
-        echo -e "${GREEN}$UT_CORE_BIN is not seen.C VARIANT PASS for $vername${NC}"
-    fi
-
-    if [ -f "$UT_CORE_TEST_BIN" ]; then
-        echo -e "${GREEN}$UT_CORE_TEST_BIN exists.C VARIANT PASS for $vername${NC}"
-    else
-       echo -e "${RED}$UT_CORE_TEST_BIN is not created. C VARIANT FAIL. Make FAILED for $vername ${NC}"
-    fi
-    echo -e "${RED}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
-
-    }
+}
 
 run_make_with_logs_for_CPP() {
     local architecture_type="$1"
@@ -174,20 +159,6 @@ run_make_with_logs_for_CPP() {
     else
         echo -e "${RED}Make -C tests/ command failed for $vername. Check the logs in make_test_cpp_log.txt${NC}"
     fi
-
-    echo -e "${RED}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
-    if [ -f "$UT_CORE_BIN" ]; then
-        echo -e "${GREEN}$UT_CORE_BIN exists.CPP VARIANT PASS for $vername${NC}"
-    else
-       echo -e "${RED}$UT_CORE_BIN is not created.CPP VARIANT FAIL. Make FAILED for $vername ${NC}"
-    fi
-
-    if [ -f "$UT_CORE_TEST_BIN" ]; then
-        echo -e "${GREEN}$UT_CORE_TEST_BIN exists.CPP VARIANT PASS for $vername${NC}"
-    else
-       echo -e "${RED}$UT_CORE_TEST_BIN is not created.CPP VARIANT FAIL. Make FAILED for $vername ${NC}"
-    fi
-    echo -e "${RED}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
 }
 
 export -f run_make_with_logs_for_C
@@ -206,6 +177,8 @@ run_checks() {
     CMAKE_HOST_BIN="framework/ut-control/host-tools/CMake-3.30.0/build/bin/cmake"
     GTEST_STATIC_LIB="build/${architecture_type}/cpp_libs/lib/libgtest.a"
     GTEST_MAIN_STATIC_LIB="build/${architecture_type}/cpp_libs/lib/libgtest_main.a"
+    UT_CORE_BIN="build/bin/hal_test"
+    UT_CORE_TEST_BIN="tests/build/bin/ut-test"
 
     echo -e "${RED}RESULTS for ${environment} ${NC}"
 
@@ -214,7 +187,7 @@ run_checks() {
     # Compare with the target branch name
     if [ "${current_branch}" == "${UT_CORE_BRANCH_NAME}" ]; then
         echo -e "${GREEN}On the branch $UT_CORE_BRANCH_NAME
-. PASS${NC}"
+        . PASS${NC}"
     else
         error_exit "Branch is not switched. FAIL"
     fi
@@ -304,18 +277,50 @@ run_checks() {
         fi
     fi
 
-    # Test for gtest static library
-    if [ -f "$GTEST_STATIC_LIB" ]; then
-        echo -e "${GREEN}$GTEST_STATIC_LIB exists. PASS${NC}"
-    else
-        echo -e "${RED}GTEST static lib does not exist. FAIL ${NC}"
+    if [ "$4" == "CPP" ]; then
+        # Test for gtest static library
+        if [ -f "$GTEST_STATIC_LIB" ]; then
+            echo -e "${GREEN}$GTEST_STATIC_LIB exists. PASS${NC}"
+        else
+            echo -e "${RED}GTEST static lib does not exist. FAIL ${NC}"
+        fi
+
+        # Test for gtest main static library
+        if [ -f "$GTEST_MAIN_STATIC_LIB" ]; then
+            echo -e "${GREEN}$GTEST_MAIN_STATIC_LIB exists. PASS${NC}"
+        else
+            echo -e "${RED}GTEST main static lib does not exist. FAIL ${NC}"
+        fi
+
+        # Test for ut-core binary
+        if [ -f "$UT_CORE_BIN" ]; then
+            echo -e "${GREEN}$UT_CORE_BIN exists. PASS${NC}"
+        else
+            echo -e "${RED}UT_CORE_BIN does not exist. FAIL ${NC}"
+        fi
+
+        # Test for ut-core test binary
+        if [ -f "$UT_CORE_TEST_BIN" ]; then
+            echo -e "${GREEN}$UT_CORE_TEST_BIN exists. PASS${NC}"
+        else
+            echo -e "${RED}UT_CORE_TEST_BIN does not exist. FAIL ${NC}"
+        fi
     fi
 
-    # Test for gtest main static library
-    if [ -f "$GTEST_MAIN_STATIC_LIB" ]; then
-        echo -e "${GREEN}$GTEST_MAIN_STATIC_LIB exists. PASS${NC}"
-    else
-        echo -e "${RED}GTEST main static lib does not exist. FAIL ${NC}"
+     if [ "$4" == "C" ]; then
+        # Test for ut-core binary
+        if [ -f "$UT_CORE_BIN" ]; then
+            echo -e "${RED}$UT_CORE_BIN exists. FAIL${NC}"
+        else
+            echo -e "${GREEN}hal_test does not exist. PASS ${NC}"
+        fi
+
+        # Test for ut-core test binary
+        if [ -f "$UT_CORE_TEST_BIN" ]; then
+            echo -e "${GREEN}$UT_CORE_TEST_BIN exists. PASS${NC}"
+        else
+            echo -e "${RED}UT_CORE_TEST_BIN does not exist. FAIL ${NC}"
+        fi
     fi
 
     echo -e "${RED}==========================================================${NC}"
@@ -325,7 +330,7 @@ print_results() {
 
     if [ "$1" == "C" ]; then
         echo -e "${RED}==================== RESULTS FOR C VARIANT ====================${NC}"
-    elif [ "$1" == "CPP" ]; then
+        elif [ "$1" == "CPP" ]; then
         echo -e "${RED}==================== RESULTS FOR CPP VARIANT ====================${NC}"
     fi
 
@@ -334,41 +339,41 @@ print_results() {
     #Results for ubuntu
     PLAT_DIR="${REPO_NAME}-ubuntu-$1"
     pushd ${PLAT_DIR} > /dev/null
-    run_checks "ubuntu" "linux" "$UT_CORE_BRANCH_NAME"
+    run_checks "ubuntu" "linux" "$UT_CORE_BRANCH_NAME" $1
     popd > /dev/null
     
     #Results for VM_SYNC
     PLAT_DIR="${REPO_NAME}-VM-SYNC-$1"
     pushd ${PLAT_DIR} > /dev/null
-    run_checks "VM-SYNC" "linux" $UT_CORE_BRANCH_NAME
+    run_checks "VM-SYNC" "linux" $UT_CORE_BRANCH_NAME $1
     popd > /dev/null
     
     #Results for dunfell-arm
     PLAT_DIR="${REPO_NAME}-dunfell_arm-$1"
     pushd ${PLAT_DIR} > /dev/null
-    run_checks "dunfell_arm" "arm" $UT_CORE_BRANCH_NAME
+    run_checks "dunfell_arm" "arm" $UT_CORE_BRANCH_NAME $1
     popd > /dev/null
-    
+
     #Results for dunfell-linux
     PLAT_DIR="${REPO_NAME}-dunfell_linux-$1"
     pushd ${PLAT_DIR} > /dev/null
-    run_checks "dunfell_linux" "linux" $UT_CORE_BRANCH_NAME
+    run_checks "dunfell_linux" "linux" $UT_CORE_BRANCH_NAME $1
     popd > /dev/null
 
     #Results for kirkstone-arm
     PLAT_DIR="${REPO_NAME}-kirkstone_arm-$1"
     pushd ${PLAT_DIR} > /dev/null
-    run_checks "kirkstone_arm" "arm" $UT_CORE_BRANCH_NAME
+    run_checks "kirkstone_arm" "arm" $UT_CORE_BRANCH_NAME $1
     popd > /dev/null
 
     #Results for kirkstone-linux
     PLAT_DIR="${REPO_NAME}-kirkstone_linux-$1"
     pushd ${PLAT_DIR} > /dev/null
-    run_checks "kirkstone_linux" "linux" $UT_CORE_BRANCH_NAME
+    run_checks "kirkstone_linux" "linux" $UT_CORE_BRANCH_NAME $1
     popd > /dev/null
-    
+
     popd > /dev/null
-    
+
 }
 
 run_make_with_logs() {
@@ -390,86 +395,6 @@ export -f run_checks
 export -f usage
 export -f error_exit
 
-# run_on_ubuntu_linux() {
-#     pushd ${MY_DIR} > /dev/null
-#     run_git_clone "ubuntu"
-#     run_make_with_logs_for_C "linux"
-#     run_checks "ubuntu" "linux" "$UT_CORE_BRANCH_NAME"
-#     popd > /dev/null
-# }
-
-# run_on_dunfell_linux() {
-#     pushd ${MY_DIR} > /dev/null
-#     run_git_clone "dunfell_linux"
-#     /bin/bash -c "export -f run_make_with_logs_for_C && \
-#     sc docker run rdk-dunfell bash -c '
-# 	export -f run_make_with_logs_for_C;  # Re-export inside Docker
-#         $(declare -f run_make_with_logs_for_C);
-#         run_make_with_logs_for_C linux'"
-#     run_checks "dunfell_linux" "linux" $UT_CORE_BRANCH_NAME
-#     popd > /dev/null
-# }
-
-# run_on_dunfell_arm() {
-#     pushd ${MY_DIR} > /dev/null
-#     run_git_clone "dunfell_arm"
-#     /bin/bash -c "export -f run_make_with_logs_for_C && \
-#     sc docker run rdk-dunfell bash -c '
-# 	export -f run_make_with_logs_for_C;  # Re-export inside Docker
-#         $(declare -f run_make_with_logs_for_C);
-#         cd /opt/toolchains/rdk-glibc-x86_64-arm-toolchain;
-#         . environment-setup-armv7at2hf-neon-oe-linux-gnueabi;
-#         env | grep CC;
-#         cd -;
-#         run_make_with_logs_for_C arm'"
-#     run_checks "dunfell_arm" "arm" $UT_CORE_BRANCH_NAME
-#     popd > /dev/null
-# }
-
-# run_on_vm_sync_linux() {
-#     pushd ${MY_DIR} > /dev/null
-#     run_git_clone "VM-SYNC"
-#     /bin/bash -c "export -f run_make_with_logs_for_C && \
-#     sc docker run vm-sync bash -c '
-# 	export -f run_make_with_logs_for_C;  # Re-export inside Docker
-#         $(declare -f run_make_with_logs_for_C);
-#         run_make_with_logs_for_C linux'"
-#     run_checks "VM-SYNC" "linux" $UT_CORE_BRANCH_NAME
-#     popd > /dev/null
-# }
-
-# run_on_kirkstone_linux() {
-#     pushd ${MY_DIR} > /dev/null
-#     run_git_clone "kirkstone_linux"
-#     #/bin/bash -c "$SETUP_ENV; $(declare -f run_make_with_logs_for_C); run_make_with_logs_for_C 'linux'"
-#     /bin/bash -c "export -f run_make_with_logs_for_C && \
-#     sc docker run rdk-kirkstone bash -c '
-# 	export -f run_make_with_logs_for_C;  # Re-export inside Docker
-#         $(declare -f run_make_with_logs_for_C);
-#         run_make_with_logs_for_C linux'"
-#     run_checks "kirkstone_linux" "linux" $UT_CORE_BRANCH_NAME
-#     popd > /dev/null
-# }
-
-# run_on_kirkstone_arm() {
-#     pushd ${MY_DIR} > /dev/null
-#     run_git_clone "kirkstone_arm"
-#     #/bin/bash -c "sc docker run rdk-kirkstone 'cd /opt/toolchains/rdk-glibc-x86_64-arm-toolchain; \
-#     # . environment-setup-armv7at2hf-neon-oe-linux-gnueabi; env | grep CC; cd -; \
-#     # $(declare -f run_make_with_logs_for_C); make TARGET=arm'"
-#     /bin/bash -c "export -f run_make_with_logs_for_C && \
-#     sc docker run rdk-kirkstone bash -c '
-# 	export -f run_make_with_logs_for_C;  # Re-export inside Docker
-#         $(declare -f run_make_with_logs_for_C);
-#         cd /opt/toolchains/rdk-glibc-x86_64-arm-toolchain;
-#         . environment-setup-armv7at2hf-neon-oe-linux-gnueabi;
-#         env | grep CC;
-#         cd -;
-#         run_make_with_logs_for_C arm'"
-#     run_checks "kirkstone_arm" "arm" $UT_CORE_BRANCH_NAME
-#     popd > /dev/null
-# }
-
 run_on_ubuntu_linux() {
     pushd ${MY_DIR} > /dev/null
     run_git_clone "ubuntu" $1
@@ -481,11 +406,13 @@ run_on_ubuntu_linux() {
 run_on_dunfell_linux() {
     pushd ${MY_DIR} > /dev/null
     run_git_clone "dunfell_linux" $1
-    /bin/bash -c "export -f run_make_with_logs && \
-    sc docker run rdk-dunfell bash -c '
-	export -f run_make_with_logs;  # Re-export inside Docker
-        $(declare -f run_make_with_logs);
-        run_make_with_logs $1 linux'"
+    if [ "$1" == "C" ]; then
+        echo "Running make for C variant"
+        /bin/bash -c "sc docker run rdk-dunfell 'make > make_log_C.txt 2>&1; make -C tests/ > make_test_log_C.txt 2>&1'"
+    elif [ "$1" == "CPP" ]; then
+        echo "Running make for CPP variant"
+        /bin/bash -c "sc docker run rdk-dunfell 'make VARIANT=CPP > make_log_CPP.txt 2>&1; make -C tests/ VARIANT=CPP > make_test_log_CPP.txt 2>&1'"
+    fi
     run_checks "dunfell_linux" "linux" $UT_CORE_BRANCH_NAME
     popd > /dev/null
 }
@@ -493,15 +420,21 @@ run_on_dunfell_linux() {
 run_on_dunfell_arm() {
     pushd ${MY_DIR} > /dev/null
     run_git_clone "dunfell_arm" $1
-    /bin/bash -c "export -f run_make_with_logs && \
-    sc docker run rdk-dunfell bash -c '
-	export -f run_make_with_logs;  # Re-export inside Docker
-        $(declare -f run_make_with_logs);
-        cd /opt/toolchains/rdk-glibc-x86_64-arm-toolchain;
-        . environment-setup-armv7at2hf-neon-oe-linux-gnueabi;
-        env | grep CC;
-        cd -;
-        run_make_with_logs $1 arm'"
+    if [ "$1" == "C" ]; then
+        echo "Running make for C variant"
+        /bin/bash -c "sc docker run rdk-dunfell \
+        'source /opt/toolchains/rdk-glibc-x86_64-arm-toolchain/environment-setup-armv7at2hf-neon-oe-linux-gnueabi;\
+        echo $CC;\
+        make TARGET=arm > make_log_C.txt 2>&1; \
+        make -C tests/ TARGET=arm > make_test_log_C.txt 2>&1'"
+    elif [ "$1" == "CPP" ]; then
+        echo "Running make for CPP variant"
+        /bin/bash -c "sc docker run rdk-dunfell \
+        'source /opt/toolchains/rdk-glibc-x86_64-arm-toolchain/environment-setup-armv7at2hf-neon-oe-linux-gnueabi;\
+        echo $CC;\
+        make TARGET=arm VARIANT=CPP > make_log_CPP.txt 2>&1;\
+        make -C tests/ TARGET=arm VARIANT=CPP > make_test_log_CPP.txt 2>&1'"
+    fi
     run_checks "dunfell_arm" "arm" $UT_CORE_BRANCH_NAME
     popd > /dev/null
 }
@@ -509,11 +442,13 @@ run_on_dunfell_arm() {
 run_on_vm_sync_linux() {
     pushd ${MY_DIR} > /dev/null
     run_git_clone "VM-SYNC" $1
-    /bin/bash -c "export -f run_make_with_logs && \
-    sc docker run vm-sync bash -c '
-	export -f run_make_with_logs;  # Re-export inside Docker
-        $(declare -f run_make_with_logs);
-        run_make_with_logs $1 linux'"
+    if [ "$1" == "C" ]; then
+        echo "Running make for C variant"
+        /bin/bash -c "sc docker run vm-sync 'make > make_log_C.txt 2>&1; make -C tests/ > make_test_log_C.txt 2>&1'"
+    elif [ "$1" == "CPP" ]; then
+        echo "Running make for CPP variant"
+        /bin/bash -c "sc docker run vm-sync 'make VARIANT=CPP > make_log_CPP.txt 2>&1; make -C tests/ VARIANT=CPP > make_test_log_CPP.txt 2>&1'"
+    fi
     run_checks "VM-SYNC" "linux" $UT_CORE_BRANCH_NAME
     popd > /dev/null
 }
@@ -521,11 +456,13 @@ run_on_vm_sync_linux() {
 run_on_kirkstone_linux() {
     pushd ${MY_DIR} > /dev/null
     run_git_clone "kirkstone_linux" $1
-    /bin/bash -c "export -f run_make_with_logs && \
-    sc docker run rdk-kirkstone bash -c '
-	export -f run_make_with_logs;  # Re-export inside Docker
-        $(declare -f run_make_with_logs);
-        run_make_with_logs $1 linux'"
+    if [ "$1" == "C" ]; then
+        echo "Running make for C variant"
+        /bin/bash -c "sc docker run rdk-kirkstone 'make > make_log_C.txt 2>&1; make -C tests/ > make_test_log_C.txt 2>&1'"
+    elif [ "$1" == "CPP" ]; then
+        echo "Running make for CPP variant"
+        /bin/bash -c "sc docker run rdk-kirkstone 'make VARIANT=CPP > make_log_CPP.txt 2>&1; make -C tests/ VARIANT=CPP > make_test_log_CPP.txt 2>&1'"
+    fi
     run_checks "kirkstone_linux" "linux" $UT_CORE_BRANCH_NAME
     popd > /dev/null
 }
@@ -533,35 +470,40 @@ run_on_kirkstone_linux() {
 run_on_kirkstone_arm() {
     pushd ${MY_DIR} > /dev/null
     run_git_clone "kirkstone_arm" $1
-    /bin/bash -c "export -f run_make_with_logs && \
-    sc docker run rdk-kirkstone bash -c '
-	export -f run_make_with_logs;  # Re-export inside Docker
-        $(declare -f run_make_with_logs);
-        cd /opt/toolchains/rdk-glibc-x86_64-arm-toolchain;
-        . environment-setup-armv7at2hf-neon-oe-linux-gnueabi;
-        env | grep CC;
-        cd -;
-        run_make_with_logs $1 arm'"
+    if [ "$1" == "C" ]; then
+        echo "Running make for C variant"
+        /bin/bash -c "sc docker run rdk-kirkstone \
+        'source /opt/toolchains/rdk-glibc-x86_64-arm-toolchain/environment-setup-armv7vet2hf-neon-oe-linux-gnueabi;\
+        echo $CC;\
+        make TARGET=arm > make_log_C.txt 2>&1; \
+        make -C tests/ TARGET=arm > make_test_log_C.txt 2>&1'"
+    elif [ "$1" == "CPP" ]; then
+        echo "Running make for CPP variant"
+        /bin/bash -c "sc docker run rdk-kirkstone \
+        'source /opt/toolchains/rdk-glibc-x86_64-arm-toolchain/environment-setup-armv7vet2hf-neon-oe-linux-gnueabi;\
+        echo $CC;\
+        make TARGET=arm VARIANT=CPP > make_log_CPP.txt 2>&1;\
+        make -C tests/ TARGET=arm VARIANT=CPP > make_test_log_CPP.txt 2>&1'"
+    fi
     run_checks "kirkstone_arm" "arm" $UT_CORE_BRANCH_NAME
     popd > /dev/null
 }
 
 # Run tests in different environments
-( run_on_ubuntu_linux "C") &
-# ( run_on_dunfell_linux "C") &
-# ( run_on_kirkstone_linux "C") &
-wait
-# run_on_vm_sync_linux "C"
-# run_on_dunfell_arm "C"
-# run_on_kirkstone_arm "C"
+
+run_on_ubuntu_linux "C"
+run_on_dunfell_linux "C"
+run_on_kirkstone_linux "C"
+run_on_vm_sync_linux "C"
+run_on_dunfell_arm "C"
+run_on_kirkstone_arm "C"
+
+run_on_ubuntu_linux "CPP"
+run_on_dunfell_linux "CPP"
+run_on_kirkstone_linux "CPP"
+run_on_vm_sync_linux "CPP"
+run_on_dunfell_arm "CPP"
+run_on_kirkstone_arm "CPP"
 
 print_results "C"
-
-( run_on_ubuntu_linux "CPP") &
-# ( run_on_dunfell_linux "CPP") &
-# ( run_on_kirkstone_linux "CPP") &
-wait
-# run_on_vm_sync_linux "CPP"
-# run_on_dunfell_arm "CPP"
-# run_on_kirkstone_arm "CPP"
 print_results "CPP"
