@@ -30,7 +30,10 @@ RED='\033[0;31m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Function to print usage
+# Function: usage
+# Description: This function displays the correct usage of the script.
+# Usage: usage
+# Returns: None
 usage() {
     echo -e "${YELLOW}Usage: $0 -u <REPO_URL> -t <UT_CORE_BRANCH_NAME> -c <UT_CONTROL_BRANCH_NAME>${NC}"
     exit 1
@@ -46,7 +49,12 @@ while getopts "u:t:c:" opt; do
     esac
 done
 
-# Function to print error message and exit
+# Function to handle errors and exit the script
+# Usage: error_exit <error_message>
+# Arguments:
+#   error_message: The message to display before exiting the script
+# Returns: None
+# Example: error_exit "Failed to clone repository."
 error_exit() {
     echo -e "${RED}$1${NC}" 1>&2
     exit 1
@@ -72,18 +80,14 @@ if [ -z "$REPO_URL" ]; then
 fi
 REPO_NAME=$(basename "$REPO_URL" .git)
 
-# # Set compiler type based on the environment passed
-# case "$environment" in
-#     "ubuntu" | "VM-SYNC" | "dunfell_linux") architecture_type="linux" ;;
-#     "dunfell_arm") architecture_type="arm" ;;
-#     *)
-#         echo "Unknown environment: $environment"
-#         echo "Environments are : ubuntu, VM-SYNC, dunfell_arm, dunfell_linux"
-#         exit 1
-#         ;;
-# esac
-
-#git clone and change dir
+# Function: run_git_clone
+# Usage: run_git_clone <environment> <variant>
+# Description: This function clones the git repository and changes to the repository directory.
+# Parameters:
+#   environment: The environment in which the repository is to be cloned.
+#   variant: The variant of the repository (C or CPP).
+# Returns: None
+# Example: run_git_clone "ubuntu" "C"
 run_git_clone(){
     local environment="$1"
     local variant="$2"
@@ -99,7 +103,7 @@ run_git_clone(){
         git clone "$REPO_URL" -b "$UT_CORE_BRANCH_NAME" "$REPO_NAME-$environment-$variant" || error_exit "Error: Failed to clone repository."
         echo -e "${GREEN}GIT_URL = $GIT_URL${NC}"
     fi
-    
+
     # Change to the repository directory
     echo -e "Current path is: $PWD"
     cd "$REPO_NAME-$environment-$variant" || error_exit "Error: Failed to change directory to $REPO_NAME-$environment-$variant."
@@ -110,7 +114,13 @@ run_git_clone(){
     fi
 }
 
-# Define a function to run the commands
+# Function: run_make_with_logs_for_C
+# Description: This function runs the 'make' command and captures the logs for C Variant.
+# Usage: Call this function to compile the C Variant and save the logs for later review.
+# Parameters:
+#   architecture_type: The architecture type of the environment.
+# Returns: None
+# Example: run_make_with_logs_for_C "linux"
 run_make_with_logs_for_C() {
     local architecture_type="$1"
     echo "architecture_type=$architecture_type"
@@ -137,6 +147,13 @@ run_make_with_logs_for_C() {
     fi
 }
 
+# Function: run_make_with_logs_for_CPP
+# Description: This function executes the 'make' command for a C++ Variant and logs the output.
+# Usage: run_make_with_logs_for_CPP
+# Parameters:
+#   architecture_type: The architecture type of the environment.
+# Returns: None
+# Example: run_make_with_logs_for_CPP "linux"
 run_make_with_logs_for_CPP() {
     local architecture_type="$1"
     echo "architecture_type=$architecture_type"
@@ -164,6 +181,17 @@ run_make_with_logs_for_CPP() {
 export -f run_make_with_logs_for_C
 export -f run_make_with_logs_for_CPP
 
+# Function: run_checks
+# Description: This function performs a series of checks to ensure the integrity and correctness
+#              of the release process for the UT core.
+# Usage: Call this function to run the checks for the UT core.
+# Parameters:
+#   environment: The environment in which the checks are to be performed.
+#   architecture_type: The architecture type of the environment.
+#   UT_CORE_BRANCH_NAME: The branch name of the UT core repository.
+#   variant: The variant of the UT core (C or CPP).
+# Returns: None
+# Example: run_checks "ubuntu" "linux" "master" "C"
 run_checks() {
     # Parameters to be passed to the function
     environment=$1
@@ -307,7 +335,7 @@ run_checks() {
         fi
     fi
 
-     if [ "$4" == "C" ]; then
+    if [ "$4" == "C" ]; then
         # Test for ut-core binary
         if [ -f "$UT_CORE_BIN" ]; then
             echo -e "${RED}$UT_CORE_BIN exists. FAIL${NC}"
@@ -326,6 +354,13 @@ run_checks() {
     echo -e "${RED}==========================================================${NC}"
 }
 
+# Function: print_results
+# Description: This function prints the results of the release tests for the UT core.
+# Usage: Call this function to display the results of the release tests for the UT core.
+# Parameters:
+#   variant: The variant of the UT core (C or CPP).
+# Returns: None
+# Example: print_results "C"
 print_results() {
 
     if [ "$1" == "C" ]; then
@@ -335,19 +370,19 @@ print_results() {
     fi
 
     pushd ${MY_DIR} > /dev/null
-    
+
     #Results for ubuntu
     PLAT_DIR="${REPO_NAME}-ubuntu-$1"
     pushd ${PLAT_DIR} > /dev/null
     run_checks "ubuntu" "linux" "$UT_CORE_BRANCH_NAME" $1
     popd > /dev/null
-    
+
     #Results for VM_SYNC
     PLAT_DIR="${REPO_NAME}-VM-SYNC-$1"
     pushd ${PLAT_DIR} > /dev/null
     run_checks "VM-SYNC" "linux" $UT_CORE_BRANCH_NAME $1
     popd > /dev/null
-    
+
     #Results for dunfell-arm
     PLAT_DIR="${REPO_NAME}-dunfell_arm-$1"
     pushd ${PLAT_DIR} > /dev/null
@@ -376,6 +411,13 @@ print_results() {
 
 }
 
+# Function: run_make_with_logs
+# Description: This function selects the appropriate make command based on the variant and logs the output.
+# Usage: run_make_with_logs <variant>
+# Parameters:
+#   variant: The variant of the UT core (C or CPP).
+# Returns: None
+# Example: run_make_with_logs "C", run_make_with_logs "CPP"
 run_make_with_logs() {
     if [ "$1" == "C" ]; then
         run_make_with_logs_for_C "$2"
@@ -395,6 +437,13 @@ export -f run_checks
 export -f usage
 export -f error_exit
 
+# Function: run_on_ubuntu_linux
+# Description: This function git clones and builds ut-core on an Ubuntu Linux environment.
+# Usage: Call this function within the script to execute the defined operations on Ubuntu Linux.
+# Parameters:
+#   variant: The variant of the UT core (C or CPP).
+# Returns: None
+# Example: run_on_ubuntu_linux "C"
 run_on_ubuntu_linux() {
     pushd ${MY_DIR} > /dev/null
     run_git_clone "ubuntu" $1
@@ -403,6 +452,13 @@ run_on_ubuntu_linux() {
     popd > /dev/null
 }
 
+# Function: run_on_dunfell_linux
+# Description: This function git clones and builds ut-core on a Dunfell Linux environment.
+# Usage: Call this function within the script to execute the defined operations on Dunfell Linux.
+# Parameters:
+#   variant: The variant of the UT core (C or CPP).
+# Returns: None
+# Example: run_on_dunfell_linux "C"
 run_on_dunfell_linux() {
     pushd ${MY_DIR} > /dev/null
     run_git_clone "dunfell_linux" $1
@@ -417,6 +473,13 @@ run_on_dunfell_linux() {
     popd > /dev/null
 }
 
+# Function : run_on_dunfell_arm
+# Description: This function git clones and builds ut-core on the sc docker with Dunfell ARM architecture.
+# Usage: run_on_dunfell_arm <command>
+# Parameters:
+#   variant: The variant of the UT core (C or CPP).
+# Returns: None
+# Example: run_on_dunfell_arm "C"
 run_on_dunfell_arm() {
     pushd ${MY_DIR} > /dev/null
     run_git_clone "dunfell_arm" $1
@@ -439,6 +502,13 @@ run_on_dunfell_arm() {
     popd > /dev/null
 }
 
+# Function : run_on_vm_sync_linux
+# Description: This function git clones and builds ut-core on the sc docker with synchronized Linux environment.
+# Usage: run_on_vm_sync_linux <command>
+# Parameters:
+#   variant: The variant of the UT core (C or CPP).
+# Returns: None
+# Example: run_on_vm_sync_linux "C"
 run_on_vm_sync_linux() {
     pushd ${MY_DIR} > /dev/null
     run_git_clone "VM-SYNC" $1
@@ -453,6 +523,13 @@ run_on_vm_sync_linux() {
     popd > /dev/null
 }
 
+# Function : run_on_kirkstone_linux
+# Description: This function git clones and builds ut-core on the sc docker with Kirkstone Linux environment.
+# Usage: run_on_kirkstone_linux <command>
+# Parameters:
+#   variant: The variant of the UT core (C or CPP).
+# Returns: None
+# Example: run_on_kirkstone_linux "C"
 run_on_kirkstone_linux() {
     pushd ${MY_DIR} > /dev/null
     run_git_clone "kirkstone_linux" $1
@@ -467,6 +544,13 @@ run_on_kirkstone_linux() {
     popd > /dev/null
 }
 
+# Function : run_on_kirkstone_arm
+# Description: This function git clones and builds ut-core on the sc docker with Kirkstone ARM architecture.
+# Usage: run_on_kirkstone_arm <command>
+# Parameters:
+#   variant: The variant of the UT core (C or CPP).
+# Returns: None
+# Example: run_on_kirkstone_arm "C"
 run_on_kirkstone_arm() {
     pushd ${MY_DIR} > /dev/null
     run_git_clone "kirkstone_arm" $1
@@ -490,7 +574,6 @@ run_on_kirkstone_arm() {
 }
 
 # Run tests in different environments
-
 run_on_ubuntu_linux "C"
 run_on_dunfell_linux "C"
 run_on_kirkstone_linux "C"
@@ -505,5 +588,6 @@ run_on_vm_sync_linux "CPP"
 run_on_dunfell_arm "CPP"
 run_on_kirkstone_arm "CPP"
 
+# Print the results for C and CPP variants
 print_results "C"
 print_results "CPP"
