@@ -932,6 +932,86 @@ public:
         }
     }
 
+    void displayRunSummary()
+    {
+        const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
+        std::vector<TestSuiteInfo> &suites = UTTestRunner::suites;
+
+        int total_suites = unit_test.total_test_suite_count();
+        int disabled_suites = 0; // GoogleTest does not track disabled test suites directly
+
+        int total_tests = unit_test.total_test_count();
+        int failed_tests = unit_test.failed_test_count();
+        int disabled_tests = unit_test.disabled_test_count();
+        int skipped_tests = unit_test.skipped_test_count();
+        int passed_tests = total_tests - (failed_tests + disabled_tests + skipped_tests);
+
+        int total_asserts = 0;
+        int failed_asserts = 0;
+
+        // Iterate through test suites to gather assertion details
+        for (int i = 0; i < unit_test.total_test_suite_count(); ++i)
+        {
+            const ::testing::TestSuite *test_suite = unit_test.GetTestSuite(i);
+            if (test_suite)
+            {
+                total_asserts += test_suite->test_to_run_count();
+                failed_asserts += test_suite->failed_test_count();
+            }
+        }
+
+        int passed_asserts = total_asserts - failed_asserts;
+
+        for (size_t i = 0; i < suites.size(); ++i)
+        {
+            if (!suites[i].isActive)
+            {
+                ++disabled_suites;
+            }
+
+            for (size_t j = 0; j < suites[i].tests.size(); ++j)
+            {
+                if (!suites[i].tests[j].isActive)
+                {
+                    ++disabled_tests;
+                }
+            }
+        }
+
+        std::cout << "\n"
+                  << "Run Summary:"
+                  << std::setw(10) << "  Type"
+                  << std::setw(10) << "Total"
+                  << std::setw(10) << "Ran"
+                  << std::setw(10) << "Passed"
+                  << std::setw(10) << "Failed"
+                  << std::setw(10) << "Inactive"
+                  << std::setw(10) << "Skipped\n"
+                  << std::setw(24) << "Suites"
+                  << std::right << std::setw(9) << total_suites
+                  << std::right << std::setw(9) << total_suites - disabled_suites
+                  << std::right << std::setw(9) << "n/a"
+                  << std::right << std::setw(9) << "n/a"
+                  << std::right << std::setw(9) << disabled_suites
+                  << std::right << std::setw(9) << "n/a" << "\n"
+                  << std::setw(23) << "Tests"
+                  << std::right << std::setw(10) << total_tests
+                  << std::right << std::setw(9) << passed_tests + failed_tests + disabled_tests + skipped_tests
+                  << std::right << std::setw(9) << passed_tests
+                  << std::right << std::setw(9) << failed_tests
+                  << std::right << std::setw(9) << disabled_tests
+                  << std::right << std::setw(9) << skipped_tests << "\n"
+                  << std::setw(25) << "Asserts"
+                  << std::right << std::setw(8) << total_asserts
+                  << std::right << std::setw(9) << passed_asserts + failed_asserts
+                  << std::right << std::setw(9) << passed_asserts
+                  << std::right << std::setw(9) << failed_asserts
+                  << std::right << std::setw(9) << "n/a"
+                  << std::right << std::setw(9) << "n/a" << "\n"
+                  << "\n"
+                  << "Elapsed time = " << std::fixed << std::setprecision(3) << unit_test.elapsed_time() / 1000.0 << " seconds\n";
+    }
+
     /**
      * @brief Disables a test group by adding it to the disabledGroups set and removing it from the enabledGroups set.
      *
@@ -1153,6 +1233,7 @@ UT_status_t UT_run_tests()
             else if (choice == STRING_FORMAT("R")[0])
             {
                 testRunner.runTests();
+                testRunner.displayRunSummary();
             }
             else if (choice == STRING_FORMAT("Q")[0])
             {
@@ -1179,9 +1260,14 @@ UT_status_t UT_run_tests()
             }
         }
     }
+    else if (UT_get_test_mode() == UT_MODE_AUTOMATED)
+    {
+        testRunner.runTests();
+    }
     else
     {
         testRunner.runTests();
+        testRunner.displayRunSummary();
     }
 
     UT_LOG( UT_LOG_ASCII_GREEN "Logfile" UT_LOG_ASCII_NC ":[" UT_LOG_ASCII_YELLOW "%s" UT_LOG_ASCII_NC "]\n", UT_log_getLogFilename() );
