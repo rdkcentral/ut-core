@@ -110,7 +110,13 @@ run_git_clone(){
     UT_CNTRL_DIR=${MY_DIR}/$REPO_NAME-$environment-$variant
 
     if [ ! -z "$UT_CONTROL_BRANCH_NAME" ]; then
-        sed -i "108s|.*|    git checkout $UT_CONTROL_BRANCH_NAME|" build.sh
+        sed -i "120s|.*|    git checkout $UT_CONTROL_BRANCH_NAME|" build.sh
+        # the sed command ensures that the build.sh will check out the branch specified by the $UT_CONTROL_BRANCH_NAME variable during execution
+        # instead of the tagged version of the ut-control repository
+        # the line number 120 is the line number of the git checkout command in the build.sh file :
+        # https://github.com/rdkcentral/ut-core/blob/develop/build.sh#L120
+        # Also, the change only happens for the ut-core repository cloned for the test environment
+        # It ensures, that the "said" ut-control branch is checked out during the build process
     fi
 }
 
@@ -208,6 +214,9 @@ run_checks() {
     UT_CORE_BIN="build/bin/hal_test"
     UT_CORE_TEST_BIN="tests/build/bin/ut-test"
 
+    # Search for libcurl.a in /usr/
+    SYSTEM_CURL_LIB=$(find /usr/ -iname "libcurl.a" 2>/dev/null)
+
     echo -e "${RED}RESULTS for ${environment} ${NC}"
 
     current_branch=$(git branch | grep '\*' | sed 's/* //')
@@ -221,10 +230,20 @@ run_checks() {
     fi
 
     # Test for CURL static library
-    if [ -f "$CURL_STATIC_LIB" ]; then
-        echo -e "${GREEN}$CURL_STATIC_LIB exists. PASS${NC}"
+    if [[ -z "$SYSTEM_CURL_LIB" ]]; then
+        # For platforms where libcurl.a is not present in /usr/
+        if [ -f "$CURL_STATIC_LIB" ]; then
+            echo -e "${GREEN}$CURL_STATIC_LIB exists. PASS${NC}"
+        else
+            echo -e "${RED}CURL static lib does not exist. FAIL ${NC}"
+        fi
     else
-        echo -e "${RED}CURL static lib does not exist. FAIL ${NC}"
+        # For platforms where libcurl.a is present in /usr/
+        if [ -f "$CURL_STATIC_LIB" ]; then
+            echo -e "${RED}$CURL_STATIC_LIB exists. FAIL${NC}"
+        else
+            echo -e "${GREEN}CURL static lib does not exist. PASS ${NC}"
+        fi
     fi
 
     # Test for OpenSSL static library
