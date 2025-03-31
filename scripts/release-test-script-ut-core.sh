@@ -110,7 +110,7 @@ run_git_clone(){
     UT_CNTRL_DIR=${MY_DIR}/$REPO_NAME-$environment-$variant
 
     if [ ! -z "$UT_CONTROL_BRANCH_NAME" ]; then
-        sed -i "120s|.*|    git checkout $UT_CONTROL_BRANCH_NAME|" build.sh
+        sed -i "s|git checkout .* # MARKER:.*|git checkout $UT_CONTROL_BRANCH_NAME # MARKER: Branch=$UT_CONTROL_BRANCH_NAME|" build.sh
         # the sed command ensures that the build.sh will check out the branch specified by the $UT_CONTROL_BRANCH_NAME variable during execution
         # instead of the tagged version of the ut-control repository
         # the line number 120 is the line number of the git checkout command in the build.sh file :
