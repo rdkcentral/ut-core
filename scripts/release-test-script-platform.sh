@@ -178,6 +178,9 @@ run_checks() {
     HAL_BIN="ut/bin/hal_test"
     # CPP_STATIC_LIB="build/${architecture_type}/cpp_libs/lib/libgtest.a"
     # CPP_MAIN_STATIC_LIB="build/${architecture_type}/cpp_libs/lib/libgtest_main.a"
+
+    # Search for libcurl.a in /usr/
+    SYSTEM_CURL_LIB=$(find /usr/ -iname "libcurl.a" 2>/dev/null)
     
     echo -e "${RED}RESULTS for ${environment} ${NC}"
     
@@ -222,12 +225,31 @@ run_checks() {
     
     # Test for CURL static library
     if [[ "$environment" == "dunfell_linux" ]]; then
+        # special case is added for dunfell_linux as docker rdk-dunfell has libcurl.a in /usr/,
+        # hence its not built.
+        # However, when the script is run for printing results from systems without libcurl.a
+        # in /usr/, it will fail.
+        if [ -f "$CURL_STATIC_LIB" ]; then
+            echo -e "${RED}$CURL_STATIC_LIB exists. FAIL${NC}"
+        else
+            echo -e "${GREEN}CURL static lib does not exist. PASS ${NC}"
+        fi
+    elif [[ -z "$SYSTEM_CURL_LIB" && "$environment" == "ubuntu" ]]; then
+        # For ubuntu platforms where libcurl.a is not present in /usr/
+        if [ -f "$CURL_STATIC_LIB" ]; then
+            echo -e "${GREEN}$CURL_STATIC_LIB exists. PASS${NC}"
+        else
+            echo -e "${RED}CURL static lib does not exist. FAIL ${NC}"
+        fi
+    elif [[ -n "$SYSTEM_CURL_LIB" && "$environment" == "ubuntu" ]]; then
+        # For ubuntu platforms where libcurl.a is present in /usr/
         if [ -f "$CURL_STATIC_LIB" ]; then
             echo -e "${RED}$CURL_STATIC_LIB exists. FAIL${NC}"
         else
             echo -e "${GREEN}CURL static lib does not exist. PASS ${NC}"
         fi
     else
+        # For other platforms
         if [ -f "$CURL_STATIC_LIB" ]; then
             echo -e "${GREEN}$CURL_STATIC_LIB exists. PASS${NC}"
         else
