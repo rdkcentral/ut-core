@@ -187,6 +187,104 @@ run_make_with_logs_for_CPP() {
 export -f run_make_with_logs_for_C
 export -f run_make_with_logs_for_CPP
 
+# Function: check_curl_dunfell_linux
+# Description: This function checks the CURL static library for dunfell_linux.
+# Usage: check_curl_dunfell_linux <curl_static_lib>
+# Parameters:
+#   curl_static_lib: The path to the CURL static library.
+# Returns: None
+# Example: check_curl_dunfell_linux "framework/ut-control/build/linux/curl/lib/libcurl.a"
+check_curl_dunfell_linux() {
+    # We do not expect CURL static library to be rebuilt in dunfell_linux
+    local curl_static_lib="$1"
+
+    if [ -f "$curl_static_lib" ]; then
+        echo -e "${RED}$curl_static_lib exists. FAIL${NC}"
+    else
+        echo -e "${GREEN}CURL static lib does not exist. PASS${NC}"
+    fi
+}
+
+# Function: check_curl_ubuntu_no_system_lib
+# Description: This function checks the CURL static library for Ubuntu when libcurl.a is not in /usr/.
+# Usage: check_curl_ubuntu_no_system_lib <curl_static_lib>
+# Parameters:
+#   curl_static_lib: The path to the CURL static library.
+# Returns: None
+# Example: check_curl_ubuntu_no_system_lib "framework/ut-control/build/linux/curl/lib/libcurl.a"
+check_curl_ubuntu_no_system_lib() {
+    # We expect CURL static library to be rebuilt in ubuntu, as libcurl.a is not in /usr/
+    local curl_static_lib="$1"
+
+    if [ -f "$curl_static_lib" ]; then
+        echo -e "${GREEN}$curl_static_lib exists. PASS${NC}"
+    else
+        echo -e "${RED}CURL static lib does not exist. FAIL${NC}"
+    fi
+}
+
+# Function: check_curl_ubuntu_with_system_lib
+# Description: This function checks the CURL static library for Ubuntu when libcurl.a is in /usr/.
+# Usage: check_curl_ubuntu_with_system_lib <curl_static_lib>
+# Parameters:
+#   curl_static_lib: The path to the CURL static library.
+# Returns: None
+# Example: check_curl_ubuntu_with_system_lib "framework/ut-control/build/linux/curl/lib/libcurl.a"
+check_curl_ubuntu_with_system_lib() {
+    # We do not expect CURL static library to be rebuilt in ubuntu, as libcurl.a is in /usr/
+    local curl_static_lib="$1"
+
+    if [ -f "$curl_static_lib" ]; then
+        echo -e "${RED}$curl_static_lib exists. FAIL${NC}"
+    else
+        echo -e "${GREEN}CURL static lib does not exist. PASS${NC}"
+    fi
+}
+
+# Function: check_curl_other
+# Description: This function checks the CURL static library for other platforms.
+# Usage: check_curl_other <curl_static_lib>
+# Parameters:
+#   curl_static_lib: The path to the CURL static library.
+# Returns: None
+# Example: check_curl_other "framework/ut-control/build/linux/curl/lib/libcurl.a"
+check_curl_other() {
+    # We expect CURL static library to be rebuilt in all other platforms
+    local curl_static_lib="$1"
+
+    if [ -f "$curl_static_lib" ]; then
+        echo -e "${GREEN}$curl_static_lib exists. PASS${NC}"
+    else
+        echo -e "${RED}CURL static lib does not exist. FAIL${NC}"
+    fi
+}
+
+# Function: check_curl_library
+# Description: This function checks the CURL static library based on the environment.
+# Usage: check_curl_library <environment>
+# Parameters:
+#   environment: The environment in which the CURL static library is to be checked.
+# Returns: None
+# Example: check_curl_library "ubuntu"
+check_curl_library() {
+    local environment="$1"
+    local curl_static_lib="framework/ut-control/build/${architecture_type}/curl/lib/libcurl.a"
+    local system_curl_lib
+
+    system_curl_lib=$(find /usr/ -iname "libcurl.a" 2>/dev/null)
+
+    if [[ "$environment" == "dunfell_linux" ]]; then
+        check_curl_dunfell_linux "$curl_static_lib"
+    elif [[ -z "$system_curl_lib" && "$environment" == "ubuntu" ]]; then
+        check_curl_ubuntu_no_system_lib "$curl_static_lib"
+    elif [[ -n "$system_curl_lib" && "$environment" == "ubuntu" ]]; then
+        check_curl_ubuntu_with_system_lib "$curl_static_lib"
+    else
+        check_curl_other "$curl_static_lib"
+    fi
+}
+
+
 # Function: run_checks
 # Description: This function performs a series of checks to ensure the integrity and correctness
 #              of the release process for the UT core.
@@ -214,9 +312,6 @@ run_checks() {
     UT_CORE_BIN="build/bin/hal_test"
     UT_CORE_TEST_BIN="tests/build/bin/ut-test"
 
-    # Search for libcurl.a in /usr/
-    SYSTEM_CURL_LIB=$(find /usr/ -iname "libcurl.a" 2>/dev/null)
-
     echo -e "${RED}RESULTS for ${environment} ${NC}"
 
     current_branch=$(git branch | grep '\*' | sed 's/* //')
@@ -230,38 +325,7 @@ run_checks() {
     fi
 
     # Test for CURL static library
-    if [[ "$environment" == "dunfell_linux" ]]; then
-        # special case is added for dunfell_linux as docker rdk-dunfell has libcurl.a in /usr/,
-        # hence its not built.
-        # However, when the script is run for printing results from systems without libcurl.a
-        # in /usr/, it will fail.
-        if [ -f "$CURL_STATIC_LIB" ]; then
-            echo -e "${RED}$CURL_STATIC_LIB exists. FAIL${NC}"
-        else
-            echo -e "${GREEN}CURL static lib does not exist. PASS ${NC}"
-        fi
-    elif [[ -z "$SYSTEM_CURL_LIB" && "$environment" == "ubuntu" ]]; then
-        # For ubuntu platforms where libcurl.a is not present in /usr/
-        if [ -f "$CURL_STATIC_LIB" ]; then
-            echo -e "${GREEN}$CURL_STATIC_LIB exists. PASS${NC}"
-        else
-            echo -e "${RED}CURL static lib does not exist. FAIL ${NC}"
-        fi
-    elif [[ -n "$SYSTEM_CURL_LIB" && "$environment" == "ubuntu" ]]; then
-        # For ubuntu platforms where libcurl.a is present in /usr/
-        if [ -f "$CURL_STATIC_LIB" ]; then
-            echo -e "${RED}$CURL_STATIC_LIB exists. FAIL${NC}"
-        else
-            echo -e "${GREEN}CURL static lib does not exist. PASS ${NC}"
-        fi
-    else
-        # For other platforms
-        if [ -f "$CURL_STATIC_LIB" ]; then
-            echo -e "${GREEN}$CURL_STATIC_LIB exists. PASS${NC}"
-        else
-            echo -e "${RED}CURL static lib does not exist. FAIL ${NC}"
-        fi
-    fi
+    check_curl_library "$environment"
 
     # Test for OpenSSL static library
     if [[ "$environment" == "ubuntu" ]]; then

@@ -163,6 +163,104 @@ run_build(){
     fi
 }
 
+# Function: check_curl_library_dunfell_linux
+# Description: Check if CURL static library exists based on environment
+# Parameters:
+#   curl_static_lib: The path to the CURL static library
+# Returns: None
+# usage: check_curl_library_dunfell_linux "ut/ut-core/framework/ut-control/build/linux/curl/lib/libcurl.a"
+check_curl_library_dunfell_linux() {
+    # We do not expect CURL static library to be rebuilt in dunfell_linux
+    local curl_static_lib="$1"
+    if [ -f "$curl_static_lib" ]; then
+        echo -e "${RED}$curl_static_lib exists. FAIL${NC}"
+    else
+        echo -e "${GREEN}CURL static lib does not exist. PASS${NC}"
+    fi
+}
+
+# Function: check_curl_library_ubuntu_no_system_lib
+# Description: Check if CURL static library exists based on environment
+# Parameters:
+#   curl_static_lib: The path to the CURL static library
+# Returns: None
+# usage: check_curl_library_ubuntu_no_system_lib "ut/ut-core/framework/ut-control/build/linux/curl/lib/libcurl.a"
+check_curl_library_ubuntu_no_system_lib() {
+    # We expect CURL static library to be rebuilt in ubuntu, as libcurl.a is not in /usr/
+    local curl_static_lib="$1"
+    if [ -f "$curl_static_lib" ]; then
+        echo -e "${GREEN}$curl_static_lib exists. PASS${NC}"
+    else
+        echo -e "${RED}CURL static lib does not exist. FAIL${NC}"
+    fi
+}
+
+# Function: check_curl_library_ubuntu_with_system_lib
+# Description: Check if CURL static library exists based on environment
+# Parameters:
+#   curl_static_lib: The path to the CURL static library
+# Returns: None
+# usage: check_curl_library_ubuntu_with_system_lib "ut/ut-core/framework/ut-control/build/linux/curl/lib/libcurl.a"
+check_curl_library_ubuntu_with_system_lib() {
+    # We do not expect CURL static library to be rebuilt in ubuntu, as libcurl.a is in /usr/
+    local curl_static_lib="$1"
+    if [ -f "$curl_static_lib" ]; then
+        echo -e "${RED}$curl_static_lib exists. FAIL${NC}"
+    else
+        echo -e "${GREEN}CURL static lib does not exist. PASS${NC}"
+    fi
+}
+
+# Function: check_curl_library_other_platforms
+# Description: Check if CURL static library exists based on environment
+# Parameters:
+#   curl_static_lib: The path to the CURL static library
+# Returns: None
+# usage: check_curl_library_other_platforms "ut/ut-core/framework/ut-control/build/linux/curl/lib/libcurl.a"
+check_curl_library_other_platforms() {
+    # We expect CURL static library to be rebuilt in all other platforms
+    local curl_static_lib="$1"
+    if [ -f "$curl_static_lib" ]; then
+        echo -e "${GREEN}$curl_static_lib exists. PASS${NC}"
+    else
+        echo -e "${RED}CURL static lib does not exist. FAIL${NC}"
+    fi
+}
+
+# Function: check_curl_library
+# Description: Check if CURL static library exists based on environment
+# Parameters:
+#   environment: The environment to run the checks on
+#   curl_static_lib: The path to the CURL static library
+# Returns: None
+# usage: check_curl_library "ubuntu" "ut/ut-core/framework/ut-control/build/linux/curl/lib/libcurl.a"
+check_curl_library() {
+    local environment="$1"
+    local curl_static_lib="$2"
+    local system_curl_lib
+
+    system_curl_lib=$(find /usr/ -iname "libcurl.a" 2>/dev/null)
+
+    if [[ "$environment" == "dunfell_linux" ]]; then
+        check_curl_library_dunfell_linux "$curl_static_lib"
+    elif [[ -z "$system_curl_lib" && "$environment" == "ubuntu" ]]; then
+        check_curl_library_ubuntu_no_system_lib "$curl_static_lib"
+    elif [[ -n "$system_curl_lib" && "$environment" == "ubuntu" ]]; then
+        check_curl_library_ubuntu_with_system_lib "$curl_static_lib"
+    else
+        check_curl_library_other_platforms "$curl_static_lib"
+    fi
+}
+
+# Function: run_checks
+# Description: Run checks to verify the existence of different libraries
+# Parameters:
+#   environment: The environment to run the checks on
+#   architecture_type: The architecture type to run the checks on
+#   UT_CORE_BRANCH_NAME: The branch name of ut-core to check
+#   UT_CONTROL_BRANCH_NAME: The branch name of ut-control to check
+# Returns: None
+# usage: run_checks "ubuntu" "linux" "ut-core-branch-name" "ut-control-branch-name"
 run_checks() {
     # Parameters to be passed to the function
     environment=$1
@@ -224,38 +322,7 @@ run_checks() {
     fi
     
     # Test for CURL static library
-    if [[ "$environment" == "dunfell_linux" ]]; then
-        # special case is added for dunfell_linux as docker rdk-dunfell has libcurl.a in /usr/,
-        # hence its not built.
-        # However, when the script is run for printing results from systems without libcurl.a
-        # in /usr/, it will fail.
-        if [ -f "$CURL_STATIC_LIB" ]; then
-            echo -e "${RED}$CURL_STATIC_LIB exists. FAIL${NC}"
-        else
-            echo -e "${GREEN}CURL static lib does not exist. PASS ${NC}"
-        fi
-    elif [[ -z "$SYSTEM_CURL_LIB" && "$environment" == "ubuntu" ]]; then
-        # For ubuntu platforms where libcurl.a is not present in /usr/
-        if [ -f "$CURL_STATIC_LIB" ]; then
-            echo -e "${GREEN}$CURL_STATIC_LIB exists. PASS${NC}"
-        else
-            echo -e "${RED}CURL static lib does not exist. FAIL ${NC}"
-        fi
-    elif [[ -n "$SYSTEM_CURL_LIB" && "$environment" == "ubuntu" ]]; then
-        # For ubuntu platforms where libcurl.a is present in /usr/
-        if [ -f "$CURL_STATIC_LIB" ]; then
-            echo -e "${RED}$CURL_STATIC_LIB exists. FAIL${NC}"
-        else
-            echo -e "${GREEN}CURL static lib does not exist. PASS ${NC}"
-        fi
-    else
-        # For other platforms
-        if [ -f "$CURL_STATIC_LIB" ]; then
-            echo -e "${GREEN}$CURL_STATIC_LIB exists. PASS${NC}"
-        else
-            echo -e "${RED}CURL static lib does not exist. FAIL ${NC}"
-        fi
-    fi
+    check_curl_library "$environment" "$CURL_STATIC_LIB"
     
     # Test for OpenSSL static library
     if [[ "$environment" == "ubuntu" ]]; then
@@ -434,7 +501,7 @@ run_on_kirkstone_arm() {
     PLAT_DIR="${REPO_NAME}-kirkstone_arm"
     pushd ${PLAT_DIR} > /dev/null
     /bin/bash -c "sc docker run rdk-kirkstone 'cd /opt/toolchains/rdk-glibc-x86_64-arm-toolchain; \
-     . environment-setup-armv7at2hf-neon-oe-linux-gnueabi; env | grep CC; cd -; \
+     . environment-setup-armv7vet2hf-neon-oe-linux-gnueabi; env | grep CC; cd -; \
     $(declare -f run_build); run_build 'kirkstone_arm' 'arm' '$UT_CORE_BRANCH_NAME' '$UT_CONTROL_BRANCH_NAME';exit'"
     run_checks "kirkstone_arm" "arm" $UT_CORE_BRANCH_NAME $UT_CONTROL_BRANCH_NAME
     popd > /dev/null
