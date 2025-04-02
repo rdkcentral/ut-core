@@ -541,13 +541,22 @@ run_on_ubuntu_linux() {
 run_on_dunfell_linux() {
     pushd ${MY_DIR} > /dev/null
     run_git_clone "dunfell_linux" $1
-    if [ "$1" == "C" ]; then
-        echo "Running make for C variant"
-        /bin/bash -c "sc docker run rdk-dunfell 'make > make_log_C.txt 2>&1; make -C tests/ > make_test_log_C.txt 2>&1'"
-    elif [ "$1" == "CPP" ]; then
-        echo "Running make for CPP variant"
-        /bin/bash -c "sc docker run rdk-dunfell 'make VARIANT=CPP > make_log_CPP.txt 2>&1; make -C tests/ VARIANT=CPP > make_test_log_CPP.txt 2>&1'"
-    fi
+
+    run_make_variant() {
+        local VARIANT=$1
+        local LOG_SUFFIX=$2
+        echo "Running make for ${VARIANT} variant"
+        /bin/bash -c "sc docker run rdk-dunfell \
+        'make ${VARIANT} > make_log_${LOG_SUFFIX}.txt 2>&1; \
+        make -C tests/ ${VARIANT} > make_test_log_${LOG_SUFFIX}.txt 2>&1'"
+    }
+
+    case "$1" in
+        C) run_make_variant "" "C" ;;
+        CPP) run_make_variant "VARIANT=CPP" "CPP" ;;
+        *) echo "Invalid argument: $1"; exit 1 ;;
+    esac
+
     run_checks "dunfell_linux" "linux" $UT_CORE_BRANCH_NAME
     popd > /dev/null
 }
@@ -562,21 +571,24 @@ run_on_dunfell_linux() {
 run_on_dunfell_arm() {
     pushd ${MY_DIR} > /dev/null
     run_git_clone "dunfell_arm" $1
-    if [ "$1" == "C" ]; then
-        echo "Running make for C variant"
+
+    run_make_variant() {
+        local VARIANT=$1
+        local LOG_SUFFIX=$2
+        echo "Running make for ${VARIANT} variant"
         /bin/bash -c "sc docker run rdk-dunfell \
         '[ -z \"\$OECORE_TARGET_OS\" ] && source /opt/toolchains/rdk-glibc-x86_64-arm-toolchain/environment-setup-armv7at2hf-neon-oe-linux-gnueabi;\
-        echo $CC;\
-        make TARGET=arm > make_log_C.txt 2>&1; \
-        make -C tests/ TARGET=arm > make_test_log_C.txt 2>&1'"
-    elif [ "$1" == "CPP" ]; then
-        echo "Running make for CPP variant"
-        /bin/bash -c "sc docker run rdk-dunfell \
-        '[ -z \"\$OECORE_TARGET_OS\" ] && source /opt/toolchains/rdk-glibc-x86_64-arm-toolchain/environment-setup-armv7at2hf-neon-oe-linux-gnueabi;\
-        echo $CC;\
-        make TARGET=arm VARIANT=CPP > make_log_CPP.txt 2>&1;\
-        make -C tests/ TARGET=arm VARIANT=CPP > make_test_log_CPP.txt 2>&1'"
-    fi
+        echo \$CC;\
+        make TARGET=arm ${VARIANT} > make_log_${LOG_SUFFIX}.txt 2>&1; \
+        make -C tests/ TARGET=arm ${VARIANT} > make_test_log_${LOG_SUFFIX}.txt 2>&1'"
+    }
+
+    case "$1" in
+        C) run_make_variant "" "C" ;;
+        CPP) run_make_variant "VARIANT=CPP" "CPP" ;;
+        *) echo "Invalid argument: $1"; exit 1 ;;
+    esac
+
     run_checks "dunfell_arm" "arm" $UT_CORE_BRANCH_NAME
     popd > /dev/null
 }
@@ -591,13 +603,22 @@ run_on_dunfell_arm() {
 run_on_vm_sync_linux() {
     pushd ${MY_DIR} > /dev/null
     run_git_clone "VM-SYNC" $1
-    if [ "$1" == "C" ]; then
-        echo "Running make for C variant"
-        /bin/bash -c "sc docker run vm-sync 'make > make_log_C.txt 2>&1; make -C tests/ > make_test_log_C.txt 2>&1'"
-    elif [ "$1" == "CPP" ]; then
-        echo "Running make for CPP variant"
-        /bin/bash -c "sc docker run vm-sync 'make VARIANT=CPP > make_log_CPP.txt 2>&1; make -C tests/ VARIANT=CPP > make_test_log_CPP.txt 2>&1'"
-    fi
+
+    run_make_variant() {
+        local VARIANT=$1
+        local LOG_SUFFIX=$2
+        echo "Running make for ${VARIANT} variant"
+        /bin/bash -c "sc docker run vm-sync \
+        'make ${VARIANT} > make_log_${LOG_SUFFIX}.txt 2>&1; \
+        make -C tests/ ${VARIANT} > make_test_log_${LOG_SUFFIX}.txt 2>&1'"
+    }
+
+    case "$1" in
+        C) run_make_variant "" "C" ;;
+        CPP) run_make_variant "VARIANT=CPP" "CPP" ;;
+        *) echo "Invalid argument: $1"; exit 1 ;;
+    esac
+
     run_checks "VM-SYNC" "linux" $UT_CORE_BRANCH_NAME
     popd > /dev/null
 }
@@ -612,13 +633,22 @@ run_on_vm_sync_linux() {
 run_on_kirkstone_linux() {
     pushd ${MY_DIR} > /dev/null
     run_git_clone "kirkstone_linux" $1
-    if [ "$1" == "C" ]; then
-        echo "Running make for C variant"
-        /bin/bash -c "sc docker run rdk-kirkstone 'make > make_log_C.txt 2>&1; make -C tests/ > make_test_log_C.txt 2>&1'"
-    elif [ "$1" == "CPP" ]; then
-        echo "Running make for CPP variant"
-        /bin/bash -c "sc docker run rdk-kirkstone 'make VARIANT=CPP > make_log_CPP.txt 2>&1; make -C tests/ VARIANT=CPP > make_test_log_CPP.txt 2>&1'"
-    fi
+
+    run_make_variant() {
+        local VARIANT=$1
+        local LOG_SUFFIX=$2
+        echo "Running make for ${VARIANT} variant"
+        /bin/bash -c "sc docker run rdk-kirkstone \
+        'make ${VARIANT} > make_log_${LOG_SUFFIX}.txt 2>&1; \
+        make -C tests/ ${VARIANT} > make_test_log_${LOG_SUFFIX}.txt 2>&1'"
+    }
+
+    case "$1" in
+        C) run_make_variant "" "C" ;;
+        CPP) run_make_variant "VARIANT=CPP" "CPP" ;;
+        *) echo "Invalid argument: $1"; exit 1 ;;
+    esac
+
     run_checks "kirkstone_linux" "linux" $UT_CORE_BRANCH_NAME
     popd > /dev/null
 }
@@ -633,21 +663,24 @@ run_on_kirkstone_linux() {
 run_on_kirkstone_arm() {
     pushd ${MY_DIR} > /dev/null
     run_git_clone "kirkstone_arm" $1
-    if [ "$1" == "C" ]; then
-        echo "Running make for C variant"
+
+    run_make_variant() {
+        local VARIANT=$1
+        local LOG_SUFFIX=$2
+        echo "Running make for ${VARIANT} variant"
         /bin/bash -c "sc docker run rdk-kirkstone \
         '[ -z \"\$OECORE_TARGET_OS\" ] && source /opt/toolchains/rdk-glibc-x86_64-arm-toolchain/environment-setup-armv7vet2hf-neon-oe-linux-gnueabi;\
-        echo $CC;\
-        make TARGET=arm > make_log_C.txt 2>&1; \
-        make -C tests/ TARGET=arm > make_test_log_C.txt 2>&1'"
-    elif [ "$1" == "CPP" ]; then
-        echo "Running make for CPP variant"
-        /bin/bash -c "sc docker run rdk-kirkstone \
-        '[ -z \"\$OECORE_TARGET_OS\" ] && source /opt/toolchains/rdk-glibc-x86_64-arm-toolchain/environment-setup-armv7vet2hf-neon-oe-linux-gnueabi;\
-        echo $CC;\
-        make TARGET=arm VARIANT=CPP > make_log_CPP.txt 2>&1;\
-        make -C tests/ TARGET=arm VARIANT=CPP > make_test_log_CPP.txt 2>&1'"
-    fi
+        echo \$CC;\
+        make TARGET=arm ${VARIANT} > make_log_${LOG_SUFFIX}.txt 2>&1; \
+        make -C tests/ TARGET=arm ${VARIANT} > make_test_log_${LOG_SUFFIX}.txt 2>&1'"
+    }
+
+    case "$1" in
+        C) run_make_variant "" "C" ;;
+        CPP) run_make_variant "VARIANT=CPP" "CPP" ;;
+        *) echo "Invalid argument: $1"; exit 1 ;;
+    esac
+
     run_checks "kirkstone_arm" "arm" $UT_CORE_BRANCH_NAME
     popd > /dev/null
 }
