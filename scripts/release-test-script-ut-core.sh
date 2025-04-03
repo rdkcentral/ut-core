@@ -531,174 +531,58 @@ run_on_ubuntu_linux() {
     popd > /dev/null
 }
 
-# Function: run_on_dunfell_linux
-# Description: This function git clones and builds ut-core on a Dunfell Linux environment.
-# Usage: Call this function within the script to execute the defined operations on Dunfell Linux.
-# Parameters:
-#   variant: The variant of the UT core (C or CPP).
-# Returns: None
-# Example: run_on_dunfell_linux "C"
-run_on_dunfell_linux() {
+# Description: This function git clones and builds ut-core on a specified platform.
+run_on_platform() {
+    local PLATFORM=$1
+    local TARGET=$2
+    local VARIANT_FLAG=$3
+    local LOG_SUFFIX=$3
+
     pushd ${MY_DIR} > /dev/null
-    run_git_clone "dunfell_linux" $1
+    run_git_clone "${PLATFORM}_${TARGET}" "${VARIANT_FLAG}"
 
-    run_make_variant() {
-        local VARIANT=$1
-        local LOG_SUFFIX=$2
-        echo "Running make for ${VARIANT} variant"
-        /bin/bash -c "sc docker run rdk-dunfell \
-        'make ${VARIANT} > make_log_${LOG_SUFFIX}.txt 2>&1; \
-        make -C tests/ ${VARIANT} > make_test_log_${LOG_SUFFIX}.txt 2>&1'"
-    }
+    echo "Running make for ${PLATFORM}_${TARGET} (${VARIANT_FLAG}) variant"
 
-    case "$1" in
-        C) run_make_variant "" "C" ;;
-        CPP) run_make_variant "VARIANT=CPP" "CPP" ;;
-        *) echo "Invalid argument: $1"; exit 1 ;;
-    esac
+    local DOCKER_IMAGE="rdk-${PLATFORM}"
+    [[ "$PLATFORM" == "VM-SYNC" ]] && DOCKER_IMAGE="vm-sync"
 
-    run_checks "dunfell_linux" "linux" $UT_CORE_BRANCH_NAME
-    popd > /dev/null
-}
+    local TARGET_FLAG=""
+    [[ "$TARGET" == "arm" ]] && TARGET_FLAG="TARGET=arm"
 
-# Function : run_on_dunfell_arm
-# Description: This function git clones and builds ut-core on the sc docker with Dunfell ARM architecture.
-# Usage: run_on_dunfell_arm <command>
-# Parameters:
-#   variant: The variant of the UT core (C or CPP).
-# Returns: None
-# Example: run_on_dunfell_arm "C"
-run_on_dunfell_arm() {
-    pushd ${MY_DIR} > /dev/null
-    run_git_clone "dunfell_arm" $1
+    local ENV_SETUP=""
+    if [[ "$TARGET" == "arm" ]]; then
+        if [[ "$PLATFORM" == "dunfell" ]]; then
+            # For Dunfell ARM
+            ENV_SETUP='[ -z "$OECORE_TARGET_OS" ] && source /opt/toolchains/rdk-glibc-x86_64-arm-toolchain/environment-setup-armv7at2hf-neon-oe-linux-gnueabi;'
+        else
+            # For Kirkstone ARM
+            ENV_SETUP='[ -z "$OECORE_TARGET_OS" ] && source /opt/toolchains/rdk-glibc-x86_64-arm-toolchain/environment-setup-armv7vet2hf-neon-oe-linux-gnueabi;'
+        fi
+    fi
 
-    run_make_variant() {
-        local VARIANT=$1
-        local LOG_SUFFIX=$2
-        echo "Running make for ${VARIANT} variant"
-        /bin/bash -c "sc docker run rdk-dunfell \
-        '[ -z \"\$OECORE_TARGET_OS\" ] && source /opt/toolchains/rdk-glibc-x86_64-arm-toolchain/environment-setup-armv7at2hf-neon-oe-linux-gnueabi;\
-        echo \$CC;\
-        make TARGET=arm ${VARIANT} > make_log_${LOG_SUFFIX}.txt 2>&1; \
-        make -C tests/ TARGET=arm ${VARIANT} > make_test_log_${LOG_SUFFIX}.txt 2>&1'"
-    }
+    /bin/bash -c "sc docker run ${DOCKER_IMAGE} \
+    '${ENV_SETUP} echo \$CC; \
+    make ${TARGET_FLAG} VARIANT=${VARIANT_FLAG} > make_log_${LOG_SUFFIX}.txt 2>&1; \
+    make -C tests/ ${TARGET_FLAG} VARIANT=${VARIANT_FLAG} > make_test_log_${LOG_SUFFIX}.txt 2>&1'"
 
-    case "$1" in
-        C) run_make_variant "" "C" ;;
-        CPP) run_make_variant "VARIANT=CPP" "CPP" ;;
-        *) echo "Invalid argument: $1"; exit 1 ;;
-    esac
-
-    run_checks "dunfell_arm" "arm" $UT_CORE_BRANCH_NAME
-    popd > /dev/null
-}
-
-# Function : run_on_vm_sync_linux
-# Description: This function git clones and builds ut-core on the sc docker with synchronized Linux environment.
-# Usage: run_on_vm_sync_linux <command>
-# Parameters:
-#   variant: The variant of the UT core (C or CPP).
-# Returns: None
-# Example: run_on_vm_sync_linux "C"
-run_on_vm_sync_linux() {
-    pushd ${MY_DIR} > /dev/null
-    run_git_clone "VM-SYNC" $1
-
-    run_make_variant() {
-        local VARIANT=$1
-        local LOG_SUFFIX=$2
-        echo "Running make for ${VARIANT} variant"
-        /bin/bash -c "sc docker run vm-sync \
-        'make ${VARIANT} > make_log_${LOG_SUFFIX}.txt 2>&1; \
-        make -C tests/ ${VARIANT} > make_test_log_${LOG_SUFFIX}.txt 2>&1'"
-    }
-
-    case "$1" in
-        C) run_make_variant "" "C" ;;
-        CPP) run_make_variant "VARIANT=CPP" "CPP" ;;
-        *) echo "Invalid argument: $1"; exit 1 ;;
-    esac
-
-    run_checks "VM-SYNC" "linux" $UT_CORE_BRANCH_NAME
-    popd > /dev/null
-}
-
-# Function : run_on_kirkstone_linux
-# Description: This function git clones and builds ut-core on the sc docker with Kirkstone Linux environment.
-# Usage: run_on_kirkstone_linux <command>
-# Parameters:
-#   variant: The variant of the UT core (C or CPP).
-# Returns: None
-# Example: run_on_kirkstone_linux "C"
-run_on_kirkstone_linux() {
-    pushd ${MY_DIR} > /dev/null
-    run_git_clone "kirkstone_linux" $1
-
-    run_make_variant() {
-        local VARIANT=$1
-        local LOG_SUFFIX=$2
-        echo "Running make for ${VARIANT} variant"
-        /bin/bash -c "sc docker run rdk-kirkstone \
-        'make ${VARIANT} > make_log_${LOG_SUFFIX}.txt 2>&1; \
-        make -C tests/ ${VARIANT} > make_test_log_${LOG_SUFFIX}.txt 2>&1'"
-    }
-
-    case "$1" in
-        C) run_make_variant "" "C" ;;
-        CPP) run_make_variant "VARIANT=CPP" "CPP" ;;
-        *) echo "Invalid argument: $1"; exit 1 ;;
-    esac
-
-    run_checks "kirkstone_linux" "linux" $UT_CORE_BRANCH_NAME
-    popd > /dev/null
-}
-
-# Function : run_on_kirkstone_arm
-# Description: This function git clones and builds ut-core on the sc docker with Kirkstone ARM architecture.
-# Usage: run_on_kirkstone_arm <command>
-# Parameters:
-#   variant: The variant of the UT core (C or CPP).
-# Returns: None
-# Example: run_on_kirkstone_arm "C"
-run_on_kirkstone_arm() {
-    pushd ${MY_DIR} > /dev/null
-    run_git_clone "kirkstone_arm" $1
-
-    run_make_variant() {
-        local VARIANT=$1
-        local LOG_SUFFIX=$2
-        echo "Running make for ${VARIANT} variant"
-        /bin/bash -c "sc docker run rdk-kirkstone \
-        '[ -z \"\$OECORE_TARGET_OS\" ] && source /opt/toolchains/rdk-glibc-x86_64-arm-toolchain/environment-setup-armv7vet2hf-neon-oe-linux-gnueabi;\
-        echo \$CC;\
-        make TARGET=arm ${VARIANT} > make_log_${LOG_SUFFIX}.txt 2>&1; \
-        make -C tests/ TARGET=arm ${VARIANT} > make_test_log_${LOG_SUFFIX}.txt 2>&1'"
-    }
-
-    case "$1" in
-        C) run_make_variant "" "C" ;;
-        CPP) run_make_variant "VARIANT=CPP" "CPP" ;;
-        *) echo "Invalid argument: $1"; exit 1 ;;
-    esac
-
-    run_checks "kirkstone_arm" "arm" $UT_CORE_BRANCH_NAME
+    run_checks "${PLATFORM}_${TARGET}" "${TARGET}" $UT_CORE_BRANCH_NAME
     popd > /dev/null
 }
 
 # Run tests in different environments
 run_on_ubuntu_linux "C"
-run_on_dunfell_linux "C"
-run_on_kirkstone_linux "C"
-run_on_vm_sync_linux "C"
-run_on_dunfell_arm "C"
-run_on_kirkstone_arm "C"
+run_on_platform "dunfell" "linux" "C"
+run_on_platform "kirkstone" "linux" "C"
+run_on_platform "VM-SYNC" "linux" "C"
+run_on_platform "dunfell" "arm" "C"
+run_on_platform "kirkstone" "arm" "C"
 
 run_on_ubuntu_linux "CPP"
-run_on_dunfell_linux "CPP"
-run_on_kirkstone_linux "CPP"
-run_on_vm_sync_linux "CPP"
-run_on_dunfell_arm "CPP"
-run_on_kirkstone_arm "CPP"
+run_on_platform "dunfell" "linux" "CPP"
+run_on_platform "kirkstone" "linux" "CPP"
+un_on_platform "VM-SYNC" "linux" "CPP"
+run_on_platform "dunfell" "arm" "CPP"
+run_on_platform "kirkstone" "arm" "CPP"
 
 # Print the results for C and CPP variants
 print_results "C"
