@@ -555,7 +555,7 @@ static void list_tests(CU_pSuite pSuite)
   /* only number of tests can change between calls */
   width[0] = CU_number_width(pSuite->uiNumberOfTests) + 1;
   if (0 == width[1]) {
-    width[1] = 34;
+    width[1] = UT_MAX_LENGTH_TEST_NAME_DISPLAYED;
     width[2] = CU_MAX(strlen(_("Active?")), CU_MAX(f_yes_width, f_no_width)) + 1;
   }
 
