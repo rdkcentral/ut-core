@@ -110,7 +110,13 @@ run_git_clone(){
     UT_CNTRL_DIR=${MY_DIR}/$REPO_NAME-$environment-$variant
 
     if [ ! -z "$UT_CONTROL_BRANCH_NAME" ]; then
-        sed -i "108s|.*|    git checkout $UT_CONTROL_BRANCH_NAME|" build.sh
+        sed -i "s|git checkout .* # MARKER:.*|git checkout $UT_CONTROL_BRANCH_NAME # MARKER: Branch=$UT_CONTROL_BRANCH_NAME|" build.sh
+        # the sed command ensures that the build.sh will check out the branch specified by the $UT_CONTROL_BRANCH_NAME variable during execution
+        # instead of the tagged version of the ut-control repository
+        # the line number 120 is the line number of the git checkout command in the build.sh file :
+        # https://github.com/rdkcentral/ut-core/blob/develop/build.sh#L120
+        # Also, the change only happens for the ut-core repository cloned for the test environment
+        # It ensures, that the "said" ut-control branch is checked out during the build process
     fi
 }
 
@@ -181,17 +187,94 @@ run_make_with_logs_for_CPP() {
 export -f run_make_with_logs_for_C
 export -f run_make_with_logs_for_CPP
 
-# Function: run_checks
-# Description: This function performs a series of checks to ensure the integrity and correctness
-#              of the release process for the UT core.
-# Usage: Call this function to run the checks for the UT core.
-# Parameters:
-#   environment: The environment in which the checks are to be performed.
-#   architecture_type: The architecture type of the environment.
-#   UT_CORE_BRANCH_NAME: The branch name of the UT core repository.
-#   variant: The variant of the UT core (C or CPP).
-# Returns: None
-# Example: run_checks "ubuntu" "linux" "master" "C"
+# Description: This function validates the CURL static library for dunfell_linux.
+validate_curl_dunfell_linux() {
+    # We do not expect CURL static library to be rebuilt in dunfell_linux
+    local curl_static_lib="$1"
+    local environment="$2"
+
+    if [[ "$environment" == "dunfell_linux" ]]; then
+        if [ -f "$curl_static_lib" ]; then
+            echo -e "${RED}$curl_static_lib exists. FAIL${NC}"
+        else
+            echo -e "${GREEN}CURL static lib does not exist. PASS${NC}"
+        fi
+    fi
+}
+
+# Description: This function validates the CURL static library for Ubuntu when libcurl.a is not in /usr/.
+validate_curl_ubuntu_no_system_lib() {
+    # We expect CURL static library to be rebuilt in ubuntu, as libcurl.a is not in /usr/
+    local curl_static_lib="$1"
+    local environment="$2"
+    local system_curl_lib="$3"
+
+    if [[ -z "$system_curl_lib" && "$environment" == "ubuntu" ]]; then
+        if [ -f "$curl_static_lib" ]; then
+            echo -e "${GREEN}$curl_static_lib exists. PASS${NC}"
+        else
+            echo -e "${RED}CURL static lib does not exist. FAIL${NC}"
+        fi
+    fi
+}
+
+# Description: This function validates the CURL static library for Ubuntu when libcurl.a is in /usr/.
+validate_curl_ubuntu_with_system_lib() {
+    # We do not expect CURL static library to be rebuilt in ubuntu, as libcurl.a is in /usr/
+    local curl_static_lib="$1"
+    local environment="$2"
+    local system_curl_lib="$3"
+
+    if [[ -n "$system_curl_lib" && "$environment" == "ubuntu" ]]; then
+        if [ -f "$curl_static_lib" ]; then
+            echo -e "${RED}$curl_static_lib exists. FAIL${NC}"
+        else
+            echo -e "${GREEN}CURL static lib does not exist. PASS${NC}"
+        fi
+    fi
+}
+
+
+# Description: This function validates the CURL static library for other platforms.
+validate_curl_all_other_platforms() {
+    # We expect CURL static library to be rebuilt in all other platforms
+    local curl_static_lib="$1"
+    local environment="$2"
+
+    if [[ "$environment" != "dunfell_linux" && "$environment" != "ubuntu" ]]; then
+        if [ -f "$curl_static_lib" ]; then
+            echo -e "${GREEN}$curl_static_lib exists. PASS${NC}"
+        else
+            echo -e "${RED}CURL static lib does not exist. FAIL${NC}"
+        fi
+    fi
+}
+
+
+# Description: This function validates the CURL static library based on the environment.
+validate_curl_library_created_correctly() {
+    local environment="$1"
+    local curl_static_lib="framework/ut-control/build/${architecture_type}/curl/lib/libcurl.a"
+    local system_curl_lib
+
+    system_curl_lib=$(find /usr/ -iname "libcurl.a" 2>/dev/null)
+
+    # Validate and print results for CURL static library for dunfell_linux
+    validate_curl_dunfell_linux "$curl_static_lib" "$environment"
+
+    # Validate and print results for CURL static library for ubuntu when libcurl.a is not in /usr/
+    validate_curl_ubuntu_no_system_lib "$curl_static_lib" "$environment" "$system_curl_lib"
+
+    # Validate and print results for CURL static library for ubuntu when libcurl.a is in /usr/
+    validate_curl_ubuntu_with_system_lib "$curl_static_lib" "$environment" "$system_curl_lib"
+
+    # Validate and print results for CURL static library for all other platforms
+    validate_curl_all_other_platforms "$curl_static_lib" "$environment"
+}
+
+
+
+# Description: This function performs a series of validations to ensure the build is successful or not.
 run_checks() {
     # Parameters to be passed to the function
     environment=$1
@@ -221,11 +304,7 @@ run_checks() {
     fi
 
     # Test for CURL static library
-    if [ -f "$CURL_STATIC_LIB" ]; then
-        echo -e "${GREEN}$CURL_STATIC_LIB exists. PASS${NC}"
-    else
-        echo -e "${RED}CURL static lib does not exist. FAIL ${NC}"
-    fi
+    validate_curl_library_created_correctly "$environment"
 
     # Test for OpenSSL static library
     if [[ "$environment" == "ubuntu" ]]; then
@@ -452,141 +531,58 @@ run_on_ubuntu_linux() {
     popd > /dev/null
 }
 
-# Function: run_on_dunfell_linux
-# Description: This function git clones and builds ut-core on a Dunfell Linux environment.
-# Usage: Call this function within the script to execute the defined operations on Dunfell Linux.
-# Parameters:
-#   variant: The variant of the UT core (C or CPP).
-# Returns: None
-# Example: run_on_dunfell_linux "C"
-run_on_dunfell_linux() {
-    pushd ${MY_DIR} > /dev/null
-    run_git_clone "dunfell_linux" $1
-    if [ "$1" == "C" ]; then
-        echo "Running make for C variant"
-        /bin/bash -c "sc docker run rdk-dunfell 'make > make_log_C.txt 2>&1; make -C tests/ > make_test_log_C.txt 2>&1'"
-    elif [ "$1" == "CPP" ]; then
-        echo "Running make for CPP variant"
-        /bin/bash -c "sc docker run rdk-dunfell 'make VARIANT=CPP > make_log_CPP.txt 2>&1; make -C tests/ VARIANT=CPP > make_test_log_CPP.txt 2>&1'"
-    fi
-    run_checks "dunfell_linux" "linux" $UT_CORE_BRANCH_NAME
-    popd > /dev/null
-}
+# Description: This function git clones and builds ut-core on a specified platform.
+run_on_platform() {
+    local PLATFORM=$1
+    local TARGET=$2
+    local VARIANT_FLAG=$3
+    local LOG_SUFFIX=$3
 
-# Function : run_on_dunfell_arm
-# Description: This function git clones and builds ut-core on the sc docker with Dunfell ARM architecture.
-# Usage: run_on_dunfell_arm <command>
-# Parameters:
-#   variant: The variant of the UT core (C or CPP).
-# Returns: None
-# Example: run_on_dunfell_arm "C"
-run_on_dunfell_arm() {
     pushd ${MY_DIR} > /dev/null
-    run_git_clone "dunfell_arm" $1
-    if [ "$1" == "C" ]; then
-        echo "Running make for C variant"
-        /bin/bash -c "sc docker run rdk-dunfell \
-        'source /opt/toolchains/rdk-glibc-x86_64-arm-toolchain/environment-setup-armv7at2hf-neon-oe-linux-gnueabi;\
-        echo $CC;\
-        make TARGET=arm > make_log_C.txt 2>&1; \
-        make -C tests/ TARGET=arm > make_test_log_C.txt 2>&1'"
-    elif [ "$1" == "CPP" ]; then
-        echo "Running make for CPP variant"
-        /bin/bash -c "sc docker run rdk-dunfell \
-        'source /opt/toolchains/rdk-glibc-x86_64-arm-toolchain/environment-setup-armv7at2hf-neon-oe-linux-gnueabi;\
-        echo $CC;\
-        make TARGET=arm VARIANT=CPP > make_log_CPP.txt 2>&1;\
-        make -C tests/ TARGET=arm VARIANT=CPP > make_test_log_CPP.txt 2>&1'"
-    fi
-    run_checks "dunfell_arm" "arm" $UT_CORE_BRANCH_NAME
-    popd > /dev/null
-}
+    run_git_clone "${PLATFORM}_${TARGET}" "${VARIANT_FLAG}"
 
-# Function : run_on_vm_sync_linux
-# Description: This function git clones and builds ut-core on the sc docker with synchronized Linux environment.
-# Usage: run_on_vm_sync_linux <command>
-# Parameters:
-#   variant: The variant of the UT core (C or CPP).
-# Returns: None
-# Example: run_on_vm_sync_linux "C"
-run_on_vm_sync_linux() {
-    pushd ${MY_DIR} > /dev/null
-    run_git_clone "VM-SYNC" $1
-    if [ "$1" == "C" ]; then
-        echo "Running make for C variant"
-        /bin/bash -c "sc docker run vm-sync 'make > make_log_C.txt 2>&1; make -C tests/ > make_test_log_C.txt 2>&1'"
-    elif [ "$1" == "CPP" ]; then
-        echo "Running make for CPP variant"
-        /bin/bash -c "sc docker run vm-sync 'make VARIANT=CPP > make_log_CPP.txt 2>&1; make -C tests/ VARIANT=CPP > make_test_log_CPP.txt 2>&1'"
-    fi
-    run_checks "VM-SYNC" "linux" $UT_CORE_BRANCH_NAME
-    popd > /dev/null
-}
+    echo "Running make for ${PLATFORM}_${TARGET} (${VARIANT_FLAG}) variant"
 
-# Function : run_on_kirkstone_linux
-# Description: This function git clones and builds ut-core on the sc docker with Kirkstone Linux environment.
-# Usage: run_on_kirkstone_linux <command>
-# Parameters:
-#   variant: The variant of the UT core (C or CPP).
-# Returns: None
-# Example: run_on_kirkstone_linux "C"
-run_on_kirkstone_linux() {
-    pushd ${MY_DIR} > /dev/null
-    run_git_clone "kirkstone_linux" $1
-    if [ "$1" == "C" ]; then
-        echo "Running make for C variant"
-        /bin/bash -c "sc docker run rdk-kirkstone 'make > make_log_C.txt 2>&1; make -C tests/ > make_test_log_C.txt 2>&1'"
-    elif [ "$1" == "CPP" ]; then
-        echo "Running make for CPP variant"
-        /bin/bash -c "sc docker run rdk-kirkstone 'make VARIANT=CPP > make_log_CPP.txt 2>&1; make -C tests/ VARIANT=CPP > make_test_log_CPP.txt 2>&1'"
-    fi
-    run_checks "kirkstone_linux" "linux" $UT_CORE_BRANCH_NAME
-    popd > /dev/null
-}
+    local DOCKER_IMAGE="rdk-${PLATFORM}"
+    [[ "$PLATFORM" == "VM-SYNC" ]] && DOCKER_IMAGE="vm-sync"
 
-# Function : run_on_kirkstone_arm
-# Description: This function git clones and builds ut-core on the sc docker with Kirkstone ARM architecture.
-# Usage: run_on_kirkstone_arm <command>
-# Parameters:
-#   variant: The variant of the UT core (C or CPP).
-# Returns: None
-# Example: run_on_kirkstone_arm "C"
-run_on_kirkstone_arm() {
-    pushd ${MY_DIR} > /dev/null
-    run_git_clone "kirkstone_arm" $1
-    if [ "$1" == "C" ]; then
-        echo "Running make for C variant"
-        /bin/bash -c "sc docker run rdk-kirkstone \
-        'source /opt/toolchains/rdk-glibc-x86_64-arm-toolchain/environment-setup-armv7vet2hf-neon-oe-linux-gnueabi;\
-        echo $CC;\
-        make TARGET=arm > make_log_C.txt 2>&1; \
-        make -C tests/ TARGET=arm > make_test_log_C.txt 2>&1'"
-    elif [ "$1" == "CPP" ]; then
-        echo "Running make for CPP variant"
-        /bin/bash -c "sc docker run rdk-kirkstone \
-        'source /opt/toolchains/rdk-glibc-x86_64-arm-toolchain/environment-setup-armv7vet2hf-neon-oe-linux-gnueabi;\
-        echo $CC;\
-        make TARGET=arm VARIANT=CPP > make_log_CPP.txt 2>&1;\
-        make -C tests/ TARGET=arm VARIANT=CPP > make_test_log_CPP.txt 2>&1'"
+    local TARGET_FLAG=""
+    [[ "$TARGET" == "arm" ]] && TARGET_FLAG="TARGET=arm"
+
+    local ENV_SETUP=""
+    if [[ "$TARGET" == "arm" ]]; then
+        if [[ "$PLATFORM" == "dunfell" ]]; then
+            # For Dunfell ARM
+            ENV_SETUP='[ -z "$OECORE_TARGET_OS" ] && source /opt/toolchains/rdk-glibc-x86_64-arm-toolchain/environment-setup-armv7at2hf-neon-oe-linux-gnueabi;'
+        else
+            # For Kirkstone ARM
+            ENV_SETUP='[ -z "$OECORE_TARGET_OS" ] && source /opt/toolchains/rdk-glibc-x86_64-arm-toolchain/environment-setup-armv7vet2hf-neon-oe-linux-gnueabi;'
+        fi
     fi
-    run_checks "kirkstone_arm" "arm" $UT_CORE_BRANCH_NAME
+
+    /bin/bash -c "sc docker run ${DOCKER_IMAGE} \
+    '${ENV_SETUP} echo \$CC; \
+    make ${TARGET_FLAG} VARIANT=${VARIANT_FLAG} > make_log_${LOG_SUFFIX}.txt 2>&1; \
+    make -C tests/ ${TARGET_FLAG} VARIANT=${VARIANT_FLAG} > make_test_log_${LOG_SUFFIX}.txt 2>&1'"
+
+    run_checks "${PLATFORM}_${TARGET}" "${TARGET}" $UT_CORE_BRANCH_NAME
     popd > /dev/null
 }
 
 # Run tests in different environments
 run_on_ubuntu_linux "C"
-run_on_dunfell_linux "C"
-run_on_kirkstone_linux "C"
-run_on_vm_sync_linux "C"
-run_on_dunfell_arm "C"
-run_on_kirkstone_arm "C"
+run_on_platform "dunfell" "linux" "C"
+run_on_platform "kirkstone" "linux" "C"
+run_on_platform "VM-SYNC" "linux" "C"
+run_on_platform "dunfell" "arm" "C"
+run_on_platform "kirkstone" "arm" "C"
 
 run_on_ubuntu_linux "CPP"
-run_on_dunfell_linux "CPP"
-run_on_kirkstone_linux "CPP"
-run_on_vm_sync_linux "CPP"
-run_on_dunfell_arm "CPP"
-run_on_kirkstone_arm "CPP"
+run_on_platform "dunfell" "linux" "CPP"
+run_on_platform "kirkstone" "linux" "CPP"
+un_on_platform "VM-SYNC" "linux" "CPP"
+run_on_platform "dunfell" "arm" "CPP"
+run_on_platform "kirkstone" "arm" "CPP"
 
 # Print the results for C and CPP variants
 print_results "C"
