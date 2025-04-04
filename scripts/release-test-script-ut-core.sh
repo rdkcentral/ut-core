@@ -457,7 +457,7 @@ print_results() {
     popd > /dev/null
 
     #Results for VM_SYNC
-    PLAT_DIR="${REPO_NAME}-VM-SYNC-$1"
+    PLAT_DIR="${REPO_NAME}-VM-SYNC_linux-$1"
     pushd ${PLAT_DIR} > /dev/null
     run_checks "VM-SYNC" "linux" $UT_CORE_BRANCH_NAME $1
     popd > /dev/null
@@ -580,7 +580,7 @@ run_on_platform "kirkstone" "arm" "C"
 run_on_ubuntu_linux "CPP"
 run_on_platform "dunfell" "linux" "CPP"
 run_on_platform "kirkstone" "linux" "CPP"
-un_on_platform "VM-SYNC" "linux" "CPP"
+run_on_platform "VM-SYNC" "linux" "CPP"
 run_on_platform "dunfell" "arm" "CPP"
 run_on_platform "kirkstone" "arm" "CPP"
 
