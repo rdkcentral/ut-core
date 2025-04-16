@@ -89,77 +89,88 @@ run_git_clone(){
     
 }
 
-run_build(){
+# Function to run the build process
+run_build() {
     local environment="$1"
     local target="$2"
     local UT_CORE_BRANCH_NAME="$3"
     local UT_CONTROL_BRANCH_NAME="$4"
+
     echo "environment=$environment"
     echo "target=$target"
     echo "UT_CORE_BRANCH_NAME=$UT_CORE_BRANCH_NAME"
-    
+    echo "REPO_NAME-$environment=$REPO_NAME-$environment"
+
+    error_exit() {
+        echo "[ERROR] $1"
+        exit 1
+    }
+
     if [ ! -z "$UT_CORE_BRANCH_NAME" ]; then
-        #command to run for downloading ut/
-        command_to_run="./build_ut.sh TARGET=$target > build_log_temp.txt 2>&1"
-        echo -e "${GREEN}command_to_run = $command_to_run${NC}"
-        #($command_to_run) &
-        eval "$command_to_run &"
+        cd $REPO_NAME-$environment
+        echo "Directory: $PWD"
+        # Just run it in background directly
+        ./build_ut.sh TARGET=$target > $PWD/build_log_temp.txt 2>&1 &
         command_pid=$!
-        
-        
-        # Check if the command started successfully
-        # if [ -z "$command_pid" ]; then
-        #     error_exit "Failed to start the command."
-        # fi
-        
         echo "Started command with PID $command_pid"
-        
-        # Wait for the specified time
         sleep 10
-        
-        # Stop the command
-        kill -9 "$command_pid" || error_exit "Failed to stop the command."
-        
-        sleep 10
-        
-        # switch ut-core to ut_core_branch_name
-        # echo "UT_CORE_BRANCH_NAME = $UT_CORE_BRANCH_NAME"
-        # sed -i "62s|.*|    git checkout $UT_CORE_BRANCH_NAME|" ut/build.sh
-        # sleep 5
-        # rm -rf ut/ut-core || error_exit "Failed to remove ut-core"
-        # sleep 5
+        kill -9 "$command_pid" || echo "Warning: Could not kill process $command_pid (might have finished)"
+        sleep 5
 
         if [ ! -z "$UT_CONTROL_BRANCH_NAME" ]; then
-            cd ut/ut-core
-            git checkout $UT_CORE_BRANCH_NAME
+            cd ut/ut-core || error_exit "ut-core not found"
+            git checkout "$UT_CORE_BRANCH_NAME"
             git pull
             cd -
 
-            cd ut/ut-core/framework/ut-control
-            git checkout $UT_CONTROL_BRANCH_NAME
+            cd ut/ut-core/framework/ut-control || error_exit "ut-control not found"
+            git checkout "$UT_CONTROL_BRANCH_NAME"
             git pull
             cd -
+
             rm -rf ut/build/ ut/ut-core/framework/ut-control/build/ ut/ut-core/framework/ut-control/framework/ ut/ut-core/framework/ut-control/host-tools/
         else
-	    # switch ut-core to ut_core_branch_name
             echo "UT_CORE_BRANCH_NAME = $UT_CORE_BRANCH_NAME"
-            sed -i "62s|.*|    git checkout $UT_CORE_BRANCH_NAME|" ut/build.sh
+            sed -i "s| git checkout .*|    git checkout $UT_CORE_BRANCH_NAME # MARKER: Branch=$UT_CORE_BRANCH_NAME|" ut/build.sh || error_exit "sed failed"
             sleep 5
-            rm -rf ut/ut-core || error_exit "Failed to remove ut-core"
+            chmod -R +w ut/ut-core 2>/dev/null
+
+            # Retry mechanism for stubborn directories
+            MAX_ATTEMPTS=5
+            ATTEMPT=1
+            while [ -d "ut/ut-core" ] && [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+                rm -rf ut/ut-core 2>/dev/null
+                if [ -d "ut/ut-core" ]; then
+                    echo "[WARN] ut-core not fully removed. Retrying ($ATTEMPT/$MAX_ATTEMPTS)..."
+                    sleep 1
+                fi
+                ATTEMPT=$((ATTEMPT+1))
+            done
+
+            # Final check
+            if [ -d "ut/ut-core" ]; then
+                echo "[ERROR] Failed to remove ut-core after $MAX_ATTEMPTS attempts."
+                exit 1
+            fi
+
             sleep 5
-	fi
-
-
+        fi
     fi
-    
-    echo -e "${YELLOW}You may also tail the output in another shell using ${NC}"
-    echo -e "${MAGENTA}tail -f 100 $PWD/build_log.txt ${NC}"
-    ./build_ut.sh TARGET="$target" | tee build_log.txt 2>&1
-    
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}Build command executed successfully.${NC}"
-    else
-        echo -e "${RED}Build command failed. Check the logs in build_log.txt${NC}"
+
+    echo "You may also tail the output in another shell using:"
+    echo "tail -f 100 $PWD/build_log.txt"
+
+    if [ ! -f ./build_ut.sh ]; then
+        error_exit "./build_ut.sh not found"
+    fi
+
+    if [ "$environment" = "ubuntu" ] && [ "$target" = "linux" ]; then
+        ./build_ut.sh TARGET="$target" | tee "$PWD/build_log.txt" 2>&1
+        if [ $? -eq 0 ]; then
+            echo "Build command executed successfully."
+        else
+            echo "[ERROR] Build command failed. Check build_log.txt"
+        fi
     fi
 }
 
@@ -246,15 +257,7 @@ validate_curl_library_created_correctly() {
     validate_curl_library_other_platforms "$curl_static_lib" "$environment"
 }
 
-# Function: run_checks
-# Description: Run checks to verify the existence of different libraries
-# Parameters:
-#   environment: The environment to run the checks on
-#   architecture_type: The architecture type to run the checks on
-#   UT_CORE_BRANCH_NAME: The branch name of ut-core to check
-#   UT_CONTROL_BRANCH_NAME: The branch name of ut-control to check
-# Returns: None
-# usage: run_checks "ubuntu" "linux" "ut-core-branch-name" "ut-control-branch-name"
+# This function runs the checks for the build process
 run_checks() {
     # Parameters to be passed to the function
     environment=$1
@@ -267,7 +270,7 @@ run_checks() {
     CURL_STATIC_LIB="ut/ut-core/framework/ut-control/build/${architecture_type}/curl/lib/libcurl.a"
     OPENSSL_STATIC_LIB="ut/ut-core/framework/ut-control/build/${architecture_type}/openssl/lib/libssl.a"
     CMAKE_HOST_BIN="ut/ut-core/framework/ut-control/host-tools/CMake-3.30.0/build/bin/cmake"
-    HAL_BIN="ut/bin/hal_test"
+    HAL_BIN=$(find ut/bin/ -iname "hal_test*" 2>/dev/null)
     # CPP_STATIC_LIB="build/${architecture_type}/cpp_libs/lib/libgtest.a"
     # CPP_MAIN_STATIC_LIB="build/${architecture_type}/cpp_libs/lib/libgtest_main.a"
 
@@ -435,75 +438,51 @@ run_on_ubuntu_linux() {
     popd > /dev/null
 }
 
-run_on_dunfell_linux() {
-    pushd ${MY_DIR} > /dev/null
-    SETUP_ENV="sc docker run rdk-dunfell"
-    run_git_clone "dunfell_linux" "linux"
-    # Change to the repository directory
-    PLAT_DIR="${REPO_NAME}-dunfell_linux"
-    pushd ${PLAT_DIR} > /dev/null
-    /bin/bash -c "$SETUP_ENV; $(declare -f run_build); run_build ''dunfell_linux 'linux' '$UT_CORE_BRANCH_NAME' '$UT_CONTROL_BRANCH_NAME'"
-    run_checks "dunfell_linux" "linux" $UT_CORE_BRANCH_NAME $UT_CONTROL_BRANCH_NAME
-    popd > /dev/null
+
+
+# Description: This function git clones and builds ut-core on a specified platform.
+run_on_platform() {
+    local PLATFORM=$1
+    local TARGET=$2
+    local VARIANT_FLAG=$3
+    local LOG_SUFFIX=$3
+
+    pushd "${MY_DIR}" > /dev/null
+    run_git_clone "${PLATFORM}_${TARGET}" "${VARIANT_FLAG}"
+
+    echo "Running make for ${PLATFORM}_${TARGET} (${VARIANT_FLAG}) variant"
+
+    local DOCKER_IMAGE="rdk-${PLATFORM}"
+    [[ "$PLATFORM" == "VM-SYNC" ]] && DOCKER_IMAGE="vm-sync"
+
+    local TARGET_FLAG=""
+    [[ "$TARGET" == "arm" ]] && TARGET_FLAG="TARGET=arm"
+
+    local ENV_SETUP=""
+    if [[ "$TARGET" == "arm" ]]; then
+        if [[ "$PLATFORM" == "dunfell" ]]; then
+            ENV_SETUP='[ -z "$OECORE_TARGET_OS" ] && source /opt/toolchains/rdk-glibc-x86_64-arm-toolchain/environment-setup-armv7at2hf-neon-oe-linux-gnueabi;'
+        else
+            ENV_SETUP='[ -z "$OECORE_TARGET_OS" ] && source /opt/toolchains/rdk-glibc-x86_64-arm-toolchain/environment-setup-armv7vet2hf-neon-oe-linux-gnueabi;'
+        fi
+    fi
+
+    run_build "${PLATFORM}_${TARGET}" "${TARGET}" "$UT_CORE_BRANCH_NAME" "$UT_CONTROL_BRANCH_NAME"
+
+    /bin/bash -c "sc docker run ${DOCKER_IMAGE} \
+    '${ENV_SETUP} echo \$CC; \
+    ./build_ut.sh TARGET=${TARGET} | tee \$PWD/build_log.txt 2>&1; \
+    if [ \$? -eq 0 ]; then \
+        echo \"Build command executed successfully.\"; \
+    else \
+        echo \"[ERROR] Build command failed. Check build_log.txt\"; \
+    fi'"
+
+    run_checks "${PLATFORM}_${TARGET}" "${TARGET}" $UT_CORE_BRANCH_NAME
     popd > /dev/null
 }
 
-run_on_dunfell_arm() {
-    pushd ${MY_DIR} > /dev/null
-    run_git_clone "dunfell_arm" "arm"
-    # Change to the repository directory
-    PLAT_DIR="${REPO_NAME}-dunfell_arm"
-    pushd ${PLAT_DIR} > /dev/null
-    /bin/bash -c "sc docker run rdk-dunfell 'cd /opt/toolchains/rdk-glibc-x86_64-arm-toolchain; \
-    [ -z \"\$OECORE_TARGET_OS\" ] && . environment-setup-armv7at2hf-neon-oe-linux-gnueabi;
-    env | grep CC; cd -; \
-    $(declare -f run_build); run_build 'dunfell_arm' 'arm' '$UT_CORE_BRANCH_NAME' '$UT_CONTROL_BRANCH_NAME';exit'"
-    run_checks "dunfell_arm" "arm" $UT_CORE_BRANCH_NAME $UT_CONTROL_BRANCH_NAME
-    popd > /dev/null
-    popd > /dev/null
-}
-
-run_on_vm_sync_linux() {
-    pushd ${MY_DIR} > /dev/null
-    SETUP_ENV="sc docker run vm-sync"
-    run_git_clone "VM-SYNC" "linux"
-    # Change to the repository directory
-    PLAT_DIR="${REPO_NAME}-VM-SYNC"
-    pushd ${PLAT_DIR} > /dev/null
-    /bin/bash -c "$SETUP_ENV '$(declare -f run_build); run_build 'VM-SYNC' 'linux' '$UT_CORE_BRANCH_NAME' '$UT_CONTROL_BRANCH_NAME';'"
-    run_checks "VM-SYNC" "linux" $UT_CORE_BRANCH_NAME $UT_CONTROL_BRANCH_NAME
-    popd > /dev/null
-    popd > /dev/null
-}
-
-run_on_kirkstone_linux() {
-    pushd ${MY_DIR} > /dev/null
-    SETUP_ENV="sc docker run rdk-kirkstone"
-    run_git_clone "kirkstone_linux" "linux"
-    # Change to the repository directory
-    PLAT_DIR="${REPO_NAME}-kirkstone_linux"
-    pushd ${PLAT_DIR} > /dev/null
-    /bin/bash -c "$SETUP_ENV; $(declare -f run_build); run_build ''kirkstone_linux 'linux' '$UT_CORE_BRANCH_NAME' '$UT_CONTROL_BRANCH_NAME'"
-    run_checks "kirkstone_linux" "linux" $UT_CORE_BRANCH_NAME $UT_CONTROL_BRANCH_NAME
-    popd > /dev/null
-    popd > /dev/null
-}
-
-run_on_kirkstone_arm() {
-    pushd ${MY_DIR} > /dev/null
-    run_git_clone "kirkstone_arm" "arm"
-    # Change to the repository directory
-    PLAT_DIR="${REPO_NAME}-kirkstone_arm"
-    pushd ${PLAT_DIR} > /dev/null
-    /bin/bash -c "sc docker run rdk-kirkstone 'cd /opt/toolchains/rdk-glibc-x86_64-arm-toolchain; \
-     [ -z \"\$OECORE_TARGET_OS\" ] && . environment-setup-armv7vet2hf-neon-oe-linux-gnueabi; \
-     env | grep CC; cd -; \
-    $(declare -f run_build); run_build 'kirkstone_arm' 'arm' '$UT_CORE_BRANCH_NAME' '$UT_CONTROL_BRANCH_NAME'; exit'"
-    run_checks "kirkstone_arm" "arm" $UT_CORE_BRANCH_NAME $UT_CONTROL_BRANCH_NAME
-    popd > /dev/null
-    popd > /dev/null
-}
-
+# Description: This function prints the results of the tests
 print_results() {
     pushd ${MY_DIR} > /dev/null
     
@@ -514,7 +493,7 @@ print_results() {
     popd > /dev/null
     
     #Results for VM_SYNC
-    PLAT_DIR="${REPO_NAME}-VM-SYNC"
+    PLAT_DIR="${REPO_NAME}-VM-SYNC_linux"
     pushd ${PLAT_DIR} > /dev/null
     run_checks "VM-SYNC" "linux" $UT_CORE_BRANCH_NAME
     popd > /dev/null
@@ -549,9 +528,10 @@ print_results() {
 
 # Run tests in different environments
 run_on_ubuntu_linux
-run_on_dunfell_linux
-run_on_vm_sync_linux
-run_on_dunfell_arm
-run_on_kirkstone_arm
-run_on_kirkstone_linux
+run_on_platform "dunfell" "linux"
+run_on_platform "kirkstone" "linux"
+run_on_platform "VM-SYNC" "linux"
+run_on_platform "dunfell" "arm"
+run_on_platform "kirkstone" "arm"
+
 print_results
