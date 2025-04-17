@@ -110,6 +110,32 @@ void test_ut_kvp_profile_string(void)
     UT_LOG_STEP("test_ut_kvp_profile_string - end");
 }
 
+void test_ut_kvp_profile_right_string_long(void)
+{
+    const char *checkField = "the beef";
+    char myString[UT_KVP_MAX_ELEMENT_SIZE];
+    UT_LOG_STEP("test_ut_kvp_profile_string");
+    UT_ASSERT_KVP_NOT_EQUAL_PROFILE_STRING( checkField, "decodeTest/checkStringDeadBeef");
+    UT_ASSERT_KVP_NOT_EQUAL_PROFILE_STRING( checkField, "decodeTest.checkStringDeadBeef");
+    UT_KVP_PROFILE_GET_STRING("decodeTest/checkStringDeadBeef", myString);
+    UT_ASSERT_STRING_NOT_EQUAL(myString, checkField);
+
+    UT_LOG_STEP("test_ut_kvp_profile_string - end");
+}
+
+void test_ut_kvp_profile_left_string_long(void)
+{
+    const char *checkField = "the beef is dead and also the cow";
+    char myString[UT_KVP_MAX_ELEMENT_SIZE];
+    UT_LOG_STEP("test_ut_kvp_profile_string");
+    UT_ASSERT_KVP_NOT_EQUAL_PROFILE_STRING( checkField, "decodeTest/checkStringDeadBeef");
+    UT_ASSERT_KVP_NOT_EQUAL_PROFILE_STRING( checkField, "decodeTest.checkStringDeadBeef");
+    UT_KVP_PROFILE_GET_STRING("decodeTest/checkStringDeadBeef", myString);
+    UT_ASSERT_STRING_NOT_EQUAL(myString, checkField);
+
+    UT_LOG_STEP("test_ut_kvp_profile_string - end");
+}
+
 void test_ut_kvp_profile_bool(void)
 {
     bool result;
@@ -228,6 +254,8 @@ void register_kvp_profile_testing_functions(void)
     UT_add_test(gpAssertSuite2, "kvp profile string", test_ut_kvp_profile_string);
     UT_add_test(gpAssertSuite2, "kvp profile bool", test_ut_kvp_profile_bool);
     UT_add_test(gpAssertSuite2, "kvp profile list count", test_ut_kvp_profile_list_count);
+    UT_add_test(gpAssertSuite2, "kvp profile right string long", test_ut_kvp_profile_right_string_long);
+    UT_add_test(gpAssertSuite2, "kvp profile left string long", test_ut_kvp_profile_left_string_long);
 
     gpAssertSuite3 = UT_add_suite("ut-kvp - assert testing json ", test_ut_kvp_profile_init_json, test_ut_kvp_profile_cleanup);
     assert(gpAssertSuite3 != NULL);
@@ -239,5 +267,4 @@ void register_kvp_profile_testing_functions(void)
     UT_add_test(gpAssertSuite3, "kvp profile string", test_ut_kvp_profile_string);
     UT_add_test(gpAssertSuite3, "kvp profile bool", test_ut_kvp_profile_bool);
     UT_add_test(gpAssertSuite3, "kvp profile list count", test_ut_kvp_profile_list_count);
-    
 }
