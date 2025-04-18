@@ -562,19 +562,32 @@ static void list_tests(CU_pSuite pSuite)
   fprintf(stdout, "\n%s",
                   _("----------------- Test List ------------------------------"));
   fprintf(stdout, "\n%s%s\n", _("Suite: "), pSuite->pName);
-  fprintf(stdout, "\n%*s  %-*s%*s\n",
-                  (int)width[0], _("#"),
-                  (int)width[1], _("Test Name"),
-                  (int)width[2], _("Active?"));
 
-  for (uiCount = 1, pCurTest = pSuite->pTest ;
-       NULL != pCurTest ;
+  /* Calculate the maximum test name length */
+  unsigned int maxTestNameLength = strlen("Test Name");
+  for (pCurTest = pSuite->pTest;
+       NULL != pCurTest;
+       pCurTest = pCurTest->pNext) {
+    if (strlen(pCurTest->pName) > maxTestNameLength) {
+        maxTestNameLength = strlen(pCurTest->pName);
+    }
+  }
+
+  /* Print header with adjusted width */
+  fprintf(stdout, "\n%*s  %-*s%*s\n",
+                 (int)width[0], _("#"),
+                (int)maxTestNameLength, _("Test Name"),
+                (int)width[2], _("Active?"));
+
+  /* Print test cases without truncation */
+  for (uiCount = 1, pCurTest = pSuite->pTest;
+       NULL != pCurTest;
        uiCount++, pCurTest = pCurTest->pNext) {
     assert(NULL != pCurTest->pName);
-    fprintf(stdout, "\n%*u. %-*.*s%*s",
-                    (int)width[0], uiCount,
-                    (int)width[1], (int)width[1]-1, pCurTest->pName,
-                    (int)width[2]-1, (CU_FALSE != pCurTest->fActive) ? _("Yes") : _("No"));
+    fprintf(stdout, "\n%*u. %-*s%*s",
+            (int)width[0], uiCount,
+            (int)maxTestNameLength, pCurTest->pName,
+            (int)width[2] - 1, (CU_FALSE != pCurTest->fActive) ? _("Yes") : _("No"));
   }
   fprintf(stdout, "\n----------------------------------------------------------\n");
   fprintf(stdout, _("Total Number of Tests : %-u"), pSuite->uiNumberOfTests);
