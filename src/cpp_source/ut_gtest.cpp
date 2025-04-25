@@ -451,7 +451,7 @@ public:
         for (size_t i = 0; i < suite.tests.size(); ++i)
         {
             std::cout << std::setw(1) << suite.tests[i].number << ". "
-            << std::left << std::setw(50) << suite.tests[i].name
+            << std::left << std::setw(50) << suite.tests[i].name.substr(0, 45) + (suite.tests[i].name.length() > 45 ? "..." : "")
             << std::left << std::setw(10) << (suite.tests[i].isActive ? "Yes" : "No")
             << "\n";
         }
