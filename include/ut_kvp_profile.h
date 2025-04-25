@@ -105,6 +105,23 @@ extern "C"
         } \
     }
 
+/**! Asserts that a string KVP field doesnot match the expected value. */
+#define UT_ASSERT_KVP_NOT_EQUAL_PROFILE_STRING(checkValue, key) \
+    { \
+        char result_kvp[UT_KVP_MAX_ELEMENT_SIZE]={0}; \
+        ut_kvp_status_t status; \
+        status = ut_kvp_getStringField(ut_kvp_profile_getInstance(), key, result_kvp, UT_KVP_MAX_ELEMENT_SIZE); \
+        UT_ASSERT( status == UT_KVP_STATUS_SUCCESS ); \
+        if ( status == UT_KVP_STATUS_SUCCESS ) \
+        { \
+            UT_ASSERT_STRING_NOT_EQUAL(checkValue, result_kvp); \
+        } \
+        else \
+        { \
+            UT_ASSERT(true);\
+        } \
+    }
+
 /* TODO: Deprecated functions will be removed in future revisions */
 #define UT_ASSERT_EQUAL_KVP_PROFILE_BOOL UT_ASSERT_KVP_EQUAL_PROFILE_BOOL
 #define UT_ASSERT_EQUAL_KVP_PROFILE_UINT64 UT_ASSERT_KVP_EQUAL_PROFILE_UINT64
