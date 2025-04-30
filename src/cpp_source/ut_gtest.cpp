@@ -330,24 +330,28 @@ public:
         std::vector<TestSuiteInfo> &suites = UTTestRunner::suites;
         std::string filter = ::testing::GTEST_FLAG(filter);
 
+        const int nameColumnWidth = 56;
+        const int activeWidth = 8;
+        const int testWidth = 8;
+
         std::cout << "\n"
-                      << STRING_FORMAT("--------------------- Registered Suites -----------------------------") << "\n"
+                      << STRING_FORMAT("----------------------------- Registered Suites -------------------------------") << "\n"
                       << std::flush;
         std::cout << std::setw(1) << "#" << "  "  // Right-aligned
-              << std::left << std::setw(50) << STRING_FORMAT("Suite Name") // Left-aligned
-              << std::left << std::setw(10) << STRING_FORMAT("#Tests") // Left-aligned
-              << std::left << std::setw(10) << STRING_FORMAT("Active?") // Left-aligned
+              << std::left << std::setw(nameColumnWidth) << STRING_FORMAT("Suite Name") // Left-aligned
+              << std::left << std::setw(testWidth) << STRING_FORMAT("#Tests") // Left-aligned
+              << std::left << std::setw(activeWidth) << STRING_FORMAT("Active?") // Left-aligned
               << std::endl << "\n";
         for (size_t i = 0; i < suites.size(); ++i)
         {
 
             std::cout << std::setw(1) << i + 1 << ". "
-                      << std::left << std::setw(50) << suites[i].name
-                      << std::left << std::setw(10) << suites[i].tests.size()
-                      << std::left << std::setw(10) << (suites[i].isActive ? "Yes" : "No")
+                      << std::left << std::setw(nameColumnWidth) << suites[i].name
+                      << std::left << std::setw(testWidth) << suites[i].tests.size()
+                      << std::left << std::setw(activeWidth) << (suites[i].isActive ? "Yes" : "No")
                       << "\n";
         }
-        std::cout  << STRING_FORMAT("---------------------------------------------------------------------") << "\n"
+        std::cout  << STRING_FORMAT("-------------------------------------------------------------------------------") << "\n"
                    << std::flush;
         std::cout << "\n"
                       <<"Total Number of Suites : "<< unit_test.total_test_suite_count() << "\n";
@@ -438,25 +442,36 @@ public:
      */
     std::vector<TestInfo> listTestsFromSuite(const TestSuiteInfo &suite)
     {
+        const int indexWidth = 4;        // e.g. "1.  "
+        const int nameContentWidth = 64; // Name content only
+        const int nameColumnWidth = indexWidth + nameContentWidth; // = 68
+        const int activeWidth = 8;
 
         std::cout << "\n"
-                  << STRING_FORMAT("---------------------------Test List ------------------------------") << "\n"
+                  << STRING_FORMAT("----------------------------- Test List -----------------------------------") << "\n"
                   << std::flush;
         std::cout << "Suite: "<< suite.name << "\n\n";
-        std::cout << std::setw(1) << "#" << "  "  // Right-aligned
-              << std::left << std::setw(50) << STRING_FORMAT("Test Name") // Left-aligned
-              << std::left << std::setw(10) << STRING_FORMAT("Active?") // Left-aligned
-              << std::endl << "\n";
+        std::cout << "#  "
+              << std::left << std::setw(nameContentWidth) << "Test Name"
+              << std::left << std::setw(activeWidth) << "Active?"
+              << "\n\n";
 
         for (size_t i = 0; i < suite.tests.size(); ++i)
         {
-            std::cout << std::setw(1) << suite.tests[i].number << ". "
-            << std::left << std::setw(50) << suite.tests[i].name.substr(0, 45) + (suite.tests[i].name.length() > 45 ? "..." : "")
-            << std::left << std::setw(10) << (suite.tests[i].isActive ? "Yes" : "No")
-            << "\n";
-        }
+            std::ostringstream numberedName;
+                numberedName << suite.tests[i].number << ". ";
 
-        std::cout  << STRING_FORMAT("-------------------------------------------------------------------") << "\n"
+            std::string name = numberedName.str() + suite.tests[i].name;
+
+            // Truncate if too long
+            if (name.length() > nameContentWidth)
+                name = name.substr(0, nameContentWidth - 3) + "..";
+
+            std::cout << std::left << std::setw(nameColumnWidth) << name
+              << std::left << std::setw(activeWidth) << (suite.tests[i].isActive ? "Yes" : "No")
+              << "\n";
+        }
+        std::cout  << STRING_FORMAT("----------------------------------------------------------------------------") << "\n"
                    << std::flush;
         std::cout << "\n"
                       <<"Total Number of Tests : "<< suite.tests.size() << "\n";
