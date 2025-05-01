@@ -366,9 +366,9 @@ run_checks() {
         fi
     elif [[ "$environment" == "dunfell_linux" ]]; then
         if [ ! -f "$CMAKE_HOST_BIN" ]; then
-            echo -e "${GREEN}CMake host binary does not exist. PASS ${NC}"
+            echo -e "${RED}CMake host binary does not exist. FAIL ${NC}"
         else
-            echo -e "${RED}CMake host binary exists. FAIL ${NC}"
+            echo -e "${GREEN}CMake host binary exists. PASS ${NC}"
         fi
     elif [[ "$environment" == "kirkstone_arm" ]]; then
         if [ ! -f "$CMAKE_HOST_BIN" ]; then
