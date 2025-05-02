@@ -144,6 +144,8 @@ if [[ ! -d "${GTEST_DIR}/googletest-${GTEST_VERSION}" && "${VARIANT}" == "CPP" ]
     fi
     mkdir -p ${GTEST_LIB_DIR}
     cd ${GTEST_LIB_DIR}
+
+    # Prefer system cmake if version is > 3.12
     if command -v cmake &> /dev/null && [ "$(cmake --version | head -n1 | awk '{print $3}')" \> "3.12" ]; then
         cmake "${GTEST_DIR}/googletest-${GTEST_VERSION}/"
     else
