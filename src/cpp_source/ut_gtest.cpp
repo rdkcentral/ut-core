@@ -27,6 +27,13 @@
 
 static TestMode_t  gTestMode;
 #define STRING_FORMAT(x) x
+
+#define UT_MAX_DISPLAYED_TEST_WIDTH (8)
+#define UT_MAX_DISPLAYED_INDEX_WIDTH (4)        // e.g. "1.  "
+#define UT_MAX_DISPLAYED_UT_MAX_DISPLAYED_NAME_COLUMN_WIDTH (64) // Name content only
+#define NAME_COLUMN_WIDTH (UT_MAX_DISPLAYED_INDEX_WIDTH + UT_MAX_DISPLAYED_UT_MAX_DISPLAYED_NAME_COLUMN_WIDTH) // = 68
+#define UT_MAX_DISPLAYED_ACTIVE_WIDTH (8)
+
 typedef enum
 {
   UT_STATUS_CONTINUE = 1,   /**< Continue processing commands in current menu. */
@@ -330,25 +337,21 @@ public:
         std::vector<TestSuiteInfo> &suites = UTTestRunner::suites;
         std::string filter = ::testing::GTEST_FLAG(filter);
 
-        const int nameColumnWidth = 56;
-        const int activeWidth = 8;
-        const int testWidth = 8;
-
         std::cout << "\n"
                       << STRING_FORMAT("----------------------------- Registered Suites -------------------------------") << "\n"
                       << std::flush;
         std::cout << std::setw(1) << "#" << "  "  // Right-aligned
-              << std::left << std::setw(nameColumnWidth) << STRING_FORMAT("Suite Name") // Left-aligned
-              << std::left << std::setw(testWidth) << STRING_FORMAT("#Tests") // Left-aligned
-              << std::left << std::setw(activeWidth) << STRING_FORMAT("Active?") // Left-aligned
+              << std::left << std::setw(UT_MAX_DISPLAYED_UT_MAX_DISPLAYED_NAME_COLUMN_WIDTH) << STRING_FORMAT("Suite Name") // Left-aligned
+              << std::left << std::setw(UT_MAX_DISPLAYED_TEST_WIDTH) << STRING_FORMAT("#Tests") // Left-aligned
+              << std::left << std::setw(UT_MAX_DISPLAYED_ACTIVE_WIDTH) << STRING_FORMAT("Active?") // Left-aligned
               << std::endl << "\n";
         for (size_t i = 0; i < suites.size(); ++i)
         {
 
             std::cout << std::setw(1) << i + 1 << ". "
-                      << std::left << std::setw(nameColumnWidth) << suites[i].name
-                      << std::left << std::setw(testWidth) << suites[i].tests.size()
-                      << std::left << std::setw(activeWidth) << (suites[i].isActive ? "Yes" : "No")
+                      << std::left << std::setw(UT_MAX_DISPLAYED_UT_MAX_DISPLAYED_NAME_COLUMN_WIDTH) << suites[i].name
+                      << std::left << std::setw(UT_MAX_DISPLAYED_TEST_WIDTH) << suites[i].tests.size()
+                      << std::left << std::setw(UT_MAX_DISPLAYED_ACTIVE_WIDTH) << (suites[i].isActive ? "Yes" : "No")
                       << "\n";
         }
         std::cout  << STRING_FORMAT("-------------------------------------------------------------------------------") << "\n"
@@ -442,18 +445,14 @@ public:
      */
     std::vector<TestInfo> listTestsFromSuite(const TestSuiteInfo &suite)
     {
-        const int indexWidth = 4;        // e.g. "1.  "
-        const int nameContentWidth = 64; // Name content only
-        const int nameColumnWidth = indexWidth + nameContentWidth; // = 68
-        const int activeWidth = 8;
 
         std::cout << "\n"
                   << STRING_FORMAT("----------------------------- Test List -----------------------------------") << "\n"
                   << std::flush;
         std::cout << "Suite: "<< suite.name << "\n\n";
         std::cout << "#  "
-              << std::left << std::setw(nameContentWidth) << "Test Name"
-              << std::left << std::setw(activeWidth) << "Active?"
+              << std::left << std::setw(UT_MAX_DISPLAYED_UT_MAX_DISPLAYED_NAME_COLUMN_WIDTH) << "Test Name"
+              << std::left << std::setw(UT_MAX_DISPLAYED_ACTIVE_WIDTH) << "Active?"
               << "\n\n";
 
         for (size_t i = 0; i < suite.tests.size(); ++i)
@@ -464,11 +463,11 @@ public:
             std::string name = numberedName.str() + suite.tests[i].name;
 
             // Truncate if too long
-            if (name.length() > nameContentWidth)
-                name = name.substr(0, nameContentWidth - 3) + "..";
+            if (name.length() > UT_MAX_DISPLAYED_UT_MAX_DISPLAYED_NAME_COLUMN_WIDTH)
+                name = name.substr(0, UT_MAX_DISPLAYED_UT_MAX_DISPLAYED_NAME_COLUMN_WIDTH - 3) + "..";
 
-            std::cout << std::left << std::setw(nameColumnWidth) << name
-              << std::left << std::setw(activeWidth) << (suite.tests[i].isActive ? "Yes" : "No")
+            std::cout << std::left << std::setw(NAME_COLUMN_WIDTH) << name
+              << std::left << std::setw(UT_MAX_DISPLAYED_ACTIVE_WIDTH) << (suite.tests[i].isActive ? "Yes" : "No")
               << "\n";
         }
         std::cout  << STRING_FORMAT("----------------------------------------------------------------------------") << "\n"
