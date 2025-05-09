@@ -27,6 +27,13 @@
 
 static TestMode_t  gTestMode;
 #define STRING_FORMAT(x) x
+
+#define UT_MAX_DISPLAYED_TEST_WIDTH (8)
+#define UT_MAX_DISPLAYED_INDEX_WIDTH (4)        // e.g. "1.  "
+#define UT_MAX_DISPLAYED_UT_MAX_DISPLAYED_NAME_COLUMN_WIDTH (64) // Name content only
+#define NAME_COLUMN_WIDTH (UT_MAX_DISPLAYED_INDEX_WIDTH + UT_MAX_DISPLAYED_UT_MAX_DISPLAYED_NAME_COLUMN_WIDTH) // = 68
+#define UT_MAX_DISPLAYED_ACTIVE_WIDTH (8)
+
 typedef enum
 {
   UT_STATUS_CONTINUE = 1,   /**< Continue processing commands in current menu. */
@@ -331,23 +338,23 @@ public:
         std::string filter = ::testing::GTEST_FLAG(filter);
 
         std::cout << "\n"
-                      << STRING_FORMAT("--------------------- Registered Suites -----------------------------") << "\n"
+                      << STRING_FORMAT("----------------------------- Registered Suites -------------------------------") << "\n"
                       << std::flush;
         std::cout << std::setw(1) << "#" << "  "  // Right-aligned
-              << std::left << std::setw(50) << STRING_FORMAT("Suite Name") // Left-aligned
-              << std::left << std::setw(10) << STRING_FORMAT("#Tests") // Left-aligned
-              << std::left << std::setw(10) << STRING_FORMAT("Active?") // Left-aligned
+              << std::left << std::setw(UT_MAX_DISPLAYED_UT_MAX_DISPLAYED_NAME_COLUMN_WIDTH) << STRING_FORMAT("Suite Name") // Left-aligned
+              << std::left << std::setw(UT_MAX_DISPLAYED_TEST_WIDTH) << STRING_FORMAT("#Tests") // Left-aligned
+              << std::left << std::setw(UT_MAX_DISPLAYED_ACTIVE_WIDTH) << STRING_FORMAT("Active?") // Left-aligned
               << std::endl << "\n";
         for (size_t i = 0; i < suites.size(); ++i)
         {
 
             std::cout << std::setw(1) << i + 1 << ". "
-                      << std::left << std::setw(50) << suites[i].name
-                      << std::left << std::setw(10) << suites[i].tests.size()
-                      << std::left << std::setw(10) << (suites[i].isActive ? "Yes" : "No")
+                      << std::left << std::setw(UT_MAX_DISPLAYED_UT_MAX_DISPLAYED_NAME_COLUMN_WIDTH) << suites[i].name
+                      << std::left << std::setw(UT_MAX_DISPLAYED_TEST_WIDTH) << suites[i].tests.size()
+                      << std::left << std::setw(UT_MAX_DISPLAYED_ACTIVE_WIDTH) << (suites[i].isActive ? "Yes" : "No")
                       << "\n";
         }
-        std::cout  << STRING_FORMAT("---------------------------------------------------------------------") << "\n"
+        std::cout  << STRING_FORMAT("-------------------------------------------------------------------------------") << "\n"
                    << std::flush;
         std::cout << "\n"
                       <<"Total Number of Suites : "<< unit_test.total_test_suite_count() << "\n";
@@ -440,23 +447,30 @@ public:
     {
 
         std::cout << "\n"
-                  << STRING_FORMAT("---------------------------Test List ------------------------------") << "\n"
+                  << STRING_FORMAT("----------------------------- Test List -----------------------------------") << "\n"
                   << std::flush;
         std::cout << "Suite: "<< suite.name << "\n\n";
-        std::cout << std::setw(1) << "#" << "  "  // Right-aligned
-              << std::left << std::setw(50) << STRING_FORMAT("Test Name") // Left-aligned
-              << std::left << std::setw(10) << STRING_FORMAT("Active?") // Left-aligned
-              << std::endl << "\n";
+        std::cout << "#  "
+              << std::left << std::setw(UT_MAX_DISPLAYED_UT_MAX_DISPLAYED_NAME_COLUMN_WIDTH) << "Test Name"
+              << std::left << std::setw(UT_MAX_DISPLAYED_ACTIVE_WIDTH) << "Active?"
+              << "\n\n";
 
         for (size_t i = 0; i < suite.tests.size(); ++i)
         {
-            std::cout << std::setw(1) << suite.tests[i].number << ". "
-            << std::left << std::setw(50) << suite.tests[i].name
-            << std::left << std::setw(10) << (suite.tests[i].isActive ? "Yes" : "No")
-            << "\n";
-        }
+            std::ostringstream numberedName;
+                numberedName << suite.tests[i].number << ". ";
 
-        std::cout  << STRING_FORMAT("-------------------------------------------------------------------") << "\n"
+            std::string name = numberedName.str() + suite.tests[i].name;
+
+            // Truncate if too long
+            if (name.length() > UT_MAX_DISPLAYED_UT_MAX_DISPLAYED_NAME_COLUMN_WIDTH)
+                name = name.substr(0, UT_MAX_DISPLAYED_UT_MAX_DISPLAYED_NAME_COLUMN_WIDTH - 3) + "..";
+
+            std::cout << std::left << std::setw(NAME_COLUMN_WIDTH) << name
+              << std::left << std::setw(UT_MAX_DISPLAYED_ACTIVE_WIDTH) << (suite.tests[i].isActive ? "Yes" : "No")
+              << "\n";
+        }
+        std::cout  << STRING_FORMAT("----------------------------------------------------------------------------") << "\n"
                    << std::flush;
         std::cout << "\n"
                       <<"Total Number of Tests : "<< suite.tests.size() << "\n";
@@ -932,6 +946,86 @@ public:
         }
     }
 
+    void displayRunSummary()
+    {
+        const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
+        std::vector<TestSuiteInfo> &suites = UTTestRunner::suites;
+
+        int total_suites = unit_test.total_test_suite_count();
+        int disabled_suites = 0; // GoogleTest does not track disabled test suites directly
+
+        int total_tests = unit_test.total_test_count();
+        int failed_tests = unit_test.failed_test_count();
+        int disabled_tests = unit_test.disabled_test_count();
+        int skipped_tests = unit_test.skipped_test_count();
+        int passed_tests = total_tests - (failed_tests + disabled_tests + skipped_tests);
+
+        int total_asserts = 0;
+        int failed_asserts = 0;
+
+        // Iterate through test suites to gather assertion details
+        for (int i = 0; i < unit_test.total_test_suite_count(); ++i)
+        {
+            const ::testing::TestSuite *test_suite = unit_test.GetTestSuite(i);
+            if (test_suite)
+            {
+                total_asserts += test_suite->test_to_run_count();
+                failed_asserts += test_suite->failed_test_count();
+            }
+        }
+
+        int passed_asserts = total_asserts - failed_asserts;
+
+        for (size_t i = 0; i < suites.size(); ++i)
+        {
+            if (!suites[i].isActive)
+            {
+                ++disabled_suites;
+            }
+
+            for (size_t j = 0; j < suites[i].tests.size(); ++j)
+            {
+                if (!suites[i].tests[j].isActive)
+                {
+                    ++disabled_tests;
+                }
+            }
+        }
+
+        std::cout << "\n"
+                  << "Run Summary:"
+                  << std::setw(10) << "  Type"
+                  << std::setw(10) << "Total"
+                  << std::setw(10) << "Ran"
+                  << std::setw(10) << "Passed"
+                  << std::setw(10) << "Failed"
+                  << std::setw(10) << "Inactive"
+                  << std::setw(10) << "Skipped\n"
+                  << std::setw(24) << "Suites"
+                  << std::right << std::setw(9) << total_suites
+                  << std::right << std::setw(9) << total_suites - disabled_suites
+                  << std::right << std::setw(9) << "n/a"
+                  << std::right << std::setw(9) << "n/a"
+                  << std::right << std::setw(9) << disabled_suites
+                  << std::right << std::setw(9) << "n/a" << "\n"
+                  << std::setw(23) << "Tests"
+                  << std::right << std::setw(10) << total_tests
+                  << std::right << std::setw(9) << passed_tests + failed_tests + disabled_tests + skipped_tests
+                  << std::right << std::setw(9) << passed_tests
+                  << std::right << std::setw(9) << failed_tests
+                  << std::right << std::setw(9) << disabled_tests
+                  << std::right << std::setw(9) << skipped_tests << "\n"
+                  << std::setw(25) << "Asserts"
+                  << std::right << std::setw(8) << total_asserts
+                  << std::right << std::setw(9) << passed_asserts + failed_asserts
+                  << std::right << std::setw(9) << passed_asserts
+                  << std::right << std::setw(9) << failed_asserts
+                  << std::right << std::setw(9) << "n/a"
+                  << std::right << std::setw(9) << "n/a" << "\n"
+                  << "\n"
+                  << "Elapsed time = " << std::fixed << std::setprecision(3) << unit_test.elapsed_time() / 1000.0 << " seconds\n";
+    }
+
     /**
      * @brief Disables a test group by adding it to the disabledGroups set and removing it from the enabledGroups set.
      *
@@ -1153,6 +1247,7 @@ UT_status_t UT_run_tests()
             else if (choice == STRING_FORMAT("R")[0])
             {
                 testRunner.runTests();
+                testRunner.displayRunSummary();
             }
             else if (choice == STRING_FORMAT("Q")[0])
             {
@@ -1179,9 +1274,14 @@ UT_status_t UT_run_tests()
             }
         }
     }
+    else if (UT_get_test_mode() == UT_MODE_AUTOMATED)
+    {
+        testRunner.runTests();
+    }
     else
     {
         testRunner.runTests();
+        testRunner.displayRunSummary();
     }
 
     UT_LOG( UT_LOG_ASCII_GREEN "Logfile" UT_LOG_ASCII_NC ":[" UT_LOG_ASCII_YELLOW "%s" UT_LOG_ASCII_NC "]\n", UT_log_getLogFilename() );

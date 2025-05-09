@@ -67,7 +67,7 @@ popd > /dev/null # ${MY_DIR}
 # Therefore in that case it warns you but doesnt' chnage to that version, which could cause your tests to break.
 # Change this to upgrade your ut-control Major versions. Non ABI Changes 1.x.x are supported, between major revisions
 
-UT_CONTROL_PROJECT_VERSION="1.6.2"  # Fixed version
+UT_CONTROL_PROJECT_VERSION="1.6.3"  # Fixed version
 
 # Clone the Unit Test Requirements
 UT_CONTROL_REPO=git@github.com:rdkcentral/ut-control.git
@@ -117,7 +117,8 @@ else
         check_ut_control_revision
         # Check out the version required based on control_revision
         pushd ${UT_CONTROL_LIB_DIR} > /dev/null
-        git checkout ${UT_CONTROL_PROJECT_VERSION}
+        git checkout ${UT_CONTROL_PROJECT_VERSION} # MARKER: Version=${UT_CONTROL_PROJECT_VERSION}
+        # Note: The above line can be modified by release test scripts to checkout a specific version or branch
         popd > /dev/null
         configure_ut_control
     else
@@ -143,7 +144,9 @@ if [[ ! -d "${GTEST_DIR}/googletest-${GTEST_VERSION}" && "${VARIANT}" == "CPP" ]
     fi
     mkdir -p ${GTEST_LIB_DIR}
     cd ${GTEST_LIB_DIR}
-    if command -v cmake &> /dev/null; then
+
+    # Prefer system cmake if version is > 3.12
+    if command -v cmake &> /dev/null && [ "$(cmake --version | head -n1 | awk '{print $3}')" \> "3.12" ]; then
         cmake "${GTEST_DIR}/googletest-${GTEST_VERSION}/"
     else
         CMAKE_BIN=$(find ${UT_CONTROL_LIB_DIR} -name cmake -type f | grep '/bin/')
