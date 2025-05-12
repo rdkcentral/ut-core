@@ -38,97 +38,97 @@
 /**
  * @brief Verifies that condition is true.
  */
-#define UT_ASSERT_TRUE(condition) ASSERT_TRUE(condition)
+#define UT_ASSERT_TRUE(condition) EXPECT_TRUE(condition)
 
 /**
  * @brief Verifies that condition is false.
  */
-#define UT_ASSERT_FALSE(condition) ASSERT_FALSE(condition)
+#define UT_ASSERT_FALSE(condition) EXPECT_FALSE(condition)
 
 /**
  * @brief Verifies that actual == expected.
  */
-#define UT_ASSERT_EQUAL(actual, expected) ASSERT_EQ(expected, actual)
+#define UT_ASSERT_EQUAL(actual, expected) EXPECT_EQ(expected, actual)
 
 /**
  * @brief Verifies that actual != expected.
  */
-#define UT_ASSERT_NOT_EQUAL(actual, expected) ASSERT_NE(expected, actual)
+#define UT_ASSERT_NOT_EQUAL(actual, expected) EXPECT_NE(expected, actual)
 
 /**
  * @brief Verifies that actual < expected.
  */
-#define UT_ASSERT_LESS(actual, expected) ASSERT_LT(actual, expected)
+#define UT_ASSERT_LESS(actual, expected) EXPECT_LT(actual, expected)
 
 /**
  * @brief Verifies that actual <= expected.
  */
-#define UT_ASSERT_LESS_EQUAL(actual, expected) ASSERT_LE(actual, expected)
+#define UT_ASSERT_LESS_EQUAL(actual, expected) EXPECT_LE(actual, expected)
 
 /**
  * @brief Verifies that actual > expected.
  */
-#define UT_ASSERT_GREATER(actual, expected) ASSERT_GT(actual, expected)
+#define UT_ASSERT_GREATER(actual, expected) EXPECT_GT(actual, expected)
 
 /**
  * @brief Verifies that actual >= expected.
  */
-#define UT_ASSERT_GREATER_EQUAL(actual, expected) ASSERT_GE(actual, expected)
+#define UT_ASSERT_GREATER_EQUAL(actual, expected) EXPECT_GE(actual, expected)
 
 /**
  * @brief Verifies that ptr is NULL.
  */
-#define UT_ASSERT_NULL(ptr) ASSERT_EQ(nullptr, ptr)
+#define UT_ASSERT_NULL(ptr) EXPECT_EQ(nullptr, ptr)
 
 /**
  * @brief Verifies that ptr is not NULL.
  */
-#define UT_ASSERT_NOT_NULL(ptr) ASSERT_NE(nullptr, ptr)
+#define UT_ASSERT_NOT_NULL(ptr) EXPECT_NE(nullptr, ptr)
 
 /**
  * @brief Verifies that two C-style strings are equal.
  */
-#define UT_ASSERT_STRING_EQUAL(actual, expected) ASSERT_STREQ(expected, actual)
+#define UT_ASSERT_STRING_EQUAL(actual, expected) EXPECT_STREQ(expected, actual)
 
 /**
  * @brief Verifies that two C-style strings are not equal.
  */
-#define UT_ASSERT_STRING_NOT_EQUAL(actual, expected) ASSERT_STRNE(expected, actual)
+#define UT_ASSERT_STRING_NOT_EQUAL(actual, expected) EXPECT_STRNE(expected, actual)
 
 /**
  * @brief Verifies that two strings are equal, ignoring case.
  */
-#define UT_ASSERT_STRING_EQUAL_IGNORE_CASE(actual, expected) ASSERT_STRCASEEQ(expected, actual)
+#define UT_ASSERT_STRING_EQUAL_IGNORE_CASE(actual, expected) EXPECT_STRCASEEQ(expected, actual)
 
 /**
  * @brief Verifies that two strings are not equal, ignoring case.
  */
-#define UT_ASSERT_STRING_NOT_EQUAL_IGNORE_CASE(actual, expected) ASSERT_STRCASENE(expected, actual)
+#define UT_ASSERT_STRING_NOT_EQUAL_IGNORE_CASE(actual, expected) EXPECT_STRCASENE(expected, actual)
 
 /**
  * @brief Verifies that two double values are nearly equal.
  */
-#define UT_ASSERT_DOUBLE_EQUAL(actual, expected, tolerance) ASSERT_NEAR(expected, actual, tolerance)
+#define UT_ASSERT_DOUBLE_EQUAL(actual, expected, tolerance) EXPECT_NEAR(expected, actual, tolerance)
 
 /**
  * @brief Verifies that two float values are nearly equal.
  */
-#define UT_ASSERT_FLOAT_EQUAL(actual, expected, tolerance) ASSERT_NEAR(expected, actual, tolerance)
+#define UT_ASSERT_FLOAT_EQUAL(actual, expected, tolerance) EXPECT_NEAR(expected, actual, tolerance)
 
 /**
  * @brief Verifies that a statement throws an exception of type exception_type.
  */
-#define UT_ASSERT_THROW(statement, exception_type) ASSERT_THROW(statement, exception_type)
+#define UT_ASSERT_THROW(statement, exception_type) EXPECT_THROW(statement, exception_type)
 
 /**
  * @brief Verifies that a statement throws any exception.
  */
-#define UT_ASSERT_ANY_THROW(statement) ASSERT_ANY_THROW(statement)
+#define UT_ASSERT_ANY_THROW(statement) EXPECT_ANY_THROW(statement)
 
 /**
  * @brief Verifies that a statement does not throw any exception.
  */
-#define UT_ASSERT_NO_THROW(statement) ASSERT_NO_THROW(statement)
+#define UT_ASSERT_NO_THROW(statement) EXPECT_NO_THROW(statement)
 
 /**
  * @brief Generates a failure with a message.
@@ -143,7 +143,7 @@
 /**
  * @brief Verifies that a condition is true, with a message.
  */
-#define UT_ASSERT_MESSAGE(condition, message) ASSERT_TRUE(condition) << message
+#define UT_ASSERT_MESSAGE(condition, message) EXPECT_TRUE(condition) << message
 
 /**
  * @brief Fatal assertion that actual == expected.
