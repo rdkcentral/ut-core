@@ -33,6 +33,9 @@
 
 
 #define DEFAULT_FILENAME "ut_test"
+#ifndef UT_VERSION
+#define UT_VERSION "Not Defined"
+#endif
 
 /* Global variables */
 static optionFlags_t gOptions;  /*!< Control flags, should not be exposed outside of this file */
@@ -170,6 +173,8 @@ static bool decodeOptions( int argc, char **argv )
  */
 UT_status_t UT_init(int argc, char** argv)
 {
+    printf("\nUT CORE Version: \033[0;32m%s\033[0m\n",UT_VERSION);
+
     /* Decode the options */
     if ( decodeOptions( argc, argv ) == false )
     {

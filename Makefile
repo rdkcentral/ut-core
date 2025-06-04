@@ -110,7 +110,7 @@ DEPS := $(OBJS:.o=.d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 VERSION := $(shell git describe --tags | head -n1)
 XCFLAGS += $(CFLAGS) $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\"
-CXXFLAGS += $(INC_FLAGS)
+CXXFLAGS += $(INC_FLAGS) -D UT_VERSION=\"$(VERSION)\" $(KCPPFLAGS)
 
 # Initial output
 $(info $(shell ${ECHOE} ${GREEN}TARGET_EXEC [$(TARGET_EXEC)]${NC}))
