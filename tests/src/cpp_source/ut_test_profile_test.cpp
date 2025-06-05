@@ -51,7 +51,7 @@ UT_ADD_TEST(UTKVPProfileTestL1, TestProfileOpenSuccess)
     UT_ASSERT_EQUAL_FATAL(status, UT_KVP_STATUS_SUCCESS);
 }
 
-UT_ADD_TEST(UTKVPProfileTestL1, TestProfileGetInstance)
+UT_ADD_TEST(UTKVPProfileTestL1, TestProfileGetInstance1234567891234567891234567891234567891234567)
 {
     // Getinstance from the profile passed via cli
     ut_kvp_instance_t *instance = ut_kvp_profile_getInstance();
