@@ -117,7 +117,8 @@ else
         check_ut_control_revision
         # Check out the version required based on control_revision
         pushd ${UT_CONTROL_LIB_DIR} > /dev/null
-        git checkout ${UT_CONTROL_PROJECT_VERSION} # MARKER: Version=${UT_CONTROL_PROJECT_VERSION}
+        #git checkout ${UT_CONTROL_PROJECT_VERSION} # MARKER: Version=${UT_CONTROL_PROJECT_VERSION}
+        git checkout feature/gh79-ut-control-reduce-size  # MARKER: Version=${UT_CONTROL_PROJECT_VERSION}
         # Note: The above line can be modified by release test scripts to checkout a specific version or branch
         popd > /dev/null
         configure_ut_control
