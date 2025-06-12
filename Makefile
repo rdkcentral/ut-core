@@ -133,10 +133,10 @@ framework: checkvariantchange createdirs download_and_build
 	@make test VARIANT=${VARIANT}
 	@cp -r $(UT_CONTROL)/build/$(TARGET)/lib/libut_control.* $(LIB_DIR) $(BIN_DIR)
 	@if [ -d "$(UT_CONTROL)/build/$(TARGET)/curl" ]; then \
-		@cp -r $(UT_CONTROL)/build/$(TARGET)/curl/lib/libcurl.so* $(LIB_DIR) $(BIN_DIR); \
+		cp -r $(UT_CONTROL)/build/$(TARGET)/curl/lib/libcurl.so* $(LIB_DIR) $(BIN_DIR); \
 	fi
 	@if [ -d "$(UT_CONTROL)/build/$(TARGET)/openssl" ]; then \
-		@cp -r $(UT_CONTROL)/build/$(TARGET)/openssl/lib/lib*.so* $(LIB_DIR) $(BIN_DIR); \
+		cp -r $(UT_CONTROL)/build/$(TARGET)/openssl/lib/lib*.so* $(LIB_DIR) $(BIN_DIR); \
 	fi
 	@${ECHOE} ${GREEN}ut-control and related LIBs Copied to [${BIN_DIR}]${NC}
 	@if [ -d "$(TOP_DIR)/../include" ] && [ -d "$(BUILD_DIR)/src" ]; then \
