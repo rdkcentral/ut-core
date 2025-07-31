@@ -475,6 +475,16 @@ public:
         std::cout << "\n"
                       <<"Total Number of Tests : "<< suite.tests.size() << "\n";
 
+        //Update the static vector with the current suite information
+        for(size_t i = 0; i < UTTestRunner::suites.size(); ++i)
+        {
+            if(UTTestRunner::suites[i].name == suite.name)
+            {
+                UTTestRunner::suites[i].tests = suite.tests; // Update the tests in the static vector
+                UTTestRunner::suites[i].isActive = suite.isActive; // Update the active status
+                UTTestRunner::suites[i].number = suite.number; // Update the suite number
+            }
+        }
         return suite.tests;
     }
 
@@ -691,6 +701,7 @@ public:
                     {
                         ::testing::GTEST_FLAG(filter) = testName;
                         runTests();
+                        displayRunSummary();
                         break; // Exit the loop once the test is found and executed
                     }
                 }
@@ -699,6 +710,7 @@ public:
             {
                 setFlag(suite);
                 runTests();
+                displayRunSummary();
             }
             else if (choice == STRING_FORMAT("Q")[0])
             {
@@ -946,6 +958,14 @@ public:
         }
     }
 
+    /**
+     * @brief Displays a summary of the test run, including total tests, passed, failed, and skipped tests.
+     *
+     * This function retrieves the test results from the Google Test framework and prints a summary
+     * of the test run to the console. It includes information about the total number of test suites,
+     * tests, assertions, and their respective statuses (passed, failed, disabled, skipped).
+     */
+
     void displayRunSummary()
     {
         const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
@@ -954,48 +974,91 @@ public:
         int total_suites = unit_test.total_test_suite_count();
         int disabled_suites = 0; // GoogleTest does not track disabled test suites directly
 
-        int total_tests = unit_test.total_test_count();
-        int failed_tests = unit_test.failed_test_count();
-        int disabled_tests = unit_test.disabled_test_count();
-        int skipped_tests = unit_test.skipped_test_count();
-        int passed_tests = total_tests - (failed_tests + disabled_tests + skipped_tests);
+        int ran_suites = 0;
+        int total_tests = 0;
+        int failed_tests = 0;
+        int disabled_tests = 0;
+        int skipped_tests = 0;
+        int passed_tests = 0;
+        int ran_tests = 0;
+        std::string filter = ::testing::GTEST_FLAG(filter);
+        //std::cout << "Filter: " << filter << "\n";
 
-        int total_asserts = 0;
-        int failed_asserts = 0;
-
-        // Iterate through test suites to gather assertion details
+        // Iterate through test suites to fill in the summary
         for (int i = 0; i < unit_test.total_test_suite_count(); ++i)
         {
             const ::testing::TestSuite *test_suite = unit_test.GetTestSuite(i);
-            if (test_suite)
-            {
-                total_asserts += test_suite->test_to_run_count();
-                failed_asserts += test_suite->failed_test_count();
-            }
-        }
-
-        int passed_asserts = total_asserts - failed_asserts;
-
-        for (size_t i = 0; i < suites.size(); ++i)
-        {
             if (!suites[i].isActive)
             {
                 ++disabled_suites;
             }
-
-            for (size_t j = 0; j < suites[i].tests.size(); ++j)
+            if(filter == "-") // All tests are run
             {
+                ran_suites++; // Count the suite when all tests are run
+                ran_tests = unit_test.total_test_count();
+                total_tests = unit_test.total_test_count();
+                failed_tests = unit_test.failed_test_count();
+                disabled_tests = unit_test.disabled_test_count();
+                skipped_tests = unit_test.skipped_test_count();
+                passed_tests = total_tests - (failed_tests + disabled_tests + skipped_tests);
+            }
+            if (filter.back() == '*' && std::string(test_suite->name()).find(filter.substr(0, filter.length() - 1)) == 0)
+            {
+                // When a specific suite is run
+                ran_suites++;
+                ran_tests = test_suite->total_test_count();
+                total_tests = test_suite->total_test_count();
+                failed_tests = test_suite->failed_test_count();
+                disabled_tests = test_suite->disabled_test_count();
+                skipped_tests = test_suite->skipped_test_count();
+                passed_tests = total_tests - (failed_tests + disabled_tests + skipped_tests);
+            }
+            //TODO: Handle the case when suites have been disabled
+
+            for(int j = 0; j < test_suite->total_test_count(); ++j)
+            {
+                const ::testing::TestInfo *test_info = test_suite->GetTestInfo(j);
                 if (!suites[i].tests[j].isActive)
                 {
                     ++disabled_tests;
                 }
+
+                if (filter.find('.') != std::string::npos && std::string(test_info->name()) == filter.substr(filter.find('.') + 1))
+                {
+                    // When a specific test is run
+                    ran_suites++;
+                    ran_tests = 1;
+                    total_tests = test_suite->total_test_count();
+                    failed_tests = test_suite->failed_test_count();
+                    skipped_tests = test_suite->skipped_test_count();
+                    passed_tests = test_info->result()->Passed() ? 1 : 0;
+                }
+                else if (filter.find(':') != std::string::npos && filter.substr(0, filter.find('.')) == test_suite->name())
+                {
+                    // When a specific suite is run excluding few disabled tests
+                    ran_suites = 1; // As we are running a specific suite
+                    ran_tests = test_suite->total_test_count() - disabled_tests;
+                    total_tests = test_suite->total_test_count();
+                    failed_tests = test_suite->failed_test_count();
+                    skipped_tests = test_suite->skipped_test_count();
+                    passed_tests = total_tests - (failed_tests + disabled_tests + skipped_tests);
+                }
             }
         }
 
+        // GoogleTest does not provide a direct way to count assertions, so we assume each test
+        // has at least one assertion. This is a simplification and may not reflect the actual
+        // number of assertions in each test.
+        // This is a simplification and may not reflect the actual number of assertions in each test
+        int passed_asserts = passed_tests;
+        int total_asserts = total_tests;
+        int failed_asserts = failed_tests;
+        int disabled_asserts = disabled_tests;
+
         std::cout << "\n"
-                  << "Run Summary:"
-                  << std::setw(10) << "  Type"
-                  << std::setw(10) << "Total"
+                  << std::left << "Run Summary:"
+                  << std::right << std::setw(10) << "Type"
+                  << std::setw(11) << "Total"
                   << std::setw(10) << "Ran"
                   << std::setw(10) << "Passed"
                   << std::setw(10) << "Failed"
@@ -1003,14 +1066,14 @@ public:
                   << std::setw(10) << "Skipped\n"
                   << std::setw(24) << "Suites"
                   << std::right << std::setw(9) << total_suites
-                  << std::right << std::setw(9) << total_suites - disabled_suites
+                  << std::right << std::setw(9) << ran_suites
                   << std::right << std::setw(9) << "n/a"
                   << std::right << std::setw(9) << "n/a"
                   << std::right << std::setw(9) << disabled_suites
                   << std::right << std::setw(9) << "n/a" << "\n"
                   << std::setw(23) << "Tests"
                   << std::right << std::setw(10) << total_tests
-                  << std::right << std::setw(9) << passed_tests + failed_tests + disabled_tests + skipped_tests
+                  << std::right << std::setw(9) << ran_tests
                   << std::right << std::setw(9) << passed_tests
                   << std::right << std::setw(9) << failed_tests
                   << std::right << std::setw(9) << disabled_tests
@@ -1020,7 +1083,7 @@ public:
                   << std::right << std::setw(9) << passed_asserts + failed_asserts
                   << std::right << std::setw(9) << passed_asserts
                   << std::right << std::setw(9) << failed_asserts
-                  << std::right << std::setw(9) << "n/a"
+                  << std::right << std::setw(9) << disabled_asserts
                   << std::right << std::setw(9) << "n/a" << "\n"
                   << "\n"
                   << "Elapsed time = " << std::fixed << std::setprecision(3) << unit_test.elapsed_time() / 1000.0 << " seconds\n";
