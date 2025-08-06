@@ -56,4 +56,9 @@ UT_ADD_TEST(UTGTestL1, TestGtestL1GreaterThan)
     UT_ASSERT_GREATER(2, 1);
 }
 
+UT_ADD_TEST(UTGTestL1, SameNameTest)
+{
+    UT_PASS("This test has the same name as another test in a different suite");
+}
+
 // Other test cases as needed...
