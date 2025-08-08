@@ -1000,7 +1000,7 @@ public:
                 failed_tests = unit_test.failed_test_count();
                 disabled_tests = unit_test.disabled_test_count();
                 skipped_tests = unit_test.skipped_test_count();
-                passed_tests = total_tests - (failed_tests + disabled_tests + skipped_tests);
+                passed_tests = unit_test.successful_test_count();
             }
             if (filter.back() == '*' && std::string(test_suite->name()).find(filter.substr(0, filter.length() - 1)) == 0)
             {
@@ -1011,7 +1011,7 @@ public:
                 failed_tests = test_suite->failed_test_count();
                 disabled_tests = test_suite->disabled_test_count();
                 skipped_tests = test_suite->skipped_test_count();
-                passed_tests = total_tests - (failed_tests + disabled_tests + skipped_tests);
+                passed_tests = test_suite->successful_test_count();
             }
             //TODO: Handle the case when suites have been disabled
 
@@ -1023,7 +1023,13 @@ public:
                     ++disabled_tests;
                 }
 
-                if (filter.find('.') != std::string::npos && std::string(test_info->name()) == filter.substr(filter.find('.') + 1))
+                std::string suiteNameFromFilter = filter.substr(0, filter.find('.'));
+                std::string testNameFromFilter = filter.substr(filter.find('.') + 1);
+
+                std::string currentSuiteName = test_suite->name();
+                std::string currentTestName = test_info->name();
+
+                if (filter.find('.') != std::string::npos && currentSuiteName == suiteNameFromFilter && currentTestName == testNameFromFilter)
                 {
                     // When a specific test is run
                     ran_suites++;
@@ -1031,9 +1037,9 @@ public:
                     total_tests = test_suite->total_test_count();
                     failed_tests = test_suite->failed_test_count();
                     skipped_tests = test_suite->skipped_test_count();
-                    passed_tests = test_info->result()->Passed() ? 1 : 0;
+                    passed_tests = test_suite->successful_test_count();
                 }
-                else if (filter.find(':') != std::string::npos && filter.substr(0, filter.find('.')) == test_suite->name())
+                else if (filter.find(':') != std::string::npos && currentSuiteName == suiteNameFromFilter)
                 {
                     // When a specific suite is run excluding few disabled tests
                     ran_suites = 1; // As we are running a specific suite
@@ -1041,7 +1047,7 @@ public:
                     total_tests = test_suite->total_test_count();
                     failed_tests = test_suite->failed_test_count();
                     skipped_tests = test_suite->skipped_test_count();
-                    passed_tests = total_tests - (failed_tests + disabled_tests + skipped_tests);
+                    passed_tests = test_suite->successful_test_count();
                 }
             }
         }
