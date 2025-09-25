@@ -70,6 +70,7 @@ UT_ADD_TEST(UTGTestTest, UT_ASSERT_NOT_EQUAL_Test)
     int a = 5;
     int b = 6;
     UT_ASSERT_NOT_EQUAL(a, b);
+    UT_ASSERT_EQUAL(a, b);
 }
 
 // Test case for UT_ASSERT_LESS
@@ -270,6 +271,11 @@ UT_ADD_TEST(UTGTestTest, IgnoredTest)
 {
     UT_IGNORE_TEST();   // This test will be skipped at runtime
     ASSERT_TRUE(false); // This line will never be executed
+}
+
+UT_ADD_TEST(UTGTestTest, SameNameTest)
+{
+    UT_FAIL("This test has the same name as another test in a different suite");
 }
 
 #endif  // __TEST_UT_GTEST_H
