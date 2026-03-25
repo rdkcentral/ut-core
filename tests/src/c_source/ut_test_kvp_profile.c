@@ -165,6 +165,74 @@ void test_ut_kvp_profile_list_count(void)
     UT_LOG_STEP( "test_ut_kvp_profile_list_count - end" );
 }
 
+void test_ut_kvp_profile_int8(void)
+{
+    int8_t checkFieldPositive = 120;
+    int8_t checkFieldNegative = -120;
+    int8_t result;
+    UT_LOG_STEP("test_ut_kvp_profile_int8 - start");
+    UT_ASSERT_KVP_EQUAL_PROFILE_INT8( checkFieldPositive, "decodeTest/checkInt8Positive" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_INT8( checkFieldPositive, "decodeTest.checkInt8Positive" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_INT8( checkFieldNegative, "decodeTest/checkInt8Negative" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_INT8( checkFieldNegative, "decodeTest.checkInt8Negative" );
+
+    result = UT_KVP_PROFILE_GET_INT8("decodeTest.checkInt8Positive");
+    UT_ASSERT_EQUAL(result, checkFieldPositive);
+
+    UT_LOG_STEP( "test_ut_kvp_profile_int8 - end" );
+}
+
+void test_ut_kvp_profile_int16(void)
+{
+    int16_t checkFieldPositive = 30000;
+    int16_t checkFieldNegative = -30000;
+    int16_t result;
+    UT_LOG_STEP("test_ut_kvp_profile_int16 - start");
+    UT_ASSERT_KVP_EQUAL_PROFILE_INT16( checkFieldPositive, "decodeTest/checkInt16Positive" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_INT16( checkFieldPositive, "decodeTest.checkInt16Positive" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_INT16( checkFieldNegative, "decodeTest/checkInt16Negative" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_INT16( checkFieldNegative, "decodeTest.checkInt16Negative" );
+
+    result = UT_KVP_PROFILE_GET_INT16("decodeTest.checkInt16Positive");
+    UT_ASSERT_EQUAL(result, checkFieldPositive);
+
+    UT_LOG_STEP( "test_ut_kvp_profile_int16 - end" );
+}
+
+void test_ut_kvp_profile_int32(void)
+{
+    int32_t checkFieldPositive = 2000000000;
+    int32_t checkFieldNegative = -2000000000;
+    int32_t result;
+    UT_LOG_STEP("test_ut_kvp_profile_int32 - start");
+    UT_ASSERT_KVP_EQUAL_PROFILE_INT32( checkFieldPositive, "decodeTest/checkInt32Positive" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_INT32( checkFieldPositive, "decodeTest.checkInt32Positive" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_INT32( checkFieldNegative, "decodeTest/checkInt32Negative" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_INT32( checkFieldNegative, "decodeTest.checkInt32Negative" );
+
+    result = UT_KVP_PROFILE_GET_INT32("decodeTest.checkInt32Positive");
+    UT_ASSERT_EQUAL(result, checkFieldPositive);
+
+    UT_LOG_STEP("test_ut_kvp_profile_int32 - end");
+}
+
+void test_ut_kvp_profile_int64(void)
+{
+    int64_t checkFieldPositive = 9000000000000000000LL;
+    int64_t checkFieldNegative = -9000000000000000000LL;
+    int64_t result;
+    UT_LOG_STEP("test_ut_kvp_profile_int64 - start");
+    UT_ASSERT_KVP_EQUAL_PROFILE_INT64( checkFieldPositive, "decodeTest/checkInt64Positive" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_INT64( checkFieldPositive, "decodeTest.checkInt64Positive" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_INT64( checkFieldNegative, "decodeTest/checkInt64Negative" );
+    UT_ASSERT_KVP_EQUAL_PROFILE_INT64( checkFieldNegative, "decodeTest.checkInt64Negative" );
+
+    result = UT_KVP_PROFILE_GET_INT64("decodeTest.checkInt64Positive");
+    UT_ASSERT_EQUAL(result, checkFieldPositive);
+
+    UT_LOG_STEP("test_ut_kvp_profile_int64 - end");
+}
+
 void test_ut_kvp_profile_open( void )
 {
     UT_LOG_STEP( "test_ut_kvp_profile_open - start" );
@@ -251,6 +319,10 @@ void register_kvp_profile_testing_functions(void)
     UT_add_test(gpAssertSuite2, "kvp profile uint16", test_ut_kvp_profile_uint16);
     UT_add_test(gpAssertSuite2, "kvp profile uint32", test_ut_kvp_profile_uint32);
     UT_add_test(gpAssertSuite2, "kvp profile uint64", test_ut_kvp_profile_uint64);
+    UT_add_test(gpAssertSuite2, "kvp profile int8", test_ut_kvp_profile_int8);
+    UT_add_test(gpAssertSuite2, "kvp profile int16", test_ut_kvp_profile_int16);
+    UT_add_test(gpAssertSuite2, "kvp profile int32", test_ut_kvp_profile_int32);
+    UT_add_test(gpAssertSuite2, "kvp profile int64", test_ut_kvp_profile_int64);
     UT_add_test(gpAssertSuite2, "kvp profile string", test_ut_kvp_profile_string);
     UT_add_test(gpAssertSuite2, "kvp profile bool", test_ut_kvp_profile_bool);
     UT_add_test(gpAssertSuite2, "kvp profile list count", test_ut_kvp_profile_list_count);
@@ -264,6 +336,10 @@ void register_kvp_profile_testing_functions(void)
     UT_add_test(gpAssertSuite3, "kvp profile uint16", test_ut_kvp_profile_uint16);
     UT_add_test(gpAssertSuite3, "kvp profile uint32", test_ut_kvp_profile_uint32);
     UT_add_test(gpAssertSuite3, "kvp profile uint64", test_ut_kvp_profile_uint64);
+    UT_add_test(gpAssertSuite3, "kvp profile int8", test_ut_kvp_profile_int8);
+    UT_add_test(gpAssertSuite3, "kvp profile int16", test_ut_kvp_profile_int16);
+    UT_add_test(gpAssertSuite3, "kvp profile int32", test_ut_kvp_profile_int32);
+    UT_add_test(gpAssertSuite3, "kvp profile int64", test_ut_kvp_profile_int64);
     UT_add_test(gpAssertSuite3, "kvp profile string", test_ut_kvp_profile_string);
     UT_add_test(gpAssertSuite3, "kvp profile bool", test_ut_kvp_profile_bool);
     UT_add_test(gpAssertSuite3, "kvp profile list count", test_ut_kvp_profile_list_count);
