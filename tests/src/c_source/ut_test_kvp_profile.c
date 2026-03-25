@@ -228,7 +228,7 @@ void test_ut_kvp_profile_int64(void)
     UT_ASSERT_KVP_EQUAL_PROFILE_INT64( checkFieldNegative, "decodeTest.checkInt64Negative" );
 
     result = UT_KVP_PROFILE_GET_INT64("decodeTest.checkInt64Positive");
-    UT_ASSERT_EQUAL(result, checkFieldPositive);
+    UT_ASSERT(result == checkFieldPositive);
 
     UT_LOG_STEP("test_ut_kvp_profile_int64 - end");
 }
