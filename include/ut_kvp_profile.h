@@ -62,6 +62,10 @@ extern "C"
 #define UT_KVP_PROFILE_GET_UINT16(key) ut_kvp_getUInt16Field(ut_kvp_profile_getInstance(), key)
 #define UT_KVP_PROFILE_GET_UINT32(key) ut_kvp_getUInt32Field(ut_kvp_profile_getInstance(), key)
 #define UT_KVP_PROFILE_GET_UINT64(key) ut_kvp_getUInt64Field(ut_kvp_profile_getInstance(), key)
+#define UT_KVP_PROFILE_GET_INT8(key) ut_kvp_getInt8Field(ut_kvp_profile_getInstance(), key)
+#define UT_KVP_PROFILE_GET_INT16(key) ut_kvp_getInt16Field(ut_kvp_profile_getInstance(), key)
+#define UT_KVP_PROFILE_GET_INT32(key) ut_kvp_getInt32Field(ut_kvp_profile_getInstance(), key)
+#define UT_KVP_PROFILE_GET_INT64(key) ut_kvp_getInt64Field(ut_kvp_profile_getInstance(), key)
 #define UT_KVP_PROFILE_GET_LIST_COUNT(key) ut_kvp_getListCount(ut_kvp_profile_getInstance(), key)
 #define UT_KVP_PROFILE_GET_STRING(key, pszReturnedString ) \
     { \
@@ -84,6 +88,18 @@ extern "C"
 
 /**! Asserts that a UINT64 KVP field matches the expected value. */
 #define UT_ASSERT_KVP_EQUAL_PROFILE_UINT64(checkValue, key) UT_ASSERT_EQUAL(UT_KVP_PROFILE_GET_UINT64(key), checkValue);
+
+/**! Asserts that an INT8 KVP field matches the expected value. */
+#define UT_ASSERT_KVP_EQUAL_PROFILE_INT8(checkValue, key) UT_ASSERT_EQUAL(UT_KVP_PROFILE_GET_INT8(key), checkValue);
+
+/**! Asserts that an INT16 KVP field matches the expected value. */
+#define UT_ASSERT_KVP_EQUAL_PROFILE_INT16(checkValue, key) UT_ASSERT_EQUAL(UT_KVP_PROFILE_GET_INT16(key), checkValue);
+
+/**! Asserts that an INT32 KVP field matches the expected value. */
+#define UT_ASSERT_KVP_EQUAL_PROFILE_INT32(checkValue, key) UT_ASSERT_EQUAL(UT_KVP_PROFILE_GET_INT32(key), checkValue);
+
+/**! Asserts that an INT64 KVP field matches the expected value. */
+#define UT_ASSERT_KVP_EQUAL_PROFILE_INT64(checkValue, key) UT_ASSERT(UT_KVP_PROFILE_GET_INT64(key) == (checkValue));
 
 /**! Asserts that a KVP list field matches the expected value. */
 #define UT_ASSERT_KVP_EQUAL_PROFILE_LIST_COUNT(checkValue, key) UT_ASSERT_EQUAL(UT_KVP_PROFILE_GET_LIST_COUNT(key), checkValue);

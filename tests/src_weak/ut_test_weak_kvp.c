@@ -175,6 +175,74 @@ uint64_t __attribute__((weak)) ut_kvp_getUInt64Field(ut_kvp_instance_t *pInstanc
 }
 
 /**
+ * @brief Weak implementation of ut_kvp_getInt8Field.
+ *
+ * Always returns 0.
+ *
+ * @param[in] pInstance - Handle to the KVP instance.
+ * @param[in] pszKey - Key to search for.
+ * @returns 0.
+ */
+int8_t __attribute__((weak)) ut_kvp_getInt8Field(ut_kvp_instance_t *pInstance, const char *pszKey)
+{
+    (void)pInstance;
+    (void)pszKey;
+    printf("Weak implementation of [%s]", __func__);
+    return 0;
+}
+
+/**
+ * @brief Weak implementation of ut_kvp_getInt16Field.
+ *
+ * Always returns 0.
+ *
+ * @param[in] pInstance - Handle to the KVP instance.
+ * @param[in] pszKey - Key to search for.
+ * @returns 0.
+ */
+int16_t __attribute__((weak)) ut_kvp_getInt16Field(ut_kvp_instance_t *pInstance, const char *pszKey)
+{
+    (void)pInstance;
+    (void)pszKey;
+    printf("Weak implementation of [%s]", __func__);
+    return 0;
+}
+
+/**
+ * @brief Weak implementation of ut_kvp_getInt32Field.
+ *
+ * Always returns 0.
+ *
+ * @param[in] pInstance - Handle to the KVP instance.
+ * @param[in] pszKey - Key to search for.
+ * @returns 0.
+ */
+int32_t __attribute__((weak)) ut_kvp_getInt32Field(ut_kvp_instance_t *pInstance, const char *pszKey)
+{
+    (void)pInstance;
+    (void)pszKey;
+    printf("Weak implementation of [%s]", __func__);
+    return 0;
+}
+
+/**
+ * @brief Weak implementation of ut_kvp_getInt64Field.
+ *
+ * Always returns 0.
+ *
+ * @param[in] pInstance - Handle to the KVP instance.
+ * @param[in] pszKey - Key to search for.
+ * @returns 0.
+ */
+int64_t __attribute__((weak)) ut_kvp_getInt64Field(ut_kvp_instance_t *pInstance, const char *pszKey)
+{
+    (void)pInstance;
+    (void)pszKey;
+    printf("Weak implementation of [%s]", __func__);
+    return 0;
+}
+
+/**
  * @brief Weak implementation of ut_kvp_getStringField.
  *
  * Always returns UT_KVP_STATUS_KEY_NOT_FOUND.

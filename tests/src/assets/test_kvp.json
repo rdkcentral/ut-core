@@ -26,6 +26,14 @@
       720,
       800,
       1080
-    ]
+    ],
+    "checkInt8Positive": 120,
+    "checkInt8Negative": -120,
+    "checkInt16Positive": 30000,
+    "checkInt16Negative": -30000,
+    "checkInt32Positive": 2000000000,
+    "checkInt32Negative": -2000000000,
+    "checkInt64Positive": 9000000000000000000,
+    "checkInt64Negative": -9000000000000000000
   }
 }
