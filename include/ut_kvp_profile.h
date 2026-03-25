@@ -87,7 +87,7 @@ extern "C"
 #define UT_ASSERT_KVP_EQUAL_PROFILE_UINT32(checkValue, key) UT_ASSERT_EQUAL(UT_KVP_PROFILE_GET_UINT32(key), checkValue);
 
 /**! Asserts that a UINT64 KVP field matches the expected value. */
-#define UT_ASSERT_KVP_EQUAL_PROFILE_UINT64(checkValue, key) UT_ASSERT(UT_KVP_PROFILE_GET_UINT64(key) == (checkValue));
+#define UT_ASSERT_KVP_EQUAL_PROFILE_UINT64(checkValue, key) UT_ASSERT_EQUAL(UT_KVP_PROFILE_GET_UINT64(key), checkValue);
 
 /**! Asserts that an INT8 KVP field matches the expected value. */
 #define UT_ASSERT_KVP_EQUAL_PROFILE_INT8(checkValue, key) UT_ASSERT_EQUAL(UT_KVP_PROFILE_GET_INT8(key), checkValue);
