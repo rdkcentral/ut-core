@@ -89,12 +89,14 @@ endif
 
 VARIANT_FILE := .variant
 
-ifeq ($(TARGET),arm)
+ifneq ($(filter arm arm64,$(TARGET)),)
+# case for arm or arm64
 COMPILER := $(if $(filter CPP,$(VARIANT)),$(CXX),$(CC))
 #CC := arm-rdk-linux-gnueabi-gcc -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -mabi=aapcs-linux -mno-thumb-interwork -ffixed-r8 -fomit-frame-pointer
 # CFLAGS will be overriden by Caller as required
 INC_DIRS += $(UT_CORE_DIR)/sysroot/usr/include
 else
+# case for linux
 COMPILER := $(if $(filter CPP,$(VARIANT)),g++ -ggdb -o0 -Wall, gcc -ggdb -o0 -Wall)
 endif
 
@@ -197,7 +199,8 @@ $(WEAK_STUBS_OUTPUT_DIR)/%.o: $(BUILD_WEAK_STUBS_SRC)/%.c
 
 arm:
 	make TARGET=arm
-
+arm64:
+	make TARGET=arm64
 linux: framework
 	make TARGET=linux
 

@@ -32,11 +32,14 @@ else
     VARIANT="C"
 fi
 
-if [[ "$*" == *"TARGET=arm"* ]]; then
+if [[ "$*" == *"TARGET=arm64"* ]]; then
+    TARGET="arm64"
+elif [[ "$*" == *"TARGET=arm"* ]]; then
     TARGET="arm"
 else
     TARGET="linux"
 fi
+
 echo "TARGET= [$TARGET] from [$0]"
 echo "VARIANT= [$VARIANT] from [$0]"
 
