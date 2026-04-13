@@ -30,15 +30,16 @@ NC='\033[0m' # No Color
 
 # Function to print usage
 usage() {
-    echo -e "${YELLOW}Usage: $0 -u <REPO_URL> -t <UT_CORE_BRANCH_NAME> -c <UT_CONTROL_BRANCH_NAME>${NC}"
+    echo -e "${YELLOW}Usage: $0 -u <REPO_URL> -t <UT_CORE_BRANCH_NAME> -c <UT_CONTROL_BRANCH_NAME> [-a <ARM64_TOOLCHAIN_ENV_FILE>]${NC}"
 }
 
 # Parse command-line arguments
-while getopts "u:t:c:" opt; do
+while getopts "u:t:c:a:" opt; do
     case $opt in
         u) REPO_URL="$OPTARG" ;;
         t) UT_CORE_BRANCH_NAME="$OPTARG" ;;
         c) UT_CONTROL_BRANCH_NAME="$OPTARG" ;;
+        a) ARM64_TOOLCHAIN="$OPTARG" ;;
         *) usage ;;
     esac
 done
@@ -67,6 +68,27 @@ fi
 if [ -z "$REPO_URL" ]; then
     REPO_URL=git@github.com:rdkcentral/rdk-halif-hdmi_cec.git
 fi
+
+# Default ARM64 toolchain path; override with -a <path>
+ARM64_TOOLCHAIN="${ARM64_TOOLCHAIN:-$HOME/rdkb-64bit-toolchnain/environment-setup-aarch64-rdk-linux}"
+
+# Function: setup_arm64_toolchain
+# Description: Sources the aarch64 cross-compilation toolchain environment file.
+# Usage: setup_arm64_toolchain
+# Returns: None; exits on error if the toolchain file is not found.
+setup_arm64_toolchain() {
+    if [ ! -f "$ARM64_TOOLCHAIN" ]; then
+        echo -e "${RED}[ERROR] ARM64 toolchain not found at: $ARM64_TOOLCHAIN${NC}" 1>&2
+        echo -e "${YELLOW}Please download the aarch64-rdk-linux toolchain and either:${NC}" 1>&2
+        echo -e "${YELLOW}  - Place it at the default path above, or${NC}" 1>&2
+        echo -e "${YELLOW}  - Pass the path via: -a <toolchain_env_setup_file>${NC}" 1>&2
+        exit 1
+    fi
+    echo -e "${YELLOW}Sourcing ARM64 toolchain: $ARM64_TOOLCHAIN${NC}"
+    # shellcheck source=/dev/null
+    source "$ARM64_TOOLCHAIN"
+    echo -e "${GREEN}ARM64 toolchain sourced. CC=$CC${NC}"
+}
 
 #git clone and change dir
 run_git_clone(){
@@ -116,6 +138,8 @@ run_build() {
         sleep 10
         kill -9 "$command_pid" || echo "Warning: Could not kill process $command_pid (might have finished)"
         sleep 5
+        echo "**********************current directory: ${PWD}***********************"
+        sed -i 's/^ifeq ($(TARGET),arm)/ifneq ($(filter arm arm64,$(TARGET)),)/' ut/Makefile || error_exit "sed failed to modify Makefile"
 
         if [ ! -z "$UT_CONTROL_BRANCH_NAME" ]; then
             cd ut/ut-core || error_exit "ut-core not found"
@@ -165,6 +189,13 @@ run_build() {
     fi
 
     if [ "$environment" = "ubuntu" ] && [ "$target" = "linux" ]; then
+        ./build_ut.sh TARGET="$target" | tee "$PWD/build_log.txt" 2>&1
+        if [ $? -eq 0 ]; then
+            echo "Build command executed successfully."
+        else
+            echo "[ERROR] Build command failed. Check build_log.txt"
+        fi
+    elif [ "$environment" = "arm64" ] && [ "$target" = "arm64" ]; then
         ./build_ut.sh TARGET="$target" | tee "$PWD/build_log.txt" 2>&1
         if [ $? -eq 0 ]; then
             echo "Build command executed successfully."
@@ -358,6 +389,12 @@ run_checks() {
         else
             echo -e "${GREEN}Openssl static lib does not exist. PASS ${NC}"
         fi
+    elif [[ "$environment" == "arm64" ]]; then
+        if [ -f "$OPENSSL_STATIC_LIB" ]; then
+            echo -e "${GREEN}$OPENSSL_STATIC_LIB exists. PASS ${NC}"
+        else
+            echo -e "${RED}Openssl static lib does not exist. FAIL ${NC}"
+        fi
     fi
     
     # Test for CMAKE host binary
@@ -397,6 +434,12 @@ run_checks() {
         else
             echo -e "${RED}CMake host binary exists. FAIL ${NC}"
         fi
+    elif [[ "$environment" == "arm64" ]]; then
+        if [ ! -f "$CMAKE_HOST_BIN" ]; then
+            echo -e "${GREEN}CMake host binary does not exist. PASS ${NC}"
+        else
+            echo -e "${RED}CMake host binary exists. FAIL ${NC}"
+        fi
     fi
     
     # # Test for CPP static library
@@ -422,6 +465,7 @@ export -f run_checks
 export -f run_build
 export -f usage
 export -f error_exit
+export -f setup_arm64_toolchain
 
 REPO_NAME=$(basename "$REPO_URL" .git)
 
@@ -521,10 +565,28 @@ print_results() {
     pushd ${PLAT_DIR} > /dev/null
     run_checks "kirkstone_linux" "linux" $UT_CORE_BRANCH_NAME
     popd > /dev/null
+
+    #Results for arm64
+    PLAT_DIR="${REPO_NAME}-arm64"
+    pushd ${PLAT_DIR} > /dev/null
+    run_checks "arm64" "arm64" $UT_CORE_BRANCH_NAME
+    popd > /dev/null
     
     popd > /dev/null
     
 }
+
+# Description: This function git clones and builds the platform repo for TARGET=arm64
+#              using the host aarch64 cross-compilation toolchain (no docker required).
+run_on_arm64() {
+    pushd "${MY_DIR}" > /dev/null
+    setup_arm64_toolchain
+    run_git_clone "arm64" "arm64"
+    run_build "arm64" "arm64" "$UT_CORE_BRANCH_NAME" "$UT_CONTROL_BRANCH_NAME"
+    run_checks "arm64" "arm64" "$UT_CORE_BRANCH_NAME" "$UT_CONTROL_BRANCH_NAME"
+    popd > /dev/null
+}
+export -f run_on_arm64
 
 # Run tests in different environments
 run_on_ubuntu_linux
@@ -533,5 +595,6 @@ run_on_platform "kirkstone" "linux"
 run_on_platform "VM-SYNC" "linux"
 run_on_platform "dunfell" "arm"
 run_on_platform "kirkstone" "arm"
+run_on_arm64
 
 print_results

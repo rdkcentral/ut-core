@@ -124,7 +124,7 @@ $(info $(shell ${ECHOE} ${GREEN}VARIANT [$(VARIANT)]${NC}))
 VPATH += $(UT_CORE_DIR) $(TOP_DIR)
 
 # Default target
-.PHONY: clean list arm linux framework test createdirs all printenv
+.PHONY: clean list arm arm64 linux framework test createdirs all printenv
 
 all: framework $(OBJS) $(if $(BUILD_WEAK_STUBS_SRC),$(WEAK_STUBS_LIB))
 

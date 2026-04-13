@@ -35,16 +35,17 @@ NC='\033[0m' # No Color
 # Usage: usage
 # Returns: None
 usage() {
-    echo -e "${YELLOW}Usage: $0 -u <REPO_URL> -t <UT_CORE_BRANCH_NAME> -c <UT_CONTROL_BRANCH_NAME>${NC}"
+    echo -e "${YELLOW}Usage: $0 -u <REPO_URL> -t <UT_CORE_BRANCH_NAME> -c <UT_CONTROL_BRANCH_NAME> [-a <ARM64_TOOLCHAIN_ENV_FILE>]${NC}"
     exit 1
 }
 
 # Parse command-line arguments
-while getopts "u:t:c:" opt; do
+while getopts "u:t:c:a:" opt; do
     case $opt in
         u) REPO_URL="$OPTARG" ;;
         t) UT_CORE_BRANCH_NAME="$OPTARG" ;;
         c) UT_CONTROL_BRANCH_NAME="$OPTARG" ;;
+        a) ARM64_TOOLCHAIN="$OPTARG" ;;
         *) usage ;;
     esac
 done
@@ -79,6 +80,27 @@ if [ -z "$REPO_URL" ]; then
     REPO_URL=git@github.com:rdkcentral/ut-core.git
 fi
 REPO_NAME=$(basename "$REPO_URL" .git)
+
+# Default ARM64 toolchain path; override with -a <path>
+ARM64_TOOLCHAIN="${ARM64_TOOLCHAIN:-$HOME/rdkb-64bit-toolchnain/environment-setup-aarch64-rdk-linux}"
+
+# Function: setup_arm64_toolchain
+# Description: Sources the aarch64 cross-compilation toolchain environment file.
+# Usage: setup_arm64_toolchain
+# Returns: None; exits on error if the toolchain file is not found.
+setup_arm64_toolchain() {
+    if [ ! -f "$ARM64_TOOLCHAIN" ]; then
+        echo -e "${RED}[ERROR] ARM64 toolchain not found at: $ARM64_TOOLCHAIN${NC}" 1>&2
+        echo -e "${YELLOW}Please download the aarch64-rdk-linux toolchain and either:${NC}" 1>&2
+        echo -e "${YELLOW}  - Place it at the default path above, or${NC}" 1>&2
+        echo -e "${YELLOW}  - Pass the path via: -a <toolchain_env_setup_file>${NC}" 1>&2
+        exit 1
+    fi
+    echo -e "${YELLOW}Sourcing ARM64 toolchain: $ARM64_TOOLCHAIN${NC}"
+    # shellcheck source=/dev/null
+    source "$ARM64_TOOLCHAIN"
+    echo -e "${GREEN}ARM64 toolchain sourced. CC=$CC${NC}"
+}
 
 # Function: run_git_clone
 # Usage: run_git_clone <environment> <variant>
@@ -343,6 +365,12 @@ run_checks() {
         else
             echo -e "${GREEN}Openssl static lib does not exist. PASS ${NC}"
         fi
+    elif [[ "$environment" == "arm64" ]]; then
+        if [ -f "$OPENSSL_STATIC_LIB" ]; then
+            echo -e "${GREEN}$OPENSSL_STATIC_LIB exists. PASS ${NC}"
+        else
+            echo -e "${RED}Openssl static lib does not exist. FAIL ${NC}"
+        fi
     fi
 
     # Test for CMAKE host binary
@@ -377,6 +405,12 @@ run_checks() {
             echo -e "${RED}CMake host binary exists. FAIL ${NC}"
         fi
     elif [[ "$environment" == "kirkstone_linux" ]]; then
+        if [ ! -f "$CMAKE_HOST_BIN" ]; then
+            echo -e "${GREEN}CMake host binary does not exist. PASS ${NC}"
+        else
+            echo -e "${RED}CMake host binary exists. FAIL ${NC}"
+        fi
+    elif [[ "$environment" == "arm64" ]]; then
         if [ ! -f "$CMAKE_HOST_BIN" ]; then
             echo -e "${GREEN}CMake host binary does not exist. PASS ${NC}"
         else
@@ -486,6 +520,12 @@ print_results() {
     run_checks "kirkstone_linux" "linux" $UT_CORE_BRANCH_NAME $1
     popd > /dev/null
 
+    #Results for arm64
+    PLAT_DIR="${REPO_NAME}-arm64-$1"
+    pushd ${PLAT_DIR} > /dev/null
+    run_checks "arm64" "arm64" $UT_CORE_BRANCH_NAME $1
+    popd > /dev/null
+
     popd > /dev/null
 
 }
@@ -515,6 +555,7 @@ export -f run_make_with_logs
 export -f run_checks
 export -f usage
 export -f error_exit
+export -f setup_arm64_toolchain
 
 # Function: run_on_ubuntu_linux
 # Description: This function git clones and builds ut-core on an Ubuntu Linux environment.
@@ -569,6 +610,24 @@ run_on_platform() {
     popd > /dev/null
 }
 
+# Function: run_on_arm64
+# Description: This function git clones and builds ut-core for TARGET=arm64
+#              using the host aarch64 cross-compilation toolchain (no docker required).
+# Usage: run_on_arm64 <variant>
+# Parameters:
+#   variant: The variant of the UT core (C or CPP).
+# Returns: None
+# Example: run_on_arm64 "C"
+run_on_arm64() {
+    pushd ${MY_DIR} > /dev/null
+    setup_arm64_toolchain
+    run_git_clone "arm64" $1
+    run_make_with_logs $1 "arm64"
+    run_checks "arm64" "arm64" "$UT_CORE_BRANCH_NAME" $1
+    popd > /dev/null
+}
+export -f run_on_arm64
+
 # Run tests in different environments
 run_on_ubuntu_linux "C"
 run_on_platform "dunfell" "linux" "C"
@@ -583,6 +642,8 @@ run_on_platform "kirkstone" "linux" "CPP"
 run_on_platform "VM-SYNC" "linux" "CPP"
 run_on_platform "dunfell" "arm" "CPP"
 run_on_platform "kirkstone" "arm" "CPP"
+run_on_arm64 "C"
+run_on_arm64 "CPP"
 
 # Print the results for C and CPP variants
 print_results "C"
