@@ -16,8 +16,8 @@ Following table gives the overview:
 |6|./build_ut.sh -C tests/ TARGET=arm|rdk-kirkstone|builds hal tests for target arm
 |7|./build_ut.sh -C tests/ TARGET=linux|vm-sync|builds hal tests for target linux
 |8|./build_ut.sh -C tests/ TARGET=linux|none|builds hal tests for target linux
-|9|./build_ut.sh TARGET=arm64|none (host toolchain)|builds hal for target arm64
-|10|./build_ut.sh -C tests/ TARGET=arm64|none (host toolchain)|builds hal tests for target arm64
+|9|./build_ut.sh TARGET=arm|none (host toolchain)|builds hal for cross compilation
+|10|./build_ut.sh -C tests/ TARGET=arm|none (host toolchain)|builds hal tests for cross compilation
 
 ## Key Objectives:
 1. **Automated Repository Setup**:  
@@ -28,7 +28,7 @@ Following table gives the overview:
    Dunfell Linux : is a docker with linux environment
    Dunfell ARM : is a docker simulating the arm environment for yocto version dunfell
    Kirkstone ARM : is a docker simulating the arm environment for yocto version kirkstone
-   ARM64 : local build using the host aarch64 cross-compilation toolchain (no docker)
+   Cross : local build using the host aarch64 cross-compilation toolchain (no docker)
 
 2. **Environment-Specific Builds**:  
    Runs a customized build process based on the environment. It supports branching logic to switch and build from a specific branch (`UT_CORE_BRANCH_NAME`) when provided.
@@ -56,7 +56,7 @@ Following table gives the overview:
 |4|RDK-DUNFELL(linux)|NO|YES|NO|YES
 |5|RDK-KIRKSTONE(arm)|NO|YES|YES|YES
 |6|RDK-KIRKSTONE(linux)|NO|YES|NO|YES
-|7|ARM64 (host toolchain)|NO|YES|YES|YES
+|7|Cross (host toolchain)|NO|YES|YES|YES
 
 For ex:
 On env 1,  the script will check for availability of CURL library, OpenSSL libraraies and Gtest libraries for Target.It would however would not look for CMAKE binary for host as this environment already provides cmake support which is provided by build essentials.
@@ -80,7 +80,11 @@ This script is a powerful tool for managing multi-environment development workfl
 - Observed that during some of the runs the build_log.txt have undefined reference error, however same is not observed while runing it on terminal (w/o using the script).
  In the rare case of the above occurence, user can run manually change to the respective directory, remove `ut/ut-core` and `ut/build/`, and trigger the command : `build_ut.sh TARGET=<TARGET>`.To print the results user can comment all the 4 commands at the end of the bash script except print_results and run the script as usual.
 - This script doesnot handle the case of `build_ut.sh TARGET=<TARGET> VARIANT=CPP` as this change is not available from platform test-suit as of now. This script only checks that the PR changes doesnot break the platform test-suit as it exists today.
-- The ARM64 build requires the aarch64-rdk-linux cross-compilation toolchain. The default path is `$HOME/rdkb-64bit-toolchnain/environment-setup-aarch64-rdk-linux`. If the toolchain is not present at that path, download it and provide the path via the `-a` flag:
+- The Cross build requires a cross-compilation toolchain. The toolchain path must be provided via the `-a` flag or entered interactively when the script starts. If no path is given (i.e. the user presses Enter at the prompt), cross-compilation tests are skipped and the user is informed. There is no hardcoded default path.
   ```bash
+  # Prompted interactively at startup if -a is omitted (press Enter to skip cross)
+  ./release-test-script-platform.sh -t <BRANCH> -u <REPO_URL>
+
+  # Supply the toolchain path directly
   ./release-test-script-platform.sh -t <BRANCH> -u <REPO_URL> -a <path/to/environment-setup-aarch64-rdk-linux>
   ```

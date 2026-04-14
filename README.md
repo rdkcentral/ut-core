@@ -2,7 +2,6 @@
 
 | Date (DD/MM/YY)  | Comment | Document Version |
 |--------|---------|---------|
-| 02/02/26 | Added support for 64 bit ARM | 5.1.0 |
 | 19/02/25 | Updated link for Groups in UT Core | 2.1.0 |
 | 24/12/24 | Updated usage of Weak Library | 2.0.3 |
 | 07/11/24 | Updated How to use Autogenerate script url | 2.0.2|
@@ -164,11 +163,10 @@ arm-rdk-linux-gnueabi-gcc -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -ma
 
 ## Making the code
 
-There are three targets for the platform
+There are two targets for the platform
 
 1. linux - (default) will build all the tests, the test_app, and the stubs
-2. arm - TARGET=arm, will build all the tests, and the test_app for the 32-bit ARM target
-3. arm64 - TARGET=arm64, will build all the tests, and the test_app for the 64-bit ARM target
+2. arm - TARGET=arm, will build all the tests, and the test_app for the target
 
 ```bash
 make clean
@@ -191,11 +189,7 @@ This will build the following directories `src/*.c`, in addition to core functio
 The toolchain must be sourced as above, once sources though swapping between linux & arm is possible as required.
 
 ```bash
-make TARGET=arm // For 32 bit ARM
-```
-
-```bash
-make TARGET=arm64 // For 64 bit ARM
+make TARGET=arm
 ```
 
 This will build the following directories `src/*.c`, in addition to core functions from `ut-core/src/c_source` and linking against libraries in `ut-core/framework` and link against `libs/.so` or from `sysroot` path in the SDK.
@@ -217,11 +211,7 @@ This will build the following directories `src/*.c`, in addition to core functio
 The toolchain must be sourced as above, once sources though swapping between linux & arm is possible as required.
 
 ```bash
-make VARIANT=CPP TARGET=arm // For 32 bit arm
-```
-
-```bash
-make VARIANT=CPP TARGET=arm64 // For 64 bit arm
+make VARIANT=CPP TARGET=arm
 ```
 
 This will build the following directories `src/*.c`, in addition to core functions from `ut-core/src/cpp_source` and linking against libraries in `ut-core/framework` and link against `libs/.so` or from `sysroot` path in the SDK.
