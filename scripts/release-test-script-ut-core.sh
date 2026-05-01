@@ -35,16 +35,17 @@ NC='\033[0m' # No Color
 # Usage: usage
 # Returns: None
 usage() {
-    echo -e "${YELLOW}Usage: $0 -u <REPO_URL> -t <UT_CORE_BRANCH_NAME> -c <UT_CONTROL_BRANCH_NAME>${NC}"
+    echo -e "${YELLOW}Usage: $0 -u <REPO_URL> -t <UT_CORE_BRANCH_NAME> -c <UT_CONTROL_BRANCH_NAME> [-a <CROSS_TOOLCHAIN_ENV_FILE>]${NC}"
     exit 1
 }
 
 # Parse command-line arguments
-while getopts "u:t:c:" opt; do
+while getopts "u:t:c:a:" opt; do
     case $opt in
         u) REPO_URL="$OPTARG" ;;
         t) UT_CORE_BRANCH_NAME="$OPTARG" ;;
         c) UT_CONTROL_BRANCH_NAME="$OPTARG" ;;
+        a) CROSS_TOOLCHAIN="$OPTARG" ;;
         *) usage ;;
     esac
 done
@@ -79,6 +80,35 @@ if [ -z "$REPO_URL" ]; then
     REPO_URL=git@github.com:rdkcentral/ut-core.git
 fi
 REPO_NAME=$(basename "$REPO_URL" .git)
+
+# Prompt user for cross-compilation toolchain path if not supplied via -a
+SKIP_CROSS=false
+if [ -z "$CROSS_TOOLCHAIN" ]; then
+    echo -e "${YELLOW}Cross-compilation toolchain path not provided.${NC}"
+    read -rp "Enter path to cross-compilation toolchain env file (or press Enter to skip cross compilation): " CROSS_TOOLCHAIN_INPUT
+    if [ -z "$CROSS_TOOLCHAIN_INPUT" ]; then
+        echo -e "${YELLOW}No toolchain path given. Cross compilation tests will be skipped.${NC}"
+        SKIP_CROSS=true
+    else
+        CROSS_TOOLCHAIN="$CROSS_TOOLCHAIN_INPUT"
+    fi
+fi
+
+# Function: setup_cross_toolchain
+# Description: Sources the cross-compilation toolchain environment file.
+# Usage: setup_cross_toolchain
+# Returns: None; exits on error if the toolchain file is not found.
+setup_cross_toolchain() {
+    if [ ! -f "$CROSS_TOOLCHAIN" ]; then
+        echo -e "${RED}[ERROR] Cross toolchain not found at: $CROSS_TOOLCHAIN${NC}" 1>&2
+        echo -e "${YELLOW}Please provide a valid toolchain env-setup file path via: -a <toolchain_env_setup_file>${NC}" 1>&2
+        exit 1
+    fi
+    echo -e "${YELLOW}Sourcing Cross toolchain: $CROSS_TOOLCHAIN${NC}"
+    # shellcheck source=/dev/null
+    source "$CROSS_TOOLCHAIN"
+    echo -e "${GREEN}Cross toolchain sourced. CC=$CC${NC}"
+}
 
 # Function: run_git_clone
 # Usage: run_git_clone <environment> <variant>
@@ -343,6 +373,12 @@ run_checks() {
         else
             echo -e "${GREEN}Openssl static lib does not exist. PASS ${NC}"
         fi
+    elif [[ "$environment" == "cross" ]]; then
+        if [ -f "$OPENSSL_STATIC_LIB" ]; then
+            echo -e "${GREEN}$OPENSSL_STATIC_LIB exists. PASS ${NC}"
+        else
+            echo -e "${RED}Openssl static lib does not exist. FAIL ${NC}"
+        fi
     fi
 
     # Test for CMAKE host binary
@@ -377,6 +413,12 @@ run_checks() {
             echo -e "${RED}CMake host binary exists. FAIL ${NC}"
         fi
     elif [[ "$environment" == "kirkstone_linux" ]]; then
+        if [ ! -f "$CMAKE_HOST_BIN" ]; then
+            echo -e "${GREEN}CMake host binary does not exist. PASS ${NC}"
+        else
+            echo -e "${RED}CMake host binary exists. FAIL ${NC}"
+        fi
+    elif [[ "$environment" == "cross" ]]; then
         if [ ! -f "$CMAKE_HOST_BIN" ]; then
             echo -e "${GREEN}CMake host binary does not exist. PASS ${NC}"
         else
@@ -486,6 +528,16 @@ print_results() {
     run_checks "kirkstone_linux" "linux" $UT_CORE_BRANCH_NAME $1
     popd > /dev/null
 
+    #Results for cross
+    if [ "$SKIP_CROSS" = true ]; then
+        echo -e "${YELLOW}Cross compilation tests were skipped (no toolchain path provided).${NC}"
+    else
+        PLAT_DIR="${REPO_NAME}-cross-$1"
+        pushd ${PLAT_DIR} > /dev/null
+        run_checks "cross" "arm" $UT_CORE_BRANCH_NAME $1
+        popd > /dev/null
+    fi
+
     popd > /dev/null
 
 }
@@ -515,6 +567,7 @@ export -f run_make_with_logs
 export -f run_checks
 export -f usage
 export -f error_exit
+export -f setup_cross_toolchain
 
 # Function: run_on_ubuntu_linux
 # Description: This function git clones and builds ut-core on an Ubuntu Linux environment.
@@ -569,6 +622,24 @@ run_on_platform() {
     popd > /dev/null
 }
 
+# Function: run_on_cross
+# Description: This function git clones and builds ut-core using
+#              the host cross-compilation toolchain (no docker required).
+# Usage: run_on_cross <variant>
+# Parameters:
+#   variant: The variant of the UT core (C or CPP).
+# Returns: None
+# Example: run_on_cross "C"
+run_on_cross() {
+    pushd ${MY_DIR} > /dev/null
+    setup_cross_toolchain
+    run_git_clone "cross" $1
+    run_make_with_logs $1 "arm"
+    run_checks "cross" "arm" "$UT_CORE_BRANCH_NAME" $1
+    popd > /dev/null
+}
+export -f run_on_cross
+
 # Run tests in different environments
 run_on_ubuntu_linux "C"
 run_on_platform "dunfell" "linux" "C"
@@ -583,6 +654,12 @@ run_on_platform "kirkstone" "linux" "CPP"
 run_on_platform "VM-SYNC" "linux" "CPP"
 run_on_platform "dunfell" "arm" "CPP"
 run_on_platform "kirkstone" "arm" "CPP"
+if [ "$SKIP_CROSS" = true ]; then
+    echo -e "${YELLOW}Skipping cross compilation tests (no toolchain path provided).${NC}"
+else
+    run_on_cross "C"
+    run_on_cross "CPP"
+fi
 
 # Print the results for C and CPP variants
 print_results "C"
