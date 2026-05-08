@@ -70,7 +70,7 @@ popd > /dev/null # ${MY_DIR}
 UT_CONTROL_PROJECT_VERSION="main"  # Fixed version
 
 # Clone the Unit Test Requirements
-UT_CONTROL_REPO=git@github.com:rdkcentral/ut-control.git
+UT_CONTROL_REPO=https://github.com/rdkcentral/ut-control.git
 
 # This function checks the latest version of UT core and recommends an upgrade if reuqired
 function check_ut_control_revision()
