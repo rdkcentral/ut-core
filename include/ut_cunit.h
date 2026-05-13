@@ -70,7 +70,7 @@
  */
 #define UT_ASSERT(value)                      \
     {                                         \
-        typeof(value) _value = (value);                \
+        typeof(value) _value = (value);       \
         if (!_value)                          \
         {                                     \
             UT_LOG_ASSERT(UT_ASSERT, #value); \
@@ -85,7 +85,7 @@
  */
 #define UT_ASSERT_FATAL(value)                      \
     {                                               \
-        typeof(value) _value = (value);                      \
+        typeof(value) _value = (value);             \
         if (!(_value))                              \
         {                                           \
             UT_LOG_ASSERT(UT_ASSERT_FATAL, #value); \
@@ -99,15 +99,17 @@
  * @param value - pointer value actual
  * @param expected - pointer value expected
  */
-#define UT_ASSERT_PTR_EQUAL(actual, expected)                       \
-    {                                                               \
-        const void *_actual = (const void *)(actual);               \
-        const void *_expected = (const void *)(expected);           \
-        if (_actual != _expected)                                   \
-        {                                                           \
-            UT_LOG_ASSERT(UT_ASSERT_PTR_EQUAL, #actual, #expected); \
-        }                                                           \
-        CU_ASSERT_PTR_EQUAL(_actual, _expected);                    \
+#define UT_ASSERT_PTR_EQUAL(actual, expected)                \
+    {                                                        \
+        const void *_actual = (const void *)(actual);        \
+        const void *_expected = (const void *)(expected);    \
+        if (_actual != _expected)                            \
+        {                                                    \
+            UT_LOG_ASSERT(UT_ASSERT_PTR_EQUAL,               \
+                    "%s=%p, %s=%p", #actual, (void*)_actual, \
+                    #expected, (void*)_expected);            \
+        }                                                    \
+        CU_ASSERT_PTR_EQUAL(_actual, _expected);             \
     }
 
 /**
@@ -116,15 +118,17 @@
  * @param value - pointer value actual
  * @param expected - pointer value expected
  */
-#define UT_ASSERT_PTR_EQUAL_FATAL(actual, expected)                       \
-    {                                                                     \
-        const void *_actual = (const void *)(actual);                     \
-        const void *_expected = (const void *)(expected);                 \
-        if (_actual != _expected)                                         \
-        {                                                                 \
-            UT_LOG_ASSERT(UT_ASSERT_PTR_EQUAL_FATAL, #actual, #expected); \
-        }                                                                 \
-        CU_ASSERT_PTR_EQUAL_FATAL(_actual, _expected);                    \
+#define UT_ASSERT_PTR_EQUAL_FATAL(actual, expected)          \
+    {                                                        \
+        const void *_actual = (const void *)(actual);        \
+        const void *_expected = (const void *)(expected);    \
+        if (_actual != _expected)                            \
+        {                                                    \
+            UT_LOG_ASSERT(UT_ASSERT_PTR_EQUAL_FATAL,         \
+                    "%s=%p, %s=%p", #actual, (void*)_actual, \
+                    #expected, (void*)_expected);            \
+        }                                                    \
+        CU_ASSERT_PTR_EQUAL_FATAL(_actual, _expected);       \
     }
 
 /**
@@ -133,15 +137,17 @@
  * @param value - pointer value actual
  * @param expected - pointer value expected
  */
-#define UT_ASSERT_PTR_NOT_EQUAL(actual, expected)                       \
-    {                                                                   \
-        const void *_actual = (const void *)(actual);                   \
-        const void *_expected = (const void *)(expected);               \
-        if (_actual == _expected)                                       \
-        {                                                               \
-            UT_LOG_ASSERT(UT_ASSERT_PTR_NOT_EQUAL, #actual, #expected); \
-        }                                                               \
-        CU_ASSERT_PTR_NOT_EQUAL(_actual, _expected);                    \
+#define UT_ASSERT_PTR_NOT_EQUAL(actual, expected)            \
+    {                                                        \
+        const void *_actual = (const void *)(actual);        \
+        const void *_expected = (const void *)(expected);    \
+        if (_actual == _expected)                            \
+        {                                                    \
+            UT_LOG_ASSERT(UT_ASSERT_PTR_NOT_EQUAL,           \
+                "%s=%p, %s=%p", #actual, (void*)_actual,     \
+                          #expected, (void*)_expected);      \
+        }                                                    \
+        CU_ASSERT_PTR_NOT_EQUAL(_actual, _expected);         \
     }
 
 /**
@@ -156,7 +162,9 @@
         const void *_expected = (const void *)(expected);                     \
         if (_actual == _expected)                                             \
         {                                                                     \
-            UT_LOG_ASSERT(UT_ASSERT_PTR_NOT_EQUAL_FATAL, #actual, #expected); \
+            UT_LOG_ASSERT(UT_ASSERT_PTR_NOT_EQUAL_FATAL,                      \
+                          "%s=%p, %s=%p", #actual, (void*)_actual,            \
+                          #expected, (void*)_expected);                       \
         }                                                                     \
         CU_ASSERT_PTR_NOT_EQUAL_FATAL(_actual, _expected);                    \
     }
@@ -291,15 +299,17 @@
  * @param actual -  actual expression
  * @param expected -  expected expression
  */
-#define UT_ASSERT_EQUAL(actual, expected)                       \
-    {                                                           \
-        const int _actual = (actual);                           \
-        const int _expected = (expected);                       \
-        if (_actual != _expected)                               \
-        {                                                       \
-            UT_LOG_ASSERT(UT_ASSERT_EQUAL, #actual, #expected); \
-        }                                                       \
-        CU_ASSERT_EQUAL(_actual, _expected);                    \
+#define UT_ASSERT_EQUAL(actual, expected)                    \
+    {                                                        \
+        const int _actual = (actual);                        \
+        const int _expected = (expected);                    \
+        if (_actual != _expected)                            \
+        {                                                    \
+            UT_LOG_ASSERT(UT_ASSERT_EQUAL,                   \
+                          "%s=%d, %s=%d", #actual, _actual,  \
+                          #expected, _expected);             \
+        }                                                    \
+        CU_ASSERT_EQUAL(_actual, _expected);                 \
     }
 
 /**
@@ -308,15 +318,17 @@
  * @param actual -  actual expression
  * @param expected -  expected expression
  */
-#define UT_ASSERT_EQUAL_FATAL(actual, expected)                       \
-    {                                                                 \
-        const int _actual = (actual);                                 \
-        const int _expected = (expected);                             \
-        if (_actual != _expected)                                     \
-        {                                                             \
-            UT_LOG_ASSERT(UT_ASSERT_EQUAL_FATAL, #actual, #expected); \
-        }                                                             \
-        CU_ASSERT_EQUAL_FATAL(_actual, _expected);                    \
+#define UT_ASSERT_EQUAL_FATAL(actual, expected)              \
+    {                                                        \
+        const int _actual = (actual);                        \
+        const int _expected = (expected);                    \
+        if (_actual != _expected)                            \
+        {                                                    \
+            UT_LOG_ASSERT(UT_ASSERT_EQUAL_FATAL,             \
+                          "%s=%d, %s=%d", #actual, _actual,  \
+                          #expected, _expected);             \
+        }                                                    \
+        CU_ASSERT_EQUAL_FATAL(_actual, _expected);           \
     }
 
 /**
@@ -325,15 +337,17 @@
  * @param actual -  actual expression
  * @param expected -  expected expression
  */
-#define UT_ASSERT_NOT_EQUAL(actual, expected)                       \
-    {                                                               \
-        const int _actual = (actual);                               \
-        const int _expected = (expected);                           \
-        if (_actual == _expected)                                   \
-        {                                                           \
-            UT_LOG_ASSERT(UT_ASSERT_NOT_EQUAL, #actual, #expected); \
-        }                                                           \
-        CU_ASSERT_NOT_EQUAL(_actual, _expected);                    \
+#define UT_ASSERT_NOT_EQUAL(actual, expected)                \
+    {                                                        \
+        const int _actual = (actual);                        \
+        const int _expected = (expected);                    \
+        if (_actual == _expected)                            \
+        {                                                    \
+            UT_LOG_ASSERT(UT_ASSERT_NOT_EQUAL,               \
+                          "%s=%d, %s=%d", #actual, _actual,  \
+                          #expected, _expected);             \
+        }                                                    \
+        CU_ASSERT_NOT_EQUAL(_actual, _expected);             \
     }
 
 /**
@@ -342,15 +356,17 @@
  * @param actual -  actual expression
  * @param expected -  expected expression
  */
-#define UT_ASSERT_NOT_EQUAL_FATAL(actual, expected)                       \
-    {                                                                     \
-        const int _actual = (actual);                                     \
-        const int _expected = (expected);                                 \
-        if (_actual == _expected)                                         \
-        {                                                                 \
-            UT_LOG_ASSERT(UT_ASSERT_NOT_EQUAL_FATAL, #actual, #expected); \
-        }                                                                 \
-        CU_ASSERT_NOT_EQUAL_FATAL(_actual, _expected);                    \
+#define UT_ASSERT_NOT_EQUAL_FATAL(actual, expected)          \
+    {                                                        \
+        const int _actual = (actual);                        \
+        const int _expected = (expected);                    \
+        if (_actual == _expected)                            \
+        {                                                    \
+            UT_LOG_ASSERT(UT_ASSERT_NOT_EQUAL_FATAL,         \
+                          "%s=%d, %s=%d", #actual, _actual,  \
+                          #expected, _expected);             \
+        }                                                    \
+        CU_ASSERT_NOT_EQUAL_FATAL(_actual, _expected);       \
     }
 
 /**
@@ -359,16 +375,17 @@
  * @param actual -  actual string
  * @param expected -  expected string
  */
-#define UT_ASSERT_STRING_EQUAL(expected, actual)                       \
-    {                                                                  \
-        const char *_expected = (const char *)(expected);              \
-        const char *_actual = (const char *)(actual);                  \
-        const int _result = strcmp(_actual, _expected);                \
-        if (_result)                                                   \
-        {                                                              \
-            UT_LOG_ASSERT(UT_ASSERT_STRING_EQUAL, #actual, #expected); \
-        }                                                              \
-        CU_ASSERT_STRING_EQUAL(_actual, _expected);                    \
+#define UT_ASSERT_STRING_EQUAL(expected, actual)                     \
+    {                                                                \
+        const char *_expected = (const char *)(expected);            \
+        const char *_actual = (const char *)(actual);                \
+        const int _result = strcmp(_actual, _expected);              \
+        if (_result)                                                 \
+        {                                                            \
+            UT_LOG_ASSERT(UT_ASSERT_STRING_EQUAL,                    \
+                          "\"%s\", \"%s\"", _actual, _expected);     \
+        }                                                            \
+        CU_ASSERT_STRING_EQUAL(_actual, _expected);                  \
     }
 
 /**
@@ -377,16 +394,17 @@
  * @param actual -  actual string
  * @param expected -  expected string
  */
-#define UT_ASSERT_STRING_EQUAL_FATAL(expected, actual)                 \
-    {                                                                  \
-        const char *_expected = (const char *)(expected);              \
-        const char *_actual = (const char *)(actual);                  \
-        const int _result = strcmp(_actual, _expected);                \
-        if (_result)                                                   \
-        {                                                              \
-            UT_LOG_ASSERT(UT_ASSERT_STRING_NOT_EQUAL_FATAL, #actual, #expected); \
-        }                                                              \
-        CU_ASSERT_STRING_EQUAL_FATAL(_actual, _expected);              \
+#define UT_ASSERT_STRING_EQUAL_FATAL(expected, actual)               \
+    {                                                                \
+        const char *_expected = (const char *)(expected);            \
+        const char *_actual = (const char *)(actual);                \
+        const int _result = strcmp(_actual, _expected);              \
+        if (_result)                                                 \
+        {                                                            \
+            UT_LOG_ASSERT(UT_ASSERT_STRING_EQUAL_FATAL,              \
+                          "\"%s\", \"%s\"", _actual, _expected);     \
+        }                                                            \
+        CU_ASSERT_STRING_EQUAL_FATAL(_actual, _expected);            \
     }
 
 /**
@@ -395,16 +413,17 @@
  * @param actual -  actual string
  * @param expected -  expected string
  */
-#define UT_ASSERT_STRING_NOT_EQUAL(expected, actual)                       \
-    {                                                                      \
-        const char *_expected = (const char *)(expected);                  \
-        const char *_actual = (const char *)(actual);                      \
-        const int _result = strcmp(_actual, _expected);                    \
-        if (!_result)                                                      \
-        {                                                                  \
-            UT_LOG_ASSERT(UT_ASSERT_STRING_NOT_EQUAL, #actual, #expected); \
-        }                                                                  \
-        CU_ASSERT_STRING_NOT_EQUAL(_actual, _expected);                    \
+#define UT_ASSERT_STRING_NOT_EQUAL(expected, actual)                 \
+    {                                                                \
+        const char *_expected = (const char *)(expected);            \
+        const char *_actual = (const char *)(actual);                \
+        const int _result = strcmp(_actual, _expected);              \
+        if (!_result)                                                \
+        {                                                            \
+            UT_LOG_ASSERT(UT_ASSERT_STRING_NOT_EQUAL,                \
+                          "\"%s\", \"%s\"", _actual, _expected);     \
+        }                                                            \
+        CU_ASSERT_STRING_NOT_EQUAL(_actual, _expected);              \
     }
 
 /**
@@ -413,16 +432,17 @@
  * @param actual -  actual string
  * @param expected -  expected string
  */
-#define UT_ASSERT_STRING_NOT_EQUAL_FATAL(expected, actual)                       \
-    {                                                                            \
-        const char *_expected = (const char *)(expected);                        \
-        const char *_actual = (const char *)(actual);                            \
-        const int _result = strcmp(_actual, _expected);                          \
-        if (!_result)                                                            \
-        {                                                                        \
-            UT_LOG_ASSERT(UT_ASSERT_STRING_NOT_EQUAL_FATAL, #actual, #expected); \
-        }                                                                        \
-        CU_ASSERT_STRING_NOT_EQUAL_FATAL(_actual, _expected);                    \
+#define UT_ASSERT_STRING_NOT_EQUAL_FATAL(expected, actual)           \
+    {                                                                \
+        const char *_expected = (const char *)(expected);            \
+        const char *_actual = (const char *)(actual);                \
+        const int _result = strcmp(_actual, _expected);              \
+        if (!_result)                                                \
+        {                                                            \
+            UT_LOG_ASSERT(UT_ASSERT_STRING_NOT_EQUAL_FATAL,          \
+                          "\"%s\", \"%s\"", _actual, _expected);     \
+        }                                                            \
+        CU_ASSERT_STRING_NOT_EQUAL_FATAL(_actual, _expected);        \
     }
 
 /**
@@ -432,14 +452,16 @@
  * @param[in] message - message to log, if the assert fails
  * 
  */
-#define UT_ASSERT_MSG(value, message)                      \
-    {                                                      \
-        const int _value = (value);                        \
-        if (!_value)                                       \
-        {                                                  \
-            UT_LOG_ASSERT(UT_ASSERT_MSG, #value, message); \
-        }                                                  \
-        CU_ASSERT(_value);                                 \
+#define UT_ASSERT_MSG(value, message)                   \
+    {                                                   \
+        const int _value = (value);                     \
+        if (!_value)                                    \
+        {                                               \
+            UT_LOG_ASSERT(UT_ASSERT_MSG,                \
+                          "%s=%d, %s", #value, _value,  \
+                          message);                     \
+        }                                               \
+        CU_ASSERT(_value);                              \
     }
 
 /**
@@ -449,14 +471,16 @@
  * @param[in] message - message to log, if the assert fails
  * 
  */
-#define UT_ASSERT_MSG_FATAL(value, message)                      \
-    {                                                            \
-        const int _value = (value);                              \
-        if (!_value)                                             \
-        {                                                        \
-            UT_LOG_ASSERT(UT_ASSERT_MSG_FATAL, #value, message); \
-        }                                                        \
-        CU_ASSERT_FATAL(_value);                                 \
+#define UT_ASSERT_MSG_FATAL(value, message)             \
+    {                                                   \
+        const int _value = (value);                     \
+        if (!_value)                                    \
+        {                                               \
+            UT_LOG_ASSERT(UT_ASSERT_MSG_FATAL,          \
+                          "%s=%d, %s", #value, _value,  \
+                          message);                     \
+        }                                               \
+        CU_ASSERT_FATAL(_value);                        \
     }
 
 /**
@@ -466,14 +490,16 @@
  * @param[in] message - message to log, if the expression is true
  * 
  */
-#define UT_ASSERT_TRUE_MSG(value, message)                      \
-    {                                                           \
-        const int _value = (value);                             \
-        if (!_value)                                            \
-        {                                                       \
-            UT_LOG_ASSERT(UT_ASSERT_TRUE_MSG, #value, message); \
-        }                                                       \
-        CU_ASSERT_TRUE(_value);                                 \
+#define UT_ASSERT_TRUE_MSG(value, message)              \
+    {                                                   \
+        const int _value = (value);                     \
+        if (!_value)                                    \
+        {                                               \
+            UT_LOG_ASSERT(UT_ASSERT_TRUE_MSG,           \
+                          "%s=%d, %s", #value, _value,  \
+                          message);                     \
+        }                                               \
+        CU_ASSERT_TRUE(_value);                         \
     }
 
 /**
@@ -483,14 +509,16 @@
  * @param[in] message - message to log, if the expression is true
  * 
  */
-#define UT_ASSERT_TRUE_MSG_FATAL(value, message)                      \
-    {                                                                 \
-        const int _value = (value);                                   \
-        if (!_value)                                                  \
-        {                                                             \
-            UT_LOG_ASSERT(UT_ASSERT_TRUE_MSG_FATAL, #value, message); \
-        }                                                             \
-        CU_ASSERT_TRUE_FATAL(_value);                                 \
+#define UT_ASSERT_TRUE_MSG_FATAL(value, message)        \
+    {                                                   \
+        const int _value = (value);                     \
+        if (!_value)                                    \
+        {                                               \
+            UT_LOG_ASSERT(UT_ASSERT_TRUE_MSG_FATAL,     \
+                          "%s=%d, %s", #value, _value,  \
+                          message);                     \
+        }                                               \
+        CU_ASSERT_TRUE_FATAL(_value);                   \
     }
 
 /**
@@ -500,14 +528,16 @@
  * @param[in] message - message to log, if the expression is false
  * 
  */
-#define UT_ASSERT_FALSE_MSG(value, message)                      \
-    {                                                            \
-        const int _value = (value);                              \
-        if (_value)                                              \
-        {                                                        \
-            UT_LOG_ASSERT(UT_ASSERT_FALSE_MSG, #value, message); \
-        }                                                        \
-        CU_ASSERT_FALSE(_value);                                 \
+#define UT_ASSERT_FALSE_MSG(value, message)             \
+    {                                                   \
+        const int _value = (value);                     \
+        if (_value)                                     \
+        {                                               \
+            UT_LOG_ASSERT(UT_ASSERT_FALSE_MSG,          \
+                          "%s=%d, %s", #value, _value,  \
+                          message);                     \
+        }                                               \
+        CU_ASSERT_FALSE(_value);                        \
     }
 
 /**
@@ -517,14 +547,16 @@
  * @param[in] message - message to log, if the expression is false
  * 
  */
-#define UT_ASSERT_FALSE_MSG_FATAL(value, message)                      \
-    {                                                                  \
-        const int _value = (value);                                    \
-        if (_value)                                                    \
-        {                                                              \
-            UT_LOG_ASSERT(UT_ASSERT_FALSE_MSG_FATAL, #value, message); \
-        }                                                              \
-        CU_ASSERT_FALSE_FATAL(_value);                                 \
+#define UT_ASSERT_FALSE_MSG_FATAL(value, message)       \
+    {                                                   \
+        const int _value = (value);                     \
+        if (_value)                                     \
+        {                                               \
+            UT_LOG_ASSERT(UT_ASSERT_FALSE_MSG_FATAL,    \
+                          "%s=%d, %s", #value, _value,  \
+                          message);                     \
+        }                                               \
+        CU_ASSERT_FALSE_FATAL(_value);                  \
     }
 
 /**
@@ -534,18 +566,22 @@
  * @param[in] message - message to log, will always log
  * 
  */
-#define UT_ASSERT_LOG(value, message)                      \
-    {                                                      \
-        const int _value = (value);                        \
-        if (!_value)                                       \
-        {                                                  \
-            UT_LOG_ASSERT(UT_ASSERT_LOG, #value, message); \
-        }                                                  \
-        else                                               \
-        {                                                  \
-            UT_LOG_ASSERT(UT_ASSERT_LOG, #value, message); \
-        }                                                  \
-        CU_ASSERT(_value);                                 \
+#define UT_ASSERT_LOG(value, message)                   \
+    {                                                   \
+        const int _value = (value);                     \
+        if (!_value)                                    \
+        {                                               \
+            UT_LOG_ASSERT(UT_ASSERT_LOG,                \
+                          "%s=%d, %s", #value, _value,  \
+                          message);                     \
+        }                                               \
+        else                                            \
+        {                                               \
+            UT_LOG_ASSERT(UT_ASSERT_LOG,                \
+                          "%s=%d, %s", #value, _value,  \
+                          message);                     \
+        }                                               \
+        CU_ASSERT(_value);                              \
     }
 
 /**
@@ -555,18 +591,22 @@
  * @param[in] message - message to log, will always log
  * 
  */
-#define UT_ASSERT_LOG_FATAL(value, message)                      \
-    {                                                            \
-        const int _value = (value);                              \
-        if (!_value)                                             \
-        {                                                        \
-            UT_LOG_ASSERT(UT_ASSERT_LOG_FATAL, #value, message); \
-        }                                                        \
-        else                                                     \
-        {                                                        \
-            UT_LOG_ASSERT(UT_ASSERT_LOG_FATAL, #value, message); \
-        }                                                        \
-        CU_ASSERT_FATAL(_value);                                 \
+#define UT_ASSERT_LOG_FATAL(value, message)             \
+    {                                                   \
+        const int _value = (value);                     \
+        if (!_value)                                    \
+        {                                               \
+            UT_LOG_ASSERT(UT_ASSERT_LOG_FATAL,          \
+                          "%s=%d, %s", #value, _value,  \
+                          message);                     \
+        }                                               \
+        else                                            \
+        {                                               \
+            UT_LOG_ASSERT(UT_ASSERT_LOG_FATAL,          \
+                          "%s=%d, %s", #value, _value,  \
+                          message);                     \
+        }                                               \
+        CU_ASSERT_FATAL(_value);                        \
     }
 
 #endif  /* UT -> CUNIT - Wrapper */
