@@ -104,6 +104,8 @@ if [ -d "${UT_CONTROL_LIB_DIR}" ]; then
     echo "Framework ut-control already exists"
     # ut-control exists so run the makefile from ut, but warn the user that they could update
     #check_ut_control_revision
+    # Commented above function as ut-control has been stable and  will take main branch
+    # in case of discrepancy uncomment this and use a fixed version.
     if [ -d "${THIRD_PARTY_LIB_DIR}" ]; then
         echo "Third party libraries are built for ${TARGET}"
     else
@@ -116,6 +118,8 @@ else
         git clone ${UT_CONTROL_REPO} ut-control
         #check_ut_control_revision
         # Check out the version required based on control_revision
+        # Commented above function as ut-control has been stable and  will take main branch
+        # in case of discrepancy uncomment this and use a fixed version.
         pushd ${UT_CONTROL_LIB_DIR} > /dev/null
         git checkout ${UT_CONTROL_PROJECT_VERSION} # MARKER: Version=${UT_CONTROL_PROJECT_VERSION}
         # Note: The above line can be modified by release test scripts to checkout a specific version or branch
