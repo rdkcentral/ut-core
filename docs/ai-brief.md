@@ -16,7 +16,7 @@ ut-core is the standard unit-testing framework for RDK HAL (Hardware Abstraction
 
 Repository: `https://github.com/rdkcentral/ut-core`
 License: Apache 2.0
-Current version tag: **5.0.0.0** (latest tag on the develop branch; `5.0.0` is the immediately preceding tag)
+Current version tag: **5.0.0** (latest tag on the develop branch)
 
 ---
 
@@ -591,7 +591,7 @@ The internal mode enum (`TestMode_t` in `src/ut_internal.h`) is `UT_MODE_BASIC`,
 
 ## 16. Version Scheme
 
-Tags use a dotted numeric form (e.g. `5.0.0`, `5.0.0.0`).
+Tags use a dotted numeric form (e.g. `4.7.3`, `5.0.0`).
 
 - Major version changes indicate ABI-breaking changes requiring test code updates.
 - Minor/patch updates are backwards-compatible within a major version.
