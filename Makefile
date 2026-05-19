@@ -57,7 +57,7 @@ ifneq ($(VARIANT),CPP) # CUNIT case
   CUNIT_DIR = $(FRAMEWORK_DIR)/CUnit-2.1-3/CUnit
   INC_DIRS += $(CUNIT_DIR)/Headers $(UT_CORE_DIR)/src/c_source
   SRC_DIRS += $(CUNIT_DIR)/Sources/Framework $(UT_CORE_DIR)/src
-  XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -lut_control -Wl,-rpath, -pthread -lpthread
+  XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -lut_control -Wl,-rpath, -pthread -lpthread -lm
 
   # Source files
   SRCS := $(shell find $(SRC_DIRS) -name *.c -or -name *.s)
@@ -69,7 +69,7 @@ else # GTEST case
   GTEST_SRC = $(FRAMEWORK_DIR)/gtest/$(TARGET)/googletest-1.15.2
   INC_DIRS += $(GTEST_SRC)/googletest/include $(UT_CORE_DIR)/src/cpp_source $(UT_CORE_DIR)/src
   TEST_LIB_DIR = $(UT_CORE_DIR)/build/$(TARGET)/cpp_libs/lib/
-  XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -L$(TEST_LIB_DIR) -lgtest_main -lgtest -lut_control -lpthread
+  XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -L$(TEST_LIB_DIR) -lgtest_main -lgtest -lut_control -lpthread -lm
 
   # Source files
   SRCS := $(shell find $(SRC_DIRS) -type f \( -name '*.cpp' -o -name '*.c' \) | grep -v "$(EXCLUDE_DIRS)")
