@@ -74,7 +74,7 @@ popd > /dev/null # ${MY_DIR}
 # Therefore in that case it warns you but doesnt' chnage to that version, which could cause your tests to break.
 # Change this to upgrade your ut-control Major versions. Non ABI Changes 1.x.x are supported, between major revisions
 
-UT_CONTROL_PROJECT_VERSION="develop"  # Fixed version
+UT_CONTROL_PROJECT_VERSION="2.0.0"  # Fixed version
 
 # Resolve the best available git endpoint for ut-control.
 # Priority: SSH github.com -> SSH code.rdkcentral.com -> HTTPS fallback.
@@ -82,7 +82,7 @@ UT_CONTROL_PROJECT_VERSION="develop"  # Fixed version
 # in the environment or by passing it as a script argument (or Makefile variable).
 resolve_ut_control_repo()
 {
-    local SSH_OPTS="-T -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=no"
+    local SSH_OPTS="-T -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=accept-new"
     local GITHUB_SSH="git@github.com:rdkcentral/ut-control.git"
     local RDKCENTRAL_SSH="git@code.rdkcentral.com:rdkcentral/ut-control.git"
     local HTTPS_URL="https://github.com/rdkcentral/ut-control.git"
@@ -165,9 +165,7 @@ configure_ut_control()
 if [ -d "${UT_CONTROL_LIB_DIR}" ]; then
     echo "Framework ut-control already exists"
     # ut-control exists so run the makefile from ut, but warn the user that they could update
-    #check_ut_control_revision
-    # Commented above function as ut-control has been stable and  will take main branch
-    # in case of discrepancy uncomment this and use a fixed version.
+    check_ut_control_revision
     if [ -d "${THIRD_PARTY_LIB_DIR}" ]; then
         echo "Third party libraries are built for ${TARGET}"
     else
@@ -178,10 +176,8 @@ else
     if [ "$1" != "no_ut_control" ]; then
         echo "Clone ut_control in ${UT_CONTROL_LIB_DIR}"
         git clone ${UT_CONTROL_REPO} ut-control
-        #check_ut_control_revision
+        check_ut_control_revision
         # Check out the version required based on control_revision
-        # Commented above function as ut-control has been stable and  will take main branch
-        # in case of discrepancy uncomment this and use a fixed version.
         pushd ${UT_CONTROL_LIB_DIR} > /dev/null
         git checkout ${UT_CONTROL_PROJECT_VERSION} # MARKER: Version=${UT_CONTROL_PROJECT_VERSION}
         # Note: The above line can be modified by release test scripts to checkout a specific version or branch
