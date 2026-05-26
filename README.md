@@ -230,7 +230,7 @@ The `UT_CONTROL_REPO_ENDPOINT` environment variable controls which git transport
 
 #### Usage
 
-Set the variable in the environment before invoking `make`:
+Set the variable in the environment before invoking `make`, or pass it as a make variable (which `build.sh` will forward):
 
 ```bash
 # Force HTTPS (useful in environments without SSH key access)
@@ -240,6 +240,13 @@ make
 # Force SSH
 export UT_CONTROL_REPO_ENDPOINT=ssh
 make
+```
+
+Alternatively, pass it directly on the `make` command line — `build.sh` will pick it up from its argument list:
+
+```bash
+make UT_CONTROL_REPO_ENDPOINT=https
+make UT_CONTROL_REPO_ENDPOINT=ssh
 ```
 
 ### Feature: `BUILD_WEAK_STUBS_SRC` for Weak Library Compilation

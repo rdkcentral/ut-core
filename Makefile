@@ -57,7 +57,7 @@ ifneq ($(VARIANT),CPP) # CUNIT case
   CUNIT_DIR = $(FRAMEWORK_DIR)/CUnit-2.1-3/CUnit
   INC_DIRS += $(CUNIT_DIR)/Headers $(UT_CORE_DIR)/src/c_source
   SRC_DIRS += $(CUNIT_DIR)/Sources/Framework $(UT_CORE_DIR)/src
-  XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -lut_control -Wl,-rpath, -pthread -lpthread -lm
+  XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -lut_control -Wl,-rpath,$(UT_CONTROL)/build/$(TARGET)/lib -pthread -lpthread -lm
 
   # Source files
   SRCS := $(shell find $(SRC_DIRS) -name *.c -or -name *.s)

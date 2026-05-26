@@ -95,12 +95,12 @@ resolve_ut_control_repo()
 
     if [ "${UT_CONTROL_REPO_ENDPOINT}" == "ssh" ]; then
         echo "UT_CONTROL_REPO_ENDPOINT override: SSH requested, probing endpoints..."
-        if ssh ${SSH_OPTS} git@github.com 2>&1 | grep -qi "successfully authenticated\|Hi "; then
+        if ssh ${SSH_OPTS} git@github.com 2>&1 | grep -qiE "successfully authenticated|Hi "; then
             echo "SSH access to github.com confirmed, using: ${GITHUB_SSH}"
             UT_CONTROL_REPO="${GITHUB_SSH}"
             return 0
         fi
-        if ssh ${SSH_OPTS} git@code.rdkcentral.com 2>&1 | grep -qi "successfully authenticated\|Hi \|welcome"; then
+        if ssh ${SSH_OPTS} git@code.rdkcentral.com 2>&1 | grep -qiE "successfully authenticated|Hi |welcome"; then
             echo "SSH access to code.rdkcentral.com confirmed, using: ${RDKCENTRAL_SSH}"
             UT_CONTROL_REPO="${RDKCENTRAL_SSH}"
             return 0
@@ -116,13 +116,23 @@ resolve_ut_control_repo()
 
     echo "Resolving git endpoint for ut-control..."
 
-    if ssh ${SSH_OPTS} git@github.com 2>&1 | grep -qi "successfully authenticated\|Hi "; then
+    # Short-circuit: skip SSH probes when no keys are loaded in the agent and
+    # no private key files exist in ~/.ssh.  This avoids 2 × ConnectTimeout
+    # latency on CI images that have no SSH credentials at all.
+    if ! ssh-add -l >/dev/null 2>&1 && \
+       ! ls ~/.ssh/id_* >/dev/null 2>&1; then
+        echo "No SSH keys found (agent empty, no ~/.ssh/id_* files), skipping SSH probes, using HTTPS: ${HTTPS_URL}"
+        UT_CONTROL_REPO="${HTTPS_URL}"
+        return 0
+    fi
+
+    if ssh ${SSH_OPTS} git@github.com 2>&1 | grep -qiE "successfully authenticated|Hi "; then
         echo "SSH access to github.com confirmed, using: ${GITHUB_SSH}"
         UT_CONTROL_REPO="${GITHUB_SSH}"
         return 0
     fi
 
-    if ssh ${SSH_OPTS} git@code.rdkcentral.com 2>&1 | grep -qi "successfully authenticated\|Hi \|welcome"; then
+    if ssh ${SSH_OPTS} git@code.rdkcentral.com 2>&1 | grep -qiE "successfully authenticated|Hi |welcome"; then
         echo "SSH access to code.rdkcentral.com confirmed, using: ${RDKCENTRAL_SSH}"
         UT_CONTROL_REPO="${RDKCENTRAL_SSH}"
         return 0
