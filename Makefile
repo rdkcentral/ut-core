@@ -94,8 +94,10 @@ COMPILER := $(if $(filter CPP,$(VARIANT)),$(CXX),$(CC))
 #CC := arm-rdk-linux-gnueabi-gcc -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -mabi=aapcs-linux -mno-thumb-interwork -ffixed-r8 -fomit-frame-pointer
 # CFLAGS will be overriden by Caller as required
 INC_DIRS += $(UT_CORE_DIR)/sysroot/usr/include
+UT_CONTROL_COMPILER := $(CC)
 else
 COMPILER := $(if $(filter CPP,$(VARIANT)),g++ -ggdb -o0 -Wall, gcc -ggdb -o0 -Wall)
+UT_CONTROL_COMPILER := gcc -ggdb -o0 -Wall
 endif
 
 # Common object file setup
@@ -142,7 +144,7 @@ download_and_build:
 	@${UT_CORE_DIR}/build.sh TARGET=${TARGET} VARIANT=${VARIANT}
 	@${ECHOE} ${GREEN}Completed${NC}
 	@${ECHOE} ${GREEN}Entering ut-control [TARGET=${TARGET}]${NC}
-	@${MAKE} -C $(UT_CONTROL) TARGET=${TARGET}
+	@${MAKE} -C $(UT_CONTROL) TARGET=${TARGET} CC="${UT_CONTROL_COMPILER}"
 
 # Build the test binary
 test: $(OBJS) createdirs $(if $(BUILD_WEAK_STUBS_SRC),$(WEAK_STUBS_LIB))
