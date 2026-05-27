@@ -218,6 +218,37 @@ This will build the following directories `src/*.c`, in addition to core functio
 
 The final output binary is build as `hal_test` and resides in the `bin` directory, the framework .so files will be copied to the same directory.
 
+### Environment Variable: `UT_CONTROL_REPO_ENDPOINT`
+
+The `UT_CONTROL_REPO_ENDPOINT` environment variable controls which git transport is used when cloning the `ut-control` dependency. By default, `build.sh` probes for SSH access to `github.com` and `code.rdkcentral.com`, falling back to HTTPS if neither is reachable.
+
+| Value | Behaviour |
+|-------|-----------|
+| _(unset)_ | Auto-detect: tries SSH (github.com, then code.rdkcentral.com), falls back to HTTPS |
+| `ssh` | Forces SSH; probes both SSH endpoints and falls back to HTTPS if unreachable |
+| `https` | Forces HTTPS unconditionally |
+
+#### Usage
+
+Set the variable in the environment before invoking `make`, or pass it as a make variable (which `build.sh` will forward):
+
+```bash
+# Force HTTPS (useful in environments without SSH key access)
+export UT_CONTROL_REPO_ENDPOINT=https
+make
+
+# Force SSH
+export UT_CONTROL_REPO_ENDPOINT=ssh
+make
+```
+
+Alternatively, pass it directly on the `make` command line — `build.sh` will pick it up from its argument list:
+
+```bash
+make UT_CONTROL_REPO_ENDPOINT=https
+make UT_CONTROL_REPO_ENDPOINT=ssh
+```
+
 ### Feature: `BUILD_WEAK_STUBS_SRC` for Weak Library Compilation
 
 The `BUILD_WEAK_STUBS_SRC` variable enables clients to define and export a list of source files that will be compiled into a weak library. This allows testing suites to use stubbed implementations of functions during development, with the strong implementation provided by vendors or third parties at a later stage.

@@ -40,6 +40,13 @@ fi
 echo "TARGET= [$TARGET] from [$0]"
 echo "VARIANT= [$VARIANT] from [$0]"
 
+# Allow the git transport to be overridden via UT_CONTROL_REPO_ENDPOINT.
+# Accepted values: 'ssh' or 'https' (e.g., UT_CONTROL_REPO_ENDPOINT=ssh from Makefile)
+if [[ "$*" == *"UT_CONTROL_REPO_ENDPOINT="* ]]; then
+    UT_CONTROL_REPO_ENDPOINT=$(echo "$*" | sed 's/.*UT_CONTROL_REPO_ENDPOINT=\([^ ]*\).*/\1/')
+    echo "UT_CONTROL_REPO_ENDPOINT= [${UT_CONTROL_REPO_ENDPOINT}] from args"
+fi
+
 THIRD_PARTY_LIB_DIR=${FRAMEWORK_DIR}/ut-control/build/${TARGET}
 GTEST_DIR=${FRAMEWORK_DIR}/gtest/${TARGET}
 GTEST_LIB_DIR=${MY_DIR}/build/${TARGET}/cpp_libs
@@ -69,8 +76,73 @@ popd > /dev/null # ${MY_DIR}
 
 UT_CONTROL_PROJECT_VERSION="2.0.0"  # Fixed version
 
-# Clone the Unit Test Requirements
-UT_CONTROL_REPO=git@github.com:rdkcentral/ut-control.git
+# Resolve the best available git endpoint for ut-control.
+# Priority: SSH github.com -> SSH code.rdkcentral.com -> HTTPS fallback.
+# Can be overridden by setting UT_CONTROL_REPO_ENDPOINT=ssh or UT_CONTROL_REPO_ENDPOINT=https
+# in the environment or by passing it as a script argument (or Makefile variable).
+resolve_ut_control_repo()
+{
+    local SSH_OPTS="-T -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=accept-new"
+    local GITHUB_SSH="git@github.com:rdkcentral/ut-control.git"
+    local RDKCENTRAL_SSH="git@code.rdkcentral.com:rdkcentral/ut-control.git"
+    local HTTPS_URL="https://github.com/rdkcentral/ut-control.git"
+
+    if [ "${UT_CONTROL_REPO_ENDPOINT}" == "https" ]; then
+        echo "UT_CONTROL_REPO_ENDPOINT override: HTTPS requested, using: ${HTTPS_URL}"
+        UT_CONTROL_REPO="${HTTPS_URL}"
+        return 0
+    fi
+
+    if [ "${UT_CONTROL_REPO_ENDPOINT}" == "ssh" ]; then
+        echo "UT_CONTROL_REPO_ENDPOINT override: SSH requested, probing endpoints..."
+        if ssh ${SSH_OPTS} git@github.com 2>&1 | grep -qiE "successfully authenticated|Hi "; then
+            echo "SSH access to github.com confirmed, using: ${GITHUB_SSH}"
+            UT_CONTROL_REPO="${GITHUB_SSH}"
+            return 0
+        fi
+        if ssh ${SSH_OPTS} git@code.rdkcentral.com 2>&1 | grep -qiE "successfully authenticated|Hi |welcome"; then
+            echo "SSH access to code.rdkcentral.com confirmed, using: ${RDKCENTRAL_SSH}"
+            UT_CONTROL_REPO="${RDKCENTRAL_SSH}"
+            return 0
+        fi
+        echo "SSH override requested but no SSH endpoint is reachable, falling back to HTTPS: ${HTTPS_URL}"
+        UT_CONTROL_REPO="${HTTPS_URL}"
+        return 0
+    fi
+
+    if [ -n "${UT_CONTROL_REPO_ENDPOINT}" ]; then
+        echo "WARNING: UT_CONTROL_REPO_ENDPOINT value '${UT_CONTROL_REPO_ENDPOINT}' is not recognised (expected 'ssh' or 'https'), ignoring override."
+    fi
+
+    echo "Resolving git endpoint for ut-control..."
+
+    # Short-circuit: skip SSH probes when no keys are loaded in the agent and
+    # no private key files exist in ~/.ssh.  This avoids 2 × ConnectTimeout
+    # latency on CI images that have no SSH credentials at all.
+    if ! ssh-add -l >/dev/null 2>&1 && \
+       ! ls ~/.ssh/id_* >/dev/null 2>&1; then
+        echo "No SSH keys found (agent empty, no ~/.ssh/id_* files), skipping SSH probes, using HTTPS: ${HTTPS_URL}"
+        UT_CONTROL_REPO="${HTTPS_URL}"
+        return 0
+    fi
+
+    if ssh ${SSH_OPTS} git@github.com 2>&1 | grep -qiE "successfully authenticated|Hi "; then
+        echo "SSH access to github.com confirmed, using: ${GITHUB_SSH}"
+        UT_CONTROL_REPO="${GITHUB_SSH}"
+        return 0
+    fi
+
+    if ssh ${SSH_OPTS} git@code.rdkcentral.com 2>&1 | grep -qiE "successfully authenticated|Hi |welcome"; then
+        echo "SSH access to code.rdkcentral.com confirmed, using: ${RDKCENTRAL_SSH}"
+        UT_CONTROL_REPO="${RDKCENTRAL_SSH}"
+        return 0
+    fi
+
+    echo "No SSH access available, falling back to HTTPS: ${HTTPS_URL}"
+    UT_CONTROL_REPO="${HTTPS_URL}"
+}
+
+resolve_ut_control_repo
 
 # This function checks the latest version of UT core and recommends an upgrade if reuqired
 function check_ut_control_revision()

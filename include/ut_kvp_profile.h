@@ -36,8 +36,8 @@ extern "C"
      * @param[in] fileName - Path to the configuration file.
      * @returns Status of the operation:
      * @retval UT_KVP_STATUS_SUCCESS - Success.
+     * @retval UT_KVP_STATUS_NULL_PARAM - NULL filename provided.
      * @retval UT_KVP_STATUS_FILE_OPEN_ERROR - Failed to open the file.
-     * @retval UT_KVP_STATUS_INVALID_PARAM - Invalid filename provided.
      * @retval UT_KVP_STATUS_PARSING_ERROR - Error parsing the file.
      */
     extern ut_kvp_status_t ut_kvp_profile_open(char *fileName);
