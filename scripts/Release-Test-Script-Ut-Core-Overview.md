@@ -7,6 +7,7 @@ where:
    Dunfell Linux : is a docker with linux environment
    Dunfell ARM : is a docker simulating the arm environment for yocto version dunfell
    Kirkstone ARM : is a docker simulating the arm environment for yocto version kirkstone
+   Cross : local build using the host aarch64 cross-compilation toolchain (no docker)
 It checks for the existence of various third party packages like openssl, curl, cmake, gtest etc for various environments listed above.
 With these validations, it ensures if the PR is good for merge and has not broken the basic requirements.
 
@@ -22,6 +23,8 @@ Following table gives the overview:
 |6|make -C tests/  TARGET=arm|rdk-kirkstone|builds ut-core tests for target arm
 |7|make -C tests/ TARGET=linux|vm-sync|builds ut-core tests for target linux
 |8|make -C tests/ TARGET=linux|none|builds ut-core tests for target linux
+|9|make TARGET=arm|none (host toolchain)|builds ut-core for cross compilation (C and CPP variants)
+|10|make -C tests/ TARGET=arm|none (host toolchain)|builds ut-core tests for cross compilation (C and CPP variants)
 
 ## Key Features
 
@@ -58,6 +61,7 @@ Following table gives the overview:
 |4|RDK-DUNFELL(linux)|NO|YES|NO|YES
 |5|RDK-KIRKSTONE(arm)|NO|YES|YES|YES
 |6|RDK-KIRKSTONE(linux)|NO|YES|NO|YES
+|7|Cross (host toolchain)|NO|YES|YES|YES
 
 For ex:
 On env 1,  the script will check for availability of CURL library, OpenSSL libraraies and Gtest libraries for Target.It would however would not look for CMAKE binary for host as this environment already provides cmake support which is provided by build essentials.
@@ -68,3 +72,8 @@ On env 2, on the other hand, none of the packages are present , hence the script
 ## Usage Example
 ```bash
 ./release-test-script-ut-core.sh -t <BRANCH_NAME_TO_BE_TESTED_ON_UT_CORE_REPO>
+# Prompted interactively for toolchain path if -a is omitted (press Enter to skip cross)
+./release-test-script-ut-core.sh -t <BRANCH_NAME>
+# Supply the toolchain path directly
+./release-test-script-ut-core.sh -t <BRANCH_NAME> -a <path/to/environment-setup-aarch64-rdk-linux>
+```

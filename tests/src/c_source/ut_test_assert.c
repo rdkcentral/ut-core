@@ -195,10 +195,10 @@ void test_ut_assert_ptr_equal()
     UT_LOG_STEP( "1: UT_ASSERT_PTR_EQUAL (pTR1 == pTR2 ) : no assert");
     UT_ASSERT_PTR_EQUAL( pTR1, pTR2 );
 
-    UT_LOG_STEP( "2: UT_ASSERT_PTR_EQUAL (pTR != pTR3 ) - this step should assert");
+    UT_LOG_STEP( "2: UT_ASSERT_PTR_EQUAL (pTR1 != pTR3 ) - this step should assert");
     UT_ASSERT_PTR_EQUAL( pTR1, pTR3 );   /* Should Fail */
 
-    UT_LOG_STEP( "3: UT_ASSERT_PTR_EQUAL (pTR != pTR3 ) - this step should assert & FATAL");
+    UT_LOG_STEP( "3: UT_ASSERT_PTR_EQUAL (pTR1 != pTR3 ) - this step should assert & FATAL");
     UT_ASSERT_PTR_EQUAL_FATAL( pTR1, pTR3 );   /* Should Fail */
 
     UT_LOG_ERROR("### This line should never be seen\n");

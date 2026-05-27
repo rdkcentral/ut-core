@@ -57,7 +57,7 @@ ifneq ($(VARIANT),CPP) # CUNIT case
   CUNIT_DIR = $(FRAMEWORK_DIR)/CUnit-2.1-3/CUnit
   INC_DIRS += $(CUNIT_DIR)/Headers $(UT_CORE_DIR)/src/c_source
   SRC_DIRS += $(CUNIT_DIR)/Sources/Framework $(UT_CORE_DIR)/src
-  XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -lut_control -Wl,-rpath, -pthread -lpthread
+  XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -lut_control -Wl,-rpath,$(UT_CONTROL)/build/$(TARGET)/lib -pthread -lpthread -lm
 
   # Source files
   SRCS := $(shell find $(SRC_DIRS) -name *.c -or -name *.s)
@@ -69,7 +69,7 @@ else # GTEST case
   GTEST_SRC = $(FRAMEWORK_DIR)/gtest/$(TARGET)/googletest-1.15.2
   INC_DIRS += $(GTEST_SRC)/googletest/include $(UT_CORE_DIR)/src/cpp_source $(UT_CORE_DIR)/src
   TEST_LIB_DIR = $(UT_CORE_DIR)/build/$(TARGET)/cpp_libs/lib/
-  XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -L$(TEST_LIB_DIR) -lgtest_main -lgtest -lut_control -lpthread
+  XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -L$(TEST_LIB_DIR) -lgtest_main -lgtest -lut_control -lpthread -lm
 
   # Source files
   SRCS := $(shell find $(SRC_DIRS) -type f \( -name '*.cpp' -o -name '*.c' \) | grep -v "$(EXCLUDE_DIRS)")
@@ -94,8 +94,10 @@ COMPILER := $(if $(filter CPP,$(VARIANT)),$(CXX),$(CC))
 #CC := arm-rdk-linux-gnueabi-gcc -mthumb -mfpu=vfp -mcpu=cortex-a9 -mfloat-abi=soft -mabi=aapcs-linux -mno-thumb-interwork -ffixed-r8 -fomit-frame-pointer
 # CFLAGS will be overriden by Caller as required
 INC_DIRS += $(UT_CORE_DIR)/sysroot/usr/include
+UT_CONTROL_COMPILER := $(CC)
 else
 COMPILER := $(if $(filter CPP,$(VARIANT)),g++ -ggdb -o0 -Wall, gcc -ggdb -o0 -Wall)
+UT_CONTROL_COMPILER := gcc -ggdb -o0 -Wall
 endif
 
 # Common object file setup
@@ -142,7 +144,7 @@ download_and_build:
 	@${UT_CORE_DIR}/build.sh TARGET=${TARGET} VARIANT=${VARIANT}
 	@${ECHOE} ${GREEN}Completed${NC}
 	@${ECHOE} ${GREEN}Entering ut-control [TARGET=${TARGET}]${NC}
-	@${MAKE} -C $(UT_CONTROL) TARGET=${TARGET}
+	@${MAKE} -C $(UT_CONTROL) TARGET=${TARGET} CC="${UT_CONTROL_COMPILER}"
 
 # Build the test binary
 test: $(OBJS) createdirs $(if $(BUILD_WEAK_STUBS_SRC),$(WEAK_STUBS_LIB))

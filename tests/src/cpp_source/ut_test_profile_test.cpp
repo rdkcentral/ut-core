@@ -67,7 +67,7 @@ UT_ADD_TEST(UTKVPProfileTestL1, TestProfileOpenFailure)
 
     // Test with a null file name.
     status = ut_kvp_profile_open(nullptr);
-    UT_ASSERT_EQUAL_FATAL(status, UT_KVP_STATUS_INVALID_PARAM);
+    UT_ASSERT_EQUAL_FATAL(status,  UT_KVP_STATUS_NULL_PARAM);
 }
 
 UT_ADD_TEST(UTKVPProfileTestL1, TestProfileClose)

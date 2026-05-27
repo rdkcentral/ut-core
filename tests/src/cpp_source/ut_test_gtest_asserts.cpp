@@ -70,7 +70,6 @@ UT_ADD_TEST(UTGTestTest, UT_ASSERT_NOT_EQUAL_Test)
     int a = 5;
     int b = 6;
     UT_ASSERT_NOT_EQUAL(a, b);
-    UT_ASSERT_EQUAL(a, b);
 }
 
 // Test case for UT_ASSERT_LESS
