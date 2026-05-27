@@ -197,6 +197,12 @@ private:
 Non-`_FATAL` use GTest `EXPECT_*` (continue on failure).
 `_FATAL` use GTest `ASSERT_*` (abort test on failure).
 
+> **Exception:** `UT_FAIL` and `UT_FAIL_FATAL` both map to GTest `FAIL()` in the C++ path,
+> and `FAIL()` is a *fatal* assertion (it stops the current test, like `ASSERT_*`). So
+> `UT_FAIL` is **not** a "continue on failure" macro in C++ despite the name lacking
+> `_FATAL`, and the two are behaviourally identical here. (In the C path they differ:
+> `UT_FAIL`→`CU_FAIL` continues, `UT_FAIL_FATAL`→`CU_FAIL_FATAL` aborts.)
+
 | Macro | Parameters | GTest equivalent |
 |-------|-----------|------------------|
 | `UT_ASSERT_TRUE(condition)` | expression | `EXPECT_TRUE` |
@@ -482,7 +488,9 @@ UT_ADD_TEST(MyHalTests, NegativeCase) {
 }
 ```
 
-In the C++ path the Makefile links `libgtest_main`, which supplies the `main()` entry point. `ut_gtest.cpp` provides ut-core's own `UT_init()` and `UT_run_tests()` implementations (including the interactive console menu and `UT_exit()` cleanup); these are the same unified API entry points as the C path. The framework filtering and group-activation logic are driven through `UTCore` and the `UTTestRunner` class in `ut_gtest.cpp`.
+In the C++ path, ut-core provides its own `UT_init()` and `UT_run_tests()` implementations in `ut_gtest.cpp` — these wrap GTest with the same unified API as the C path, including the interactive console menu, option parsing (`-b`/`-a`/`-e`/`-p`...), KVP profile loading, group activation/deactivation, and `UT_exit()` cleanup. Framework filtering and group-activation logic run through `UTCore` and the `UTTestRunner` class in `ut_gtest.cpp`.
+
+To use that runner the C++ test project must supply its own `main()` that calls `UT_init()` and `UT_run_tests()` (same pattern as the C path). The Makefile also links `libgtest_main` for projects that prefer GoogleTest's default entry point, but doing so **bypasses ut-core's runner entirely** — no option parsing, no `-p` KVP load, no console menu, no `UT_exit()`. Pick one or the other.
 
 ---
 
@@ -572,7 +580,7 @@ export LD_LIBRARY_PATH=/usr/lib:/lib:/home/root:./
 ./hal_test -a                          # Automated, xUnit/JUnit XML output
 ./hal_test -b -p platform_profile.yaml # With device profile
 ./hal_test -b -d 4                     # Disable L4 group
-./hal_test -b -e 1 -e 2               # Enable only L1 and L2
+./hal_test -b -e 1 -e 2               # Enable groups L1 and L2 (additive; combine with -d to deactivate others for an exclusive run)
 ```
 
 ---
