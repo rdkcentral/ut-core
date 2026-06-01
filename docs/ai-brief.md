@@ -118,7 +118,7 @@ These suite/test typedefs and the registration prototypes below are declared in 
 | `UT_test_suite_t *UT_add_suite_withGroupID(const char *pTitle, UT_InitialiseFunction_t pInit, UT_CleanupFunction_t pClean, UT_groupID_t groupId)` | Same as above but assigns a group ID for selective enable/disable via `-d`/`-e` CLI flags. |
 | `UT_test_t *UT_add_test(UT_test_suite_t *pSuite, const char *pTitle, UT_TestFunction_t pFunction)` | Add a test case to a suite. |
 | `const char *UT_getTestSuiteTitle(UT_test_suite_t *pSuite)` | Get suite title string. |
-| `void UT_regsiter_test_cleanup_function(UT_test_suite_t *pSuite, UT_TestCleanupFunction_t pFunction)` | Register post-suite cleanup. Note: name has typo "regsiter" -- this is the actual API name. |
+| `void UT_regsiter_test_cleanup_function(UT_test_suite_t *pSuite, UT_TestCleanupFunction_t pFunction)` | **Declared in `ut.h` but not implemented** in any source file — calls will not link. Name has typo "regsiter" (sic) preserved as in the header. |
 
 ### Assertion macros (C path -- CUnit backend)
 
@@ -304,14 +304,14 @@ The test binary (built as `hal_test` by default) accepts these flags. Options ar
 | `-c` | Console mode -- interactive menu. Console is the default mode, so `-c` is accepted but has no dedicated handler (no-op). |
 | `-b` | Basic mode -- run all tests, output to stdout |
 | `-a` | Automated mode -- generate xUnit/JUnit XML report |
-| `-t` | Automated mode + list all tests run to a file |
+| `-t` | Sets `gOptions.testMode = UT_MODE_AUTOMATED` and `gOptions.listTest = true`; `listTest` is not read anywhere, so the effective behaviour is identical to `-a` (automated XML report). |
 | `-l <path>` | Set log file output path (default: `/tmp/`) |
 | `-p <filename>` | Load a KVP profile (YAML or JSON); also used by the `kvp_assert` macros |
 | `-d <group_id>` | Disable test group (1-9, see `UT_groupID_t`) |
 | `-e <group_id>` | Enable test group |
 | `-h` | Show help and exit |
 | `-f <arg>` | Accepts an argument in the option string but has no handler; effectively reserved/unused. |
-| `--gtest_output=<...>` | Long option recognized as a placeholder (GTest output passthrough). |
+| `--gtest_output=<...>` | Long option (`val=0` in `long_options`) consumed by `getopt_long` but **not forwarded** to GTest — there is no `case 0:` handler. Effectively a no-op that stops `getopt_long` from rejecting the argument when a GTest-style wrapper passes it through. |
 
 Group IDs correspond to `UT_groupID_t` values (1 = L1, 2 = L2, 3 = L3, 4 = L4, 5 = HUMAN_L2, 6 = HUMAN_L3, 7 = HUMAN_L4, 8 = VDEVICE, 9 = UNKNOWN). A group value `>= UT_TESTS_MAX` is rejected as invalid.
 
@@ -488,7 +488,7 @@ UT_ADD_TEST(MyHalTests, NegativeCase) {
 }
 ```
 
-In the C++ path, ut-core provides its own `UT_init()` and `UT_run_tests()` implementations in `ut_gtest.cpp` — these wrap GTest with the same unified API as the C path, including the interactive console menu, option parsing (`-b`/`-a`/`-e`/`-p`...), KVP profile loading, group activation/deactivation, and `UT_exit()` cleanup. Framework filtering and group-activation logic run through `UTCore` and the `UTTestRunner` class in `ut_gtest.cpp`.
+In the C++ path, `UT_init()` is defined in `src/ut_main.c` and is shared by both VARIANT=C and VARIANT=CPP — option parsing (`-b`/`-a`/`-e`/`-p`...), `-p` KVP profile loading, and the run-mode selection all live there. `UT_run_tests()` for the C++ path is implemented separately in `src/cpp_source/ut_gtest.cpp`, where it wraps GTest behind the same unified API as the C path — including the interactive console menu, group activation/deactivation, and `UT_exit()` cleanup. Framework filtering and group-activation logic run through `UTCore` and the `UTTestRunner` class in `ut_gtest.cpp`.
 
 To use that runner the C++ test project must supply its own `main()` that calls `UT_init()` and `UT_run_tests()` (same pattern as the C path). The Makefile also links `libgtest_main` for projects that prefer GoogleTest's default entry point, but doing so **bypasses ut-core's runner entirely** — no option parsing, no `-p` KVP load, no console menu, no `UT_exit()`. Pick one or the other.
 
