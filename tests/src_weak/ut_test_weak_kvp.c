@@ -59,11 +59,13 @@ void __attribute__((weak)) ut_kvp_destroyInstance(ut_kvp_instance_t *pInstance)
  * Always returns UT_KVP_STATUS_INVALID_INSTANCE.
  *
  * @param[in] pInstance - Handle to the KVP instance.
- * @param[in] fileName - Path to the KVP file.
+ * @param[in] fileNameOrUrl - Path to the KVP file.
  * @returns UT_KVP_STATUS_INVALID_INSTANCE.
  */
-ut_kvp_status_t __attribute__((weak)) ut_kvp_open(ut_kvp_instance_t *pInstance, char *fileName)
+ut_kvp_status_t __attribute__((weak)) ut_kvp_open(ut_kvp_instance_t *pInstance, const char *fileNameOrUrl)
 {
+    (void)pInstance;
+    (void)fileNameOrUrl;
     printf("Weak implementation of [%s]", __func__);
     return UT_KVP_STATUS_INVALID_INSTANCE;
 }
