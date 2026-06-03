@@ -16,7 +16,7 @@ ut-core is the standard unit-testing framework for RDK HAL (Hardware Abstraction
 
 Repository: `https://github.com/rdkcentral/ut-core`
 License: Apache 2.0
-Current version tag: **5.0.0** (latest tag on the develop branch)
+Current version tag: **5.1.0** (latest tag on the develop branch)
 
 ---
 
@@ -551,7 +551,7 @@ Log files default to `/tmp/` and the path can be changed with `-l <path>`.
 - **Key types from ut-control**: `ut_kvp_instance_t`, `ut_kvp_status_t` (including `UT_KVP_STATUS_SUCCESS`), `UT_KVP_MAX_ELEMENT_SIZE`.
 - **KVP accessor functions**: `ut_kvp_getBoolField()`, `ut_kvp_getUInt8Field()`, `ut_kvp_getUInt16Field()`, `ut_kvp_getUInt32Field()`, `ut_kvp_getUInt64Field()`, `ut_kvp_getInt8Field()`, `ut_kvp_getInt16Field()`, `ut_kvp_getInt32Field()`, `ut_kvp_getInt64Field()`, `ut_kvp_getStringField()`, `ut_kvp_getListCount()`, `ut_kvp_createInstance()`, `ut_kvp_destroyInstance()`, `ut_kvp_open()`.
 
-`build.sh` pins ut-control via `UT_CONTROL_PROJECT_VERSION="2.0.0"` and checks out that tag. If a newer ut-control tag exists, the build prints an upgrade recommendation but does not auto-upgrade across major versions.
+`build.sh` pins ut-control via `UT_CONTROL_PROJECT_VERSION="2.1.0"` and checks out that tag. If a newer ut-control tag exists, the build prints an upgrade recommendation but does not auto-upgrade across major versions.
 
 ---
 
@@ -614,7 +614,7 @@ Tags use a dotted numeric form (e.g. `4.7.3`, `5.0.0`).
 |-----------|---------|-------------|
 | CUnit | 2.1-3 | Downloaded by `build.sh` from SourceForge (C path), then patched |
 | Google Test | 1.15.2 | Downloaded by `build.sh` from GitHub (C++ path) |
-| ut-control | 2.0.0 | Cloned by `build.sh` from `rdkcentral/ut-control` (`git@github.com` SSH remote) |
+| ut-control | 2.1.0 | Cloned by `build.sh` from `rdkcentral/ut-control` (`git@github.com` SSH remote) |
 | CMake | > 3.12 | Required for building GTest (system cmake preferred, else one bundled with ut-control) |
 | GCC/G++ | System | For linux target |
 | ARM toolchain | Vendor/SDK | For arm target (sourced via environment) |
