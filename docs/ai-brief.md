@@ -90,7 +90,7 @@ typedef enum {
 | Signature | Description |
 |-----------|-------------|
 | `UT_status_t UT_init(int argc, char** argv)` | Initialize framework; parse CLI flags and start up the system. Must be called first from `main()`. Also prints the `UT CORE Version`. |
-| `void UT_exit(void)` | Release resources (closes the KVP profile via `ut_kvp_profile_close()`). Called automatically at the end of `UT_run_tests()` in both the CUnit and GTest paths. |
+| `void UT_exit(void)` | Release resources (closes the KVP profile via `ut_kvp_profile_close()`). Called automatically at the end of `UT_run_tests()` on the **success path** of both backends. Caveat (CUnit path): `UT_run_tests()` returns early on suite/test registration failure or a post-run CUnit error *without* reaching `UT_exit()` (`src/c_source/ut_cunit.c`), so a KVP profile opened via `-p` may remain open — call `UT_exit()` explicitly on those error returns. |
 | `UT_status_t UT_run_tests(void)` | Execute all registered suites/tests in the selected mode. Returns `UT_STATUS_OK` if execution completed without framework error. |
 
 ---
@@ -409,7 +409,7 @@ The template `build.sh` (see `template/ut_template/build.sh`):
 
 1. Sets `UT_PROJECT_MAJOR_VERSION` (the template default is `"3."`) to pin the major version.
 2. Clones `rdkcentral/ut-core` as `./ut-core` if not present.
-3. Checks out the highest tag matching the major version.
+3. Checks out the pinned tag: `check_next_revision` sets `UT_CORE_PROJECT_VERSION` to the highest tag matching `UT_PROJECT_MAJOR_VERSION` (e.g. the highest `3.*` tag) when it is not already set, then the script runs `git checkout ${UT_CORE_PROJECT_VERSION}` on that exact tag.
 4. On subsequent runs, `check_next_revision` warns if a newer major version exists.
 5. Delegates to `make -C . -f Makefile` (which in turn runs `./ut-core/build.sh` to download frameworks).
 
@@ -543,7 +543,7 @@ Log files default to `/tmp/` and the path can be changed with `-l <path>`.
 
 ## 12. Integration with ut-control
 
-**ut-control** (`framework/ut-control/`) is the RDK unit-testing support library, cloned and built by `build.sh` (via `git clone git@github.com:rdkcentral/ut-control.git`). It provides:
+**ut-control** (`framework/ut-control/`) is the RDK unit-testing support library, cloned and built by `build.sh`. The clone endpoint is auto-resolved — SSH `git@github.com`, then SSH `git@code.rdkcentral.com`, falling back to HTTPS (`https://github.com/rdkcentral/ut-control.git`) — and can be forced with `UT_CONTROL_REPO_ENDPOINT=ssh|https`. It provides:
 
 - **KVP engine**: Parses YAML/JSON configuration files. The `ut_kvp_*` functions used by the profile system come from ut-control.
 - **Logging**: `ut_log.h` and the `UT_LOG*` macros.
@@ -614,7 +614,7 @@ Tags use a dotted numeric form (e.g. `4.7.3`, `5.0.0`).
 |-----------|---------|-------------|
 | CUnit | 2.1-3 | Downloaded by `build.sh` from SourceForge (C path), then patched |
 | Google Test | 1.15.2 | Downloaded by `build.sh` from GitHub (C++ path) |
-| ut-control | 2.1.0 | Cloned by `build.sh` from `rdkcentral/ut-control` (`git@github.com` SSH remote) |
+| ut-control | 2.1.0 | Cloned by `build.sh` from `rdkcentral/ut-control` (endpoint auto-resolved: SSH github.com → SSH code.rdkcentral.com → HTTPS; override via `UT_CONTROL_REPO_ENDPOINT`) |
 | CMake | > 3.12 | Required for building GTest (system cmake preferred, else one bundled with ut-control) |
 | GCC/G++ | System | For linux target |
 | ARM toolchain | Vendor/SDK | For arm target (sourced via environment) |
