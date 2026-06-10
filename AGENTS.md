@@ -91,7 +91,7 @@ typedef enum {
 |-----------|-------------|
 | `UT_status_t UT_init(int argc, char** argv)` | Initialize framework; parse CLI flags and start up the system. Must be called first from `main()`. Also prints the `UT CORE Version`. |
 | `void UT_exit(void)` | Release resources (closes the KVP profile via `ut_kvp_profile_close()`). Called automatically at the end of `UT_run_tests()` on the **success path** of both backends. Caveat (CUnit path): `UT_run_tests()` returns early on suite/test registration failure or a post-run CUnit error *without* reaching `UT_exit()` (`src/c_source/ut_cunit.c`), so a KVP profile opened via `-p` may remain open — call `UT_exit()` explicitly on those error returns. |
-| `UT_status_t UT_run_tests(void)` | Execute all registered suites/tests in the selected mode. Returns `UT_STATUS_OK` if execution completed without framework error. |
+| `UT_status_t UT_run_tests(void)` | Execute all registered suites/tests in the selected mode. Returns `UT_STATUS_OK` on success. Caveat (CUnit path): on suite/test **registration** failure (`gRegisterFailed`) it still returns `UT_STATUS_OK` as long as `CU_get_error()` is `CUE_SUCCESS` (`src/c_source/ut_cunit.c`) — a successful return does not by itself prove every suite/test registered, so check the logs/registration result too. |
 
 ---
 
@@ -270,7 +270,7 @@ The profile is loaded via the `-p <filename>` CLI flag, which calls `ut_kvp_prof
 | `UT_KVP_PROFILE_GET_LIST_COUNT(key)` | `uint32_t` |
 | `UT_KVP_PROFILE_GET_STRING(key, buffer)` | Writes to `buffer` (char array sized `UT_KVP_MAX_ELEMENT_SIZE`) |
 
-Keys use slash-separated paths into the YAML/JSON document, e.g. `"dsAudio/ports/0/name"`.
+Keys are paths into the YAML/JSON document and accept **either** slash- or dot-separated form, e.g. `"dsAudio/ports/0/name"` or `"dsAudio.ports.0.name"` — ut-control normalizes `.` to `/` internally (`convert_dot_to_slash`).
 
 ### Profile assertion macros
 
@@ -292,6 +292,8 @@ These combine profile lookup with assertion in one call:
 | `UT_ASSERT_KVP_NOT_EQUAL_PROFILE_STRING(checkValue, key)` | unexpected string, key string |
 
 Deprecated aliases (still functional): `UT_ASSERT_EQUAL_KVP_PROFILE_BOOL`, `UT_ASSERT_EQUAL_KVP_PROFILE_UINT64`, `UT_ASSERT_EQUAL_KVP_PROFILE_STRING`.
+
+**C++/GTest limitation:** `UT_ASSERT_KVP_EQUAL_PROFILE_INT64`, `UT_ASSERT_KVP_EQUAL_PROFILE_STRING`, and `UT_ASSERT_KVP_NOT_EQUAL_PROFILE_STRING` expand to the bare `UT_ASSERT(...)` macro, which is defined only in the CUnit path (`ut_cunit.h`); it is **not** defined in the GTest/C++ variant, so these macros will not compile from C++ tests. In C++ use `UT_KVP_PROFILE_GET_INT64(key)` / `UT_KVP_PROFILE_GET_STRING(...)` with a GTest assertion (`UT_ASSERT_EQUAL`, `EXPECT_*`) instead. The numeric `*_PROFILE_UINT*/INT8/16/32`/`BOOL`/`LIST_COUNT` macros use `UT_ASSERT_EQUAL` and work in both paths.
 
 ---
 
