@@ -541,6 +541,8 @@ Color constants: `UT_LOG_ASCII_GREEN`, `UT_LOG_ASCII_RED`, `UT_LOG_ASCII_YELLOW`
 
 Log files default to `/tmp/` and the path can be changed with `-l <path>`.
 
+**Log verbosity** is controlled at compile time by ut-control's `UT_LOG_LEVEL` (`NONE`→`DEBUG`, default `WARNING`); the level-gated macros are documented in ut-control's brief / README — see [log-level-filtering](https://github.com/rdkcentral/ut-control#log-level-filtering) for the level table and gating behavior.
+
 ---
 
 ## 12. Integration with ut-control
