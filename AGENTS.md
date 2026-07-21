@@ -54,10 +54,10 @@ Current version tag: **5.1.0** (latest tag on the develop branch)
 | VARIANT value | Define set      | Backend   | Source path                     |
 |---------------|----------------|-----------|---------------------------------|
 | `C` (default) | `-DUT_CUNIT`   | CUnit 2.1-3 | `src/c_source/ut_cunit.c`     |
-| `CPP`         | (none extra)    | GTest 1.15.2 | `src/cpp_source/ut_gtest.cpp` |
+| `CPP`         | (none extra)    | GTest + GMock 1.15.2 | `src/cpp_source/ut_gtest.cpp` |
 
 When `UT_CUNIT` is defined, `ut.h` includes `ut_cunit.h`.
-When `UT_CUNIT` is **not** defined (C++ path), `ut.h` includes `ut_gtest.h`.
+When `UT_CUNIT` is **not** defined (C++ path), `ut.h` includes `ut_gtest.h` **and** `ut_gmock.h` (GoogleMock wrappers). The combined googletest distribution ships googlemock, so no extra download is needed.
 
 ---
 
@@ -165,7 +165,7 @@ All `_FATAL` macros record failure and **abort the current test**.
 
 ---
 
-## 5. C++ Path API (ut_gtest.h) -- When VARIANT=CPP
+## 5. C++ Path API (ut_gtest.h + ut_gmock.h) -- When VARIANT=CPP
 
 ### Test fixture class
 
@@ -237,6 +237,23 @@ Non-`_FATAL` use GTest `EXPECT_*` (continue on failure).
 | `UT_PASS_FATAL(message)` | string | `SUCCEED() << message` |
 
 > Note: the C++ path does **not** define the `_MSG`/`_LOG` macro family or the `UT_ASSERT_PTR_*` macros from the C path, and has no plain `UT_ASSERT` (use `UT_ASSERT_TRUE`). Conversely, `UT_ASSERT_LESS`, `UT_ASSERT_GREATER`, the throw macros, and the floating-point and ignore-case string macros exist only in the C++ path.
+
+### Mocking macros (C++ path -- GoogleMock backend)
+
+`ut_gmock.h` wraps GoogleMock so C++ tests can mock an interface under test using `UT_`-prefixed macros, without including `<gmock/gmock.h>` directly. It is pulled in automatically by `ut.h` on the C++ path. Mock verification is active because the test runner calls `::testing::InitGoogleMock` — an unmet `UT_EXPECT_CALL` fails the run.
+
+| Macro | Maps to | Purpose |
+|---|---|---|
+| `UT_MOCK_METHOD(ret, name, (args), (specs))` | `MOCK_METHOD` | Declare a mocked method in a mock class |
+| `UT_EXPECT_CALL(mock, call)` | `EXPECT_CALL` | Set an expectation (chain `.Times()`, `.WillOnce()`, ...) |
+| `UT_ON_CALL(mock, call)` | `ON_CALL` | Set default behaviour without a count expectation |
+| `UT_NICE_MOCK/UT_NAGGY_MOCK/UT_STRICT_MOCK(type)` | `NiceMock/NaggyMock/StrictMock` | Control uninteresting-call strictness |
+| `UT_ANY`, `UT_EQ/NE/GT/GE/LT/LE(v)`, `UT_NOTNULL`, `UT_ISNULL`, `UT_STR_EQ(v)`, `UT_BETWEEN(lo,hi)` | `::testing::_`, `Eq/Ne/Gt/...`, matchers | Argument matchers |
+| `UT_RETURN(v)`, `UT_RETURN_REF(v)`, `UT_RETURN_DEFAULT`, `UT_INVOKE(f)`, `UT_SET_ARG_POINTEE(N,v)`, `UT_DO_ALL(...)`, `UT_THROW(e)` | `::testing::Return/Invoke/...` | Actions |
+| `UT_AT_LEAST(n)`, `UT_AT_MOST(n)`, `UT_EXACTLY(n)`, `UT_ANY_NUMBER` | `::testing::AtLeast/...` | Cardinalities (argument to `.Times()`) |
+| `UT_VERIFY_AND_CLEAR(mock)` | `Mock::VerifyAndClearExpectations` | Verify expectations mid-test |
+
+Mock classes register and run like any other gtest suite (`UT_ADD_TEST_TO_GROUP` / `UT_ADD_TEST`). See `tests/src/cpp_source/ut_test_gmock.cpp` for a worked interface-mock example.
 
 ---
 

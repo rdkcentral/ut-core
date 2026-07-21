@@ -67,9 +67,9 @@ else # GTEST case
   SRC_DIRS += $(UT_CORE_DIR)/src
   EXCLUDE_DIRS = $(SRCDIR)/c_source
   GTEST_SRC = $(FRAMEWORK_DIR)/gtest/$(TARGET)/googletest-1.15.2
-  INC_DIRS += $(GTEST_SRC)/googletest/include $(UT_CORE_DIR)/src/cpp_source $(UT_CORE_DIR)/src
+  INC_DIRS += $(GTEST_SRC)/googletest/include $(GTEST_SRC)/googlemock/include $(UT_CORE_DIR)/src/cpp_source $(UT_CORE_DIR)/src
   TEST_LIB_DIR = $(UT_CORE_DIR)/build/$(TARGET)/cpp_libs/lib/
-  XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -L$(TEST_LIB_DIR) -lgtest_main -lgtest -lut_control -lpthread -lm
+  XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -L$(TEST_LIB_DIR) -lgmock -lgtest_main -lgtest -lut_control -lpthread -lm
 
   # Source files
   SRCS := $(shell find $(SRC_DIRS) -type f \( -name '*.cpp' -o -name '*.c' \) | grep -v "$(EXCLUDE_DIRS)")
