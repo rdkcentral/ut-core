@@ -255,6 +255,8 @@ Non-`_FATAL` use GTest `EXPECT_*` (continue on failure).
 
 Mock classes register and run like any other gtest suite (`UT_ADD_TEST_TO_GROUP` / `UT_ADD_TEST`). See `tests/src/cpp_source/ut_test_gmock.cpp` for a worked interface-mock example.
 
+**Autogeneration.** `scripts/autogenerate_gmock.sh -f <interface.h> [-c <Class>] [-o <dir>]` parses the pure-virtual methods of a C++ interface header and emits a matching mock (`mock_<class>.h`, one `UT_MOCK_METHOD` per virtual) plus a gtest test skeleton (`test_<class>.cpp`). It handles standard single-line `virtual ... = 0;` declarations; wrap comma-bearing template return types in a typedef. (GoogleMock's own `gmock_gen.py` was removed from googletest by 1.15.2, so generation is provided by ut-core.)
+
 ---
 
 ## 6. KVP Profile System (ut_kvp_profile.h)
