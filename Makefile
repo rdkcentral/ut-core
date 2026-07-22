@@ -96,8 +96,8 @@ COMPILER := $(if $(filter CPP,$(VARIANT)),$(CXX),$(CC))
 INC_DIRS += $(UT_CORE_DIR)/sysroot/usr/include
 UT_CONTROL_COMPILER := $(CC)
 else
-COMPILER := $(if $(filter CPP,$(VARIANT)),g++ -ggdb -o0 -Wall, gcc -ggdb -o0 -Wall)
-UT_CONTROL_COMPILER := gcc -ggdb -o0 -Wall
+COMPILER := $(if $(filter CPP,$(VARIANT)),g++ -ggdb -O0 -Wall, gcc -ggdb -O0 -Wall)
+UT_CONTROL_COMPILER := gcc -ggdb -O0 -Wall
 endif
 
 # Common object file setup
