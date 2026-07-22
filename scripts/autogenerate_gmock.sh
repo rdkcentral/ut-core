@@ -173,9 +173,12 @@ MOCK_CLASS="Mock${AGT_CLASS}"
 MOCK_HEADER="${AGT_OUTDIR}/mock_${CLASS_LOWER}.h"
 TEST_FILE="${AGT_OUTDIR}/test_${CLASS_LOWER}.cpp"
 
-# Collect the pure-virtual declarations of the target class.
+# Collect the pure-virtual declarations of the target class. Exclude a
+# pure-virtual destructor (virtual ~Foo() = 0;) -- destructors cannot be
+# expressed with MOCK_METHOD.
 mapfile -t PURE_VIRTUALS < <(AGT_gmock_class_body "${AGT_HEADER}" "${AGT_CLASS}" \
-    | grep -E 'virtual' | grep -E '=[[:space:]]*0[[:space:]]*;')
+    | grep -E 'virtual' | grep -E '=[[:space:]]*0[[:space:]]*;' \
+    | grep -vE 'virtual[[:space:]]*~')
 
 if [ "${#PURE_VIRTUALS[@]}" -eq 0 ]; then
     echo "Warning: no pure-virtual methods found in class ${AGT_CLASS}." >&2

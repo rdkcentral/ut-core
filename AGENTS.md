@@ -249,7 +249,7 @@ Non-`_FATAL` use GTest `EXPECT_*` (continue on failure).
 | `UT_MOCK_ON_CALL(mock, call)` | `ON_CALL` | Set default behaviour without a count expectation |
 | `UT_MOCK_NICE/UT_MOCK_NAGGY/UT_MOCK_STRICT(type)` | `NiceMock/NaggyMock/StrictMock` | Control uninteresting-call strictness |
 | `UT_MOCK_ANY`, `UT_MOCK_EQ/NE/GT/GE/LT/LE(v)`, `UT_MOCK_NOTNULL`, `UT_MOCK_ISNULL`, `UT_MOCK_STR_EQ(v)`, `UT_MOCK_BETWEEN(lo,hi)` | `::testing::_`, `Eq/Ne/Gt/...`, matchers | Argument matchers |
-| `UT_MOCK_RETURN(v)`, `UT_MOCK_RETURN_REF(v)`, `UT_MOCK_RETURN_DEFAULT`, `UT_MOCK_INVOKE(f)`, `UT_MOCK_SET_ARG_POINTEE(N,v)`, `UT_MOCK_DO_ALL(...)`, `UT_MOCK_THROW(e)` | `::testing::Return/Invoke/...` | Actions |
+| `UT_MOCK_RETURN(v)`, `UT_MOCK_RETURN_REF(v)`, `UT_MOCK_DO_DEFAULT`, `UT_MOCK_INVOKE(f)`, `UT_MOCK_SET_ARG_POINTEE(N,v)`, `UT_MOCK_DO_ALL(...)`, `UT_MOCK_THROW(e)` | `::testing::Return/Invoke/...` | Actions |
 | `UT_MOCK_AT_LEAST(n)`, `UT_MOCK_AT_MOST(n)`, `UT_MOCK_EXACTLY(n)`, `UT_MOCK_ANY_NUMBER` | `::testing::AtLeast/...` | Cardinalities (argument to `.Times()`) |
 | `UT_MOCK_VERIFY_AND_CLEAR(mock)` | `Mock::VerifyAndClearExpectations` | Verify expectations mid-test |
 

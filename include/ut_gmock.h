@@ -124,8 +124,10 @@
 #define UT_MOCK_RETURN(value) ::testing::Return(value)
 /** @brief Returns a reference to @p value from the mocked call. */
 #define UT_MOCK_RETURN_REF(value) ::testing::ReturnRef(value)
-/** @brief Returns the default-constructed return value. */
-#define UT_MOCK_RETURN_DEFAULT ::testing::Return()
+/** @brief Performs the method's default action (e.g. the ON_CALL default, or
+ *  gmock's built-in default return for the type). Note: a mocked method with
+ *  no action already returns a default-constructed value automatically. */
+#define UT_MOCK_DO_DEFAULT ::testing::DoDefault()
 /** @brief Invokes @p f (a callable) with the mocked call's arguments. */
 #define UT_MOCK_INVOKE(f) ::testing::Invoke(f)
 /** @brief Writes @p value through the pointer/reference at argument index @p N. */
