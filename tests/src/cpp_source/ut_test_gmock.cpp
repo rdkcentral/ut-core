@@ -21,9 +21,9 @@
  * @file ut_test_gmock.cpp
  * @brief Example: mocking a C++ interface with the ut-core gmock wrappers.
  *
- * Demonstrates UT_MOCK_METHOD, UT_EXPECT_CALL, matchers (UT_ANY / UT_GE /
- * UT_STR_EQ), actions (UT_RETURN), cardinalities (UT_EXACTLY / UT_ANY_NUMBER)
- * and strictness wrappers (UT_NICE_MOCK) — all without including
+ * Demonstrates UT_MOCK_METHOD, UT_MOCK_EXPECT_CALL, matchers (UT_MOCK_ANY / UT_MOCK_GE /
+ * UT_MOCK_STR_EQ), actions (UT_MOCK_RETURN), cardinalities (UT_MOCK_EXACTLY / UT_MOCK_ANY_NUMBER)
+ * and strictness wrappers (UT_MOCK_NICE) — all without including
  * <gmock/gmock.h> directly.
  */
 
@@ -73,9 +73,9 @@ UT_ADD_TEST_TO_GROUP(UTGMockL1, UT_TESTS_L1)
 UT_ADD_TEST(UTGMockL1, SelfTestPasses)
 {
     MockSensor sensor;
-    UT_EXPECT_CALL(sensor, reset()).Times(UT_EXACTLY(1));
-    UT_EXPECT_CALL(sensor, read(UT_STR_EQ("temperature"))).WillOnce(UT_RETURN(21));
-    UT_EXPECT_CALL(sensor, calibrate(0, 100)).WillOnce(UT_RETURN(true));
+    UT_MOCK_EXPECT_CALL(sensor, reset()).Times(UT_MOCK_EXACTLY(1));
+    UT_MOCK_EXPECT_CALL(sensor, read(UT_MOCK_STR_EQ("temperature"))).WillOnce(UT_MOCK_RETURN(21));
+    UT_MOCK_EXPECT_CALL(sensor, calibrate(0, 100)).WillOnce(UT_MOCK_RETURN(true));
 
     UT_ASSERT_TRUE(sensorSelfTest(sensor));
 }
@@ -84,9 +84,9 @@ UT_ADD_TEST(UTGMockL1, SelfTestPasses)
 UT_ADD_TEST(UTGMockL1, MatchersAndActions)
 {
     MockSensor sensor;
-    UT_EXPECT_CALL(sensor, reset()).Times(UT_ANY_NUMBER);
-    UT_EXPECT_CALL(sensor, read(UT_ANY)).WillRepeatedly(UT_RETURN(5));
-    UT_EXPECT_CALL(sensor, calibrate(UT_ANY, UT_GE(0))).WillOnce(UT_RETURN(true));
+    UT_MOCK_EXPECT_CALL(sensor, reset()).Times(UT_MOCK_ANY_NUMBER);
+    UT_MOCK_EXPECT_CALL(sensor, read(UT_MOCK_ANY)).WillRepeatedly(UT_MOCK_RETURN(5));
+    UT_MOCK_EXPECT_CALL(sensor, calibrate(UT_MOCK_ANY, UT_MOCK_GE(0))).WillOnce(UT_MOCK_RETURN(true));
 
     UT_ASSERT_TRUE(sensorSelfTest(sensor));
 }
@@ -95,8 +95,8 @@ UT_ADD_TEST(UTGMockL1, MatchersAndActions)
  * the failure path so we can assert the negative branch. */
 UT_ADD_TEST(UTGMockL1, NiceMockFailurePath)
 {
-    UT_NICE_MOCK(MockSensor) sensor;
-    UT_EXPECT_CALL(sensor, read(UT_ANY)).WillOnce(UT_RETURN(-1));
+    UT_MOCK_NICE(MockSensor) sensor;
+    UT_MOCK_EXPECT_CALL(sensor, read(UT_MOCK_ANY)).WillOnce(UT_MOCK_RETURN(-1));
 
     UT_ASSERT_FALSE(sensorSelfTest(sensor));
 }
@@ -107,9 +107,9 @@ UT_ADD_TEST(UTGMockL1, NiceMockFailurePath)
 UT_ADD_TEST(UTGMockL1, DISABLED_UnmetExpectationFails)
 {
     MockSensor sensor;
-    UT_EXPECT_CALL(sensor, reset()).Times(UT_ANY_NUMBER);
-    UT_EXPECT_CALL(sensor, read(UT_ANY)).WillOnce(UT_RETURN(-1));
-    UT_EXPECT_CALL(sensor, calibrate(UT_ANY, UT_ANY)).WillOnce(UT_RETURN(true)); // never called
+    UT_MOCK_EXPECT_CALL(sensor, reset()).Times(UT_MOCK_ANY_NUMBER);
+    UT_MOCK_EXPECT_CALL(sensor, read(UT_MOCK_ANY)).WillOnce(UT_MOCK_RETURN(-1));
+    UT_MOCK_EXPECT_CALL(sensor, calibrate(UT_MOCK_ANY, UT_MOCK_ANY)).WillOnce(UT_MOCK_RETURN(true)); // never called
 
     UT_ASSERT_FALSE(sensorSelfTest(sensor));
 }

@@ -69,7 +69,10 @@ else # GTEST case
   GTEST_SRC = $(FRAMEWORK_DIR)/gtest/$(TARGET)/googletest-1.15.2
   INC_DIRS += $(GTEST_SRC)/googletest/include $(GTEST_SRC)/googlemock/include $(UT_CORE_DIR)/src/cpp_source $(UT_CORE_DIR)/src
   TEST_LIB_DIR = $(UT_CORE_DIR)/build/$(TARGET)/cpp_libs/lib/
-  XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -L$(TEST_LIB_DIR) -lgmock -lgtest_main -lgtest -lut_control -lpthread -lm
+  # Link gmock_main (not gtest_main) as the fallback main() so a downstream
+  # project without its own main() still gets InitGoogleMock (gmock flags +
+  # verification), matching the init performed in UTTestRunner.
+  XLDFLAGS += $(YLDFLAGS) $(LDFLAGS) -L$(UT_CONTROL)/build/$(TARGET)/lib -L$(TEST_LIB_DIR) -lgmock_main -lgmock -lgtest -lut_control -lpthread -lm
 
   # Source files
   SRCS := $(shell find $(SRC_DIRS) -type f \( -name '*.cpp' -o -name '*.c' \) | grep -v "$(EXCLUDE_DIRS)")

@@ -154,8 +154,20 @@ if [ -z "${AGT_CLASS}" ]; then
     exit 1
 fi
 
+# Validate the class name is a plain C++ identifier before using it to form
+# file paths and generated code (rejects path components like '/..').
+if ! echo "${AGT_CLASS}" | grep -qE '^[A-Za-z_][A-Za-z0-9_]*$'; then
+    echo "Error: class name '${AGT_CLASS}' is not a valid identifier." >&2
+    exit 1
+fi
+
 mkdir -p "${AGT_OUTDIR}"
 HEADER_BASENAME="$(basename "${AGT_HEADER}")"
+# Copy the interface header alongside the generated files so the emitted mock
+# (which includes it by basename) compiles regardless of where -o points.
+if [ "$(cd "$(dirname "${AGT_HEADER}")" && pwd)" != "$(cd "${AGT_OUTDIR}" && pwd)" ]; then
+    cp "${AGT_HEADER}" "${AGT_OUTDIR}/${HEADER_BASENAME}"
+fi
 CLASS_LOWER="$(echo "${AGT_CLASS}" | tr '[:upper:]' '[:lower:]')"
 MOCK_CLASS="Mock${AGT_CLASS}"
 MOCK_HEADER="${AGT_OUTDIR}/mock_${CLASS_LOWER}.h"
@@ -173,8 +185,8 @@ fi
 AGT_gmock_copyright "${MOCK_HEADER}"
 {
     echo "/* Auto-generated GoogleMock for ${AGT_CLASS} (from ${HEADER_BASENAME}). */"
-    echo "#ifndef __MOCK_${CLASS_LOWER^^}_H"
-    echo "#define __MOCK_${CLASS_LOWER^^}_H"
+    echo "#ifndef MOCK_${CLASS_LOWER^^}_H_"
+    echo "#define MOCK_${CLASS_LOWER^^}_H_"
     echo ""
     echo "#include <ut.h>"
     echo "#include \"${HEADER_BASENAME}\""
@@ -187,7 +199,7 @@ AGT_gmock_copyright "${MOCK_HEADER}"
     done
     echo "};"
     echo ""
-    echo "#endif /* __MOCK_${CLASS_LOWER^^}_H */"
+    echo "#endif /* MOCK_${CLASS_LOWER^^}_H_ */"
 } >> "${MOCK_HEADER}"
 
 # ---- Emit the gtest test skeleton ---------------------------------------
@@ -214,7 +226,7 @@ AGT_gmock_copyright "${TEST_FILE}"
         echo "{"
         echo "    ${MOCK_CLASS} mock;"
         echo "    // TODO: set expectations, e.g."
-        echo "    // UT_EXPECT_CALL(mock, ${mname}(UT_ANY)).WillOnce(UT_RETURN(/* value */));"
+        echo "    // UT_MOCK_EXPECT_CALL(mock, ${mname}(UT_MOCK_ANY)).WillOnce(UT_MOCK_RETURN(/* value */));"
         echo "    // TODO: drive the code under test with 'mock' and assert the result."
         echo "    (void)mock;"
         echo "}"

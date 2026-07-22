@@ -57,85 +57,94 @@
  * (.Times(), .WillOnce(), .WillRepeatedly(), .With(), ...).
  *
  * @code
- * UT_EXPECT_CALL(mock, open(UT_ANY)).Times(UT_AT_LEAST(1)).WillOnce(UT_RETURN(3));
+ * UT_MOCK_EXPECT_CALL(mock, open(UT_MOCK_ANY)).Times(UT_MOCK_AT_LEAST(1)).WillOnce(UT_MOCK_RETURN(3));
  * @endcode
  */
-#define UT_EXPECT_CALL(mock_object, call) EXPECT_CALL(mock_object, call)
+#define UT_MOCK_EXPECT_CALL(mock_object, call) EXPECT_CALL(mock_object, call)
 
 /**
  * @brief Sets the default behaviour of a mock method (no expectation on count).
  */
-#define UT_ON_CALL(mock_object, call) ON_CALL(mock_object, call)
+#define UT_MOCK_ON_CALL(mock_object, call) ON_CALL(mock_object, call)
 
 /* ---- Mock strictness wrappers ------------------------------------------- */
 
 /**
  * @brief A mock whose uninteresting calls are silently ignored.
  */
-#define UT_NICE_MOCK(type) ::testing::NiceMock<type>
+#define UT_MOCK_NICE(type) ::testing::NiceMock<type>
 
 /**
  * @brief A mock whose uninteresting calls produce a warning (gmock default).
  */
-#define UT_NAGGY_MOCK(type) ::testing::NaggyMock<type>
+#define UT_MOCK_NAGGY(type) ::testing::NaggyMock<type>
 
 /**
  * @brief A mock whose uninteresting calls are treated as failures.
  */
-#define UT_STRICT_MOCK(type) ::testing::StrictMock<type>
+#define UT_MOCK_STRICT(type) ::testing::StrictMock<type>
 
 /* ---- Common matchers (argument matching in EXPECT_CALL) ------------------ */
 
+/*
+ * NOTE: these UT_MOCK_* matchers are NOT the UT_ASSERT_* assertions from
+ * ut_gtest.h. A matcher (e.g. UT_MOCK_LT(5)) describes which argument values
+ * satisfy an expectation and is used *inside*
+ * UT_MOCK_EXPECT_CALL(mock, foo(UT_MOCK_LT(5))). An assertion (e.g.
+ * UT_ASSERT_LESS(a, b)) checks a value and records pass/fail. The UT_MOCK_
+ * prefix makes the distinction explicit: everything in this header is UT_MOCK_*.
+ */
+
 /** @brief Matches any argument value. */
-#define UT_ANY ::testing::_
+#define UT_MOCK_ANY ::testing::_
 /** @brief Matches an argument equal to @p value. */
-#define UT_EQ(value) ::testing::Eq(value)
+#define UT_MOCK_EQ(value) ::testing::Eq(value)
 /** @brief Matches an argument not equal to @p value. */
-#define UT_NE(value) ::testing::Ne(value)
+#define UT_MOCK_NE(value) ::testing::Ne(value)
 /** @brief Matches an argument greater than @p value. */
-#define UT_GT(value) ::testing::Gt(value)
+#define UT_MOCK_GT(value) ::testing::Gt(value)
 /** @brief Matches an argument greater than or equal to @p value. */
-#define UT_GE(value) ::testing::Ge(value)
+#define UT_MOCK_GE(value) ::testing::Ge(value)
 /** @brief Matches an argument less than @p value. */
-#define UT_LT(value) ::testing::Lt(value)
+#define UT_MOCK_LT(value) ::testing::Lt(value)
 /** @brief Matches an argument less than or equal to @p value. */
-#define UT_LE(value) ::testing::Le(value)
+#define UT_MOCK_LE(value) ::testing::Le(value)
 /** @brief Matches a non-null pointer argument. */
-#define UT_NOTNULL ::testing::NotNull()
+#define UT_MOCK_NOTNULL ::testing::NotNull()
 /** @brief Matches a null pointer argument. */
-#define UT_ISNULL ::testing::IsNull()
+#define UT_MOCK_ISNULL ::testing::IsNull()
 /** @brief Matches a C-string argument equal to @p value. */
-#define UT_STR_EQ(value) ::testing::StrEq(value)
+#define UT_MOCK_STR_EQ(value) ::testing::StrEq(value)
 /** @brief Matches an argument within [@p lo, @p hi]. */
-#define UT_BETWEEN(lo, hi) ::testing::AllOf(::testing::Ge(lo), ::testing::Le(hi))
+#define UT_MOCK_BETWEEN(lo, hi) ::testing::AllOf(::testing::Ge(lo), ::testing::Le(hi))
 
 /* ---- Common actions (what a mocked call does) --------------------------- */
 
 /** @brief Returns @p value from the mocked call. */
-#define UT_RETURN(value) ::testing::Return(value)
+#define UT_MOCK_RETURN(value) ::testing::Return(value)
 /** @brief Returns a reference to @p value from the mocked call. */
-#define UT_RETURN_REF(value) ::testing::ReturnRef(value)
+#define UT_MOCK_RETURN_REF(value) ::testing::ReturnRef(value)
 /** @brief Returns the default-constructed return value. */
-#define UT_RETURN_DEFAULT ::testing::Return()
+#define UT_MOCK_RETURN_DEFAULT ::testing::Return()
 /** @brief Invokes @p f (a callable) with the mocked call's arguments. */
-#define UT_INVOKE(f) ::testing::Invoke(f)
+#define UT_MOCK_INVOKE(f) ::testing::Invoke(f)
 /** @brief Writes @p value through the pointer/reference at argument index @p N. */
-#define UT_SET_ARG_POINTEE(N, value) ::testing::SetArgPointee<N>(value)
+#define UT_MOCK_SET_ARG_POINTEE(N, value) ::testing::SetArgPointee<N>(value)
 /** @brief Performs all of the supplied actions in order. */
-#define UT_DO_ALL(...) ::testing::DoAll(__VA_ARGS__)
+#define UT_MOCK_DO_ALL(...) ::testing::DoAll(__VA_ARGS__)
 /** @brief Throws @p exception from the mocked call. */
-#define UT_THROW(exception) ::testing::Throw(exception)
+#define UT_MOCK_THROW(exception) ::testing::Throw(exception)
 
 /* ---- Cardinalities (arguments to .Times()) ------------------------------ */
 
 /** @brief Cardinality: at least @p n calls. */
-#define UT_AT_LEAST(n) ::testing::AtLeast(n)
+#define UT_MOCK_AT_LEAST(n) ::testing::AtLeast(n)
 /** @brief Cardinality: at most @p n calls. */
-#define UT_AT_MOST(n) ::testing::AtMost(n)
+#define UT_MOCK_AT_MOST(n) ::testing::AtMost(n)
 /** @brief Cardinality: exactly @p n calls. */
-#define UT_EXACTLY(n) ::testing::Exactly(n)
+#define UT_MOCK_EXACTLY(n) ::testing::Exactly(n)
 /** @brief Cardinality: any number of calls (including zero). */
-#define UT_ANY_NUMBER ::testing::AnyNumber()
+#define UT_MOCK_ANY_NUMBER ::testing::AnyNumber()
 
 /**
  * @brief Verifies and clears all expectations on @p mock immediately.
@@ -145,7 +154,7 @@
  * ::testing::InitGoogleMock in the UT test runner), but this is useful to
  * assert expectations mid-test.
  */
-#define UT_VERIFY_AND_CLEAR(mock) ::testing::Mock::VerifyAndClearExpectations(&(mock))
+#define UT_MOCK_VERIFY_AND_CLEAR(mock) ::testing::Mock::VerifyAndClearExpectations(&(mock))
 
 #endif  /* UT -> GMOCK - Wrapper */
 

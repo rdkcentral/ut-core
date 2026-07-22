@@ -240,18 +240,18 @@ Non-`_FATAL` use GTest `EXPECT_*` (continue on failure).
 
 ### Mocking macros (C++ path -- GoogleMock backend)
 
-`ut_gmock.h` wraps GoogleMock so C++ tests can mock an interface under test using `UT_`-prefixed macros, without including `<gmock/gmock.h>` directly. It is pulled in automatically by `ut.h` on the C++ path. Mock verification is active because the test runner calls `::testing::InitGoogleMock` — an unmet `UT_EXPECT_CALL` fails the run.
+`ut_gmock.h` wraps GoogleMock so C++ tests can mock an interface under test using `UT_`-prefixed macros, without including `<gmock/gmock.h>` directly. It is pulled in automatically by `ut.h` on the C++ path. Mock verification is active because the test runner calls `::testing::InitGoogleMock` — an unmet `UT_MOCK_EXPECT_CALL` fails the run.
 
 | Macro | Maps to | Purpose |
 |---|---|---|
 | `UT_MOCK_METHOD(ret, name, (args), (specs))` | `MOCK_METHOD` | Declare a mocked method in a mock class |
-| `UT_EXPECT_CALL(mock, call)` | `EXPECT_CALL` | Set an expectation (chain `.Times()`, `.WillOnce()`, ...) |
-| `UT_ON_CALL(mock, call)` | `ON_CALL` | Set default behaviour without a count expectation |
-| `UT_NICE_MOCK/UT_NAGGY_MOCK/UT_STRICT_MOCK(type)` | `NiceMock/NaggyMock/StrictMock` | Control uninteresting-call strictness |
-| `UT_ANY`, `UT_EQ/NE/GT/GE/LT/LE(v)`, `UT_NOTNULL`, `UT_ISNULL`, `UT_STR_EQ(v)`, `UT_BETWEEN(lo,hi)` | `::testing::_`, `Eq/Ne/Gt/...`, matchers | Argument matchers |
-| `UT_RETURN(v)`, `UT_RETURN_REF(v)`, `UT_RETURN_DEFAULT`, `UT_INVOKE(f)`, `UT_SET_ARG_POINTEE(N,v)`, `UT_DO_ALL(...)`, `UT_THROW(e)` | `::testing::Return/Invoke/...` | Actions |
-| `UT_AT_LEAST(n)`, `UT_AT_MOST(n)`, `UT_EXACTLY(n)`, `UT_ANY_NUMBER` | `::testing::AtLeast/...` | Cardinalities (argument to `.Times()`) |
-| `UT_VERIFY_AND_CLEAR(mock)` | `Mock::VerifyAndClearExpectations` | Verify expectations mid-test |
+| `UT_MOCK_EXPECT_CALL(mock, call)` | `EXPECT_CALL` | Set an expectation (chain `.Times()`, `.WillOnce()`, ...) |
+| `UT_MOCK_ON_CALL(mock, call)` | `ON_CALL` | Set default behaviour without a count expectation |
+| `UT_MOCK_NICE/UT_MOCK_NAGGY/UT_MOCK_STRICT(type)` | `NiceMock/NaggyMock/StrictMock` | Control uninteresting-call strictness |
+| `UT_MOCK_ANY`, `UT_MOCK_EQ/NE/GT/GE/LT/LE(v)`, `UT_MOCK_NOTNULL`, `UT_MOCK_ISNULL`, `UT_MOCK_STR_EQ(v)`, `UT_MOCK_BETWEEN(lo,hi)` | `::testing::_`, `Eq/Ne/Gt/...`, matchers | Argument matchers |
+| `UT_MOCK_RETURN(v)`, `UT_MOCK_RETURN_REF(v)`, `UT_MOCK_RETURN_DEFAULT`, `UT_MOCK_INVOKE(f)`, `UT_MOCK_SET_ARG_POINTEE(N,v)`, `UT_MOCK_DO_ALL(...)`, `UT_MOCK_THROW(e)` | `::testing::Return/Invoke/...` | Actions |
+| `UT_MOCK_AT_LEAST(n)`, `UT_MOCK_AT_MOST(n)`, `UT_MOCK_EXACTLY(n)`, `UT_MOCK_ANY_NUMBER` | `::testing::AtLeast/...` | Cardinalities (argument to `.Times()`) |
+| `UT_MOCK_VERIFY_AND_CLEAR(mock)` | `Mock::VerifyAndClearExpectations` | Verify expectations mid-test |
 
 Mock classes register and run like any other gtest suite (`UT_ADD_TEST_TO_GROUP` / `UT_ADD_TEST`). See `tests/src/cpp_source/ut_test_gmock.cpp` for a worked interface-mock example.
 
