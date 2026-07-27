@@ -22,6 +22,7 @@ BIN_DIR := $(ROOT_DIR)/build/bin
 ECHOE = /bin/echo -e
 TARGET_EXEC = ut-test
 PYTHON_SCRIPT = $(ROOT_DIR)/check_macros_usage.py
+FLAGS_SCRIPT = $(ROOT_DIR)/check_makefile_flags.py
 
 # Switch on Linux & disable asserts for the testing suites
 CFLAGS += -DNDEBUG
@@ -44,6 +45,8 @@ endif
 
 ifneq ($(TARGET),arm)
 TARGET = linux
+# arm takes its compiler from the SDK, so only linux has flags of our own to assert
+EXPECTED_FLAGS = --expect COMPILER=-ggdb,-O0,-Wall --expect UT_CONTROL_COMPILER=-ggdb,-O0,-Wall
 endif
 BUILD_DIR := $(ROOT_DIR)/build/${TARGET}/obj
 
@@ -66,9 +69,11 @@ export BUILD_WEAK_STUBS_SRC
 GREEN='\033[0;32m'
 NC='\033[0m'
 
-.PHONY: clean list build all
+.PHONY: clean list build all check_macros check_makefile_flags
 
-all: framework check_macros
+# check_makefile_flags runs first: it is static, and a flag typo is cheaper to
+# hear about now than after a full framework build
+all: check_makefile_flags framework check_macros
 
 build:
 	@${ECHOE} ${GREEN}Build [$@] ${NC}
@@ -110,3 +115,8 @@ cleanall:
 check_macros:
 	@echo "Running macro usage check..."
 	@$(PYTHON_SCRIPT) $(HEADER_FILE) $(USAGE_FILE)
+
+# Target to check the build files for mistyped or missing compiler flags
+check_makefile_flags:
+	@echo "Running makefile flag check..."
+	@$(FLAGS_SCRIPT) $(ROOT_DIR)/.. --make-arg TARGET=$(TARGET) --make-arg VARIANT=$(VARIANT) $(EXPECTED_FLAGS)
