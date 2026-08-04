@@ -92,7 +92,9 @@ public:
     {
         int argc = 1;
         char *argv[1] = {(char *)"test_runner"};
-        ::testing::InitGoogleTest(&argc, argv);
+        // InitGoogleMock also initialises GoogleTest, and additionally installs
+        // gmock's verification listener so unmet EXPECT_CALL()s fail the run.
+        ::testing::InitGoogleMock(&argc, argv);
         const ::testing::UnitTest &unit_test = *::testing::UnitTest::GetInstance();
         std::string filter = UTCore::UT_get_test_filter();
         std::vector<std::string> activeFilters;

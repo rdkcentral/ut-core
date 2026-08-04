@@ -204,6 +204,8 @@ make VARIANT=CPP
 
 This will build the following directories `src/*.c`, in addition to core functions from `ut-core/src/cpp_source` and linking against libraries in `ut-core/framework`
 
+The CPP variant links both GoogleTest and **GoogleMock** (both ship in the pinned googletest distribution). Tests can mock a C++ interface using the `UT_MOCK_METHOD` / `UT_MOCK_EXPECT_CALL` wrappers in `include/ut_gmock.h` (pulled in automatically by `ut.h`); see `tests/src/cpp_source/ut_test_gmock.cpp` for a worked example.
+
 `skeletons/src` - will be included in the linux build to enable stubs to compile against
 
 ### Build the target `arm` environment with CPP language
