@@ -42,7 +42,7 @@ The `ut` for a given module is triggered from scripts / makefiles which clone th
 
 This allows the `ut-core` framework to be upgraded over time, and have independence of the `ut` unit being tested.
 
-Script templates are provided to show examples files that will be required of reach layer, starting from the component under test (e.g. the HAL).
+Script templates are provided to show example files that will be required for each layer, starting from the component under test (e.g. the HAL).
 
 Testing relationship is as follows:-
 
