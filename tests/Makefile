@@ -52,8 +52,6 @@ BUILD_DIR := $(ROOT_DIR)/build/${TARGET}/obj
 
 $(info TARGET [$(TARGET)])
 
-.PHONY: clean list all
-
 # Here is a list of exports from this makefile to the next
 export BIN_DIR
 export SRC_DIRS
@@ -69,7 +67,11 @@ export BUILD_WEAK_STUBS_SRC
 GREEN='\033[0;32m'
 NC='\033[0m'
 
-.PHONY: clean list build all check_macros check_makefile_flags
+# Every target in this makefile is recipe-only, so declare them all phony in one
+# place: a stray file or directory sharing a target name must not stop the recipe
+# from running.
+.PHONY: all build run rebuild framework list clean cleanall \
+        check_macros check_makefile_flags
 
 # check_makefile_flags runs first: it is static, and a flag typo is cheaper to
 # hear about now than after a full framework build
