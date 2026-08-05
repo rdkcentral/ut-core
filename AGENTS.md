@@ -6,13 +6,13 @@
 
 ## 1. Purpose
 
-ut-core is the standard unit-testing framework for RDK HAL (Hardware Abstraction Layer) components. It provides:
+ut-core is the standard unit-testing core framework for RDK C/C++ components. Its primary current use is testing HAL (Hardware Abstraction Layer) implementations. It provides:
 
 - A backend-agnostic C/C++ test API that abstracts over CUnit (C path) or Google Test (C++ path).
 - A KVP (Key-Value Pair) profile system for loading YAML/JSON device configuration at runtime.
 - Three execution modes: Console (interactive), Basic (stdout), and Automated (xUnit/JUnit XML).
 - Integration with the **ut-control** support library (KVP engine, logging, control-plane helpers) and **ut-raft** (Python test orchestration).
-- A template system for bootstrapping new HAL test projects.
+- A template system for bootstrapping new test projects (e.g. HAL test suites).
 
 Repository: `https://github.com/rdkcentral/ut-core`
 License: Apache 2.0
@@ -24,7 +24,7 @@ Current version tag: **5.1.0** (latest tag on the develop branch)
 
 ```
 +--------------------------+
-|   HAL Test Binary        |  (downstream project, e.g. haltest-wifi)
+|   Test Binary            |  (downstream project, e.g. haltest-wifi)
 |   main.c                 |
 +-----------+--------------+
             |
@@ -422,7 +422,7 @@ build:
 	make -C ./ut-core
 ```
 
-The `skeletons/src` directory is supplied by the downstream HAL test project (it is not committed inside `template/ut_template/`).
+The `skeletons/src` directory is supplied by the downstream test project (it is not committed inside `template/ut_template/`).
 
 ### Downstream build.sh pattern
 
@@ -541,7 +541,7 @@ ut_template/
   tools/              # Placeholder directory for project tooling
 ```
 
-`template/api_definition_template/` provides a `build_ut.sh` script for the top-level HAL API repository to clone and trigger the test suite build.
+`template/api_definition_template/` provides a `build_ut.sh` script for the top-level API repository to clone and trigger the test suite build.
 
 ---
 
@@ -668,8 +668,8 @@ ut-core/
     gtest/<TARGET>/         # GTest source (C++ path)
     ut-control/             # ut-control subproject
   template/
-    ut_template/            # Skeleton for new HAL test projects
-    api_definition_template/ # Skeleton for HAL API repos (build_ut.sh)
+    ut_template/            # Skeleton for new test projects
+    api_definition_template/ # Skeleton for API repos (build_ut.sh)
   scripts/                  # Autogenerate + release-test helper scripts and templates
   tests/                    # Self-tests for ut-core itself (incl. demo/ examples)
   build.sh                  # Framework download script

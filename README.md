@@ -1,4 +1,4 @@
-# Unit Testing - Hal Testing Suite
+# ut-core - Unit Testing Core Framework
 
 | Date (DD/MM/YY)  | Comment | Document Version |
 |--------|---------|---------|
@@ -17,9 +17,9 @@ To develop a L1, L2 testing suite to support vendor deliverables. This combines 
 
 Please refer to the release notes here :- [RELEASE.md](./RELEASE.md), for information on latest releases.
 
-## HAL Scope
+## Primary Use Case — HAL Testing
 
-Each of the HALS will use the hal `UT-Core` framework, it will provide all the configuration required to support building and running a common testing environment.
+Each HAL uses the `ut-core` framework, which provides all the configuration required to support building and running a common testing environment.
 
 Each HAL component definition, will have individual cadence, specific documentation, and tagged testing suites to support them. All code is shared in the `rdkcentral` git hub.
 
@@ -42,7 +42,7 @@ The `ut` for a given module is triggered from scripts / makefiles which clone th
 
 This allows the `ut-core` framework to be upgraded over time, and have independence of the `ut` unit being tested.
 
-Script templates are provided to show examples files that will be required of reach layer, starting from the hal.
+Script templates are provided to show example files that will be required for each layer, starting from the component under test (e.g. the HAL).
 
 Testing relationship is as follows:-
 
@@ -299,7 +299,7 @@ export LD_LIBRARY_PATH=/usr/lib:/lib:/home/root:./
 
 or use the `run.sh`, which is in the same directory
 
-Now the hal test can be executed, `-h` for help is supported.
+Now the test binary can be executed, `-h` for help is supported.
 
 ```bash
 ./hal_test  -h
@@ -465,7 +465,7 @@ The purpose of the test level is to test the module functionality as much as pos
 
 - independent test application that will run and build without the RDK on platform
 - The application can be copied after building to a running box.
-- Application will perform the startup requirements for the section of the HAL required to test, in order to perform Black Box Testing
+- Application will perform the startup requirements for the component under test, in order to perform Black Box Testing
 - Features to be defined on whether it can be functionally tested or not.
 
 ## Autogen scripts
