@@ -374,6 +374,34 @@ void test_ut_assert_EQUAL_for_arg_function( void )
     UT_LOG_ERROR("### This line should never be seen\n");
 }
 
+void test_ut_assert_NOT_EQUAL( void )
+{
+    UT_LOG_STEP( "1: UT_ASSERT_NOT_EQUAL ( true, false ) : PASS");
+    UT_ASSERT_NOT_EQUAL( true, false );
+
+    UT_LOG_STEP( "2: UT_ASSERT_NOT_EQUAL ( true, true ) : : this step should assert " );
+    UT_ASSERT_NOT_EQUAL( true, true );  /* Should FAIL */
+
+    UT_LOG_STEP( "3: UT_ASSERT_NOT_EQUAL ( true, true ) : : this step should assert & FATAL" );
+    UT_ASSERT_NOT_EQUAL_FATAL( true, true );  /* Should FAIL */
+
+    UT_LOG_ERROR("### This line should never be seen\n");
+}
+
+void test_ut_assert_NOT_EQUAL_for_arg_function( void )
+{
+    UT_LOG_STEP( "1: UT_ASSERT_NOT_EQUAL ( returnBool(1), returnBool(0) ) : PASS");
+    UT_ASSERT_NOT_EQUAL( returnBool(1), returnBool(0) );
+
+    UT_LOG_STEP( "2: UT_ASSERT_NOT_EQUAL ( returnBool(1), returnBool(2) ) : : this step should assert " );
+    UT_ASSERT_NOT_EQUAL( returnBool(1), returnBool(2) );  /* Should FAIL */
+
+    UT_LOG_STEP( "3: UT_ASSERT_NOT_EQUAL ( returnBool(1), returnBool(2) ) : : this step should assert & FATAL" );
+    UT_ASSERT_NOT_EQUAL_FATAL( returnBool(1), returnBool(2) );  /* Should FAIL */
+
+    UT_LOG_ERROR("### This line should never be seen\n");
+}
+
 void test_ut_assert_STRING_EQUAL( void )
 {
     UT_LOG_STEP( "1: UT_ASSERT_STRING_EQUAL ( bob, bob ) : No Assert ");
@@ -544,6 +572,11 @@ void test_ut_assert_log( void )
     UT_ASSERT_LOG( true==false, "Step 2: ASSERT_LOG : should log and NOT fail :");   /* This line should assert */
 
     UT_LOG_INFO("+++ This line SHOULD be seen\n");
+
+    UT_LOG_STEP( "3: UT_ASSERT_LOG_FATAL ( true==false ) : should log, assert & FATAL" );
+    UT_ASSERT_LOG_FATAL( true==false, "Step 3: ASSERT_LOG_FATAL : should log and fail :");   /* This line should assert & FATAL */
+
+    UT_LOG_ERROR("### This line should never be seen\n");
 }
 
 void test_ut_assert_log_for_arg_function( void )
@@ -552,6 +585,11 @@ void test_ut_assert_log_for_arg_function( void )
     UT_ASSERT_LOG( returnBool(1)==returnBool(0), "Step 2: ASSERT_LOG : should log and NOT fail :");   /* This line should assert */
 
     UT_LOG_INFO("+++ This line SHOULD be seen\n");
+
+    UT_LOG_STEP( "3: UT_ASSERT_LOG_FATAL ( returnBool(1)==returnBool(0) ) : should log, assert & FATAL" );
+    UT_ASSERT_LOG_FATAL( returnBool(1)==returnBool(0), "Step 3: ASSERT_LOG_FATAL : should log and fail :");   /* This line should assert & FATAL */
+
+    UT_LOG_ERROR("### This line should never be seen\n");
 }
 
 /**
@@ -580,6 +618,7 @@ void register_assert_functions(void)
     UT_add_test( gpAssertSuite, "UT_ASSERT TRUE", test_ut_assert_TRUE);
     UT_add_test( gpAssertSuite, "UT_ASSERT FALSE", test_ut_assert_FALSE);
     UT_add_test( gpAssertSuite, "UT_ASSERT EQUAL", test_ut_assert_EQUAL);
+    UT_add_test( gpAssertSuite, "UT_ASSERT NOT_EQUAL", test_ut_assert_NOT_EQUAL);
     UT_add_test( gpAssertSuite, "UT_ASSERT STRING_EQUAL", test_ut_assert_STRING_EQUAL);
     UT_add_test( gpAssertSuite, "UT_ASSERT STRING_NOT_EQUAL", test_ut_assert_STRING_NOT_EQUAL);
     UT_add_test( gpAssertSuite, "UT_ASSERT Msg", test_ut_assert_msg);
@@ -597,6 +636,7 @@ void register_assert_functions(void)
     UT_add_test( gpAssertSuite1, "UT_ASSERT TRUE with function as args", test_ut_assert_TRUE_for_arg_function);
     UT_add_test( gpAssertSuite1, "UT_ASSERT FALSE with function as args", test_ut_assert_FALSE_for_arg_function);
     UT_add_test( gpAssertSuite1, "UT_ASSERT EQUAL with function as args", test_ut_assert_EQUAL_for_arg_function);
+    UT_add_test( gpAssertSuite1, "UT_ASSERT NOT_EQUAL with function as args", test_ut_assert_NOT_EQUAL_for_arg_function);
     UT_add_test( gpAssertSuite1, "UT_ASSERT STRING_EQUAL with function as args", test_ut_assert_STRING_EQUAL_for_arg_function);
     UT_add_test( gpAssertSuite1, "UT_ASSERT STRING_NOT_EQUAL with function as args", test_ut_assert_STRING_NOT_EQUAL_for_arg_function);
     UT_add_test( gpAssertSuite1, "UT_ASSERT MSG with function as args", test_ut_assert_msg_for_arg_function);
