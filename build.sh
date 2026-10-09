@@ -51,13 +51,40 @@ THIRD_PARTY_LIB_DIR=${FRAMEWORK_DIR}/ut-control/build/${TARGET}
 GTEST_DIR=${FRAMEWORK_DIR}/gtest/${TARGET}
 GTEST_LIB_DIR=${MY_DIR}/build/${TARGET}/cpp_libs
 GTEST_VERSION=1.15.2
+CUNIT_ARCHIVE=CUnit-2.1-3.tar.bz2
+CUNIT_DOWNLOAD_URL="https://downloads.sourceforge.net/project/cunit/CUnit/2.1-3/${CUNIT_ARCHIVE}"
+
+download_cunit()
+{
+    local archive_path="${FRAMEWORK_DIR}/${CUNIT_ARCHIVE}"
+
+    mkdir -p "${FRAMEWORK_DIR}"
+    rm -f "${archive_path}"
+    echo "Downloading CUnit from ${CUNIT_DOWNLOAD_URL}"
+
+    if command -v curl > /dev/null 2>&1 && \
+       curl --fail --insecure --location --retry 3 --connect-timeout 20 \
+           --output "${archive_path}" "${CUNIT_DOWNLOAD_URL}"; then
+        return 0
+    fi
+
+    rm -f "${archive_path}"
+    if command -v wget > /dev/null 2>&1 && \
+       wget --no-check-certificate --tries=3 --timeout=20 \
+           --output-document="${archive_path}" "${CUNIT_DOWNLOAD_URL}"; then
+        return 0
+    fi
+
+    echo "Unable to download ${CUNIT_ARCHIVE}. Install curl or wget and check network access." >&2
+    return 1
+}
 
 pushd ${MY_DIR} > /dev/null
 # Clone CUnit
 if [[ ! -d "${FRAMEWORK_DIR}/CUnit-2.1-3" && "${VARIANT}" == "C" ]]; then
     echo "Clone Framework"
-    wget https://sourceforge.net/projects/cunit/files/CUnit/2.1-3/CUnit-2.1-3.tar.bz2 --no-check-certificate -P ${FRAMEWORK_DIR}
-    tar xvfj framework/CUnit-2.1-3.tar.bz2 -C ${FRAMEWORK_DIR}
+    download_cunit
+    tar xvfj "${FRAMEWORK_DIR}/${CUNIT_ARCHIVE}" -C ${FRAMEWORK_DIR}
     cp ${FRAMEWORK_DIR}/CUnit-2.1-3/CUnit/Headers/CUnit.h.in ${FRAMEWORK_DIR}/CUnit-2.1-3/CUnit/Headers/CUnit.h
     echo "Patching Framework"
     cd ${FRAMEWORK_DIR}
