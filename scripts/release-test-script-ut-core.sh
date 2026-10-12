@@ -613,7 +613,10 @@ run_on_platform() {
         fi
     fi
 
-    /bin/bash -c "sc docker run ${DOCKER_IMAGE} \
+    local DOCKER_OPTIONS=""
+    [[ "$PLATFORM" == "kirkstone" ]] && DOCKER_OPTIONS="-t 5.0 '/bin/bash'"
+
+    /bin/bash -c "sc docker run ${DOCKER_IMAGE} ${DOCKER_OPTIONS} \
     '${ENV_SETUP} echo \$CC; \
     make ${TARGET_FLAG} VARIANT=${VARIANT_FLAG} > make_log_${LOG_SUFFIX}.txt 2>&1; \
     make -C tests/ ${TARGET_FLAG} VARIANT=${VARIANT_FLAG} > make_test_log_${LOG_SUFFIX}.txt 2>&1'"
