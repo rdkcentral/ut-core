@@ -251,6 +251,24 @@ make UT_CONTROL_REPO_ENDPOINT=https
 make UT_CONTROL_REPO_ENDPOINT=ssh
 ```
 
+### Environment Variable: `UT_CONTROL_PROJECT_VERSION`
+
+`UT_CONTROL_PROJECT_VERSION` selects the ut-control tag or branch during a
+fresh checkout. Set it to the tag or branch required by the project.
+
+The override is applied only when `framework/ut-control` does not already
+exist. To apply a different version to an existing checkout, remove
+`framework/ut-control` before rerunning the build.
+
+```bash
+# Export the override before invoking make
+export UT_CONTROL_PROJECT_VERSION=2.2.0
+make
+
+# Or provide it for a single invocation
+UT_CONTROL_PROJECT_VERSION=2.2.0 make
+```
+
 ### Feature: `BUILD_WEAK_STUBS_SRC` for Weak Library Compilation
 
 The `BUILD_WEAK_STUBS_SRC` variable enables clients to define and export a list of source files that will be compiled into a weak library. This allows testing suites to use stubbed implementations of functions during development, with the strong implementation provided by vendors or third parties at a later stage.
