@@ -269,6 +269,8 @@ make
 UT_CONTROL_PROJECT_VERSION=2.2.0 make
 ```
 
+`NOTE` : This is a developer option and its preferable to use the default tag supplied rather than using this environment variable.
+
 ### Feature: `BUILD_WEAK_STUBS_SRC` for Weak Library Compilation
 
 The `BUILD_WEAK_STUBS_SRC` variable enables clients to define and export a list of source files that will be compiled into a weak library. This allows testing suites to use stubbed implementations of functions during development, with the strong implementation provided by vendors or third parties at a later stage.
