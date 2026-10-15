@@ -519,7 +519,10 @@ run_on_platform() {
 
     run_build "${PLATFORM}_${TARGET}" "${TARGET}" "$UT_CORE_BRANCH_NAME" "$UT_CONTROL_BRANCH_NAME"
 
-    /bin/bash -c "sc docker run ${DOCKER_IMAGE} \
+    local DOCKER_OPTIONS=""
+    [[ "$PLATFORM" == "kirkstone" ]] && DOCKER_OPTIONS="-t 5.0 '/bin/bash'"
+
+    /bin/bash -c "sc docker run ${DOCKER_IMAGE} ${DOCKER_OPTIONS} \
     '${ENV_SETUP} echo \$CC; \
     ./build_ut.sh TARGET=${TARGET} | tee \$PWD/build_log.txt 2>&1; \
     if [ \$? -eq 0 ]; then \

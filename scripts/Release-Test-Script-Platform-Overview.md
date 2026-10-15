@@ -19,6 +19,11 @@ Following table gives the overview:
 |9|./build_ut.sh TARGET=arm|none (host toolchain)|builds hal for cross compilation
 |10|./build_ut.sh -C tests/ TARGET=arm|none (host toolchain)|builds hal tests for cross compilation
 
+For Kirkstone builds, the release script uses the Docker invocation prefix
+`sc docker run rdk-kirkstone -t 5.0 '/bin/bash'` for both the main build and
+the test build. The `-t 5.0` option selects the Kirkstone toolchain override;
+other environments continue to use their existing Docker invocation.
+
 ## Key Objectives:
 1. **Automated Repository Setup**:  
    Clones a given Git repository (or a default one if not specified) for different target environments (e.g., Ubuntu, VM-SYNC, Dunfell Linux, Dunfell ARM).

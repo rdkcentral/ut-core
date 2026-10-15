@@ -26,6 +26,11 @@ Following table gives the overview:
 |9|make TARGET=arm|none (host toolchain)|builds ut-core for cross compilation (C and CPP variants)
 |10|make -C tests/ TARGET=arm|none (host toolchain)|builds ut-core tests for cross compilation (C and CPP variants)
 
+For Kirkstone builds, the release script uses the Docker invocation prefix
+`sc docker run rdk-kirkstone -t 5.0 '/bin/bash'` for both the main build and
+the test build. The `-t 5.0` option selects the Kirkstone toolchain override;
+other environments continue to use their existing Docker invocation.
+
 ## Key Features
 
 1. **Repository Cloning**: 
