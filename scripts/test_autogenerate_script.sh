@@ -98,6 +98,28 @@ run_command './autogenerate.sh -c'
 run_command 'echo "y" | ./autogenerate.sh https://github.com/rdkcentral/rdkb-halif-wifi'
 run_command './autogenerate.sh -c'
 
+#Test 8 : gmock generation from a C++ interface header (self-contained, no network)
+AGT_GMOCK_TMP="$(mktemp -d)"
+cat > "${AGT_GMOCK_TMP}/ISample.h" <<'IFACE'
+#ifndef ISAMPLE_H
+#define ISAMPLE_H
+#include <cstddef>
+class ISample {
+public:
+    virtual ~ISample() = default;
+    virtual int  open(const char *path) = 0;
+    virtual bool read(int fd, void *buf, size_t len) const = 0;
+    virtual const char *name() const = 0;
+};
+#endif
+IFACE
+run_command "./autogenerate_gmock.sh -f ${AGT_GMOCK_TMP}/ISample.h -c ISample -o ${AGT_GMOCK_TMP}/out"
+# Assert the mock and skeleton were produced with the expected content.
+run_command "grep -q 'UT_MOCK_METHOD(int, open, (const char \\*path), (override));' ${AGT_GMOCK_TMP}/out/mock_isample.h"
+run_command "grep -q 'UT_MOCK_METHOD(const char \\*, name, (), (const, override));' ${AGT_GMOCK_TMP}/out/mock_isample.h"
+run_command "grep -q 'UT_ADD_TEST(TestISample, open_L1)' ${AGT_GMOCK_TMP}/out/test_isample.cpp"
+rm -rf "${AGT_GMOCK_TMP}"
+
 # Display consolidated results
 echo
 echo "Total tests run: $total_tests"

@@ -201,6 +201,7 @@ void UT_regsiter_test_cleanup_function( UT_test_suite_t *pSuite, UT_TestCleanupF
 #else
 
 #include <ut_gtest.h>
+#include <ut_gmock.h>
 
 #endif
 
