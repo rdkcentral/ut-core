@@ -75,9 +75,9 @@ The following description uses the `git-flow` commands, if they're not available
 
 The overall process of flow for an individual change or feature is:-
 
-1) Raise a ticket in JIRA, describing in detail what is the requirement for change, the description should contain enough information that it makes clear what the task is required todo.
+1) Raise a GitHub issue, describing in detail what is the requirement for change, the description should contain enough information that it makes clear what the task is required todo.
 
-2) Create a branch based on that Jira ticket number + synopsis, e.g. RDKB_45633_add32Tests
+2) Create a branch from `develop` named `feature/<issue>-<synopsis>`, where `<issue>` is the GitHub issue number and `<synopsis>` is a short, lowercase, hyphenated description, e.g. `feature/123-add-32-tests`
 
 Init of flow is required once per clone for the git repo.
 
@@ -88,10 +88,10 @@ git flow init -d
 Starting a branch:-
 
 ```bash
-git flow feature start RDKB_45633_add32Tests
+git flow feature start 123-add-32-tests
 ```
 
-the branch will be labeled as `feature/RDKB_45633_add32Tests`
+the branch will be labeled as `feature/123-add-32-tests`
 
 3) Perform the changes, adding the code as required into the branch, and check what `tig` can offer, but the git commands are :-
 
